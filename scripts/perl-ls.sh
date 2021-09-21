@@ -1,3 +1,4 @@
 #!/bin/bash
 
-sudo apt-get install cpan
+# Start CPAN configuration
+perl -MCPAN -e shell
