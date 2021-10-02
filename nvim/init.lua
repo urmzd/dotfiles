@@ -137,14 +137,6 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
 
---let s:clip = '/mnt/c/Windows/System32/clip.exe'
---if executable(s:clip)
-      --augroup WSLYank
-            --autocmd!
-            --autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif
-      --augroup END
---endif 
-
 local lsp_installer = require("nvim-lsp-installer")
 
 lsp_installer.on_server_ready(function(server)
@@ -194,6 +186,8 @@ opt.signcolumn = "yes"
 opt.colorcolumn = "80"
 opt.fileformat = "unix"
 opt.background = "dark"
+opt.undodir = vim.fn.stdpath('config')..'/undo' 
+opt.undofile = true
 
 -- WSL copy/paste support.
 opt.clipboard="unnamedplus"
