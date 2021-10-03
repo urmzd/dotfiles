@@ -4,6 +4,6 @@ Everything I use to speed up my developer flow.
 
 ## Table of Contents
 
-- [Usage](#usage)
-
-## Usage
+- [Shell]()
+- [Editor]()
+- [Language Specific]()
