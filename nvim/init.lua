@@ -17,7 +17,7 @@ end
 
 -- Install plugins.
 require('packer').startup(function()
-	use {'wbthomason/packer.nvim', opt=true}
+	use {'wbthomason/packer.nvim'}
 	use {'nvim-treesitter/nvim-treesitter'}
 	use {
       'lewis6991/gitsigns.nvim',
@@ -51,6 +51,8 @@ require('packer').startup(function()
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+  use 'norcalli/nvim_utils' -- init.lua utils
+  use 'folke/lua-dev.nvim'
 end)
 
 -- Set completeopt to have a better completion experience
@@ -103,8 +105,6 @@ cmp.setup {
   },
 }
 
-local nvim_lsp = require('lspconfig')
-
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
@@ -137,7 +137,25 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
 
+-- Lua development.
 local lsp_installer = require("nvim-lsp-installer")
+local lsp_installer_servers = require('nvim-lsp-installer.servers')
+local ok, sumneko_lsp = lsp_installer_servers.get_server("sumneko_lsp")
+
+if ok then
+  if not sumneko_lsp:is_installed() then
+    sumneko_lsp:install()
+  end
+end
+
+local luadev = require("lua-dev").setup({
+  lsp_config = {
+    on_attach = on_attach,
+    flags = {
+      debounce_text_changes = 150
+    }
+  }
+})
 
 lsp_installer.on_server_ready(function(server)
   local opts = {
@@ -147,7 +165,12 @@ lsp_installer.on_server_ready(function(server)
     }
   }
 
-  server:setup(opts)
+  if server.name == "sumneko_lua" then
+    server:setup(luadev)
+  else
+    server:setup(opts)
+  end
+
   vim.cmd [[ do User LspAttachBuffers ]]
 end)
 
@@ -221,9 +244,9 @@ api.nvim_set_keymap('i', 'jj', '<ESC>', {noremap=true, silent=true})
 -- Automatically close braces.
 api.nvim_set_keymap('i', '"', '""<left>', {noremap=true, silent=true})
 api.nvim_set_keymap('i', '\'', '\'\'<left>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', '(', '()<left>', {noremap=true, silent=true}) 
+api.nvim_set_keymap('i', '(', '()<left>', {noremap=true, silent=true})
 api.nvim_set_keymap('i', '[', '[]<left>', {noremap=true, silent=true}) 
-api.nvim_set_keymap('i', '{', '{}<left>', {noremap=true, silent=true}) 
+api.nvim_set_keymap('i', '{', '{}<left>', {noremap=true, silent=true})
 api.nvim_set_keymap('i', '{', '{}<left>', {noremap=true, silent=true}) 
 
 -- Telescope bindings.
@@ -243,3 +266,13 @@ require("nvim-lsp-installer").settings {
     }
 }
 
+-- Augroups.
+require('nvim_utils')
+
+local autocmds = {
+  toggle_hi = {
+    { "InsertEnter", "*", "setlocal nohlsearch"}
+  }
+}
+
+nvim_create_augroups(autocmds)
