@@ -16,7 +16,8 @@ end
 
 
 -- Install plugins.
-require('packer').startup(function()
+local packer = require('packer')
+packer.startup(function()
 	use {'wbthomason/packer.nvim'}
 	use {'nvim-treesitter/nvim-treesitter'}
 	use {
@@ -27,6 +28,7 @@ require('packer').startup(function()
 	use {'tpope/vim-surround'}
 	use {'tpope/vim-repeat'}
 	use {'tpope/vim-fugitive'}
+  use {'tpope/vim-unimpaired'}
 	use {'sheerun/vim-polyglot'}
 	use {'itchyny/lightline.vim'}
 	use {'preservim/nerdcommenter'}
@@ -44,16 +46,30 @@ require('packer').startup(function()
 		'nvim-telescope/telescope.nvim',
 		requires = { { 'nvim-lua/plenary.nvim' } }
 	}
-	use {
-    'williamboman/nvim-lsp-installer'
-	}
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
   use 'norcalli/nvim_utils' -- init.lua utils
   use 'folke/lua-dev.nvim'
+  use 'mfussenegger/nvim-jdtls'
+  use 'kabouzeid/nvim-lspinstall'
+  use {'tzachar/cmp-tabnine', run='./install.sh', requires = 'hrsh7th/nvim-cmp'}
+  use {'jiangmiao/auto-pairs'}
+
+  packer.install()
+  packer.compile()
 end)
+
+-- TabNine support.
+local tabnine = require('cmp_tabnine.config')
+tabnine:setup({
+        max_lines = 1000;
+        max_num_results = 20;
+        sort = true;
+	run_on_every_keystroke = true;
+	snippet_placeholder = '..';
+})
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -102,6 +118,7 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'cmp_tabnine' }
   },
 }
 
@@ -138,41 +155,127 @@ local on_attach = function(client, bufnr)
 end
 
 -- Lua development.
-local lsp_installer = require("nvim-lsp-installer")
-local lsp_installer_servers = require('nvim-lsp-installer.servers')
-local ok, sumneko_lsp = lsp_installer_servers.get_server("sumneko_lsp")
+local function setup_servers()
+  local lspinstall = require('lspinstall')
+  lspinstall.setup()
 
-if ok then
-  if not sumneko_lsp:is_installed() then
-    sumneko_lsp:install()
+  local lspconfig = require('lspconfig')
+  local servers = lspinstall.installed_servers()
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+  for _, server in pairs(servers) do
+    local opts = {
+      on_attach = on_attach,
+      flags = {
+        debounce_text_changes = 150
+      },
+      capabilities = capabilities
+    }
+
+    if server == "lua" then
+      local luadev = require("lua-dev").setup({lspconfig = opts})
+      lspconfig[server].setup(luadev)
+    else
+      if server == "java" then
+        local jdtls = vim.fn.stdpath("data").."/lspinstall/java/".."jdtls.sh"
+        opts.cmd = {jdtls}
+        --[[
+           [opts.init_options = {
+           [  settings = {
+           [         ["java.format.settings.url"] = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+           [         ["java.format.settings.profile"] = "GoogleStyle",
+           [         ["java.trace.server"] = "verbose",
+           [         ["java.maven.downloadSources"] = true,
+           [         ["java.import.maven.enabled"] = true,
+           [         ["java.format.enabled"] = false
+           [  }
+           [}
+           ]]
+      end
+
+      if server == "typescript" then
+        opts.on_attach = function (client, bufnr)
+          client.resolved_capabilities.document_formatting = false
+          on_attach(client, bufnr)
+        end
+      end
+
+      if server == "json" then
+        capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+        opts.capabilities = capabilities
+        opts.filetypes = {"json", "jsonc"}
+        opts.settings = {
+          json = {
+            schemas = {
+               {
+                fileMatch = {"tsconfig.json"},
+                url = 'http://json.schemastore.org/tsconfig.json'
+              },
+               {
+                fileMatch = {".eslintrc.json", ".eslintrc"},
+                url = 'http://json.schemastore.org/eslintrc.json'
+              }
+            }
+          }
+        }
+      end
+
+      if server == "efm" then
+        -- Formatting & Linting.
+        local eslint = {
+          lintCommand = 'eslint_d -f unix --stdin --stdin-filename ${INPUT}',
+          lintIgnoreExitCode = true,
+          lintStdin = true,
+          lintFormats = {"%f:%l:%c: %m"},
+        }
+
+        local prettier = {
+            formatCommand = "npx prettier --stdin-filepath ${INPUT}",
+            formatStdin = true
+        }
+
+        local luafmt = {
+            formatCommand = "lua-format -i --no-keep-simple-function-one-line --no-break-after-operator --column-limit=150 --break-after-table-lb",
+            formatStdin = true
+        }
+
+        local efm_settings = {
+          lua = {luafmt},
+          javascript = {eslint, prettier},
+          javascriptreact = {eslint, prettier},
+          typescript = {eslint, prettier},
+          typescriptreact = {eslint, prettier},
+          ["typescript.tsx"] = {eslint, prettier},
+          ["javascript.jsx"] = {eslint, prettier}
+        }
+
+        local efmls = vim.fn.stdpath("data").."/lspinstall/efm/".."efm-langserver"
+
+        opts.cmd = {
+          efmls,
+          "-logfile",
+          "/tmp/efm.log"
+        }
+
+        opts.root_dir = lspconfig.util.root_pattern(".git", ".tsconfig", ".eslintrc")
+        opts.init_options = {documentFormatting = true, codeAction = true}
+        opts.filetypes = vim.tbl_keys(efm_settings)
+        opts.settings = { languages  = efm_settings }
+      end
+
+      lspconfig[server].setup(opts)
+    end
   end
 end
 
-local luadev = require("lua-dev").setup({
-  lsp_config = {
-    on_attach = on_attach,
-    flags = {
-      debounce_text_changes = 150
-    }
-  }
-})
+setup_servers()
 
-lsp_installer.on_server_ready(function(server)
-  local opts = {
-    on_attach = on_attach,
-    flags = {
-      debounce_text_changes = 150
-    }
-  }
+require('lspinstall').post_install_hook = function ()
+  setup_servers() -- reload installed servers
+  vim.cmd("bufdo e") -- this triggers the FileType autocmd that starts the server
+end
 
-  if server.name == "sumneko_lua" then
-    server:setup(luadev)
-  else
-    server:setup(opts)
-  end
-
-  vim.cmd [[ do User LspAttachBuffers ]]
-end)
 
 -- Commands.
 local cmd = vim.cmd
@@ -180,17 +283,16 @@ local cmd = vim.cmd
 local opt = vim.opt
 -- Global 'let' options.
 local g = vim.g
--- Buffer options.
-local bo = vim.bo
 -- Window options.
 local wo  = vim.wo
 -- Api
 local api = vim.api
 
 -- Global let.
-g.mapleader = ' ' 
+g.mapleader = ' '
 
 -- Global Settings
+wo.wrap = false
 opt.relativenumber = true
 opt.nu = true
 opt.exrc = true
@@ -209,7 +311,7 @@ opt.signcolumn = "yes"
 opt.colorcolumn = "80"
 opt.fileformat = "unix"
 opt.background = "dark"
-opt.undodir = vim.fn.stdpath('config')..'/undo' 
+opt.undodir = vim.fn.stdpath('config')..'/undo'
 opt.undofile = true
 
 -- WSL copy/paste support.
@@ -231,23 +333,13 @@ g.clipboard = {
 cmd([[colorscheme gruvbox]])
 
 -- Window movement (LDUR).
-vim.api.nvim_set_keymap('n', '<leader>h', '<C-w>h', {silent=true})
-vim.api.nvim_set_keymap('n', '<leader>j', '<C-j>h', {silent=true})
-vim.api.nvim_set_keymap('n', '<leader>k', '<C-w>k', {silent=true})
-vim.api.nvim_set_keymap('n', '<leader>l', '<C-w>l', {silent=true})
+vim.api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>', {silent=true, noremap=true})
+vim.api.nvim_set_keymap('n', '<leader>j', ':wincmd j<CR>', {silent=true, noremap=true})
+vim.api.nvim_set_keymap('n', '<leader>k', ':wincmd k<CR>', {silent=true, noremap=true})
+vim.api.nvim_set_keymap('n', '<leader>l', ':wincmd l<CR>', {silent=true, noremap=true})
 
 -- Escape
-api.nvim_set_keymap('i', 'jk', '<ESC>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', 'kj', '<ESC>', {noremap=true, silent=true})
 api.nvim_set_keymap('i', 'jj', '<ESC>', {noremap=true, silent=true})
-
--- Automatically close braces.
-api.nvim_set_keymap('i', '"', '""<left>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', '\'', '\'\'<left>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', '(', '()<left>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', '[', '[]<left>', {noremap=true, silent=true}) 
-api.nvim_set_keymap('i', '{', '{}<left>', {noremap=true, silent=true})
-api.nvim_set_keymap('i', '{', '{}<left>', {noremap=true, silent=true}) 
 
 -- Telescope bindings.
 api.nvim_set_keymap("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>", {noremap=true, silent=true})
@@ -255,23 +347,15 @@ api.nvim_set_keymap("n", "<leader>fg", "<cmd>lua require('telescope.builtin').li
 api.nvim_set_keymap("n", "<leader>fb", "<cmd>lua require('telescope.builtin').buffers()<cr>", {noremap=true, silent=true})
 api.nvim_set_keymap("n", "<leader>fh", "<cmd>lua require('telescope.builtin').buffers()<cr>", {noremap=true, silent=true})
 
--- Icons for LSP package manager.
-require("nvim-lsp-installer").settings {
-    ui = {
-        icons = {
-            server_installed = "✓",
-            server_pending = "➜",
-            server_uninstalled = "✗"
-        }
-    }
-}
-
 -- Augroups.
 require('nvim_utils')
 
 local autocmds = {
   toggle_hi = {
     { "InsertEnter", "*", "setlocal nohlsearch"}
+  },
+  autoFormat = {
+    {"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}
   }
 }
 
