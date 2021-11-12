@@ -81,32 +81,18 @@ plugins=(git vi-mode fzf-zsh-plugin)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+# User Configuration.
+export WINDOWS="/mnt/c/users/urmzd"
 
-# export MANPATH="/usr/local/man:$MANPATH"
+alias nb=jupyter-notebook
+alias rd=rmdir
+alias vi=nvim
+alias vim=nvim
+alias kubectx='kubectl ctx'
+alias vimrc="vi $HOME/.config/nvim/init.lua"
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
+export EDITOR=nvim
+export VISUAL=nvim
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -168,7 +154,7 @@ function take_journal_note {
   cd $journal_dir &&
   commitMessage=${1:-"Add note for $week $year"} &&
   git add . &&
-  git commit -m "'$commitMesage'" &&
+  git commit -m "'$commitMessage'" &&
   git push &&
   cd $work_dir &&
   echo "Made a commit with message: $commitMessage"
@@ -176,13 +162,24 @@ function take_journal_note {
 
 alias takenote=take_journal_note
 
-# Common jumps.
+## COMMON JUMPS.
 alias cdwk="cd ~/work/"
+alias cdfe="cd ~/work/operations_dashboard"
+alias cdbe="cd ~/work/reeldata_core_springboot"
+
 alias cdme="cd ~/personal"
 alias cdsc="cd ~/personal/school"
+alias cdnlp='cd ~/personal/school/courses/CSCI4152'
+
 alias cdgr='cd $(git rev-parse --show-toplevel)'
+## END COMMON JUMPS
 
 export M2_HOME="/usr/share/maven"
+
+# FZF Settings.
+export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
 
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
@@ -207,16 +204,5 @@ zinit light-mode for \
 
 ### End of Zinit's installer chunk
 
-export WINDOWS="/mnt/c/users/urmzd"
-
-alias nb=jupyter-notebook
-alias py=python3.9
-alias rd=rmdir
-alias vi=nvim
-alias vim=nvim
-alias kubectx='kubectl ctx'
-alias idea='idea.sh'
-
-export EDITOR=nvim
-export VISUAL=nvim
-
+# rbenv
+eval "$(rbenv init -)"
