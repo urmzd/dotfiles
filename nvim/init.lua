@@ -5,7 +5,7 @@ local install_path = root_dir .. '/site/pack/packer/start/packer.nvim'
 local lsp_servers_dir = root_dir .. '/lsp_servers'
 
 if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({
+    PACKER_BOOTSTRAP = fn.system({
         'git', 'clone', '--depth', '1',
         'https://github.com/wbthomason/packer.nvim', install_path
     })
@@ -15,46 +15,60 @@ end
 -- Install plugins.
 local packer = require('packer')
 packer.startup(function()
-    use {'wbthomason/packer.nvim'}
-    use {'nvim-treesitter/nvim-treesitter'}
-    use {'sheerun/vim-polyglot'}
-    use {'neovim/nvim-lspconfig'}
-    use {'lewis6991/gitsigns.nvim', requires = {'nvim-lua/plenary.nvim'}}
-    use {'tpope/vim-surround'}
-    use {'tpope/vim-repeat'}
-    use {'tpope/vim-fugitive'}
-    use {'itchyny/lightline.vim'}
-    use {'preservim/nerdcommenter'}
-    use {'preservim/vimux'}
-    use {'alvan/vim-closetag'}
-    use {'airblade/vim-rooter'}
-    use {'morhetz/gruvbox'}
+    -- Plugin Manager
+    use 'wbthomason/packer.nvim'
+    -- File Detection
+    use 'sheerun/vim-polyglot'
+    use {'nvim-treesitter/nvim-treesitter', run = ":TsUpdate"}
+    use 'neovim/nvim-lspconfig'
+    use 'tpope/vim-surround'
+    use 'tpope/vim-repeat'
+    use 'tpope/vim-fugitive'
+    use 'preservim/nerdcommenter'
+    use 'preservim/vimux'
+    use 'morhetz/gruvbox'
+    use 'itchyny/lightline.vim'
+    -- Utils
+    use 'norcalli/nvim_utils' -- init.lua utils
+    -- Lua Specific
+    use 'folke/lua-dev.nvim'
+    -- LSP Manager
+    use 'williamboman/nvim-lsp-installer'
+    -- Documentation
     use {'kkoomen/vim-doge', run = function() fn["doge#install"]() end}
-    use {'rust-lang/rust.vim'}
+    use {'lewis6991/gitsigns.nvim', requires = {'nvim-lua/plenary.nvim'}}
+    -- Fuzzy Finder
     use {
         'nvim-telescope/telescope.nvim',
         requires = {{'nvim-lua/plenary.nvim'}}
     }
     use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make'}
+    -- Completion
     use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
     use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
     use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
     use 'L3MON4D3/LuaSnip' -- Snippets plugin
-    use 'norcalli/nvim_utils' -- init.lua utils
-    use 'folke/lua-dev.nvim'
-    use 'williamboman/nvim-lsp-installer'
     use {
         'tzachar/cmp-tabnine',
         run = './install.sh',
         requires = 'hrsh7th/nvim-cmp'
     }
-    use {'windwp/nvim-autopairs'}
+    use 'windwp/nvim-autopairs'
+    -- Test Integration
     use {
         'rcarriga/vim-ultest',
         requires = {"vim-test/vim-test"},
         run = ":UpdateRemotePlugins"
     }
     use {'lervag/vimtex', ft = 'tex', opt = true}
+    -- File Tree
+    use {
+        'kyazdani42/nvim-tree.lua',
+        requires = 'kyazdani42/nvim-web-devicons',
+        config = function() require'nvim-tree'.setup {} end
+    }
+
+    if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
 require('telescope').load_extension('fzf')
@@ -65,6 +79,7 @@ local on_attach = function(client, bufnr)
     local function buf_set_keymap(...)
         vim.api.nvim_buf_set_keymap(bufnr, ...)
     end
+
     local function buf_set_option(...)
         vim.api.nvim_buf_set_option(bufnr, ...)
     end
@@ -111,9 +126,8 @@ end
 -- LSP set up.
 local lsp_installer = require('nvim-lsp-installer')
 local lspconfig = require('lspconfig')
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp
-                                                                     .protocol
-                                                                     .make_client_capabilities())
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
 lsp_installer.on_server_ready(function(server)
     local opts = {
@@ -121,12 +135,13 @@ lsp_installer.on_server_ready(function(server)
         flags = {debounce_text_changes = 150},
         capabilities = capabilities
     }
+
     if server.name == "sumneko_lua" then
         local luadev = require("lua-dev").setup({lspconfig = opts})
         server:setup(luadev)
     else
-        local java_cmd = require("utils.java_utils")
         if server.name == "jdtls" then
+            local java_cmd = require("utils.java_utils")
             opts.cmd = java_cmd(lsp_servers_dir .. "/jdtls")
             opts.init_options = {
                 settings = {
@@ -140,45 +155,55 @@ lsp_installer.on_server_ready(function(server)
             }
         end
 
-        if server.name == "tsserver" then
-            opts.on_attach = function(client, bufnr)
-                client.resolved_capabilities.document_formatting = false
-                on_attach(client, bufnr)
-            end
-        end
-
         if server.name == "yamlls" then
             opts.filetypes = {"yaml"}
             opts.settings = {
                 yaml = {
                     schemas = {
+                        ["https://unpkg.com/graphql-config@4.1.0/config-schema.json"] = "graphql.config.yml",
                         'https://bitbucket.org/atlassianlabs/atlascode/raw/main/resources/schemas/pipelines-schema.json'
                     }
                 }
             }
         end
 
-        if server.name == "jsonls" then
-            opts.on_attach = function(client, bufnr)
-                client.resolved_capabilities.document_formatting = false
-                on_attach(client, bufnr)
-            end
+        if server.name == "graphql" then
+            opts.filetypes = {"graphql", "typescript", "typescriptreact"}
+        end
 
-            capabilities.textDocument.completion.completionItem.snippetSupport =
+        if server.name == "jsonls" then
+            opts.filetypes = {"json", "jsonc"}
+
+            local capabilities2 = vim.lsp.protocol.make_client_capabilities()
+            capabilities2.textDocument.completion.completionItem.snippetSupport =
                 true
 
-            opts.capabilities = capabilities
-            opts.filetypes = {"json", "jsonc"}
+            opts.capabilities = capabilities2
+
             opts.settings = {
                 json = {
-                    format = {enable = false},
                     schemas = {
                         {
-                            fileMatch = {"tsconfig.json"},
-                            url = 'http://json.schemastore.org/tsconfig.json'
+                            description = 'TypeScript compiler configuration file',
+                            fileMatch = {'tsconfig.json', 'tsconfig.*.json'},
+                            url = 'http://json.schemastore.org/tsconfig'
                         }, {
-                            fileMatch = {".eslintrc.json", ".eslintrc"},
-                            url = 'http://json.schemastore.org/eslintrc.json'
+                            description = 'Babel configuration',
+                            fileMatch = {
+                                '.babelrc.json', '.babelrc', 'babel.config.json'
+                            },
+                            url = 'http://json.schemastore.org/lerna'
+                        }, {
+                            description = 'ESLint config',
+                            fileMatch = {'.eslintrc.json', '.eslintrc'},
+                            url = 'http://json.schemastore.org/eslintrc'
+                        }, {
+                            description = 'Prettier config',
+                            fileMatch = {
+                                '.prettierrc', '.prettierrc.json',
+                                'prettier.config.json'
+                            },
+                            url = 'http://json.schemastore.org/prettierrc'
                         }
                     }
                 }
@@ -199,7 +224,7 @@ lsp_installer.on_server_ready(function(server)
             }
 
             local prettier = {
-                formatCommand = "npx prettier --stdin-filepath ${INPUT}",
+                formatCommand = "prettier --stdin-filepath ${INPUT}",
                 formatStdin = true
             }
 
@@ -215,15 +240,23 @@ lsp_installer.on_server_ready(function(server)
                 lintStdin = true
             }
 
+            local markdownlint = {
+                lintCommand = "mdl -s",
+                lintStdin = true,
+                lintFormats = {"%f:%l %m", "%f:l:%c %m", "%f: %l: %m"}
+            }
+
             local efm_settings = {
                 yaml = {yamllint, prettier},
                 json = {prettier},
+                jsonc = {prettier},
                 python = {black},
                 lua = {luafmt},
                 javascript = {eslint, prettier},
                 javascriptreact = {eslint, prettier},
                 typescript = {eslint, prettier},
-                typescriptreact = {eslint, prettier}
+                typescriptreact = {eslint, prettier},
+                markdown = {markdownlint, prettier}
             }
 
             local efmls = lsp_servers_dir .. "/efm/" .. "efm-langserver"
@@ -231,15 +264,17 @@ lsp_installer.on_server_ready(function(server)
             opts.cmd = {efmls, "-logfile", "/tmp/efm.log"}
 
             opts.root_dir = function(filename)
-                return lspconfig.util.root_pattern(".git", ".tsconfig",
-                                                   ".eslintrc")(filename) or
+                return lspconfig.util.root_pattern(".git")(filename) or
                            vim.fn.getcwd()
             end
 
+            opts.on_attach = on_attach
             opts.init_options = {documentFormatting = true, codeAction = true}
             opts.filetypes = vim.tbl_keys(efm_settings)
             opts.settings = {languages = efm_settings}
         end
+
+        -- Attach clients.
         server:setup(opts)
         vim.cmd [[ do User LspAttachBuffers ]]
     end
@@ -265,7 +300,6 @@ tabnine:setup({
 local luasnip = require 'luasnip'
 
 -- nvim-cmp setup
-
 local cmp = require 'cmp'
 cmp.setup {
     snippet = {
@@ -278,6 +312,7 @@ cmp.setup {
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-Space>'] = cmp.mapping.complete(),
         ['<C-e>'] = cmp.mapping.close(),
+        ['<CR>'] = cmp.mapping.confirm({select = true}),
         ['<Tab>'] = function(fallback)
             if cmp.visible() then
                 cmp.select_next_item()
@@ -303,26 +338,24 @@ cmp.setup {
 
 -- you need setup cmp first put this after cmp.setup()
 require('nvim-autopairs').setup {}
-require("nvim-autopairs.completion.cmp").setup({
-    map_cr = true, --  map <CR> on insert mode
-    map_complete = true, -- it will auto insert `(` (map_char) after select function or method item
-    auto_select = true, -- automatically select the first item
-    insert = false, -- use insert confirm behavior instead of replace
-    map_char = { -- modifies the function or method delimiter by filetypes
-        all = '(',
-        tex = '{'
-    }
-})
+local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done({
+    map_cr = true,
+    map_complete = true,
+    auto_select = true,
+    insert = false,
+    map_char = {tex = '', all = '('}
+}))
 
--- Commands.
+-- Commands
 local cmd = vim.cmd
--- Global options.
+-- Global Options
 local opt = vim.opt
--- Global 'let' options.
+-- Global 'let' Options
 local g = vim.g
--- Window options.
+-- Window Options
 local wo = vim.wo
--- Api
+-- API Shortcut
 local api = vim.api
 
 -- Global let.
@@ -406,13 +439,17 @@ api.nvim_set_keymap("n", "<leader>fb",
 api.nvim_set_keymap("n", "<leader>fh",
                     "<cmd>lua require('telescope.builtin').buffers()<cr>",
                     {noremap = true, silent = true})
+-- Tree mappings
+api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle <CR>",
+                    {noremap = true, silent = true})
 
 -- Augroups.
 require('nvim_utils')
 
 local autocmds = {
     toggle_hi = {{"InsertEnter", "*", "setlocal nohlsearch"}},
-    autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}}
+    autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}},
+    markdown_hi = {{"BufWinEnter", "*.md", ":e"}}
 }
 
 nvim_create_augroups(autocmds)
