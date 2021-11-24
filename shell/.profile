@@ -28,4 +28,8 @@ fi
 . "$HOME/.cargo/env"
 
 alias timberlea='ssh timber'
-sshfs -o reconnect urmzd@timber:/users/cs/urmzd /home/urmzd/timber
+
+# Kubetcl plugins
+export PATH="${PATH}:${HOME}/.krew/bin"
+
+export PATH="${PATH}:/usr/local/bin/aws_completer"
