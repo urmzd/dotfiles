@@ -84,11 +84,8 @@ source $ZSH/oh-my-zsh.sh
 # User Configuration.
 export WINDOWS="/mnt/c/users/urmzd"
 
-alias nb=jupyter-notebook
-alias rd=rmdir
 alias vi=nvim
 alias vim=nvim
-alias kubectx='kubectl ctx'
 alias vimrc="vi $HOME/.config/nvim/init.lua"
 
 export EDITOR=nvim
@@ -169,7 +166,7 @@ alias cdbe="cd ~/work/reeldata_core_springboot"
 
 alias cdme="cd ~/personal"
 alias cdsc="cd ~/personal/school"
-alias cdnlp='cd ~/personal/school/courses/CSCI4152'
+alias cdnlp="cd ~/personal/school/courses/CSCI4152"
 
 alias cdgr='cd $(git rev-parse --show-toplevel)'
 ## END COMMON JUMPS
@@ -177,7 +174,7 @@ alias cdgr='cd $(git rev-parse --show-toplevel)'
 export M2_HOME="/usr/share/maven"
 
 # FZF Settings.
-export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_DEFAULT_COMMAND="fd --type f"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 
@@ -204,5 +201,16 @@ zinit light-mode for \
 
 ### End of Zinit's installer chunk
 
+### Kubernetes
+  source <(kubectl completion zsh)
+### END Kubernetes
+
 # rbenv
 eval "$(rbenv init -)"
+
+export KUBECONFIG="$HOME/.kube/config.yaml"
+
+## Auto complete AWS
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+complete -C '/usr/local/bin/aws_completer' aws
