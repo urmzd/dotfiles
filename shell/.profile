@@ -32,4 +32,5 @@ alias timberlea='ssh timber'
 # Kubetcl plugins
 export PATH="${PATH}:${HOME}/.krew/bin"
 
+# Auto completion.
 export PATH="${PATH}:/usr/local/bin/aws_completer"

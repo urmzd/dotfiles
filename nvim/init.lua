@@ -24,6 +24,7 @@ packer.startup(function()
     use 'tpope/vim-surround'
     use 'tpope/vim-repeat'
     use 'tpope/vim-fugitive'
+    use 'tpope/vim-unimpaired'
     use 'preservim/nerdcommenter'
     use 'preservim/vimux'
     use 'morhetz/gruvbox'
@@ -53,10 +54,10 @@ packer.startup(function()
         run = './install.sh',
         requires = 'hrsh7th/nvim-cmp'
     }
+    use 'airblade/vim-rooter'
     use 'windwp/nvim-autopairs'
-    -- Test Integration
     use {
-        'rcarriga/vim-ultest',
+        "rcarriga/vim-ultest",
         requires = {"vim-test/vim-test"},
         run = ":UpdateRemotePlugins"
     }
@@ -140,6 +141,11 @@ lsp_installer.on_server_ready(function(server)
         local luadev = require("lua-dev").setup({lspconfig = opts})
         server:setup(luadev)
     else
+        --[[
+           [if server.name == "pyright" then
+           [    opts.settings = {python = {pythonPath = "/usr/bin/python3.10"}}
+           [end
+           ]]
         if server.name == "jdtls" then
             local java_cmd = require("utils.java_utils")
             opts.cmd = java_cmd(lsp_servers_dir .. "/jdtls")
@@ -155,6 +161,13 @@ lsp_installer.on_server_ready(function(server)
             }
         end
 
+        if server.name == "tsserver" then
+            opts.on_attach = function(client, bufnr)
+                client.resolved_capabilities.document_formatting = false
+                client.resolved_capabilities.document_range_formatting = false
+            end
+        end
+
         if server.name == "yamlls" then
             opts.filetypes = {"yaml"}
             opts.settings = {
@@ -167,18 +180,23 @@ lsp_installer.on_server_ready(function(server)
             }
         end
 
-        if server.name == "graphql" then
-            opts.filetypes = {"graphql", "typescript", "typescriptreact"}
-        end
+        if server.name == "graphql" then opts.filetypes = {"graphql"} end
 
         if server.name == "jsonls" then
             opts.filetypes = {"json", "jsonc"}
 
-            local capabilities2 = vim.lsp.protocol.make_client_capabilities()
-            capabilities2.textDocument.completion.completionItem.snippetSupport =
+            local _capabilities = vim.lsp.protocol.make_client_capabilities()
+            _capabilities.textDocument.completion.completionItem.snippetSupport =
                 true
 
-            opts.capabilities = capabilities2
+            opts.capabilities = _capabilities
+
+            --[[
+               [opts.on_attach = function(client, bufnr)
+               [    client.resolved_capabilities.document_formatting = false
+               [    client.resolved_capabilities.document_range_formatting = false
+               [end
+               ]]
 
             opts.settings = {
                 json = {
@@ -210,10 +228,6 @@ lsp_installer.on_server_ready(function(server)
             }
         end
 
-        if server.name == "pyright" then
-            opts.settings = {python = {pythonPath = "/usr/bin/python3.9"}}
-        end
-
         if server.name == "efm" then
             -- Formatting & Linting.
             local eslint = {
@@ -231,7 +245,7 @@ lsp_installer.on_server_ready(function(server)
             local luafmt = {formatCommand = "lua-format -i", formatStdin = true}
 
             local black = {
-                formatCommand = "python3.9 -m black --quiet -",
+                formatCommand = "python -m black --quiet -",
                 formatStdin = true
             }
 
@@ -360,8 +374,7 @@ local api = vim.api
 
 -- Global let.
 g.mapleader = ' '
-g.python3_host_prog = "/usr/bin/python3.9"
-g["test#strategy"] = "vimux"
+g["test#strategy"] = "neovim"
 g["test#javascript#runner"] = "jest"
 g["test#javascript#jest#options"] = "-c"
 g["tex_flavor"] = "latex"
@@ -442,6 +455,10 @@ api.nvim_set_keymap("n", "<leader>fh",
 -- Tree mappings
 api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle <CR>",
                     {noremap = true, silent = true})
+
+-- Ultest mappings
+api.nvim_set_keymap("n", "<leader>tj", ":call ultest#output#jumpto()<cr>", {noremap=true, silent = true})
+
 
 -- Augroups.
 require('nvim_utils')

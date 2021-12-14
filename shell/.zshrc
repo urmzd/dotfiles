@@ -86,7 +86,7 @@ export WINDOWS="/mnt/c/users/urmzd"
 
 alias vi=nvim
 alias vim=nvim
-alias vimrc="vi $HOME/.config/nvim/init.lua"
+
 
 export EDITOR=nvim
 export VISUAL=nvim
@@ -130,46 +130,18 @@ PERL_MM_OPT="INSTALL_BASE=/home/urmzd/perl5"; export PERL_MM_OPT;
 
 alias luamake=/home/urmzd/.config/nvim/lua-language-server/3rd/luamake/luamake
 
-function move_to_trash {
-  if [[ ! -d "$HOME/.trash" ]]
-  then 
-    mkdir "$HOME/.trash"
-  fi
 
-  mv "$@" ""$HOME"/.trash"
-}
+# Work Related
+source ~/.zshrc.work 
 
-alias trash=move_to_trash
+# Personal  Jumps.
+alias me=" ~/personal"
+alias dal="~/personal/school"
+alias vlado="~/personal/school/courses/CSCI4152"
+alias mdnlp="~/personal/md-nlp"
 
-function take_journal_note {
-  work_dir=$PWD
-  journal_dir="$HOME/personal/journal"
-  year="$(date "+%Y")"
-  week="$(date "+%U")"
-  note_dir="$journal_dir/$year/$week.md" &&
-  vi $note_dir && 
-  cd $journal_dir &&
-  commitMessage=${1:-"Add note for $week $year"} &&
-  git add . &&
-  git commit -m "'$commitMessage'" &&
-  git push &&
-  cd $work_dir &&
-  echo "Made a commit with message: $commitMessage"
-}
-
-alias takenote=take_journal_note
-
-## COMMON JUMPS.
-alias cdwk="cd ~/work/"
-alias cdfe="cd ~/work/operations_dashboard"
-alias cdbe="cd ~/work/reeldata_core_springboot"
-
-alias cdme="cd ~/personal"
-alias cdsc="cd ~/personal/school"
-alias cdnlp="cd ~/personal/school/courses/CSCI4152"
-
-alias cdgr='cd $(git rev-parse --show-toplevel)'
-## END COMMON JUMPS
+# Util jumps.
+alias gr='$(git rev-parse --show-toplevel)'
 
 export M2_HOME="/usr/share/maven"
 
@@ -214,3 +186,53 @@ export KUBECONFIG="$HOME/.kube/config.yaml"
 autoload bashcompinit && bashcompinit
 autoload -Uz compinit && compinit
 complete -C '/usr/local/bin/aws_completer' aws
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /usr/bin/terraform terraform
+
+
+# Common functions.
+function itest {
+   mvn -Dit.test=$1 failsafe:integration-test
+}
+
+function vimrc {
+  local_config="$HOME/.config/nvim/init.lua"
+  vi $local_config
+}
+
+function takenote {
+  work_dir=$PWD
+  journal_dir="$HOME/personal/journal"
+  year="$(date "+%Y")"
+  week="$(date "+%U")"
+  note_dir="$journal_dir/$year/$week.md" &&
+  vi $note_dir && 
+  cd $journal_dir &&
+  commitMessage=${1:-"Add note for $week $year"} &&
+  git add . &&
+  git commit -m "'$commitMessage'" &&
+  git push &&
+  cd $work_dir &&
+  echo "Made a commit with message: $commitMessage"
+}
+
+function trash {
+  if [[ ! -d "$HOME/.trash" ]]
+  then 
+    mkdir "$HOME/.trash"
+  fi
+
+  mv "$@" ""$HOME"/.trash"
+}
+
+initdocker() {
+  docker_init_file="$HOME/personal/dotfiles/docker/init.sh"
+  if [[ -e $docker_init_file ]]
+  then
+   $docker_init_file
+  else
+    echo "DOCKER INIT FILE NOT FOUND!"
+    exit 1
+  fi
+}
