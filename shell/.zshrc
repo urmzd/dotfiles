@@ -203,18 +203,38 @@ function vimrc {
 
 function takenote {
   work_dir=$PWD
-  journal_dir="$HOME/personal/journal"
+
+  journal="$HOME/personal/journal"
+
   year="$(date "+%Y")"
   week="$(date "+%U")"
-  note_dir="$journal_dir/$year/$week.md" &&
-  vi $note_dir && 
-  cd $journal_dir &&
-  commitMessage=${1:-"Add note for $week $year"} &&
-  git add . &&
-  git commit -m "'$commitMessage'" &&
-  git push &&
-  cd $work_dir &&
-  echo "Made a commit with message: $commitMessage"
+
+  notepad="$journal/$year/$week.md"
+
+  if [[ ! -f $notepad ]] 
+  then
+    touch "$notepad"
+  fi
+
+  if [[ -z $1 ]] 
+  then
+    cd $work_dir 
+    echo "MESSAGE IS REQUIRED!"
+    return 1
+  fi
+
+  $note="$1"
+
+  echo "$note" > $notepad
+  cd $journal
+
+  git add .
+  git commit -m "'$note'"
+  git push
+
+  cd $work_dir
+
+  echo "Made a commit with note: $note"
 }
 
 function trash {

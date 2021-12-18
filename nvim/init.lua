@@ -28,6 +28,7 @@ packer.startup(function()
     use 'preservim/nerdcommenter'
     use 'preservim/vimux'
     use 'morhetz/gruvbox'
+    use 'tyrannicaltoucan/vim-quantum'
     use 'itchyny/lightline.vim'
     -- Utils
     use 'norcalli/nvim_utils' -- init.lua utils
@@ -54,13 +55,24 @@ packer.startup(function()
         run = './install.sh',
         requires = 'hrsh7th/nvim-cmp'
     }
+    -- Path
     use 'airblade/vim-rooter'
+
+    -- Completion
     use 'windwp/nvim-autopairs'
+    -- Tests
     use {
         "rcarriga/vim-ultest",
         requires = {"vim-test/vim-test"},
         run = ":UpdateRemotePlugins"
     }
+    -- Debugger
+    use 'nvim-telescope/telescope-dap.nvim'
+    use 'mfussenegger/nvim-dap'
+    use 'theHamsta/nvim-dap-virtual-text'
+    use "Pocco81/DAPInstall.nvim"
+
+    -- Latex
     use {'lervag/vimtex', ft = 'tex', opt = true}
     -- File Tree
     use {
@@ -72,7 +84,15 @@ packer.startup(function()
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
+-- Telescope
 require('telescope').load_extension('fzf')
+require('telescope').load_extension('dap')
+
+-- Debuggers
+local dap_install = require('dap-install')
+local dbg_list = require('dap-install.api.debuggers').get_installed_debuggers()
+
+for _, debugger in ipairs(dbg_list) do dap_install.config(debugger) end
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -141,11 +161,6 @@ lsp_installer.on_server_ready(function(server)
         local luadev = require("lua-dev").setup({lspconfig = opts})
         server:setup(luadev)
     else
-        --[[
-           [if server.name == "pyright" then
-           [    opts.settings = {python = {pythonPath = "/usr/bin/python3.10"}}
-           [end
-           ]]
         if server.name == "jdtls" then
             local java_cmd = require("utils.java_utils")
             opts.cmd = java_cmd(lsp_servers_dir .. "/jdtls")
@@ -183,6 +198,10 @@ lsp_installer.on_server_ready(function(server)
         if server.name == "graphql" then opts.filetypes = {"graphql"} end
 
         if server.name == "jsonls" then
+            opts.on_attach = function(client, bufnr)
+                client.resolved_capabilities.document_formatting = false
+                client.resolved_capabilities.document_range_formatting = false
+            end
             opts.filetypes = {"json", "jsonc"}
 
             local _capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -191,17 +210,18 @@ lsp_installer.on_server_ready(function(server)
 
             opts.capabilities = _capabilities
 
-            --[[
-               [opts.on_attach = function(client, bufnr)
-               [    client.resolved_capabilities.document_formatting = false
-               [    client.resolved_capabilities.document_range_formatting = false
-               [end
-               ]]
-
             opts.settings = {
                 json = {
                     schemas = {
                         {
+                            description = "NPM",
+                            fileMatch = {"package.json"},
+                            url = "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
+                        }, {
+                            description = "Mozilla manifest",
+                            fileMatch = {"manifest.json"},
+                            url = "https://json.schemastore.org/web-manifest-combined.json"
+                        }, {
                             description = 'TypeScript compiler configuration file',
                             fileMatch = {'tsconfig.json', 'tsconfig.*.json'},
                             url = 'http://json.schemastore.org/tsconfig'
@@ -409,32 +429,36 @@ opt.undodir = vim.fn.stdpath('config') .. '/undo'
 opt.undofile = true
 
 -- WSL copy/paste support.
-opt.clipboard = "unnamedplus"
-g.clipboard = {
-    name = "win32yank-wsl",
-    copy = {
-        ["+"] = "win32yank.exe -i --crlf",
-        ["*"] = "win32yank.exe -i --crlf"
-    },
-    paste = {
-        ["+"] = "win32yank.exe -o --crlf",
-        ["*"] = "win32yank.exe -o --crlf"
-    },
-    cache_enable = 0
-}
+--[[
+   [opt.clipboard = "unnamedplus"
+   [g.clipboard = {
+   [    name = "win32yank-wsl",
+   [    copy = {
+   [        ["+"] = "win32yank.exe -i --crlf",
+   [        ["*"] = "win32yank.exe -i --crlf"
+   [    },
+   [    paste = {
+   [        ["+"] = "win32yank.exe -o --crlf",
+   [        ["*"] = "win32yank.exe -o --crlf"
+   [    },
+   [    cache_enable = 0
+   [}
+   ]]
 
--- Set colour scheme.
-cmd([[colorscheme gruvbox]])
+g["quantum_black"] = 1
+cmd([[colorscheme quantum]])
+
+g["lightline"] = {colorscheme = "quantum"}
 
 -- Window movement (LDUR).
-vim.api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>',
-                        {silent = true, noremap = true})
-vim.api.nvim_set_keymap('n', '<leader>j', ':wincmd j<CR>',
-                        {silent = true, noremap = true})
-vim.api.nvim_set_keymap('n', '<leader>k', ':wincmd k<CR>',
-                        {silent = true, noremap = true})
-vim.api.nvim_set_keymap('n', '<leader>l', ':wincmd l<CR>',
-                        {silent = true, noremap = true})
+api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>',
+                    {silent = true, noremap = true})
+api.nvim_set_keymap('n', '<leader>j', ':wincmd j<CR>',
+                    {silent = true, noremap = true})
+api.nvim_set_keymap('n', '<leader>k', ':wincmd k<CR>',
+                    {silent = true, noremap = true})
+api.nvim_set_keymap('n', '<leader>l', ':wincmd l<CR>',
+                    {silent = true, noremap = true})
 
 -- Escape
 api.nvim_set_keymap('i', 'jj', '<ESC>', {noremap = true, silent = true})
@@ -457,8 +481,8 @@ api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle <CR>",
                     {noremap = true, silent = true})
 
 -- Ultest mappings
-api.nvim_set_keymap("n", "<leader>tj", ":call ultest#output#jumpto()<cr>", {noremap=true, silent = true})
-
+api.nvim_set_keymap("n", "<leader>tj", ":call ultest#output#jumpto()<cr>",
+                    {noremap = true, silent = true})
 
 -- Augroups.
 require('nvim_utils')
@@ -466,7 +490,15 @@ require('nvim_utils')
 local autocmds = {
     toggle_hi = {{"InsertEnter", "*", "setlocal nohlsearch"}},
     autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}},
-    markdown_hi = {{"BufWinEnter", "*.md", ":e"}}
+    markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
+    colourscheme = {
+        {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
+        {"BufEnter", "*", "highlight SignColumn guibg=none"},
+        --[[
+           [{"BufEnter", "*", "highlight Comment guifg=#c1c8d4"},
+           ]]
+        {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
+    }
 }
 
 nvim_create_augroups(autocmds)
