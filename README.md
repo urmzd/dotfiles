@@ -6,4 +6,9 @@ Everything I use to speed up my developer flow.
 
 - [Shell]()
 - [Editor]()
-- [Language Specific]()
+
+## TODO:
+- [ ] Migration scripts.
+- [ ] Boostrapping all dependencies.
+
+
