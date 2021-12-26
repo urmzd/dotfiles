@@ -37,7 +37,8 @@ packer.startup(function()
     -- LSP Manager
     use 'williamboman/nvim-lsp-installer'
     -- Documentation
-    use {'kkoomen/vim-doge', run = function() fn["doge#install"]() end}
+    use {'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end}
+
     use {'lewis6991/gitsigns.nvim', requires = {'nvim-lua/plenary.nvim'}}
     -- Fuzzy Finder
     use {
@@ -73,7 +74,8 @@ packer.startup(function()
     use "Pocco81/DAPInstall.nvim"
 
     -- Latex
-    use {'lervag/vimtex', ft = 'tex', opt = true}
+    use {'lervag/vimtex', ft = 'tex'}
+
     -- File Tree
     use {
         'kyazdani42/nvim-tree.lua',
@@ -83,6 +85,9 @@ packer.startup(function()
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
+
+-- Documentation
+require"nvim-treesitter.configs".setup {tree_docs = {enable = true}}
 
 -- Telescope
 require('telescope').load_extension('fzf')
@@ -214,6 +219,11 @@ lsp_installer.on_server_ready(function(server)
                 json = {
                     schemas = {
                         {
+                            description = "Cypress",
+                            fileMatch = {"cypress.*.json"},
+                            url = "https://raw.githubusercontent.com/cypress-io/cypress/develop/cli/schema/cypress.schema.json"
+                        }, {
+
                             description = "NPM",
                             fileMatch = {"package.json"},
                             url = "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
@@ -428,23 +438,6 @@ opt.background = "dark"
 opt.undodir = vim.fn.stdpath('config') .. '/undo'
 opt.undofile = true
 
--- WSL copy/paste support.
---[[
-   [opt.clipboard = "unnamedplus"
-   [g.clipboard = {
-   [    name = "win32yank-wsl",
-   [    copy = {
-   [        ["+"] = "win32yank.exe -i --crlf",
-   [        ["*"] = "win32yank.exe -i --crlf"
-   [    },
-   [    paste = {
-   [        ["+"] = "win32yank.exe -o --crlf",
-   [        ["*"] = "win32yank.exe -o --crlf"
-   [    },
-   [    cache_enable = 0
-   [}
-   ]]
-
 g["quantum_black"] = 1
 cmd([[colorscheme quantum]])
 
@@ -493,11 +486,9 @@ local autocmds = {
     markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
     colourscheme = {
         {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
-        {"BufEnter", "*", "highlight SignColumn guibg=none"},
-        --[[
+        {"BufEnter", "*", "highlight SignColumn guibg=none"}, --[[
            [{"BufEnter", "*", "highlight Comment guifg=#c1c8d4"},
-           ]]
-        {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
+           ]] {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
     }
 }
 
