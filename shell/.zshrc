@@ -131,14 +131,7 @@ PERL_MM_OPT="INSTALL_BASE=/home/urmzd/perl5"; export PERL_MM_OPT;
 alias luamake=/home/urmzd/.config/nvim/lua-language-server/3rd/luamake/luamake
 
 
-# Work Related
-source ~/.zshrc.work 
 
-# Personal  Jumps.
-alias me=" ~/personal"
-alias dal="~/personal/school"
-alias vlado="~/personal/school/courses/CSCI4152"
-alias mdnlp="~/personal/md-nlp"
 
 # Util jumps.
 alias gr='$(git rev-parse --show-toplevel)'
@@ -191,17 +184,14 @@ autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /usr/bin/terraform terraform
 
 
-# Common functions.
-function itest {
-   mvn -Dit.test=$1 failsafe:integration-test
-}
+# Utility functions. 
 
-function vimrc {
+vimrc() {
   local_config="$HOME/.config/nvim/init.lua"
   vi $local_config
 }
 
-function takenote {
+takenote() {
   work_dir=$PWD
 
   journal="$HOME/personal/journal"
@@ -223,7 +213,7 @@ function takenote {
     return 1
   fi
 
-  $note="$1"
+  note="$1"
 
   echo "$note" > $notepad
   cd $journal
@@ -237,7 +227,7 @@ function takenote {
   echo "Made a commit with note: $note"
 }
 
-function trash {
+trash() {
   if [[ ! -d "$HOME/.trash" ]]
   then 
     mkdir "$HOME/.trash"
@@ -256,3 +246,12 @@ initdocker() {
     exit 1
   fi
 }
+
+# Load Haskell Specific Configurations
+. ~/.zshrc.haskell
+
+# Personal configurations
+. ~/.zshrc.haskell
+
+# Work Configurations. 
+. ~/.zshrc.work 
