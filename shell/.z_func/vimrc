@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+
+vimrc() {
+  local_config="$HOME/.config/nvim/init.lua"
+  vi $local_config
+}

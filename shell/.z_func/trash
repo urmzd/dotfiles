@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+
+trash() {
+  if [[ ! -d "$HOME/.trash" ]]
+  then 
+    mkdir "$HOME/.trash"
+  fi
+
+  mv "$@" ""$HOME"/.trash"
+}
