@@ -1,5 +1,5 @@
-queryinstallpackage "fzf"
-queryinstallpackage "rg"
+queryinstallpackage "fzf" 1
+queryinstallpackage "ripgrep" 1
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

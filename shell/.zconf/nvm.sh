@@ -1,12 +1,11 @@
 NVM_DIR="$HOME/.nvm"
+NVM_PROFILE="$HOME/.zconf/nvm-results.sh"
+NVM_COMPLETION="$HOME/.nvm/bash_completion"
 
 if [[ ! -d "$NVM_DIR" ]]
 then
-  git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
-  cd "$NVM_DIR"
-  git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh
 fi
 
-export "$NVM_DIR";
-source "$NVM_DIR/nvm.sh"
-source "$NVM_DIR/bash_completion"
+source "$NVM_PROFILE"
+source "$NVM_COMPLETION"

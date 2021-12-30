@@ -1,0 +1,1 @@
+queryinstallpackage "software-properties-common"
