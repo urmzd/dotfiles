@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+queryinstallpackage() {
+  if ! dpkg-query -W -f='${Status}' nano | grep "ok installed"
+  then
+    apt install $1
+  fi
+}
