@@ -6,7 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/urmzd/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
@@ -64,7 +64,7 @@ PERL_MM_OPT="INSTALL_BASE=/home/urmzd/perl5"; export PERL_MM_OPT;
 # Lua
 alias luamake=/home/urmzd/.config/nvim/lua-language-server/3rd/luamake/luamake
 
-# Util jumps.
+# Util Jumps.
 alias gr='$(git rev-parse --show-toplevel)'
 
 export M2_HOME="/usr/share/maven"
@@ -96,29 +96,30 @@ zinit light-mode for \
 
 ### End of Zinit's installer chunk
 
-### Kubernetes
-  source <(kubectl completion zsh)
-### END Kubernetes
-
 # rbenv
 eval "$(rbenv init -)"
 
 export KUBECONFIG="$HOME/.kube/config.yaml"
 
-## Auto complete AWS
-autoload bashcompinit && bashcompinit
-autoload -Uz compinit && compinit
-complete -C '/usr/local/bin/aws_completer' aws
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /usr/bin/terraform terraform
-
 # Utility functions. 
-fpath=( ~/.z_func "${fpath[@]}" )
+fpath=( ~/.zfunc "${fpath[@]}" )
 autoload -z trash initdocker vimrc 
 
-# Load Haskell Specific Configurations
-. ~/.zshrc.haskell
+# Load all configurations.
+for conf in $HOME/.zconf/*
+do 
+  source $conf 
+done
 
-# Work Configurations. 
-. ~/.zshrc.work 
+# Enable Completion.
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+
+## AWS CLI Completion.
+complete -C '/usr/local/bin/aws_completer' aws
+
+# Terraform Completion. 
+complete -o nospace -C /usr/bin/terraform terraform
+
+# Kubernetes Completion
+source <(kubectl completion zsh)

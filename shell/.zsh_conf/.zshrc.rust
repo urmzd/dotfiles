@@ -1,0 +1,6 @@
+if [[! -f "~/.zfunc/_rustup"]] 
+then
+  rustup completions zsh > ~/.zfunc/_rustup
+end
+
+autoload _rustup
