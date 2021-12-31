@@ -1,14 +1,14 @@
-# Dot Files
+# Dotfiles
 
-Everything I use to speed up my developer flow.
+A fully bootstrapped collection of configurations meant to speed up my workflow,
+in addition to reducing the complexity of migrations.
 
-## Table of Contents
+## Contents
 
-- [Shell]()
-- [Editor]()
+- [Shell Set Up](./shell)
+- [Editor Set Up](./nvim)
+- [Docker Set Up]('./docker')
 
-## TODO:
-- [ ] Migration scripts.
-- [ ] Boostrapping all dependencies.
+
 
 
