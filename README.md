@@ -8,7 +8,4 @@ in addition to reducing the complexity of migrations.
 - [Shell Set Up](./shell)
 - [Editor Set Up](./nvim)
 - [Docker Set Up]('./docker')
-
-
-
-
+- [Tmux Set Up]('./tmux')
