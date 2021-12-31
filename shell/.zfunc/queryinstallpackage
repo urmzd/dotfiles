@@ -6,8 +6,13 @@ queryinstallpackage() {
 
   local isNotInstalled="$?"
 
-  if [[ "$isNotInstalled" -eq 1 ]] 
+  if [[ ! "$isNotInstalled" -eq 0 ]] 
   then
+    if [[ ! -z "$3" ]] 
+    then
+      sudo add-apt-repository "$3"
+    fi
+
     if [[ "${2:-0}" -eq 0 ]]
     then
       sudo apt install "$1"
