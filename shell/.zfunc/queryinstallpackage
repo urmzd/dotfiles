@@ -3,7 +3,6 @@
 queryinstallpackage() {
   # Query if package exists.
   local query=`dpkg-query -W -f='${Status}' "$1" 2>&1 | grep -c "ok installed"`
-  echo "query is $query"
 
   if [[ "$query" -eq 0 ]] 
   then
