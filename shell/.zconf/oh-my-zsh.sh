@@ -13,11 +13,5 @@ FZF_ZSH_PLUGIN="$ZSH/custom/plugins/fzf-zsh-plugin"
 if [[ -d "$HOME/.oh-my-zsh" ]]
 then
   export ZSH="$ZSH"
-
-  # Path to your oh-my-zsh installation.
-  ZSH_THEME="powerlevel10k/powerlevel10k"
-
   plugins=(git vi-mode fzf-zsh-plugin) 
-
-  source "$ZSH/oh-my-zsh.sh"
 fi
