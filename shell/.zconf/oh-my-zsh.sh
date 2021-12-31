@@ -1,12 +1,19 @@
-#!/usr/bine/env zsh
+#!/usr/bin/env zsh
 
-[[ -d "$HOME/.oh-my-zsh" ]] || sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+export ZSH="$HOME/.oh-my-zsh"
 
+# Install OhMyZsh
+[[ -d "$ZSH" ]] || sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Plugins
+git clone https://github.com/unixorn/fzf-zsh-plugin.git "$ZSH/custom/plugins/fzf-zsh-plugin"
+
+# Configurations
 if [[ -d "$HOME/.oh-my-zsh" ]]
 then
-  # Path to your oh-my-zsh installation.
-  export ZSH="$HOME/.oh-my-zsh"
+  export ZSH="$ZSH"
 
+  # Path to your oh-my-zsh installation.
   ZSH_THEME="powerlevel10k/powerlevel10k"
 
   plugins=(git vi-mode fzf-zsh-plugin) 
