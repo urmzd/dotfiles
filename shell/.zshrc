@@ -30,7 +30,6 @@ source ~/.zconf/nvm.sh
 
 # NVIM
 source ~/.zconf/nvim.sh
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+# TMUX
+source ~/.zconf/tmux.sh
