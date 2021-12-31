@@ -9,8 +9,8 @@ source ~/.zconf/custom-functions.sh
 source ~/.zconf/apt.sh
 
 # Terminal
-source ~/.zconf/oh-my-zsh.sh
 source ~/.zconf/powerlevel10k.sh
+source ~/.zconf/oh-my-zsh.sh
 
 # Tools
 source ~/.zconf/fzf.sh
