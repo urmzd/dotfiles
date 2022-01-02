@@ -77,15 +77,12 @@ packer.startup(function()
     use {'lervag/vimtex', ft = 'tex'}
 
     -- File Tree
-    use {
-        'kyazdani42/nvim-tree.lua',
-        requires = 'kyazdani42/nvim-web-devicons',
-        config = function() require'nvim-tree'.setup {} end
-    }
+    use {'kyazdani42/nvim-tree.lua', requires = 'kyazdani42/nvim-web-devicons'}
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
+require'nvim-tree'.setup {}
 -- Documentation
 require"nvim-treesitter.configs".setup {tree_docs = {enable = true}}
 
