@@ -7,6 +7,7 @@ source ~/.zconf/custom-functions.sh
 
 # Packages
 source ~/.zconf/apt.sh
+source ~/.zconf/utils.sh
 
 # Terminal
 source ~/.zconf/oh-my-zsh.sh
@@ -26,3 +27,9 @@ source ~/.zconf/nvim.sh
 
 # TMUX
 source ~/.zconf/tmux.sh
+
+# Java
+source ~/.zconf/java.sh
+
+# Go
+source ~/.zconf/go.sh
