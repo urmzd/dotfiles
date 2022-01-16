@@ -28,11 +28,14 @@ source ~/.zconf/nvim.sh
 # TMUX
 source ~/.zconf/tmux.sh
 
-# Rust
-source ~/.zconf/rust.sh
-
 # Java
 source ~/.zconf/java.sh
 
 # Go
 source ~/.zconf/go.sh
+
+# Terraform
+source ~/.zconf/terraform.sh
+
+# Lua
+source ~/.zconf/lua.sh
