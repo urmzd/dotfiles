@@ -61,12 +61,10 @@ packer.startup(function()
 
     -- Completion
     use 'windwp/nvim-autopairs'
+
     -- Tests
-    use {
-        "rcarriga/vim-ultest",
-        requires = {"vim-test/vim-test"},
-        run = ":UpdateRemotePlugins"
-    }
+    use 'vim-test/vim-test'
+
     -- Debugger
     use 'nvim-telescope/telescope-dap.nvim'
     use 'mfussenegger/nvim-dap'
@@ -404,8 +402,8 @@ local api = vim.api
 
 -- Global let.
 g.mapleader = ' '
-opt.clipboard="unnamedplus"
-g["test#strategy"] = "neovim"
+opt.clipboard = "unnamedplus"
+g["test#strategy"] = "vimux"
 g["test#javascript#runner"] = "jest"
 g["test#javascript#jest#options"] = "-c"
 g["tex_flavor"] = "latex"
@@ -487,9 +485,8 @@ local autocmds = {
     markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
     colourscheme = {
         {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
-        {"BufEnter", "*", "highlight SignColumn guibg=none"}, --[[
-           [{"BufEnter", "*", "highlight Comment guifg=#c1c8d4"},
-           ]] {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
+        {"BufEnter", "*", "highlight SignColumn guibg=none"},
+        {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
     }
 }
 
