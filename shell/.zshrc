@@ -26,3 +26,6 @@ source ~/.zconf/nvim.sh
 
 # TMUX
 source ~/.zconf/tmux.sh
+
+# Rust
+source ~/.zconf/rust.sh
