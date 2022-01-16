@@ -77,17 +77,20 @@ packer.startup(function()
     use {'lervag/vimtex', ft = 'tex'}
 
     -- File Tree
-    use {'kyazdani42/nvim-tree.lua', requires = 'kyazdani42/nvim-web-devicons'}
+    use {
+        'kyazdani42/nvim-tree.lua',
+        requires = 'kyazdani42/nvim-web-devicons',
+        config = function() require'nvim-tree'.setup {} end
+    }
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
-require'nvim-tree'.setup {}
 -- Documentation
 require"nvim-treesitter.configs".setup {tree_docs = {enable = true}}
 
 -- Telescope
-require('telescope').load_extension('fzf')
+-- require('telescope').load_extension('fzf')
 require('telescope').load_extension('dap')
 
 -- Debuggers
@@ -401,6 +404,7 @@ local api = vim.api
 
 -- Global let.
 g.mapleader = ' '
+opt.clipboard="unnamedplus"
 g["test#strategy"] = "neovim"
 g["test#javascript#runner"] = "jest"
 g["test#javascript#jest#options"] = "-c"

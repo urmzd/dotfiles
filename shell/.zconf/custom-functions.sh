@@ -1,2 +1,2 @@
 fpath=( ~/.zfunc "${fpath[@]}" )
-autoload -z trash initdocker vimrc queryinstallpackage
+autoload -z trash initdocker vimrc queryinstallpackage gr
