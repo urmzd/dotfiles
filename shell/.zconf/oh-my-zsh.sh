@@ -13,5 +13,5 @@ FZF_ZSH_PLUGIN="$ZSH/custom/plugins/fzf-zsh-plugin"
 if [[ -d "$HOME/.oh-my-zsh" ]]
 then
   export ZSH="$ZSH"
-  plugins=(git vi-mode fzf-zsh-plugin) 
+  plugins=(git vi-mode fzf-zsh-plugin docker docker-compose) 
 fi

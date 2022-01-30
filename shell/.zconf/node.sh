@@ -1,0 +1,1 @@
+source <(node --completion-bash)

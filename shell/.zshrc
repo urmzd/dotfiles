@@ -39,3 +39,15 @@ source ~/.zconf/terraform.sh
 
 # Lua
 source ~/.zconf/lua.sh
+
+# Docker
+#source ~/.zconf/docker.sh
+
+# Python Manager
+source ~/.zconf/pyenv.sh
+
+# Node 
+source ~/.zconf/node.sh
+
+# AWS
+source ~/.zconf/aws.sh
