@@ -1,56 +1,55 @@
+ROOT="$HOME/dotfiles/shell"
+
 # Configurations.
-source ~/.zconf/wsl2.sh
-source ~/.zconf/user.sh
+source "$ROOT/.zconf/wsl2.sh"
+source "$ROOT/.zconf/user.sh"
 
 # Utility Functions. 
-source ~/.zconf/custom-functions.sh
+source "$ROOT/.zconf/custom-functions.sh"
 
 # Packages
-source ~/.zconf/apt.sh
-source ~/.zconf/utils.sh
+source "$ROOT/.zconf/apt.sh"
+source "$ROOT/.zconf/utils.sh"
 
 # Terminal
-source ~/.zconf/oh-my-zsh.sh
-source ~/.zconf/powerlevel10k.sh
+source "$ROOT/.zconf/oh-my-zsh.sh"
+source "$ROOT/.zconf/powerlevel10k.sh"
 
 # Tools
-source ~/.zconf/fzf.sh
+source "$ROOT/.zconf/fzf.sh"
 
 # Enable Completion.
-source ~/.zconf/completion.sh
+source "$ROOT/.zconf/completion.sh"
 
 # Node Package Manager.
-source ~/.zconf/nvm.sh
+source "$ROOT/.zconf/nvm.sh"
 
 # NVIM
-source ~/.zconf/nvim.sh
+source "$ROOT/.zconf/nvim.sh"
 
 # TMUX
-source ~/.zconf/tmux.sh
+source "$ROOT/.zconf/tmux.sh"
 
 # Java
-source ~/.zconf/java.sh
+source "$ROOT/.zconf/java.sh"
 
 # Go
-source ~/.zconf/go.sh
+source "$ROOT/.zconf/go.sh"
 
 # Terraform
-source ~/.zconf/terraform.sh
+source "$ROOT/.zconf/terraform.sh"
 
 # Lua
-source ~/.zconf/lua.sh
-
-# Docker
-#source ~/.zconf/docker.sh
+source "$ROOT/.zconf/lua.sh"
 
 # Python Manager
-source ~/.zconf/pyenv.sh
+source "$ROOT/.zconf/pyenv.sh"
 
 # Node 
-source ~/.zconf/node.sh
+source "$ROOT/.zconf/node.sh"
 
 # AWS
-source ~/.zconf/aws.sh
+source "$ROOT/.zconf/aws.sh"
 
 # Rust
-source ~/.zconf/rust.sh
+source "$ROOT/.zconf/rust.sh"
