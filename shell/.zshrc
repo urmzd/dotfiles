@@ -51,3 +51,6 @@ source ~/.zconf/node.sh
 
 # AWS
 source ~/.zconf/aws.sh
+
+# Rust
+source ~/.zconf/rust.sh
