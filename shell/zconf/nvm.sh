@@ -1,5 +1,5 @@
 NVM_DIR="$HOME/.nvm"
-PROFILE="$HOME/.zconf/nvm-results.sh"
+PROFILE="$ROOT/zconf/nvm-results.sh"
 NVM_COMPLETION="$HOME/.nvm/bash_completion"
 
 if [[ ! -d "$NVM_DIR" ]]
