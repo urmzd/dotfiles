@@ -179,7 +179,7 @@ lsp_installer.on_server_ready(function(server)
         server:setup(luadev)
     else
         if server.name == "jdtls" then
-            local java_cmd = require("utils.java_utils")
+            local java_cmd = require("java_utils")
             opts.cmd = java_cmd(lsp_servers_dir .. "/jdtls")
             opts.init_options = {
                 settings = {
