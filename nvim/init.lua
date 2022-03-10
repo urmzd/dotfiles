@@ -17,6 +17,7 @@ local packer = require('packer')
 packer.startup(function()
     -- Plugin Manager
     use 'wbthomason/packer.nvim'
+
     -- File Detection
     use 'sheerun/vim-polyglot'
     use {'nvim-treesitter/nvim-treesitter', run = ":TsUpdate"}
@@ -30,22 +31,28 @@ packer.startup(function()
     use 'morhetz/gruvbox'
     use 'tyrannicaltoucan/vim-quantum'
     use 'itchyny/lightline.vim'
+
     -- Utils
     use 'norcalli/nvim_utils' -- init.lua utils
+
     -- Lua Specific
     use 'folke/lua-dev.nvim'
+
     -- LSP Manager
     use 'williamboman/nvim-lsp-installer'
+
     -- Documentation
     use {'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end}
 
     use {'lewis6991/gitsigns.nvim', requires = {'nvim-lua/plenary.nvim'}}
+
     -- Fuzzy Finder
     use {
         'nvim-telescope/telescope.nvim',
         requires = {{'nvim-lua/plenary.nvim'}}
     }
     use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make'}
+
     -- Completion
     use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
     use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
@@ -84,22 +91,19 @@ packer.startup(function()
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
--- Documentation
-require"nvim-treesitter.configs".setup {tree_docs = {enable = true}}
+vim.g["doge_doc_standard_python"] = "google"
 
 -- Telescope
--- require('telescope').load_extension('fzf')
+--[[
+   [require('telescope').load_extension('fzf')
+   ]]
 require('telescope').load_extension('dap')
 
 -- Debuggers
 local dap_install = require('dap-install')
 local dbg_list = require('dap-install.api.debuggers').get_installed_debuggers()
 
---[[
-   [dap_install.setup({
-   [        installation_path = vim.fn.stdpath("data") .. "/dapinstall/"
-   [})
-   ]]
+dap_install.setup({installation_path = vim.fn.stdpath("data") .. "/dapinstall/"})
 
 for _, debugger in ipairs(dbg_list) do dap_install.config(debugger) end
 
@@ -163,7 +167,11 @@ lsp_installer.on_server_ready(function(server)
     local opts = {
         on_attach = on_attach,
         flags = {debounce_text_changes = 150},
-        capabilities = capabilities
+        capabilities = capabilities,
+        root_dir = function(filename)
+            return lspconfig.util.root_pattern(".git")(filename) or
+                       vim.fn.getcwd()
+        end
     }
 
     if server.name == "sumneko_lua" then
@@ -205,6 +213,12 @@ lsp_installer.on_server_ready(function(server)
         end
 
         if server.name == "graphql" then opts.filetypes = {"graphql"} end
+
+        if server.name == "pyright" then
+            local pyright_path = lsp_servers_dir .. "/python/node_modules/" ..
+                                     "pyright/" .. "langserver.index.js"
+            opts.cmd = {pyright_path, "--stdio", "--verbose"}
+        end
 
         if server.name == "jsonls" then
             opts.on_attach = function(client, bufnr)
@@ -278,11 +292,6 @@ lsp_installer.on_server_ready(function(server)
 
             local luafmt = {formatCommand = "lua-format -i", formatStdin = true}
 
-            local black = {
-                formatCommand = "python -m black --quiet -",
-                formatStdin = true
-            }
-
             local yamllint = {
                 lintCommand = "yamllint -f parsable -",
                 lintStdin = true
@@ -295,10 +304,9 @@ lsp_installer.on_server_ready(function(server)
             }
 
             local efm_settings = {
-                yaml = {yamllint, prettier},
+                yaml = {yamllint},
                 json = {prettier},
                 jsonc = {prettier},
-                python = {black},
                 lua = {luafmt},
                 javascript = {eslint, prettier},
                 javascriptreact = {eslint, prettier},
@@ -310,12 +318,6 @@ lsp_installer.on_server_ready(function(server)
             local efmls = lsp_servers_dir .. "/efm/" .. "efm-langserver"
 
             opts.cmd = {efmls, "-logfile", "/tmp/efm.log"}
-
-            opts.root_dir = function(filename)
-                return lspconfig.util.root_pattern(".git")(filename) or
-                           vim.fn.getcwd()
-            end
-
             opts.on_attach = on_attach
             opts.init_options = {documentFormatting = true, codeAction = true}
             opts.filetypes = vim.tbl_keys(efm_settings)
@@ -348,7 +350,7 @@ tabnine:setup({
 local luasnip = require 'luasnip'
 
 -- nvim-cmp setup
-local cmp = require 'cmp'
+local cmp = require('cmp')
 cmp.setup {
     snippet = {
         expand = function(args) require('luasnip').lsp_expand(args.body) end
@@ -443,10 +445,9 @@ opt.background = "dark"
 opt.undodir = vim.fn.stdpath('config') .. '/undo'
 opt.undofile = true
 
-g["quantum_black"] = 1
-cmd([[colorscheme quantum]])
+cmd([[colorscheme gruvbox]])
 
-g["lightline"] = {colorscheme = "quantum"}
+g["lightline"] = {colorscheme = "gruvbox"}
 
 -- Window movement (LDUR).
 api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>',
@@ -490,10 +491,16 @@ local autocmds = {
     autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}},
     markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
     colourscheme = {
-        {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
+        --[[
+           [{"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
+           ]]
         {"BufEnter", "*", "highlight SignColumn guibg=none"},
         {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
     }
 }
 
 nvim_create_augroups(autocmds)
+
+-- Debugging
+vim.lsp.set_log_level("info")
+
