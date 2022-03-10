@@ -42,8 +42,9 @@ source "$ROOT/zconf/terraform.sh"
 # Lua
 source "$ROOT/zconf/lua.sh"
 
-# Python Manager
+# Python
 source "$ROOT/zconf/pyenv.sh"
+source "$ROOT/zconf/python.sh"
 
 # Node 
 source "$ROOT/zconf/node.sh"
@@ -52,4 +53,4 @@ source "$ROOT/zconf/node.sh"
 source "$ROOT/zconf/aws.sh"
 
 # Rust
-source "$ROOT/zconf/rust.sh"
+#source "$ROOT/zconf/rust.sh"

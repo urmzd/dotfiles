@@ -7,5 +7,3 @@ alias vim=nvim
 export EDITOR=nvim
 export VISUAL=nvim
 export WINDOWS="/mnt/c/users/urmzd"
-
-
