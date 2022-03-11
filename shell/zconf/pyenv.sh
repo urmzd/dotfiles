@@ -6,4 +6,4 @@
 
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
-source $(pyenv root)/completions/pyenv.zsh
+#source $(pyenv root)/completions/pyenv.zsh
