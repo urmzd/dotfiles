@@ -1,7 +1,5 @@
-# Add repository key.
-# Look for terraform.
+where terraform >> /dev/null 
 
-where terraform > /dev/null 
 if [[ ! $? = 0 ]]
 then
   curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
