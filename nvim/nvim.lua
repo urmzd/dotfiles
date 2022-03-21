@@ -73,9 +73,10 @@ packer.startup(function()
     use 'vim-test/vim-test'
 
     -- Debugger
-    use 'nvim-telescope/telescope-dap.nvim'
     use 'mfussenegger/nvim-dap'
     use 'theHamsta/nvim-dap-virtual-text'
+    use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
+    use 'nvim-telescope/telescope-dap.nvim'
     use "Pocco81/DAPInstall.nvim"
 
     -- Latex
