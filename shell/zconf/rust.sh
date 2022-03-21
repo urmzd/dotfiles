@@ -7,10 +7,10 @@ export PATH="$PATH:$HOME/.cargo/bin"
 
 if [[ ! -f "$RUSTUP_COMPLETION" ]] 
 then
-  rustup completions zsh > "$RUSTUP_COMPLETION" 
+  rustup completions zsh >> "$RUSTUP_COMPLETION" 
 fi
 
 if [[ ! -f "$CARGO_COMPLETION" ]]
 then
-  rustup completions zsh cargo > "$CARGO_COMPLETION"
+  rustup completions zsh cargo >> "$CARGO_COMPLETION"
 fi
