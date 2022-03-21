@@ -94,9 +94,7 @@ end)
 vim.g["doge_doc_standard_python"] = "google"
 
 -- Telescope
---[[
-   [require('telescope').load_extension('fzf')
-   ]]
+require('telescope').load_extension('fzf')
 require('telescope').load_extension('dap')
 
 -- Debuggers
@@ -185,7 +183,7 @@ lsp_installer.on_server_ready(function(server)
                 settings = {
                     ["java.format.settings.url"] = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
                     ["java.format.settings.profile"] = "GoogleStyle",
-                    ["java.format.enabled"] = true,
+                    ["java.format.enabled"] = false,
                     ["java.trace.server"] = "verbose",
                     ["java.maven.downloadSources"] = true,
                     ["java.import.maven.enabled"] = true
