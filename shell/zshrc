@@ -53,4 +53,4 @@ source "$ROOT/zconf/node.sh"
 source "$ROOT/zconf/aws.sh"
 
 # Rust
-source "$ROOT/zconf/rust.sh"
+#source "$ROOT/zconf/rust.sh"
