@@ -73,11 +73,13 @@ packer.startup(function()
     use 'vim-test/vim-test'
 
     -- Debugger
-    use 'mfussenegger/nvim-dap'
-    use 'theHamsta/nvim-dap-virtual-text'
-    use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
-    use 'nvim-telescope/telescope-dap.nvim'
-    use "Pocco81/DAPInstall.nvim"
+    -- TODO - Set up debugger.
+    --[[
+       [use 'mfussenegger/nvim-dap'
+       [use 'theHamsta/nvim-dap-virtual-text'
+       [use {"rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"}}
+       [use 'nvim-telescope/telescope-dap.nvim'
+       ]]
 
     -- Latex
     use {'lervag/vimtex', ft = 'tex'}
@@ -96,15 +98,9 @@ vim.g["doge_doc_standard_python"] = "google"
 
 -- Telescope
 require('telescope').load_extension('fzf')
-require('telescope').load_extension('dap')
+-- require('telescope').load_extension('dap')
 
 -- Debuggers
-local dap_install = require('dap-install')
-local dbg_list = require('dap-install.api.debuggers').get_installed_debuggers()
-
-dap_install.setup({installation_path = vim.fn.stdpath("data") .. "/dapinstall/"})
-
-for _, debugger in ipairs(dbg_list) do dap_install.config(debugger) end
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
