@@ -1,1 +1,1 @@
-#eval "$( pip completion --zsh )"
+eval "$( pip completion --zsh )"
