@@ -164,7 +164,8 @@ lsp_installer.on_server_ready(function(server)
         flags = {debounce_text_changes = 150},
         capabilities = capabilities,
         root_dir = function(filename)
-            return lspconfig.util.root_pattern(".git")(filename) or
+            return lspconfig.util
+                       .root_pattern(".git", "tsconfig.json")(filename) or
                        vim.fn.getcwd()
         end
     }
