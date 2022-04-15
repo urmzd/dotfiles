@@ -487,11 +487,10 @@ local autocmds = {
     autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}},
     markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
     colourscheme = {
-        --[[
-           [{"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
-           ]]
         {"BufEnter", "*", "highlight SignColumn guibg=none"},
-        {"BufEnter", "*", "highlight VertSplit ctermbg=none "}
+        {"BufEnter", "*", "highlight VertSplit ctermbg=none "},
+        {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
+        {"BufEnter", "*", "highlight NonText ctermbg=none guibg=none"}
     }
 }
 
