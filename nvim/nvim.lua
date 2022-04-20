@@ -33,7 +33,6 @@ packer.startup(function()
     use 'itchyny/lightline.vim'
 
     -- Utils
-    use 'norcalli/nvim_utils' -- init.lua utils
 
     -- Lua Specific
     use 'folke/lua-dev.nvim'
@@ -44,6 +43,7 @@ packer.startup(function()
     -- Documentation
     use {'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end}
 
+    -- Misc
     use {'lewis6991/gitsigns.nvim', requires = {'nvim-lua/plenary.nvim'}}
 
     -- Fuzzy Finder
@@ -63,6 +63,7 @@ packer.startup(function()
         run = './install.sh',
         requires = 'hrsh7th/nvim-cmp'
     }
+
     -- Path
     use 'airblade/vim-rooter'
 
@@ -90,6 +91,10 @@ packer.startup(function()
         requires = 'kyazdani42/nvim-web-devicons',
         config = function() require'nvim-tree'.setup {} end
     }
+
+    -- Utils
+    use 'norcalli/nvim_utils'
+    use 'iamcco/markdown-preview.nvim'
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
@@ -437,7 +442,7 @@ opt.scrolloff = 16
 opt.signcolumn = "yes"
 opt.colorcolumn = "80"
 opt.fileformat = "unix"
-opt.background = "dark"
+opt.background = "light"
 opt.undodir = vim.fn.stdpath('config') .. '/undo'
 opt.undofile = true
 
