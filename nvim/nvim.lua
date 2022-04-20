@@ -18,10 +18,14 @@ packer.startup(function()
     -- Plugin Manager
     use 'wbthomason/packer.nvim'
 
+    -- LSP
+    use 'neovim/nvim-lspconfig'
+    use 'williamboman/nvim-lsp-installer'
+    use 'folke/lua-dev.nvim'
+
     -- File Detection
     use 'sheerun/vim-polyglot'
     use {'nvim-treesitter/nvim-treesitter', run = ":TsUpdate"}
-    use 'neovim/nvim-lspconfig'
     use 'tpope/vim-surround'
     use 'tpope/vim-repeat'
     use 'tpope/vim-fugitive'
@@ -31,14 +35,6 @@ packer.startup(function()
     use 'morhetz/gruvbox'
     use 'tyrannicaltoucan/vim-quantum'
     use 'itchyny/lightline.vim'
-
-    -- Utils
-
-    -- Lua Specific
-    use 'folke/lua-dev.nvim'
-
-    -- LSP Manager
-    use 'williamboman/nvim-lsp-installer'
 
     -- Documentation
     use {'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end}
@@ -73,14 +69,11 @@ packer.startup(function()
     -- Tests
     use 'vim-test/vim-test'
 
-    -- Debugger
-    -- TODO - Set up debugger.
-    --[[
-       [use 'mfussenegger/nvim-dap'
-       [use 'theHamsta/nvim-dap-virtual-text'
-       [use {"rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"}}
-       [use 'nvim-telescope/telescope-dap.nvim'
-       ]]
+    -- Debuggers
+    use 'mfussenegger/nvim-dap'
+    use 'theHamsta/nvim-dap-virtual-text'
+    use {"rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"}}
+    use 'mfussenegger/nvim-dap-python'
 
     -- Latex
     use {'lervag/vimtex', ft = 'tex'}
@@ -106,6 +99,7 @@ require('telescope').load_extension('fzf')
 -- require('telescope').load_extension('dap')
 
 -- Debuggers
+require("debuggers")
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -502,5 +496,5 @@ local autocmds = {
 nvim_create_augroups(autocmds)
 
 -- Debugging
-vim.lsp.set_log_level("info")
+-- vim.lsp.set_log_level("info")
 

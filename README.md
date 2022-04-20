@@ -3,8 +3,8 @@
 A fully bootstrapped collection of configurations meant to speed up my workflow,
 in addition to reducing the complexity of migrations.
 
-## Contents
+## Table of Contents
 
-- [Shell Set Up](./shell)
-- [Editor Set Up](./nvim)
+- [Zsh Set Up](./shell)
+- [Nvim Set Up](./nvim)
 - [Tmux Set Up]('./tmux')
