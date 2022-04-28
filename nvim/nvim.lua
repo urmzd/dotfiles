@@ -281,7 +281,7 @@ lsp_installer.on_server_ready(function(server)
             }
 
             local prettier = {
-                formatCommand = "prettier --stdin-filepath ${INPUT}",
+                formatCommand = "prettier --stdin-filepath ${INPUT} --tab-width=4",
                 formatStdin = true
             }
 
