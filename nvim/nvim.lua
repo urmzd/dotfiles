@@ -403,22 +403,31 @@ local wo = vim.wo
 -- API Shortcut
 local api = vim.api
 
+cmd([[colorscheme gruvbox]])
+
 -- Global let.
 g.mapleader = ' '
-opt.clipboard = "unnamedplus"
 g["test#strategy"] = "vimux"
+
 g["test#javascript#runner"] = "jest"
 g["test#javascript#jest#options"] = "-c"
-g["tex_flavor"] = "latex"
-g['vimtex_compiler_latexmk'] = {
+
+g["test#rust#cargotest#executable"] = "cargo test"
+g["test#rust#cargotest#options"] = "-- --show-output"
+
+g.tex_flavor = "latex"
+g.vimtex_compiler_latexmk = {
     options = {
         '-pdf', '-pdflatex="xelatex --shell-escape %O %S"', '-verbose',
         '-file-line-error', '-synctex=1', '-interaction=nonstopmode'
     }
 }
+g.gruvbox_const_light = "hard"
+g.lightline = {colorscheme = "gruvbox"}
 
 -- Global Settings
 wo.wrap = false
+opt.clipboard = "unnamedplus"
 opt.relativenumber = true
 opt.nu = true
 opt.exrc = true
@@ -436,13 +445,9 @@ opt.scrolloff = 16
 opt.signcolumn = "yes"
 opt.colorcolumn = "80"
 opt.fileformat = "unix"
-opt.background = "light"
+opt.background = "dark"
 opt.undodir = vim.fn.stdpath('config') .. '/undo'
 opt.undofile = true
-
-cmd([[colorscheme gruvbox]])
-
-g["lightline"] = {colorscheme = "gruvbox"}
 
 -- Window movement (LDUR).
 api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>',
@@ -494,7 +499,3 @@ local autocmds = {
 }
 
 nvim_create_augroups(autocmds)
-
--- Debugging
--- vim.lsp.set_log_level("info")
-
