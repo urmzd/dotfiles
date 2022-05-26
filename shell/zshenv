@@ -6,7 +6,7 @@ then
 fi
 
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:/usr/local/go/bin"
+export PATH="$PATH:/usr/local/bin/go/bin"
 export PATH="$PATH:/usr/local/lib/luarocks/rocks-5.1/luaformatter/scm-1/bin"
 export PATH="$PATH:$HOME/.rbenv/bin"
 export PATH="$PATH:$HOME/.rbenv/shims/"

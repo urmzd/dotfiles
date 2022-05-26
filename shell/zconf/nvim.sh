@@ -1,10 +1,5 @@
-#!/usr/bin/env
-
-# Install NVIM
-queryinstallpackage "neovim" 0 "ppa:neovim-ppa/unstable"
+#!/usr/bin/env zsh
 
 # VIM MODE.
 bindkey -v
 
-# Clipboard support.
-queryinstallpackage "vim-gtk3"

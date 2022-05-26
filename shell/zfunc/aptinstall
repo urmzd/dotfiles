@@ -1,5 +1,0 @@
-#!/usr/bin/env zsh
-
-aptinstall() {
-  sudo apt install $1  
-}
