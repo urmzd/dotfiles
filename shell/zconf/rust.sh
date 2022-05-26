@@ -2,11 +2,6 @@
 
 CARGO_PATH="$HOME/.cargo/bin"
 
-if [[ ! -d $CARGO_PATH ]]
-then
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-fi
-
 export PATH="$PATH:$HOME/.cargo/bin"
 
 COMPLETIONS_FOLDER="$HOME/.oh-my-zsh/completions"
