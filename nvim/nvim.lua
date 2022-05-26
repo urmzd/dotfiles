@@ -68,6 +68,11 @@ packer.startup(function()
 
     -- Tests
     use 'vim-test/vim-test'
+    use {
+        "rcarriga/vim-ultest",
+        requires = {"vim-test/vim-test"},
+        run = ":UpdateRemotePlugins"
+    }
 
     -- Debuggers
     use 'mfussenegger/nvim-dap'
@@ -79,11 +84,12 @@ packer.startup(function()
     use {'lervag/vimtex', ft = 'tex'}
 
     -- File Tree
+    -- [[
     use {
         'kyazdani42/nvim-tree.lua',
         requires = 'kyazdani42/nvim-web-devicons',
         config = function() require'nvim-tree'.setup {} end
-    }
+    } -- ]]
 
     -- Utils
     use 'norcalli/nvim_utils'
@@ -91,6 +97,8 @@ packer.startup(function()
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
+
+-- require('nvim_tree').setup {}
 
 vim.g["doge_doc_standard_python"] = "google"
 
@@ -476,7 +484,7 @@ api.nvim_set_keymap("n", "<leader>fh",
                     "<cmd>lua require('telescope.builtin').buffers()<cr>",
                     {noremap = true, silent = true})
 -- Tree mappings
-api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle <CR>",
+api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle<CR>",
                     {noremap = true, silent = true})
 
 -- Ultest mappings
