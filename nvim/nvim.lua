@@ -33,8 +33,10 @@ packer.startup(function(use)
 
   -- LSP
   use 'neovim/nvim-lspconfig'
-  use 'folke/lua-dev.nvim'
   use 'williamboman/nvim-lsp-installer'
+  -- Extra LSP Support
+  use 'folke/lua-dev.nvim'
+  use 'simrat39/rust-tools.nvim'
 
   -- File Detection
   use 'sheerun/vim-polyglot'
@@ -110,14 +112,17 @@ packer.startup(function(use)
   use 'norcalli/nvim_utils'
   use 'iamcco/markdown-preview.nvim'
   use 'urmzd/lume-nvim'
+  use 'nvim-telescope/telescope-ui-select.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
 
 
 require("nvim-lsp-installer").setup({})
+
 -- Telescope
 require('telescope').load_extension('fzf')
+require('telescope').load_extension("ui-select")
 
 -- Debuggers
 require("debuggers")
@@ -181,150 +186,19 @@ local opts = {
   on_attach = on_attach,
   flags = { debounce_text_changes = 150 },
   capabilities = capabilities,
-  root_dir = function(filename)
-    return lspconfig.util.root_pattern(".git", "tsconfig.json")(filename) or
-        fn.getcwd()
-  end
 }
 
 
 require("language-servers.lua").setup(lspconfig, opts)
---[[
-   [require("nvim-lsp-installer").on_server_ready(function(server)
-   [    if server.name == "tsserver" then
-   [        opts.on_attach = function(client, bufnr)
-   [            client.resolved_capabilities.document_formatting = false
-   [            client.resolved_capabilities.document_range_formatting = false
-   [        end
-   [    end
-   [
-   [    if server.name == "yamlls" then
-   [        opts.filetypes = {"yaml"}
-   [        opts.settings = {
-   [            yaml = {
-   [                schemas = {
-   [                    ["https://unpkg.com/graphql-config@4.1.0/config-schema.json"] = "graphql.config.yml",
-   [                    'https://bitbucket.org/atlassianlabs/atlascode/raw/main/resources/schemas/pipelines-schema.json'
-   [                }
-   [            }
-   [        }
-   [    end
-   [
-   [    if server.name == "graphql" then opts.filetypes = {"graphql"} end
-   [
-   [    if server.name == "pyright" then
-   [        local pyright_path = lsp_servers_dir .. "/python/node_modules/" ..
-   [                                 "pyright/" .. "langserver.index.js"
-   [        opts.cmd = {pyright_path, "--stdio", "--verbose"}
-   [    end
-   [
-   [    if server.name == "jsonls" then
-   [        opts.on_attach = function(client, bufnr)
-   [            client.resolved_capabilities.document_formatting = false
-   [            client.resolved_capabilities.document_range_formatting = false
-   [        end
-   [        opts.filetypes = {"json", "jsonc"}
-   [
-   [        local _capabilities = vim.lsp.protocol.make_client_capabilities()
-   [        _capabilities.textDocument.completion.completionItem.snippetSupport =
-   [            true
-   [
-   [        opts.capabilities = _capabilities
-   [
-   [        opts.settings = {
-   [            json = {
-   [                schemas = {
-   [                    {
-   [                        description = "Cypress",
-   [                        fileMatch = {"cypress.*.json"},
-   [                        url = "https://raw.githubusercontent.com/cypress-io/cypress/develop/cli/schema/cypress.schema.json"
-   [                    }, {
-   [
-   [                        description = "NPM",
-   [                        fileMatch = {"package.json"},
-   [                        url = "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
-   [                    }, {
-   [                        description = "Mozilla manifest",
-   [                        fileMatch = {"manifest.json"},
-   [                        url = "https://json.schemastore.org/web-manifest-combined.json"
-   [                    }, {
-   [                        description = 'TypeScript compiler configuration file',
-   [                        fileMatch = {'tsconfig.json', 'tsconfig.*.json'},
-   [                        url = 'http://json.schemastore.org/tsconfig'
-   [                    }, {
-   [                        description = 'Babel configuration',
-   [                        fileMatch = {
-   [                            '.babelrc.json', '.babelrc', 'babel.config.json'
-   [                        },
-   [                        url = 'http://json.schemastore.org/lerna'
-   [                    }, {
-   [                        description = 'ESLint config',
-   [                        fileMatch = {'.eslintrc.json', '.eslintrc'},
-   [                        url = 'http://json.schemastore.org/eslintrc'
-   [                    }, {
-   [                        description = 'Prettier config',
-   [                        fileMatch = {
-   [                            '.prettierrc', '.prettierrc.json',
-   [                            'prettier.config.json'
-   [                        },
-   [                        url = 'http://json.schemastore.org/prettierrc'
-   [                    }
-   [                }
-   [            }
-   [        }
-   [    end
-   [
-   [    if server.name == "efm" then
-   [        -- Formatting & Linting.
-   [        local eslint = {
-   [            lintCommand = 'eslint_d -f unix --stdin --stdin-filename ${INPUT}',
-   [            lintIgnoreExitCode = true,
-   [            lintStdin = true,
-   [            lintFormats = {"%f:%l:%c: %m"}
-   [        }
-   [
-   [        local prettier = {
-   [            formatCommand = "prettier --stdin-filepath ${INPUT} --tab-width=4",
-   [            formatStdin = true
-   [        }
-   [
-   [        local luafmt = {formatCommand = "lua-format -i", formatStdin = true}
-   [
-   [        local yamllint = {
-   [            lintCommand = "yamllint -f parsable -",
-   [            lintStdin = true
-   [        }
-   [
-   [        local markdownlint = {
-   [            lintCommand = "mdl -s",
-   [            lintStdin = true,
-   [            lintFormats = {"%f:%l %m", "%f:l:%c %m", "%f: %l: %m"}
-   [        }
-   [
-   [        local efm_settings = {
-   [            yaml = {yamllint},
-   [            json = {prettier},
-   [            jsonc = {prettier},
-   [            lua = {luafmt},
-   [            javascript = {eslint, prettier},
-   [            javascriptreact = {eslint, prettier},
-   [            typescript = {eslint, prettier},
-   [            typescriptreact = {eslint, prettier},
-   [            markdown = {markdownlint, prettier}
-   [        }
-   [
-   [        local efmls = lsp_servers_dir .. "/efm/" .. "efm-langserver"
-   [
-   [        opts.cmd = {efmls, "-logfile", "/tmp/efm.log"}
-   [        opts.on_attach = on_attach
-   [        opts.init_options = {documentFormatting = true, codeAction = true}
-   [        opts.filetypes = vim.tbl_keys(efm_settings)
-   [        opts.settings = {languages = efm_settings}
-   [    end
-   [
-   [    -- Attach clients.
-   [    server:setup(opts)
-   [    vim.cmd [[ do User LspAttachBuffers ]]
+require("language-servers.perl").setup(lspconfig, opts)
+require("language-servers.java").setup(lspconfig, opts)
+require("language-servers.typescript").setup(lspconfig, opts)
+require("language-servers.rust").setup(lspconfig, opts)
+require("language-servers.json").setup(lspconfig, opts)
+require("language-servers.yaml").setup(lspconfig, opts)
+require("language-servers.graphql").setup(lspconfig, opts)
+require("language-servers.python").setup(lspconfig, opts)
+
 
 -- TabNine support.
 local tabnine = require('cmp_tabnine.config')
