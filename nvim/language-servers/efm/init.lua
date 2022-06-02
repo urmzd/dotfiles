@@ -21,7 +21,7 @@ local default_settings = {
 
 M.default_settings = default_settings
 
-local efmls = lsp_servers .. "efm/efm-langserver"
+local efmls = lsp_servers .. "/efm/efm-langserver"
 
 local overrides = {
     cmd = { efmls, "-logfile", "/tmp/efm.log" },

@@ -199,7 +199,7 @@ require("language-servers.yaml").setup(lspconfig, opts)
 require("language-servers.graphql").setup(lspconfig, opts)
 require("language-servers.python").setup(lspconfig, opts)
 require("language-servers.efm.init").setup(lspconfig, opts)
-
+require("language-servers.bash").seutp(lspconfig, opts)
 
 -- TabNine support.
 local tabnine = require('cmp_tabnine.config')
