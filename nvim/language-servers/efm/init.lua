@@ -1,10 +1,10 @@
-local yamllint = require("yamllint")
-local luafmt = require("luafmt")
-local prettier = require("prettier")
-local eslint = require("eslint")
-local markdownlint = require("markdownlint")
+local yamllint = require("language-servers.efm.yamllint")
+local luafmt = require("language-servers.efm.luafmt")
+local prettier = require("language-servers.efm.prettier")
+local eslint = require("language-servers.efm.eslint")
+local markdownlint = require("language-servers.efm.markdownlint")
+local lsp_servers = require("utils.path").lsp_servers_dir
 local lume = require("lume")
-local lsp_servers = require("nvim.utils.path").lsp_servers_dir
 
 local M = {}
 local default_settings = {
@@ -26,8 +26,8 @@ local efmls = lsp_servers .. "efm/efm-langserver"
 local overrides = {
     cmd = { efmls, "-logfile", "/tmp/efm.log" },
     init_options = { documentFormatting = true, codeAction = true },
-    filetypes = vim.tbl_keys(efm_settings),
-    settings = { languages = efm_settings }
+    filetypes = vim.tbl_keys(default_settings),
+    settings = { languages = default_settings }
 }
 
 function M.setup(config, opts)
