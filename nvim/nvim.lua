@@ -32,8 +32,12 @@ packer.startup(function()
     use 'tpope/vim-unimpaired'
     use 'preservim/nerdcommenter'
     use 'preservim/vimux'
+
+    -- Themes
     use 'morhetz/gruvbox'
     use 'tyrannicaltoucan/vim-quantum'
+    use 'ayu-theme/ayu-vim'
+
     use 'itchyny/lightline.vim'
 
     -- Documentation
@@ -411,7 +415,9 @@ local wo = vim.wo
 -- API Shortcut
 local api = vim.api
 
-cmd([[colorscheme gruvbox]])
+local colorscheme = "ayu"
+
+cmd('colorscheme ' .. colorscheme)
 
 -- Global let.
 g.mapleader = ' '
@@ -430,8 +436,9 @@ g.vimtex_compiler_latexmk = {
         '-file-line-error', '-synctex=1', '-interaction=nonstopmode'
     }
 }
+
 g.gruvbox_const_light = "hard"
-g.lightline = {colorscheme = "gruvbox"}
+g.lightline = {colorscheme = colorscheme}
 
 -- Global Settings
 wo.wrap = false
@@ -497,13 +504,15 @@ require('nvim_utils')
 local autocmds = {
     toggle_hi = {{"InsertEnter", "*", "setlocal nohlsearch"}},
     autoFormat = {{"BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)"}},
-    markdown_hi = {{"BufWinEnter", "*.md", ":e"}},
-    colourscheme = {
-        {"BufEnter", "*", "highlight SignColumn guibg=none"},
-        {"BufEnter", "*", "highlight VertSplit ctermbg=none "},
-        {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
-        {"BufEnter", "*", "highlight NonText ctermbg=none guibg=none"}
-    }
+    markdown_hi = {{"BufWinEnter", "*.md", ":e"}}
+    --[[
+       [colourscheme = {
+       [    {"BufEnter", "*", "highlight SignColumn guibg=none"},
+       [    {"BufEnter", "*", "highlight VertSplit ctermbg=none "},
+       [    {"BufEnter", "*", "highlight Normal ctermbg=none guibg=none"},
+       [    {"BufEnter", "*", "highlight NonText ctermbg=none guibg=none"}
+       [}
+       ]]
 }
 
 nvim_create_augroups(autocmds)
