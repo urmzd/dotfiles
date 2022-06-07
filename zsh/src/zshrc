@@ -1,4 +1,4 @@
-ROOT="$HOME/dotfiles/shell"
+ROOT="$HOME/dotfiles/zsh/src"
 
 # Configurations.
 source "$ROOT/zconf/wsl2.sh"
