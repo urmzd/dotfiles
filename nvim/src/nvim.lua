@@ -97,7 +97,7 @@ packer.startup(function(use)
     -- Debuggers
     use 'mfussenegger/nvim-dap'
     use 'theHamsta/nvim-dap-virtual-text'
-    use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" }, ft = { "rmd", "markdown" } }
+    use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
     use 'mfussenegger/nvim-dap-python'
 
     -- Latex
@@ -114,7 +114,6 @@ packer.startup(function(use)
     use 'norcalli/nvim_utils'
     use { 'iamcco/markdown-preview.nvim', run = function() vim.fn["mkdp#util#install"]() end }
     use 'urmzd/lume-nvim'
-    use 'nvim-telescope/telescope-ui-select.nvim'
 
     if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
@@ -123,12 +122,9 @@ require("nvim-lsp-installer").setup({})
 
 -- Telescope
 require('telescope').load_extension('fzf')
---[[
-   [require('telescope').load_extension("ui-select")
-   ]]
 
 -- Debuggers
-require("debuggers")
+-- require("debuggers")
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
