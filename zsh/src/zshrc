@@ -1,7 +1,6 @@
 ROOT="$HOME/dotfiles/zsh/src"
 
 # Configurations.
-source "$ROOT/zconf/wsl2.sh"
 source "$ROOT/zconf/user.sh"
 
 # Utility Functions. 

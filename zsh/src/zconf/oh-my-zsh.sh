@@ -1,3 +1,4 @@
 #!/usr/bin/env zsh
 
-plugins=(git vi-mode fzf-zsh-plugin docker docker-compose conda-zsh-completion) 
+# used before: fzf-zsh-plugin conda-zsh-completion
+plugins=(git vi-mode docker docker-compose) 
