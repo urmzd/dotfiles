@@ -5,5 +5,4 @@ LINK="https://github.com/sharkdp/fd/releases/download/v8.3.2/$FILE"
 curl -L $LINK --output $FILE
 tar -xzf $FILE
 sudo mv $FILE /usr/local/bin/fdfind
-ln -s /usr/local/bin/fdfind ~/.local/bin/fd
 rm -rf $FILE
