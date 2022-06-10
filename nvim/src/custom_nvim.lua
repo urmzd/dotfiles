@@ -32,6 +32,7 @@ packer.startup(function(use)
     -- LSP
     use 'neovim/nvim-lspconfig'
     use 'williamboman/nvim-lsp-installer'
+
     -- Extra LSP Support
     use 'folke/lua-dev.nvim'
     use 'simrat39/rust-tools.nvim'
@@ -47,8 +48,6 @@ packer.startup(function(use)
     use 'preservim/vimux'
 
     -- Themes
-    use 'morhetz/gruvbox'
-    use 'tyrannicaltoucan/vim-quantum'
     use 'ayu-theme/ayu-vim'
     use 'itchyny/lightline.vim'
 
@@ -87,12 +86,16 @@ packer.startup(function(use)
     use 'windwp/nvim-autopairs'
 
     -- Tests
-    use 'vim-test/vim-test'
     use {
-        "rcarriga/vim-ultest",
-        requires = { "vim-test/vim-test" },
-        run = ":UpdateRemotePlugins"
+        "rcarriga/neotest",
+        requires = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+            "antoinemadec/FixCursorHold.nvim"
+        }
     }
+
+    use { 'rcarriga/neotest-vim-test', requires = { 'vim-test/vim-test' } }
 
     -- Debuggers
     use 'mfussenegger/nvim-dap'
@@ -283,7 +286,6 @@ g.vimtex_compiler_latexmk = {
     }
 }
 
-g.gruvbox_const_light = "hard"
 g.lightline = { colorscheme = colorscheme }
 
 -- Global Settings
