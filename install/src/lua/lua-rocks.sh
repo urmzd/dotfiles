@@ -6,5 +6,5 @@ tar zxpf luarocks-3.8.0.tar.gz
 cd luarocks-3.8.0
 ./configure --with-lua-include=/usr/local/include
 sudo make install
-rm -rf luarocks-3.8.0 luarocks-3.8.0.tar.gz
+sudo rm -rf luarocks-3.8.0 luarocks-3.8.0.tar.gz
 
