@@ -329,6 +329,8 @@ opt.fileformat = "unix"
 opt.background = "dark"
 opt.undodir = fn.stdpath('config') .. '/undo'
 opt.undofile = true
+opt.nrformats = "alpha"
+
 
 -- Window movement (LDUR).
 api.nvim_set_keymap('n', '<leader>h', ':wincmd h<CR>',
