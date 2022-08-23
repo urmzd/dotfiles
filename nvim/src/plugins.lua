@@ -60,7 +60,6 @@ packer.startup(function(use)
     requires = { 'nvim-lua/plenary.nvim' },
     config = function() require("gitsigns").setup() end
   }
-  -- TODO:
   use 'folke/lsp-colors.nvim'
   use {
     "folke/trouble.nvim",
@@ -102,7 +101,10 @@ packer.startup(function(use)
 
   -- Tests
   use 'nvim-neotest/neotest-python'
+  use 'nvim-neotest/neotest-plenary'
   use 'rouge8/neotest-rust'
+  use { 'nvim-neotest/neotest-vim-test', requires = "vim-test/vim-test" }
+
   use {
     "nvim-neotest/neotest",
     requires = {
@@ -134,7 +136,7 @@ packer.startup(function(use)
     'iamcco/markdown-preview.nvim',
     run = function() vim.fn["mkdp#util#install"]() end
   }
-  use 'urmzd/lume-nvim'
+  use 'urmzd/lume.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)

@@ -26,10 +26,7 @@ api.nvim_set_keymap("n", "<leader>fb",
 api.nvim_set_keymap("n", "<leader>fh",
   "<cmd>lua require('telescope.builtin').buffers()<cr>",
   { noremap = true, silent = true })
+
 -- Tree mappings
 api.nvim_set_keymap("n", "<C-e>", ":NvimTreeToggle<CR>",
-  { noremap = true, silent = true })
-
--- Ultest mappings
-api.nvim_set_keymap("n", "<leader>tj", ":call ultest#output#jumpto()<cr>",
   { noremap = true, silent = true })

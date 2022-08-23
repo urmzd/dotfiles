@@ -1,5 +1,8 @@
 require("nvim-dap-virtual-text").setup()
 require("dapui").setup()
-require('dap-python').setup('debugpy')
 
+dap_python = require("dap-python")
+
+--dap_python.setup()
+--dap_python.test_runner = "pytest"
 

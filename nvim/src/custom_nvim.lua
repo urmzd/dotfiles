@@ -1,15 +1,11 @@
+-- TODO: Split configurations by plugins.
 require("plugins")
 require 'nvim-rooter'.setup {
   rooter_patterns = { '.git', '.root' },
   trigger_pattern = { '*' },
   manual = false
 }
-require('neotest').setup({
-  adapters = {
-    require("neotest-python"),
-    require("neotest-rust")
-  }
-})
+require("test_setup")
 require("nvim-lsp-installer").setup({})
 require('telescope').load_extension('fzf')
 require("debuggers")
