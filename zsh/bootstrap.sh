@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-echo 'source ~/dotfiles/shell/src/zshenv' > ~/.zshenv
-echo 'source ~/dotfiles/shell/src/zprofile' > ~/.zprofile
-echo 'source ~/dotfiles/shell/src/zshrc' > ~/.zshrc
+echo 'source ~/dotfiles/zsh/src/zshenv' > ~/.zshenv
+echo 'source ~/dotfiles/zsh/src/zprofile' > ~/.zprofile
+echo 'source ~/dotfiles/zsh/src/zshrc' > ~/.zshrc

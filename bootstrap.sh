@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-function call_bootstrap() {
+call_bootstrap() {
 	parent="$(dirname $1)"
+	echo $parent
 	cd "$parent"
 	source "$1"
 	cd ..
