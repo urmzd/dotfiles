@@ -1,15 +1,12 @@
 #!/usr/bin/bash
 
-# ENTRY
-cd src
-
-# source essentials.sh
-# source zsh.sh
-# source omz.sh
-# source powerlevel10k.sh
+source essentials.sh
+source zsh.sh
+source omz.sh
+source powerlevel10k.sh
 source pyenv.sh
 source nvm.sh
-# source nvim.sh
+source nvim.sh
 source tmux.sh
 source rust.sh
 source fdfind.sh
@@ -21,7 +18,4 @@ source julia.sh
 source maven.sh
 source ripgrep.sh
 source terraform.sh
-
-# EXIT
-cd ..
 
