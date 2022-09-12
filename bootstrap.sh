@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 call_bootstrap() {
-	parent="$(dirname $1)"
-	echo $parent
-	cd "$parent"
-	source "$1"
+	dirname="$(dirname "$1")"
+	filename="$(basename $1)"
+	cd "$dirname" || exit 1
+	source "$filename" || exit 2
 	cd ..
 }
 
