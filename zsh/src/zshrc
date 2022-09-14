@@ -13,6 +13,9 @@ source "$ROOT/zconf/powerlevel10k.sh"
 # Tools
 source "$ROOT/zconf/fzf.sh"
 
+# Gradle
+source "$ROOT/zconf/gradle.sh"
+
 # Enable Completion.
 source "$ROOT/zconf/completion.sh"
 
@@ -32,10 +35,6 @@ source "$ROOT/zconf/java.sh"
 # Lua
 # source "$ROOT/zconf/lua.sh"
 
-# Gradle
-source "$ROOT/zconf/gradle.sh"
-
-
 # Python
 source "$ROOT/zconf/pyenv.sh"
 source "$ROOT/zconf/python.sh"
@@ -45,3 +44,6 @@ source "$ROOT/zconf/aws.sh"
 
 # Rust
 source "$ROOT/zconf/rust.sh"
+
+# OMZ
+source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
