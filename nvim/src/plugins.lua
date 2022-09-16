@@ -30,9 +30,11 @@ packer.startup(function(use)
   use 'wbthomason/packer.nvim'
 
   -- LSP
-  use 'neovim/nvim-lspconfig'
-  use 'williamboman/nvim-lsp-installer'
-
+  use {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+      "neovim/nvim-lspconfig",
+  }
   -- Extra LSP Support
   use 'folke/lua-dev.nvim'
   use 'simrat39/rust-tools.nvim'

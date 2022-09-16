@@ -1,6 +1,6 @@
 local M = {}
 
-function M.seutp(config, opts) 
+function M.setup(config, opts) 
    config.bashls.setup(opts)
 end
 

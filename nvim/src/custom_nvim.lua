@@ -5,8 +5,9 @@ require 'nvim-rooter'.setup {
   trigger_pattern = { '*' },
   manual = false
 }
+require("mason").setup()
+require("mason-lspconfig").setup()
 require("test_setup")
-require("nvim-lsp-installer").setup({})
 require('telescope').load_extension('fzf')
 require("debuggers")
 require("lsp_setup")
