@@ -1,27 +1,18 @@
 #!/usr/bin/bash
 
-# ENTRY
-cd src
-
-# source essentials.sh
-# source zsh.sh
-# source omz.sh
-# source powerlevel10k.sh
-source pyenv.sh
-source nvm.sh
-# source nvim.sh
-source tmux.sh
-source rust.sh
-source fdfind.sh
-source fzf.sh
-source go.sh
-source aws.sh
-source java.sh
-source julia.sh
-source maven.sh
-source ripgrep.sh
-source terraform.sh
-
-# EXIT
-cd ..
-
+source "src/essentials.sh"
+source "src/zsh.sh"
+source "src/omz.sh"
+source "src/powerlevel10k.sh"
+source "src/pyenv.sh"
+source "src/nvm.sh"
+source "src/nvim.sh"
+source "src/tmux.sh"
+source "src/rust.sh"
+source "src/fdfind.sh"
+source "src/fzf.sh"
+source "src/go.sh"
+source "src/aws.sh"
+source "src/java.sh"
+source "src/maven.sh"
+source "src/ripgrep.sh"

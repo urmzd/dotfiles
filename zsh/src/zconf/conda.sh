@@ -1,0 +1,1 @@
+plugins+=(conda-zsh-completion)

@@ -1,0 +1,1 @@
+plugins+=(gradle-completion)
