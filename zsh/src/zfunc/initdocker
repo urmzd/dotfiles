@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-
 initdocker() {
   docker_init_file="$HOME/personal/dotfiles/docker/init.sh"
   if [[ -e $docker_init_file ]]
