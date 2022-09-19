@@ -1,0 +1,10 @@
+# Use this template to make configuration dynamic.
+[[dependencies]]
+name = "zsh"
+install = "~/dotfiles/zsh/src"
+config = ""
+enable = false
+
+[[shell_config]]
+name = "shell_"
+

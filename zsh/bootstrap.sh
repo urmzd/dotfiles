@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-echo 'source ~/dotfiles/zsh/src/zshenv' > ~/.zshenv
-echo 'source ~/dotfiles/zsh/src/zprofile' > ~/.zprofile
-echo 'source ~/dotfiles/zsh/src/zshrc' > ~/.zshrc
+ROOT = "~/dotfiles/zsh/src"
+
+echo "source $ROOT/zshenv" > ~/.zshenv
+echo "source $ROOT/zprofile" > ~/.zprofile
+echo "source $ROOT/zshrc" > ~/.zshrc
