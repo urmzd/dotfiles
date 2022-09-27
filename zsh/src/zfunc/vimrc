@@ -1,4 +1,4 @@
 vimrc() {
-  local_config="$HOME/.config/nvim/init.lua"
+  local_config="$HOME/dotfiles/nvim/src/custom_nvim.lua"
   vi $local_config
 }
