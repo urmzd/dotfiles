@@ -25,18 +25,32 @@ local lume = require("lume")
 
 function M.setup(config, opts)
    config.jdtls.setup(
-      lume.merge(opts, { 
-      -- cmd = get_java_cmd(), 
-      settings = {
-         ["java.format.settings.url"] = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
-         ["java.format.settings.profile"] = "GoogleStyle",
-         ["java.format.enabled"] = false,
-         ["java.trace.server"] = "verbose",
-         ["java.maven.downloadSources"] = true,
-         ["java.import.maven.enabled"] = true
-      },
-      use_lombok_agent=true
-   }))
+      lume.merge(opts, {
+         -- cmd = get_java_cmd(),
+         settings = {
+            java = {
+               format = {
+                  settings = {
+                     url = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+                     profile = "GoogleStyle"
+                  },
+                  enabled = true
+               },
+               trace = {
+                  server = "verbose"
+               },
+               maven = {
+                  downloadSources = true
+               },
+               import = {
+                  maven = {
+                     enabled = true
+                  }
+               }
+            }
+         },
+         use_lombok_agent = true
+      }))
 
 end
 

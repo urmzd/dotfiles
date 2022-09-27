@@ -31,9 +31,9 @@ packer.startup(function(use)
 
   -- LSP
   use {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-      "neovim/nvim-lspconfig",
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+    "neovim/nvim-lspconfig",
   }
   -- Extra LSP Support
   use 'folke/lua-dev.nvim'
@@ -71,7 +71,7 @@ packer.startup(function(use)
   use {
     "folke/todo-comments.nvim",
     requires = "nvim-lua/plenary.nvim",
-    config = function() require("todo-comments").setup({}) end
+    config = function() require("todo-comments").setup() end
   }
 
   -- Fuzzy Finder
@@ -139,6 +139,8 @@ packer.startup(function(use)
     run = function() vim.fn["mkdp#util#install"]() end
   }
   use 'urmzd/lume.nvim'
+  use 'udalov/kotlin-vim'
+  use 'b0O/schemastore.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
