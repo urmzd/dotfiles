@@ -8,7 +8,10 @@ require 'nvim-rooter'.setup {
 require("mason").setup()
 require("mason-lspconfig").setup()
 require("test_setup")
+
 require('telescope').load_extension('fzf')
+require("telescope").load_extension("file_browser")
+
 require("debuggers")
 require("lsp_setup")
 require("cmp_setup")
