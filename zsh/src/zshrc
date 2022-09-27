@@ -14,7 +14,7 @@ source "$ROOT/zconf/powerlevel10k.sh"
 source "$ROOT/zconf/fzf.sh"
 
 # Gradle
-source "$ROOT/zconf/gradle.sh"
+#source "$ROOT/zconf/gradle.sh"
 
 # Enable Completion.
 source "$ROOT/zconf/completion.sh"
