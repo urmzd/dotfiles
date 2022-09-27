@@ -1,8 +1,8 @@
 #!/usr/bin/env zsh
 
 alias sudo='sudo '
-alias vi=nvim
-alias vim=nvim
+alias vi="neovide --nofork"
+alias vim="neovide --nofork"
 
-export EDITOR=nvim
-export VISUAL=nvim
+export EDITOR="neovide --nofork"
+export VISUAL="neovide --nofork"
