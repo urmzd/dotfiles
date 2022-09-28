@@ -125,13 +125,6 @@ packer.startup(function(use)
   -- Latex
   use { 'lervag/vimtex', ft = 'tex' }
 
-  -- File Tree
-  use {
-    'kyazdani42/nvim-tree.lua',
-    requires = 'kyazdani42/nvim-web-devicons',
-    config = function() require 'nvim-tree'.setup {} end
-  }
-
   -- Utils
   use 'norcalli/nvim_utils'
   use {
@@ -141,6 +134,9 @@ packer.startup(function(use)
   use 'urmzd/lume.nvim'
   use 'udalov/kotlin-vim'
   use 'b0O/schemastore.nvim'
+  use 'nvim-telescope/telescope-file-browser.nvim'
+
+  use 'jose-elias-alvarez/null-ls.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)

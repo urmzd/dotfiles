@@ -1,10 +1,15 @@
 # Use this template to make configuration dynamic.
 [[dependencies]]
-name = "zsh"
-install = "~/dotfiles/zsh/src"
-config = ""
+name = "car"
+install = "~/dotfiles/nvim"
+config = "~/dotfiles/nvim"
 enable = false
 
-[[shell_config]]
+[[package_managers]]
+name = "cargo"
+
+[shell]
 name = "shell_"
 
+[editor]
+name = "nvim"
