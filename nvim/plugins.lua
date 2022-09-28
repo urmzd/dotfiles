@@ -136,5 +136,7 @@ packer.startup(function(use)
   use 'b0O/schemastore.nvim'
   use 'nvim-telescope/telescope-file-browser.nvim'
 
+  use 'jose-elias-alvarez/null-ls.nvim'
+
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)
