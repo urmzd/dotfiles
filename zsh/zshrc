@@ -1,4 +1,4 @@
-ROOT="$HOME/dotfiles/zsh/src"
+ROOT="$HOME/dotfiles/zsh"
 
 # Configurations.
 source "$ROOT/zconf/user.sh"
