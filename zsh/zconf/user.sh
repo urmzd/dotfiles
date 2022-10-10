@@ -1,8 +1,10 @@
 #!/usr/bin/env zsh
 
-alias sudo='sudo '
-alias vi="neovide --nofork"
-alias vim="neovide --nofork"
+EDITOR_CMD="nvim"
 
-export EDITOR="neovide --nofork"
-export VISUAL="neovide --nofork"
+alias sudo='sudo '
+alias vi="$EDITOR_CMD"
+alias vim="$EDITOR_CMD"
+
+export EDITOR="$EDITOR_CMD"
+export VISUAL="$EDITOR_CMD"
