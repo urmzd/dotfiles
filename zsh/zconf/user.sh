@@ -3,6 +3,7 @@
 EDITOR_CMD="nvim"
 
 alias sudo='sudo '
+
 alias vi="$EDITOR_CMD"
 alias vim="$EDITOR_CMD"
 
