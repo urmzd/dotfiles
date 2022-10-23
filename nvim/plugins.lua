@@ -117,7 +117,6 @@ packer.startup(function(use)
   use { 'lervag/vimtex', ft = 'tex' }
 
   -- Utils
-  use 'norcalli/nvim_utils'
   use {
     'iamcco/markdown-preview.nvim',
     run = function() vim.fn["mkdp#util#install"]() end

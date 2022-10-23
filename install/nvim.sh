@@ -1,6 +1,6 @@
 git clone https://github.com/neovim/neovim
 cd neovim
-git checkout stable
+git checkout nightly
 make CMAKE_BUILD_TYPE=Release
 sudo make install
 cd ..

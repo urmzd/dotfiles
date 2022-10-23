@@ -15,7 +15,7 @@ vim.api.nvim_create_autocmd(
   {
     pattern = { "*.md" },
     callback = function()
-      vim.api.nvim_cmd({ "e" })
+      vim.api.nvim_exec("e", false)
     end
   }
 )
