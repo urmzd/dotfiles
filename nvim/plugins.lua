@@ -1,13 +1,5 @@
 local cmd = vim.cmd
 -- Global Options
-local opt = vim.opt
--- Global 'let' Options
-local g = vim.g
--- Window Options
-local wo = vim.wo
--- API Shortcut
-local api = vim.api
--- Functions
 local fn = vim.fn
 
 -- Bootstrap `packer.nvim`.
@@ -102,17 +94,16 @@ packer.startup(function(use)
   use 'windwp/nvim-autopairs'
 
   -- Tests
-  use 'nvim-neotest/neotest-python'
-  use 'nvim-neotest/neotest-plenary'
-  use 'rouge8/neotest-rust'
-  use { 'nvim-neotest/neotest-vim-test', requires = "vim-test/vim-test" }
-
   use {
     "nvim-neotest/neotest",
     requires = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
-      "antoinemadec/FixCursorHold.nvim"
+      "antoinemadec/FixCursorHold.nvim",
+      -- OPTIONAL
+      "nvim-neotest/neotest-python",
+      "nvim-neotest/neotest-plenary",
+      "rouge8/neotest-rust"
     },
   }
 
@@ -137,6 +128,8 @@ packer.startup(function(use)
   use 'nvim-telescope/telescope-file-browser.nvim'
 
   use 'jose-elias-alvarez/null-ls.nvim'
+
+  use 'j-hui/fidget.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)

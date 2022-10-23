@@ -1,10 +1,21 @@
 -- Augroups.
 require('nvim_utils')
 
-local autocmds = {
-  toggle_hi = { { "InsertEnter", "*", "setlocal nohlsearch" } },
-  auto_format = { { "BufWritePre", "*", "lua vim.lsp.buf.formatting({}, 100)" } },
-  markdown_hi = { { "BufWinEnter", "*.md", ":e" } }
-}
+vim.api.nvim_create_autocmd(
+  { "InsertEnter" },
+  {
+  pattern = {"*"},
+  callback = function()
+    vim.api.nvim_set_option("hlsearch", true)
+  end
+})
 
-nvim_create_augroups(autocmds)
+vim.api.nvim_create_autocmd(
+  { "BufWinEnter" },
+  {
+    pattern = { "*.md" },
+    callback = function()
+      vim.api.nvim_cmd({ "e" })
+    end
+  }
+)

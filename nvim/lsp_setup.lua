@@ -34,8 +34,7 @@ end
 
 -- LSP set up.
 local lspconfig = require('lspconfig')
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+local capabilities= require('cmp_nvim_lsp').default_capabilities()
 
 local opts = {
   on_attach = on_attach,
@@ -55,3 +54,6 @@ require("language-servers.python").setup(lspconfig, opts)
 require("language-servers.bash").setup(lspconfig, opts)
 require("language-servers.groovy").setup(lspconfig, opts)
 require("language-servers.kotlin").setup(lspconfig, opts)
+
+-- Null LS
+require("language-servers.nls").setup(opts)
