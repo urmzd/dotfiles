@@ -6,7 +6,9 @@ local sources = {
     nls.builtins.diagnostics.eslint,
     nls.builtins.completion.spell,
     nls.builtins.code_actions.gitsigns,
-    nls.builtins.hover.dictionary,
+    nls.builtins.hover.dictionary.with({
+            filetypes={"markdown", "text", "tex"}
+        }),
 }
 
 local M = {}
