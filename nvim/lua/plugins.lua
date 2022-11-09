@@ -28,7 +28,6 @@ packer.startup(function(use)
     "neovim/nvim-lspconfig",
   }
   -- Extra LSP Support
-  use 'folke/lua-dev.nvim'
   use 'simrat39/rust-tools.nvim'
 
   -- File Detection
@@ -128,6 +127,7 @@ packer.startup(function(use)
 
   use 'jose-elias-alvarez/null-ls.nvim'
 
+  use 'folke/neodev.nvim'
   use 'j-hui/fidget.nvim'
 
   use 'mfussenegger/nvim-jdtls'
