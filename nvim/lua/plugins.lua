@@ -36,7 +36,6 @@ packer.startup(function(use)
     "neovim/nvim-lspconfig",
   }
   -- Extra LSP Support
-  use 'folke/lua-dev.nvim'
   use 'simrat39/rust-tools.nvim'
 
   -- File Detection
@@ -137,6 +136,8 @@ packer.startup(function(use)
   use 'nvim-telescope/telescope-file-browser.nvim'
 
   use 'jose-elias-alvarez/null-ls.nvim'
+
+  use 'folke/neodev.nvim'
 
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)

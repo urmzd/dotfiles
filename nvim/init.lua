@@ -5,6 +5,7 @@ require 'nvim-rooter'.setup {
   trigger_pattern = { '*' },
   manual = false
 }
+require("neodev").setup()
 require("mason").setup()
 require("mason-lspconfig").setup()
 require("test_setup")
