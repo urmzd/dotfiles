@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-EDITOR_CMD="neovide --nofork"
+EDITOR_CMD="nvim"
 
 alias sudo='sudo '
 

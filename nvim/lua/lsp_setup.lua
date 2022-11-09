@@ -58,4 +58,3 @@ require("language-servers.kotlin").setup(lspconfig, opts)
 
 --- Null LS
 require("language-servers.nls").setup(opts)
-require("language-servers.java").setup(opts)
