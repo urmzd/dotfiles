@@ -130,5 +130,7 @@ packer.startup(function(use)
 
   use 'j-hui/fidget.nvim'
 
+  use 'mfussenegger/nvim-jdtls'
+
   if PACKER_BOOTSTRAP then require('packer').sync() end
 end)

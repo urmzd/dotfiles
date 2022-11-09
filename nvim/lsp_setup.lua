@@ -43,9 +43,9 @@ local opts = {
   capabilities = capabilities
 }
 
+--- LSP
 require("language-servers.lua").setup(lspconfig, opts)
 require("language-servers.perl").setup(lspconfig, opts)
-require("language-servers.java").setup(lspconfig, opts)
 require("language-servers.typescript").setup(lspconfig, opts)
 require("language-servers.rust").setup(lspconfig, opts)
 require("language-servers.json").setup(lspconfig, opts)
@@ -56,5 +56,6 @@ require("language-servers.bash").setup(lspconfig, opts)
 require("language-servers.groovy").setup(lspconfig, opts)
 require("language-servers.kotlin").setup(lspconfig, opts)
 
--- Null LS
+--- Null LS
 require("language-servers.nls").setup(opts)
+require("language-servers.java").setup(opts)

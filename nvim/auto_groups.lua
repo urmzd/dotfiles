@@ -3,7 +3,7 @@ vim.api.nvim_create_autocmd(
   {
   pattern = {"*"},
   callback = function()
-    vim.api.nvim_set_option("hlsearch", true)
+    vim.api.nvim_set_option("hlsearch", false)
   end
 })
 

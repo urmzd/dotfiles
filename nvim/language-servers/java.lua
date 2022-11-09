@@ -2,7 +2,19 @@ local M = {}
 
 local lume = require("lume")
 
-function M.setup(config, opts)
+function M.setup(opts)
+   cmd = {
+      'java',
+       '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+       '-Dosgi.bundles.defaultStartLevel=4',
+       '-Declipse.product=org.eclipse.jdt.ls.core.product',
+       '-Dlog.protocol=true',
+       '-Dlog.level=ALL',
+       '-Xms1g',
+       '--add-modules=ALL-SYSTEM',
+       '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+       '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+   }
    local new_config = lume.merge(opts, {
          -- cmd = get_java_cmd(),
          settings = {
@@ -39,9 +51,7 @@ function M.setup(config, opts)
          use_lombok_agent = true
       })
 
-   
-
-   config.jdtls.setup(new_config)
+   -- require("jdtls").start_or_attach(new_config)
 end
 
 return M
