@@ -26,9 +26,8 @@ end
 
 local buffer_opts = { noremap=true, silent=true }
 
-vim.keymap.set("n", "<leader>dsb", function() dap.set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, buffer_opts)
-vim.keymap.set("n", "<leader>dc", dap.continue, buffer_opts)
-vim.keymap.set("n", "<leader>di", dap.step_into, buffer_opts)
-vim.keymap.set("n", "<leader>dt", dap.step_out, buffer_opts)
-vim.keymap.set("n", "<leader>dv", dap.step_over, buffer_opts)
-vim.keymap.set("n", "<leader>dv", dap.step_over, buffer_opts)
+vim.keymap.set("n", "<F5>", dap.continue, buffer_opts)
+vim.keymap.set("n", "<F10>", dap.step_over, buffer_opts)
+vim.keymap.set("n", "<F11>", dap.step_into, buffer_opts)
+vim.keymap.set("n", "<F12>", dap.step_out, buffer_opts)
+vim.keymap.set("n", "<leader>B", function() dap.set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, buffer_opts)
