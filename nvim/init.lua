@@ -1,13 +1,18 @@
 -- TODO: Split configurations by plugins.
 require("plugins")
+require("neodev").setup()
+require("mason").setup()
+require("mason-lspconfig").setup {
+  ensure_installed = {"sumneko_lua", "rust_analyzer", "tsserver", "pyright", "jdtls"}
+}
+require("nvim-treesitter.configs").setup {
+  ensure_installed = {"rust", "python", "c", "lua"}
+}
 require 'nvim-rooter'.setup {
   rooter_patterns = { '.git', '.root' },
   trigger_pattern = { '*' },
   manual = false
 }
-require("neodev").setup()
-require("mason").setup()
-require("mason-lspconfig").setup()
 require("test_setup")
 require("debuggers")
 require("lsp_setup")
