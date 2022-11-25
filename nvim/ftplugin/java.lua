@@ -68,3 +68,4 @@ local new_config = {
    }
 
 require("jdtls").start_or_attach(new_config)
+require("jdtls").setup_dap({hotcodereplace='auto'})
