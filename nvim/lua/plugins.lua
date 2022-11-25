@@ -1,22 +1,27 @@
-local cmd = vim.cmd
--- Global Options
-local fn = vim.fn
-
 -- Bootstrap `packer.nvim`.
-local paths = require("utils.path")
 
-local install_path = paths.install_dir
+local bootstrap_packer = function()
+  local paths = require("utils.path")
+  local install_path = paths.install_dir
 
-if fn.empty(fn.glob(install_path)) > 0 then
-  PACKER_BOOTSTRAP = fn.system({
-    'git', 'clone', '--depth', '1',
-    'https://github.com/wbthomason/packer.nvim', install_path
-  })
-  cmd 'packadd packer.nvim'
+  if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
+    vim.fn.system({
+      'git', 'clone', '--depth', '1',
+      'https://github.com/wbthomason/packer.nvim', install_path
+    })
+    vim.cmd 'packadd packer.nvim'
+    return true
+  else
+    return false
+  end
 end
+
+local packer_bootstrapped = bootstrap_packer()
+
 
 -- Install plugins.
 local packer = require('packer')
+
 packer.startup(function(use)
   -- Plugin Manager
   use 'wbthomason/packer.nvim'
@@ -123,7 +128,6 @@ packer.startup(function(use)
   use 'urmzd/lume.nvim'
   use 'udalov/kotlin-vim'
   use 'b0O/schemastore.nvim'
-  use 'nvim-telescope/telescope-file-browser.nvim'
 
   use 'jose-elias-alvarez/null-ls.nvim'
 
@@ -132,5 +136,13 @@ packer.startup(function(use)
 
   use 'mfussenegger/nvim-jdtls'
 
-  if PACKER_BOOTSTRAP then require('packer').sync() end
+  use {
+    'nvim-tree/nvim-tree.lua',
+    requires = {
+      'nvim-tree/nvim-web-devicons', -- optional, for file icons
+    },
+    tag = 'nightly' -- optional, updated every week. (see issue #1193)
+  }
+
+  if packer_bootstrapped then packer.sync() end
 end)
