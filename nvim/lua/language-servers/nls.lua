@@ -3,12 +3,14 @@ local nls = require("null-ls")
 
 local sources = {
     nls.builtins.formatting.stylua,
-    nls.builtins.diagnostics.eslint,
+    nls.builtins.formatting.prettierd,
+    nls.builtins.diagnostics.eslint_d,
     nls.builtins.completion.spell,
     nls.builtins.code_actions.gitsigns,
-    nls.builtins.hover.dictionary.with({
-            filetypes={"markdown", "text", "tex"}
-        }),
+    nls.builtins.hover.dictionary
+        --.with({
+            --filetypes={"markdown", "text", "tex"}
+        --}),
 }
 
 local M = {}
