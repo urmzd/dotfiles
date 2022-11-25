@@ -24,10 +24,11 @@ dap.listeners.before.event_exited["dapui_config"] = function()
 end
 
 
-local buffer_opts = { noremap=true, silent=true }
-
-vim.keymap.set("n", "<F5>", dap.continue, buffer_opts)
-vim.keymap.set("n", "<F10>", dap.step_over, buffer_opts)
-vim.keymap.set("n", "<F11>", dap.step_into, buffer_opts)
-vim.keymap.set("n", "<F12>", dap.step_out, buffer_opts)
-vim.keymap.set("n", "<leader>B", function() dap.set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, buffer_opts)
+vim.keymap.set("n", "<F5>", dap.continue)
+vim.keymap.set("n", "<F10>", dap.step_over)
+vim.keymap.set("n", "<F11>", dap.step_into)
+vim.keymap.set("n", "<F12>", dap.step_out)
+vim.keymap.set("n", "<leader>B", function()
+  local condition = vim.fn.input("Breakpoint condition: ")
+  dap.set_breakpoint(condition)
+end)
