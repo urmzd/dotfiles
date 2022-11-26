@@ -1,5 +1,6 @@
 local nls = require("null-ls")
-
+local setup = require("lsp_setup")
+local opts = setup.opts
 
 local sources = {
     nls.builtins.formatting.stylua,
@@ -13,15 +14,9 @@ local sources = {
         --}),
 }
 
-local M = {}
-
-function M.setup(opts)
-    nls.setup {
-        sources = sources,
-        on_attach = opts.on_attach,
-        save_after_format = false,
-        debounce = 150
-    }
-end
-
-return M
+nls.setup {
+    sources = sources,
+    on_attach = opts.on_attach,
+    save_after_format = false,
+    debounce = 150
+}

@@ -1,3 +1,5 @@
+local M = {}
+
 -- -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local diagnostic_opts = { noremap = true, silent = true }
@@ -31,6 +33,12 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
   vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
   vim.keymap.set('n', '<space>f', vim.lsp.buf.format, bufopts)
+  
+  if client.name ~= "null-ls" then
+       client.server_capabilities.document_formatting = false
+       client.server_capabilities.document_range_formatting = false
+  end
+  
 end
 
 -- LSP set up.
@@ -43,18 +51,7 @@ local opts = {
   capabilities = capabilities
 }
 
---- LSP
-require("language-servers.lua").setup(lspconfig, opts)
-require("language-servers.perl").setup(lspconfig, opts)
-require("language-servers.typescript").setup(lspconfig, opts)
-require("language-servers.rust").setup(lspconfig, opts)
-require("language-servers.json").setup(lspconfig, opts)
-require("language-servers.yaml").setup(lspconfig, opts)
-require("language-servers.graphql").setup(lspconfig, opts)
-require("language-servers.python").setup(lspconfig, opts)
-require("language-servers.bash").setup(lspconfig, opts)
-require("language-servers.groovy").setup(lspconfig, opts)
-require("language-servers.kotlin").setup(lspconfig, opts)
+M.opts = opts
+M.lspconfig = lspconfig
 
---- Null LS
-require("language-servers.nls").setup(opts)
+return M

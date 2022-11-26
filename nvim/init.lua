@@ -8,11 +8,6 @@ require("mason-lspconfig").setup {
 require("nvim-treesitter.configs").setup {
   ensure_installed = {"rust", "python", "c", "lua"}
 }
-require 'nvim-rooter'.setup {
-  rooter_patterns = { '.git', '.root' },
-  trigger_pattern = { '*' },
-  manual = false
-}
 require("test_setup")
 require("debuggers")
 require("lsp_setup")
@@ -25,3 +20,4 @@ require("fidget").setup()
 
 require("plugins.telescope")
 require("plugins.nvim-tree")
+require("nls")

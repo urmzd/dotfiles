@@ -89,10 +89,9 @@ packer.startup(function(use)
   }
 
   -- Path
-  use {
-    'notjedi/nvim-rooter.lua',
-    config = function() require 'nvim-rooter'.setup() end
-  }
+  use {"ahmedkhalf/project.nvim", config = function()
+    require("project_nvim").setup()
+  end}
 
   -- Completion
   use 'windwp/nvim-autopairs'
