@@ -10,14 +10,11 @@ name = "semverbot"
 prefix = "v"
 
 [semver]
-patch = ["fix"]
+patch = ["fix", "perf", "docs", "refactor", "chore", "ci"]
 minor = ["feat"]
 major = ["BREAKING CHANGE"]
 
 [modes]
-
-[modes.git-branch]
-delimiters = "/"
 
 [modes.git-commit]
 delimiters = ":"
