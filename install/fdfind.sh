@@ -5,4 +5,4 @@ cd fd
 cargo install --path .
 cp contrib/completion/_fd ~/.oh-my-zsh/completions/_fd
 cd ..
-rm -rf fd
+trash fd
