@@ -8,10 +8,8 @@ local sources = {
     nls.builtins.diagnostics.eslint_d,
     nls.builtins.completion.spell,
     nls.builtins.code_actions.gitsigns,
-    nls.builtins.hover.dictionary
-        --.with({
-            --filetypes={"markdown", "text", "tex"}
-        --}),
+    nls.builtins.hover.dictionary,
+    nls.builtins.formatting.beautysh
 }
 
 nls.setup {
