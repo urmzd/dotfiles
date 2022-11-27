@@ -18,24 +18,18 @@ end
 
 local packer_bootstrapped = bootstrap_packer()
 
-
 -- Install plugins.
 local packer = require('packer')
 
 packer.startup(function(use)
-  -- Plugin Manager
   use 'wbthomason/packer.nvim'
-
-  -- LSP
   use {
     "williamboman/mason.nvim",
     "williamboman/mason-lspconfig.nvim",
     "neovim/nvim-lspconfig",
   }
-  -- Extra LSP Support
   use 'simrat39/rust-tools.nvim'
-
-  -- File Detection
+  use 'mfussenegger/nvim-jdtls'
   use 'sheerun/vim-polyglot'
   use { 'nvim-treesitter/nvim-treesitter', run = ":TsUpdate" }
   use 'tpope/vim-surround'
@@ -50,7 +44,7 @@ packer.startup(function(use)
   use 'itchyny/lightline.vim'
 
   -- Documentation
-  use { 'kkoomen/vim-doge', run = function() fn["doge#install"]() end }
+  use { 'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end }
 
   -- Misc
   use {
@@ -89,9 +83,7 @@ packer.startup(function(use)
   }
 
   -- Path
-  use {"ahmedkhalf/project.nvim", config = function()
-    require("project_nvim").setup()
-  end}
+  use {"ahmedkhalf/project.nvim"}
 
   -- Completion
   use 'windwp/nvim-autopairs'
@@ -127,14 +119,9 @@ packer.startup(function(use)
   use 'urmzd/lume.nvim'
   use 'udalov/kotlin-vim'
   use 'b0O/schemastore.nvim'
-
   use 'jose-elias-alvarez/null-ls.nvim'
-
   use 'folke/neodev.nvim'
   use 'j-hui/fidget.nvim'
-
-  use 'mfussenegger/nvim-jdtls'
-
   use {
     'nvim-tree/nvim-tree.lua',
     requires = {

@@ -1,7 +1,6 @@
 local lume = require("lume")
-
 local setup = require("lsp_setup")
-local config = setup.lspconfig
+local config = require("lspconfig")
 local opts = setup.opts
 
 local overrides = {}

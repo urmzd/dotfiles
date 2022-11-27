@@ -1,5 +1,5 @@
 local setup = require("lsp_setup")
-local config = setup.lspconfig
+local config = require("lspconfig")
 local opts = setup.opts
 
 config.groovyls.setup(opts)
