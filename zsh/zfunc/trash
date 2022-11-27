@@ -1,21 +1,25 @@
 trash() {
-    if [[ ! -d "$HOME/.trash" ]]
+    TRASH_DIR="$HOME/.trash"
+    if [[ ! -d "$TRASH_DIR" ]]
     then
-        mkdir "$HOME/.trash"
+        mkdir "$TRASH_DIR"
     fi
 
-    mv "$@" "$HOME/.trash"
+    mv "$@" "$TRASH_DIR" 2>/dev/null
     move_successful=$?
 
     targets=()
 
     # Get the name of the files / directories to delete.
-    for arg in $@; do
-        targets+=("$HOME/$arg")
+    for arg in "$@"; do
+        target=$(basename $arg)
+        targets+=("$TRASH_DIR/$target")
     done
 
-    if [[$move_successful -ne 0 ]]; then
-        rm -rf $targets[@]
-        mv "$@" "$HOME/.trash"
+    echo ${targets[@]}
+
+    if [[ $move_successful -ne 0 ]]; then
+        rm -rf ${targets[@]}
+        mv "$@" "$TRASH_DIR"
     fi
 }
