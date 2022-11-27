@@ -6,7 +6,7 @@ trash() {
         mkdir "$TRASH_DIR"
     fi
 
-    $(mv "$@" "$TRASH_DIR")> /dev/null
+    mv "$@" "$TRASH_DIR" 2>/dev/null
     move_successful=$?
 
     targets=()
