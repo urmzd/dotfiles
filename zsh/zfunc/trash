@@ -1,11 +1,12 @@
 trash() {
     TRASH_DIR="$HOME/.trash"
+
     if [[ ! -d "$TRASH_DIR" ]]
     then
         mkdir "$TRASH_DIR"
     fi
 
-    mv "$@" "$TRASH_DIR" 2>/dev/null
+    $(mv "$@" "$TRASH_DIR")> /dev/null
     move_successful=$?
 
     targets=()
@@ -15,8 +16,6 @@ trash() {
         target=$(basename $arg)
         targets+=("$TRASH_DIR/$target")
     done
-
-    echo ${targets[@]}
 
     if [[ $move_successful -ne 0 ]]; then
         rm -rf ${targets[@]}
