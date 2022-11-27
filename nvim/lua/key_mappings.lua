@@ -10,18 +10,3 @@ vim.api.nvim_set_keymap('n', '<leader>l', ':wincmd l<CR>',
 
 -- Escape
 vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
-
--- Telescope bindings.
-vim.api.nvim_set_keymap("n", "<leader>ff",
-  "<cmd>lua require('telescope.builtin').find_files()<cr>",
-  { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>fg",
-  "<cmd>lua require('telescope.builtin').live_grep()<cr>",
-  { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>fb",
-  "<cmd>lua require('telescope.builtin').buffers()<cr>",
-  { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>fh",
-  ":Telescope file_browser<cr>",
-  { noremap = true, silent = true })
-
