@@ -10,7 +10,7 @@ local sources = {
     nls.builtins.code_actions.gitsigns,
     nls.builtins.hover.dictionary,
     nls.builtins.formatting.beautysh,
-    nls.builtins.formatting.taplo
+    nls.builtins.formatting.taplo,
     nls.builtins.formatting.npm_groovy_lint
 }
 
