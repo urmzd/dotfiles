@@ -11,11 +11,12 @@ local sources = {
     nls.builtins.hover.dictionary,
     nls.builtins.formatting.beautysh,
     nls.builtins.formatting.taplo
+    nls.builtins.formatting.npm_groovy_lint
 }
 
 nls.setup {
     sources = sources,
     on_attach = opts.on_attach,
-    save_after_format = false,
+    save_after_format = true,
     debounce = 150
 }
