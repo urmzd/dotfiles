@@ -9,7 +9,8 @@ local sources = {
     nls.builtins.completion.spell,
     nls.builtins.code_actions.gitsigns,
     nls.builtins.hover.dictionary,
-    nls.builtins.formatting.beautysh
+    nls.builtins.formatting.beautysh,
+    nls.builtins.formatting.taplo
 }
 
 nls.setup {
