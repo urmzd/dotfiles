@@ -6,12 +6,12 @@ local opts = lsp_setup.opts
 local overide_opts = {
    settings = {
       yaml = {
-         schemas = {
-              ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*"
-         },
-         --schemaStore = {
-            --enable = true
-         --}
+         --schemas = {
+              --["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*"
+         --},
+         schemaStore = {
+            enable = true
+         }
       }
    }
 }
