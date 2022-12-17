@@ -1,5 +1,4 @@
 -- Bootstrap `packer.nvim`.
-
 local bootstrap_packer = function()
   local paths = require("utils.path")
   local install_path = paths.install_dir
@@ -41,7 +40,13 @@ packer.startup(function(use)
 
   -- Themes
   use 'ayu-theme/ayu-vim'
-  use 'itchyny/lightline.vim'
+  use 'nyoom-engineering/oxocarbon.nvim'
+
+  -- 
+  use {
+    'nvim-lualine/lualine.nvim',
+    requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+  }
 
   -- Documentation
   use { 'kkoomen/vim-doge', run = function() vim.fn["doge#install"]() end }

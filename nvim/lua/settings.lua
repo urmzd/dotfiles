@@ -4,9 +4,6 @@ local g = vim.g
 -- Window Options
 local wo = vim.wo
 
-local colorscheme = "ayu"
-
-vim.cmd('colorscheme ' .. colorscheme)
 
 -- Global let.
 g.mapleader = ' '
@@ -27,7 +24,6 @@ g.vimtex_compiler_latexmk = {
   }
 }
 
-g.lightline = { colorscheme = colorscheme }
 
 -- Global Settings
 wo.wrap = false
@@ -49,7 +45,7 @@ opt.scrolloff = 16
 opt.signcolumn = "yes"
 opt.colorcolumn = "80"
 opt.fileformat = "unix"
-opt.background = "dark"
-opt.undodir = vim.fn.stdpath('config') .. '/undo'
-opt.undofile = true
 opt.nrformats = "alpha"
+
+opt.undofile = true
+opt.undodir = vim.fn.stdpath('config') .. '/undo'
