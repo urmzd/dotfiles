@@ -3,22 +3,19 @@
 A collection of configurations meant to speed up my workflow,
 in addition to reducing the complexity of migrations.
 
-## Usage
+## Usage (WIP)
 
-WIP
+Create a configuration file and run `./pm apply`
 
 ```toml
-# setup.toml
+[[configuration]]
+repo = ""
 
-[links]
+[[links]
+source = "~/dotfiles/nvim"
+target = "~/.config/"
 
-[links.nvim]
-source = ""
-target = ""
-
-[packages]
-
-[packages.npm]
+[[packages]
 repo = "" 
 tag = "latest"
 install_instructions = "./install.sh"
