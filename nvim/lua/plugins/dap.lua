@@ -7,6 +7,7 @@ require("nvim-dap-virtual-text").setup {
 dap_ui.setup()
 
 local dap_python = require("dap-python")
+require("jdtls").setup_dap({hotcodereplace='auto'})
 
 dap_python.setup("/home/urmzd/.pyenv/shims/python")
 dap_python.test_runner = "pytest"

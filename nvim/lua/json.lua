@@ -1,7 +1,4 @@
-local lume = require("lume")
-local setup = require("lsp_setup")
-local config = require("lspconfig")
-local opts = setup.opts
+local config = require("lsp_setup")
 
 local overrides = {}
 
@@ -19,5 +16,5 @@ overrides.settings = {
    }
 }
 
-config.jsonls.setup(lume.merge(opts, overrides))
+return overrides
 

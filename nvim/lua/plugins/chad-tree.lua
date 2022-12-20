@@ -1,2 +1,1 @@
-local chad = require("chad")
-vim.keymap.set("n", "<leader>v", chad)
+vim.keymap.set("n", "<leader>v", ":CHADopen<CR>")

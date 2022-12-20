@@ -1,3 +1,4 @@
+vim.g.tex_flavor = "latex"
 vim.g.vimtex_compiler_latexmk = {
   options = {
     '-pdf', '-pdflatex="xelatex --shell-escape %O %S"', '-verbose',

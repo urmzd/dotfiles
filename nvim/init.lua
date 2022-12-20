@@ -3,16 +3,16 @@ require("plugins.mason")
 require("plugins.treesitter")
 require("plugins.neotest")
 require("plugins.dap")
-require("plugins.servers")
 
+require("servers")
 require("settings")
 require("key_mappings")
 require("auto_groups")
 require("theme")
 
 -- Plugins
+require("plugins.chad-tree")
 require("plugins.telescope")
-require("plugins.vimtex")
 require("plugins.null-ls")
 require("plugins.project_nvim")
 require("plugins.fidget")
