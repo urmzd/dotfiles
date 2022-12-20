@@ -1,8 +1,5 @@
 local config = require("lsp_setup")
 
--- For dev purposes only.
-local neodev = require("neodev")
-neodev.setup {}
 
 local servers = {
   "bashls",
@@ -20,6 +17,10 @@ local servers = {
 }
 
 for _, server in ipairs(servers) do
-  --print(server)
+  if (server == "sumneko_lua") then
+    -- For dev purposes only.
+    require("neodev").setup {}
+  end
+
   config.setup(server)
 end
