@@ -1,6 +1,4 @@
-local setup = require("lsp_setup")
-local config = require("lspconfig")
-local opts = setup.opts
+local config = require("lsp_setup")
 
 local neodev = require("neodev")
 neodev.setup {}
@@ -15,5 +13,5 @@ local overrides =  {
   }
 }
 
-config.sumneko_lua.setup(opts)
+config.setup("sumneko_lua", overrides)
 

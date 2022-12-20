@@ -1,5 +1,6 @@
-local lsp_setup = require "lsp_setup"
-local opts = lsp_setup.opts
-local lspconfig = require "lspconfig"
-
-lspconfig.texlab.setup(opts)
+vim.g.vimtex_compiler_latexmk = {
+  options = {
+    '-pdf', '-pdflatex="xelatex --shell-escape %O %S"', '-verbose',
+    '-file-line-error', '-synctex=1', '-interaction=nonstopmode'
+  }
+}

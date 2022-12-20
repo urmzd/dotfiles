@@ -7,22 +7,9 @@ local wo = vim.wo
 
 -- Global let.
 g.mapleader = ' '
-g["test#strategy"] = "vimux"
 g["doge_doc_standard_python"] = "google"
 
-g["test#javascript#runner"] = "jest"
-g["test#javascript#jest#options"] = "-c"
-
-g["test#rust#cargotest#executable"] = "cargo test"
-g["test#rust#cargotest#options"] = "-- --show-output"
-
 g.tex_flavor = "latex"
-g.vimtex_compiler_latexmk = {
-  options = {
-    '-pdf', '-pdflatex="xelatex --shell-escape %O %S"', '-verbose',
-    '-file-line-error', '-synctex=1', '-interaction=nonstopmode'
-  }
-}
 
 
 -- Global Settings

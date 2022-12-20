@@ -1,5 +1,7 @@
 local M = {}
-M.opts = {}
+local opts = {}
+
+vim.g.coq_settings = {auto_start = true}
 
 -- -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -11,7 +13,7 @@ vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, diagnostic_opts)
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
-M.opts.on_attach = function(client, bufnr)
+opts.on_attach = function(client, bufnr)
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
@@ -44,7 +46,18 @@ M.opts.on_attach = function(client, bufnr)
 end
 
 -- LSP set up.
-M.opts.capabilities = require("cmp_nvim_lsp").default_capabilities()
-M.opts.flags = { debounce_text_changes = 150 }
+opts.flags = { debounce_text_changes = 150 }
+
+function M.setup(lsp, overrides)
+  local coq = require("coq")()
+  local lspconfig = require("lspconfig")
+  local lume = require("lume")
+  local merged_opts = lume.merge(opts, overrides or {})
+
+  vim.schedule(function ()
+    lspconfig[lsp].setup(coq.lsp_ensure_capabilities(merged_opts))
+  end)
+
+end
 
 return M
