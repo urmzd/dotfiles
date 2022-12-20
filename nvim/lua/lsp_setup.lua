@@ -1,7 +1,7 @@
 local M = {}
 local opts = {}
 
-vim.g.coq_settings = {auto_start = true}
+vim.g.coq_settings = {auto_start = "shut-up"}
 
 -- -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
