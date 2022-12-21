@@ -13,6 +13,7 @@ local servers = {
   "perlls",
   "texlab",
   "sumneko_lua",
+  "jdtls"
 }
 
 for _, server in ipairs(servers) do
@@ -28,7 +29,7 @@ for _, server in ipairs(servers) do
 
   if (server == "jdtls") then
     overrides = require("java")
-    require("jdtls").start_or_attach(config.setup_with_coq(java))
+    require("jdtls").start_or_attach(config.setup_with_coq(overrides))
     goto continue
   end
 
