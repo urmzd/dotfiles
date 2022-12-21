@@ -1,5 +1,3 @@
-local config = require("lsp_setup")
-
 local overrides = {}
 
 overrides.filetypes = { "json", "jsonc" }

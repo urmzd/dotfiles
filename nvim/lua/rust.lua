@@ -1,7 +1,6 @@
-local setup = require("lsp_setup")
-local rust_tools = require("rust-tools")
-local opts = setup.opts
+local config = require("lsp_setup")
+local rt = require("rust-tools")
 
-rust_tools.setup {
-   server = opts
+rt.setup {
+   server = config.opts
 }

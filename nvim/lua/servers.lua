@@ -1,6 +1,5 @@
 local config = require("lsp_setup")
 
-
 local servers = {
   "bashls",
   "gopls",
@@ -13,14 +12,27 @@ local servers = {
   "kotlin_language_server",
   "perlls",
   "texlab",
-  "sumneko_lua"
+  "sumneko_lua",
 }
 
 for _, server in ipairs(servers) do
+  local overrides
+
   if (server == "sumneko_lua") then
-    -- For dev purposes only.
     require("neodev").setup {}
   end
 
-  config.setup(server)
+  if (server == "jsonls") then
+    overrides = require("json")
+  end
+
+  if (server == "jdtls") then
+    overrides = require("java")
+    require("jdtls").start_or_attach(config.setup_with_coq(java))
+    goto continue
+  end
+
+  config.setup(server, overrides)
+
+  ::continue::
 end

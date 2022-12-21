@@ -8,8 +8,6 @@ local workspace_dir = '/home/urmzd/.workspace/' .. project_name
 local lombok_jar = path.concat({jdtls_path, "lombok.jar"})
 local java_path = "/home/urmzd/.sdkman/candidates/java/17.0.4-tem/bin/java"
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
 local cmd = {
    java_path,
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -27,12 +25,8 @@ local cmd = {
     "-data", workspace_dir
 }
 
--- debug:
--- print(table.concat(cmd, " \\\n"))
-
-local new_config = {
+local M = {
       cmd = cmd,
-      capabilities = capabilities,
       settings = {
          java = {
             configuration = {
@@ -67,5 +61,6 @@ local new_config = {
       use_lombok_agent = true
    }
 
-require("jdtls").start_or_attach(new_config)
-require("jdtls").setup_dap({hotcodereplace='auto'})
+--require("jdtls").setup_dap({hotcodereplace='auto'})
+return M
+
