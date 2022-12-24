@@ -13,7 +13,8 @@ local servers = {
   "perlls",
   "texlab",
   "sumneko_lua",
-  "jdtls"
+  "jdtls",
+  "rust_analyzer"
 }
 
 for _, server in ipairs(servers) do
@@ -30,6 +31,14 @@ for _, server in ipairs(servers) do
   if (server == "jdtls") then
     overrides = require("java")
     require("jdtls").start_or_attach(config.setup_with_coq(overrides))
+    goto continue
+  end
+
+  if (server == "rust_analyzer") then
+    local rt = require("rust-tools")
+    rt.setup {
+      server = config.setup_with_coq()
+    }
     goto continue
   end
 
