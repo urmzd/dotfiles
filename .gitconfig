@@ -1,1 +1,9 @@
-git config --global pull.ff only
+[pull]
+	rebase = true
+[fetch]
+	prune = true
+[diff]
+	colorMoved = zebra
+[user]
+	email = urmzds@gmail.com
+	name = Urmzd Mukhammadnaim
