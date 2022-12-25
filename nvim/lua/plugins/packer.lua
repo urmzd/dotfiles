@@ -152,8 +152,6 @@ packer.startup(function(use)
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
 
-	use("nvim-autopairs")
-
 	if packer_bootstrapped then
 		packer.sync()
 	end
