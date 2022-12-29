@@ -3,6 +3,7 @@ require("plugins.mason")
 require("plugins.treesitter")
 require("plugins.neotest")
 require("plugins.dap")
+require("plugins.doge")
 
 require("servers")
 require("settings")

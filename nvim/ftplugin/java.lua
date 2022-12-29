@@ -7,7 +7,6 @@ local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local workspace_dir = '/home/urmzd/.workspace/' .. project_name
 local lombok_jar = path.concat({ jdtls_path, "lombok.jar" })
 local java_path = "/home/urmzd/.sdkman/candidates/java/17.0.4-tem/bin/java"
-
 local cmd = {
    java_path,
    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -61,5 +60,5 @@ local M = {
    use_lombok_agent = true
 }
 
-require("jdtls").setup_dap({ hotcodereplace = 'auto' })
+local config = require("lsp_config")
 require("jdtls").start_or_attach(config.setup_with_coq(M))

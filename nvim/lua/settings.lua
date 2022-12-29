@@ -1,8 +1,7 @@
--- Global let.
 vim.g.mapleader = " "
 
--- Global Settings
 vim.wo.wrap = false
+
 vim.opt.clipboard = "unnamedplus"
 vim.opt.relativenumber = true
 vim.opt.nu = true

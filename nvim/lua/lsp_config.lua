@@ -1,24 +1,17 @@
 local M = {}
+
 M.opts = {}
 
 vim.g.coq_settings = { auto_start = "shut-up" }
 
--- -- Mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
-local diagnostic_opts = { noremap = true, silent = true }
-vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, diagnostic_opts)
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, diagnostic_opts)
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, diagnostic_opts)
-vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, diagnostic_opts)
+vim.keymap.set("n", "<space>e", vim.diagnostic.open_float)
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
+vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist)
 
--- Use an on_attach function to only map the following keys
--- after the language server attaches to the current buffer
-M.opts.on_attach = function(client, bufnr)
-  -- Enable completion triggered by <c-x><c-o>
+function M.opts.on_attach(client, bufnr)
   vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
-  -- Mappings.
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
 
   vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
@@ -44,8 +37,6 @@ M.opts.on_attach = function(client, bufnr)
     client.server_capabilities.document_range_formatting = false
   end
 end
-
-M.opts.flags = { debounce_text_changes = 150 }
 
 function M.setup_with_coq(overrides)
   local lume = require("lume")
