@@ -7,3 +7,5 @@
 [user]
 	email = urmzds@gmail.com
 	name = Urmzd Mukhammadnaim
+[init]
+	defaultBranch = main

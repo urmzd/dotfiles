@@ -1,5 +1,5 @@
 local colorscheme = "oxocarbon"
-local style = "dark"
+local style = "light"
 
-vim.cmd.colorscheme(colorscheme)
 vim.opt.background = style
+vim.cmd.colorscheme(colorscheme)
