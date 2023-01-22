@@ -17,11 +17,9 @@ local servers = {
   "jsonls"
 }
 
+
 for _, server in ipairs(servers) do
   local overrides = nil
-  if server == "sumneko_lua" then
-    require("neodev").setup {}
-  end
 
   if server == "jsonls" then
     overrides = {

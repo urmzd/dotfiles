@@ -1,4 +1,6 @@
-require('neotest').setup({
+local nt = require("neotest")
+
+nt.setup({
   adapters = {
     require("neotest-plenary"),
     require("neotest-python")({
@@ -8,14 +10,5 @@ require('neotest').setup({
   }
 })
 
-vim.api.nvim_create_user_command(
-  "NtNear",
-  "lua require('neotest').run.run()",
-  {}
-)
-
-vim.api.nvim_create_user_command(
-  "NtFile",
-  "lua require('neotest').run.run(vim.fn.expand('%'))",
-  {}
-)
+vim.keymap.set("n", '<leader>ts', function() nt.summary.toggle() end, {remap=true})
+vim.keymap.set("n", '<leader>tr', function() nt.summary.run_marked() end,{remap=true})

@@ -1,7 +1,7 @@
 require("plugins.packer")
 require("plugins.mason")
 require("plugins.treesitter")
-require("plugins.neotest")
+require("plugins.neodev")
 require("plugins.dap")
 require("plugins.doge")
 
@@ -11,7 +11,7 @@ require("key_mappings")
 require("auto_groups")
 require("theme")
 
--- Plugins
+require("plugins.neotest")
 require("plugins.chad-tree")
 require("plugins.telescope")
 require("plugins.null-ls")
