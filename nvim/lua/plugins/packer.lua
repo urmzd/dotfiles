@@ -55,6 +55,7 @@ packer.startup(function(use)
 	-- Themes
 	--use("ayu-theme/ayu-vim")
 	use("nyoom-engineering/oxocarbon.nvim")
+	use("ellisonleao/gruvbox.nvim")
 
 	--
 	use ("nvim-tree/nvim-web-devicons")
