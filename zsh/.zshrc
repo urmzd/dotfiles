@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 ROOT="$HOME/dotfiles/zsh"
 
 # Configurations.
@@ -13,8 +15,8 @@ source "$ROOT/zconf/powerlevel10k.sh"
 # Tools
 source "$ROOT/zconf/fzf.sh"
 
-# Gradle
-source "$ROOT/zconf/gradle.sh"
+## Gradle
+#source "$ROOT/zconf/gradle.sh"
 
 # Enable Completion.
 source "$ROOT/zconf/completion.sh"
@@ -26,8 +28,8 @@ source "$ROOT/zconf/node.sh"
 # NVIM
 source "$ROOT/zconf/nvim.sh"
 
-# Java
-source "$ROOT/zconf/java.sh"
+## Java
+#source "$ROOT/zconf/java.sh"
 
 # Terraform
 # source "$ROOT/zconf/terraform.sh"
@@ -50,3 +52,6 @@ source "$ROOT/zconf/bfg.sh"
 
 # OMZ
 source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
+
+# GoLang
+source "$ROOT/zconf/go.sh"
