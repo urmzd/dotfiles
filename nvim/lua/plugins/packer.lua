@@ -33,12 +33,15 @@ packer.startup(function(use)
 		end,
 	})
 
-  use({ "neovim/nvim-lspconfig"})
+	use({ "neovim/nvim-lspconfig" })
 
 	use({
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 		requires = { "neovim/nvim-lspconfig" },
+	})
+	use({
+		"jayp0521/mason-null-ls.nvim",
 	})
 
 	use({ "sheerun/vim-polyglot" })
@@ -58,7 +61,7 @@ packer.startup(function(use)
 	use("ellisonleao/gruvbox.nvim")
 
 	--
-	use ("nvim-tree/nvim-web-devicons")
+	use("nvim-tree/nvim-web-devicons")
 	use({
 		"nvim-lualine/lualine.nvim",
 		requires = { "nvim-tree/nvim-web-devicons", opt = true },
@@ -147,7 +150,7 @@ packer.startup(function(use)
 	use({ "jose-elias-alvarez/null-ls.nvim" })
 	use({ "folke/neodev.nvim" })
 	use({ "j-hui/fidget.nvim" })
-	use{'ms-jpq/chadtree', branch= 'chad', run='python3 -m chadtree deps'}
+	use { 'ms-jpq/chadtree', branch = 'chad', run = 'python3 -m chadtree deps' }
 
 	use({ "ms-jpq/coq_nvim", branch = "coq" })
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
