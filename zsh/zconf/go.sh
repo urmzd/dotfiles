@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
 
-[[ -s "~/.gvm/scripts/gvm" ]] && source "~/.gvm/scripts/gvm"
-source ~/.gvm/scripts/completion
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && \
+  source "$HOME/.gvm/scripts/gvm" && \
+  source "$HOME/.gvm/scripts/completion"
