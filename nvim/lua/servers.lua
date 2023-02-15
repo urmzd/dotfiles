@@ -12,7 +12,7 @@ local servers = {
   "kotlin_language_server",
   "perlls",
   "texlab",
-  "sumneko_lua",
+  "lua_ls",
   "rust_analyzer",
   "jsonls"
 }
