@@ -2,21 +2,21 @@ local nls = require("null-ls")
 
 local sources = {
     -- diagnostics
-    nls.builtins.diagnostics.eslint_d,
-    nls.builtins.diagnostics.cspell.with({
-            extra_args = {
-                "--locale",
-                "en-GB"
-            }
-    }),
-    nls.builtins.diagnostics.misspell,
-    nls.builtins.diagnostics.proselint,
+    --nls.builtins.diagnostics.eslint_d,
+    --nls.builtins.diagnostics.cspell.with({
+            --extra_args = {
+                --"--locale",
+                --"en-GB"
+            --}
+    --}),
+    --nls.builtins.diagnostics.misspell,
+    --nls.builtins.diagnostics.proselint,
     -- completion
     nls.builtins.completion.spell,
     -- code actions
-    nls.builtins.code_actions.cspell.with({
-        "--locale", "en-GB"
-    }),
+    --nls.builtins.code_actions.cspell.with({
+        --"--locale", "en-GB"
+    --}),
     nls.builtins.code_actions.gitsigns,
     --nls.builtins.code_actions.spellcheck,
     -- hover
@@ -29,7 +29,8 @@ local sources = {
     nls.builtins.formatting.npm_groovy_lint,
     nls.builtins.formatting.markdownlint,
     nls.builtins.formatting.mdformat,
-    nls.builtins.formatting.codespell
+    nls.builtins.formatting.codespell,
+    nls.builtins.formatting.black
 
 }
 
