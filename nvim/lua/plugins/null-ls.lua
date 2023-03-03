@@ -12,7 +12,7 @@ local sources = {
     --nls.builtins.diagnostics.misspell,
     --nls.builtins.diagnostics.proselint,
     -- completion
-    nls.builtins.completion.spell,
+    --nls.builtins.completion.spell,
     -- code actions
     --nls.builtins.code_actions.cspell.with({
         --"--locale", "en-GB"
