@@ -31,7 +31,6 @@ local sources = {
     nls.builtins.formatting.mdformat,
     nls.builtins.formatting.codespell,
     nls.builtins.formatting.black
-
 }
 
 nls.setup {

@@ -150,11 +150,23 @@ packer.startup(function(use)
 	use({ "jose-elias-alvarez/null-ls.nvim" })
 	use({ "folke/neodev.nvim" })
 	use({ "j-hui/fidget.nvim" })
-	use { 'ms-jpq/chadtree', branch = 'chad', run = 'python3 -m chadtree deps' }
+	use({ "ms-jpq/chadtree", branch = "chad", run = "python3 -m chadtree deps" })
 
 	use({ "ms-jpq/coq_nvim", branch = "coq" })
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
+
+	--use({
+		--"jackMort/ChatGPT.nvim",
+		--config = function()
+			--require("chatgpt").setup({})
+		--end,
+		--requires = {
+			--"MunifTanjim/nui.nvim",
+			--"nvim-lua/plenary.nvim",
+			--"nvim-telescope/telescope.nvim",
+		--},
+	--})
 
 	if packer_bootstrapped then
 		packer.sync()
