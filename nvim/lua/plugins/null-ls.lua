@@ -29,7 +29,6 @@ local sources = {
     nls.builtins.formatting.npm_groovy_lint,
     nls.builtins.formatting.markdownlint,
     nls.builtins.formatting.mdformat,
-    nls.builtins.formatting.codespell,
     nls.builtins.formatting.black
 }
 
