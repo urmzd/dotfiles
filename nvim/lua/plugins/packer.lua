@@ -156,17 +156,7 @@ packer.startup(function(use)
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
 
-	--use({
-		--"jackMort/ChatGPT.nvim",
-		--config = function()
-			--require("chatgpt").setup({})
-		--end,
-		--requires = {
-			--"MunifTanjim/nui.nvim",
-			--"nvim-lua/plenary.nvim",
-			--"nvim-telescope/telescope.nvim",
-		--},
-	--})
+	use({ "github/copilot.vim" })
 
 	if packer_bootstrapped then
 		packer.sync()
