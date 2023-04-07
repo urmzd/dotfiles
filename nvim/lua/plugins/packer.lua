@@ -157,6 +157,7 @@ packer.startup(function(use)
 	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
 
 	use({ "github/copilot.vim" })
+	use 'mbbill/undotree'
 
 	if packer_bootstrapped then
 		packer.sync()
