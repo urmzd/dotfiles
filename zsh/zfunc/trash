@@ -1,24 +1,27 @@
 trash() {
     TRASH_DIR="$HOME/.trash"
 
-    if [[ ! -d "$TRASH_DIR" ]]
-    then
-        mkdir "$TRASH_DIR"
+    if [[ ! -d "$TRASH_DIR" ]]; then
+        mkdir -p "$TRASH_DIR"
     fi
 
-    mv "$@" "$TRASH_DIR" 2>/dev/null
-    move_successful=$?
+    for item in "$@"; do
+        if [[ -e "$item" ]]; then
+            # Generate unique name for the item in trash directory
+            timestamp=$(date +%Y%m%d%H%M%S)
+            target=$(basename "$item")_$timestamp
 
-    targets=()
+            # Move the item to the trash directory
+            mv "$item" "$TRASH_DIR/$target" 2>/dev/null
+            move_successful=$?
 
-    # Get the name of the files / directories to delete.
-    for arg in "$@"; do
-        target=$(basename $arg)
-        targets+=("$TRASH_DIR/$target")
+            # If the move was not successful, try to remove the item
+            if [[ $move_successful -ne 0 ]]; then
+                rm -rf "$item"
+                mv "$item" "$TRASH_DIR/$target"
+            fi
+        else
+            echo "Error: $item does not exist"
+        fi
     done
-
-    if [[ $move_successful -ne 0 ]]; then
-        rm -rf ${targets[@]}
-        mv "$@" "$TRASH_DIR"
-    fi
 }
