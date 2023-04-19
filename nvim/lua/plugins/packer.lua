@@ -158,6 +158,13 @@ packer.startup(function(use)
 
 	use 'mbbill/undotree'
 
+	use({
+		"anuvyklack/pretty-fold.nvim",
+		config = function()
+			require("pretty-fold").setup()
+		end,
+	})
+
 	if packer_bootstrapped then
 		packer.sync()
 	end
