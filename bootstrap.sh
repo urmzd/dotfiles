@@ -16,8 +16,9 @@ sudo apt update -y && sudo apt upgrade -y
 # Links
 DOTFILES_DIR="$HOME/dotfiles"
 
+ln -sf "$DOTFILES_DIR/zsh/.zprofile" "$HOME/.zprofile"
+ln -sf "$DOTFILES_DIR/zsh/.zshenv" "$HOME/.zshenv"
+ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+
 ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config"
-ln -sf "$DOTFILES_DIR/.zprofile" "$HOME/.zprofile"
-ln -sf "$DOTFILES_DIR/zsh/.zshenv" "$HOME/.zshenv"
-ln -sf "$DOFTILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
