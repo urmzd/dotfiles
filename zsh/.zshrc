@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 
+
 ROOT="$HOME/dotfiles/zsh"
 
 # Configurations.
@@ -17,6 +18,9 @@ source "$ROOT/zconf/fzf.sh"
 
 ## Gradle
 #source "$ROOT/zconf/gradle.sh"
+
+# K8
+source "$ROOT/zconf/k8.sh"
 
 # Enable Completion.
 source "$ROOT/zconf/completion.sh"
@@ -55,7 +59,3 @@ source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
 
 # GoLang
 source "$ROOT/zconf/go.sh"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"

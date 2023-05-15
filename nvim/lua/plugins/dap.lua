@@ -1,3 +1,12 @@
+function get_python_path()
+    local file = io.popen("which python")
+    local output = file:read('*all')
+    file:close()
+    return output
+end
+
+local python_path = get_python_path()
+
 local dap, dap_ui = require("dap"), require("dapui")
 
 require("nvim-dap-virtual-text").setup {
@@ -11,7 +20,7 @@ local jdtls = require("jdtls")
 
 jdtls.setup_dap({ hotcodereplace = 'auto' })
 
-dap_python.setup("/home/urmzd/.pyenv/shims/python")
+dap_python.setup(python_path)
 dap_python.test_runner = "pytest"
 
 dap.listeners.after.event_initialized["dapui_config"] = function()

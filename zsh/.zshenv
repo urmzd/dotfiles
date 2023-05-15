@@ -13,3 +13,5 @@ export PATH="$PATH:$HOME/.rbenv/bin"
 export PATH="$PATH:$HOME/.rbenv/shims/"
 export PATH="$PATH:$HOME/.julia/julia"
 export PATH="$PATH:/opt/gradle/gradle-8.0-20220913040000+0000/bin"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export KUBECONFIG=~/.kube/config.yaml

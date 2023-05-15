@@ -107,7 +107,9 @@ packer.startup(function(use)
 	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
 
 	-- Path
-	use({ "ahmedkhalf/project.nvim" })
+	use({
+		"ahmedkhalf/project.nvim",
+	})
 
 	-- Completion
 	use({ "windwp/nvim-autopairs" })
@@ -156,7 +158,7 @@ packer.startup(function(use)
 	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
 	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
 
-	use 'mbbill/undotree'
+	use("mbbill/undotree")
 
 	use({
 		"anuvyklack/pretty-fold.nvim",
@@ -164,6 +166,8 @@ packer.startup(function(use)
 			require("pretty-fold").setup()
 		end,
 	})
+
+	use("https://github.com/github/copilot.vim")
 
 	if packer_bootstrapped then
 		packer.sync()
