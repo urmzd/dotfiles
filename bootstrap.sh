@@ -22,3 +22,4 @@ ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
 
 ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config"
+ln -s "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"

@@ -4,8 +4,5 @@
 	prune = true
 [diff]
 	colorMoved = zebra
-[user]
-	email = urmzds@gmail.com
-	name = Urmzd Mukhammadnaim
 [init]
 	defaultBranch = main

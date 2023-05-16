@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
 
-
 ROOT="$HOME/dotfiles/zsh"
 
 # Configurations.
@@ -54,8 +53,7 @@ source "$ROOT/zconf/rust.sh"
 # BFG 
 source "$ROOT/zconf/bfg.sh"
 
-# OMZ
-source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
-
 # GoLang
 source "$ROOT/zconf/go.sh"
+
+source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
