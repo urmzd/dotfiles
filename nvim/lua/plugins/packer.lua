@@ -1,175 +1,135 @@
--- Bootstrap `packer.nvim`.
-local bootstrap_packer = function()
-	local paths = require("utils.path")
-	local install_path = paths.install_dir
-
-	if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-		vim.fn.system({
-			"git",
-			"clone",
-			"--depth",
-			"1",
-			"https://github.com/wbthomason/packer.nvim",
-			install_path,
-		})
-		vim.cmd("packadd packer.nvim")
-		return true
-	else
-		return false
-	end
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
 end
+vim.opt.rtp:prepend(lazypath)
 
-local packer_bootstrapped = bootstrap_packer()
-
--- Install plugins.
-local packer = require("packer")
-
-packer.startup(function(use)
-	use({ "wbthomason/packer.nvim" })
-	use({
+require("lazy").setup({
+	"nvim-lua/plenary.nvim",
+	{
 		"nathom/filetype.nvim",
 		config = function()
 			require("filetype").setup({})
 		end,
-	})
-
-	use({ "neovim/nvim-lspconfig" })
-
-	use({
+	},
+	{ "neovim/nvim-lspconfig" },
+	{
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 		requires = { "neovim/nvim-lspconfig" },
-	})
-	use({
+	},
+	{
 		"jayp0521/mason-null-ls.nvim",
-	})
+	},
+	{ "sheerun/vim-polyglot" },
+	{ "nvim-treesitter/nvim-treesitter", build = ":TsUpdate" },
+	{ "tpope/vim-surround" },
+	{ "tpope/vim-repeat" },
+	{ "tpope/vim-fugitive" },
+	{ "tpope/vim-unimpaired" },
+	{ "preservim/nerdcommenter" },
+	{ "preservim/vimux" },
+	"nyoom-engineering/oxocarbon.nvim",
+	"ellisonleao/gruvbox.nvim",
+	"nvim-tree/nvim-web-devicons",
+	{ "nvim-tree/nvim-web-devicons", opt = true },
 
-	use({ "sheerun/vim-polyglot" })
-	use({ "nvim-treesitter/nvim-treesitter", run = ":TsUpdate" })
-
-	use({ "tpope/vim-surround" })
-	use({ "tpope/vim-repeat" })
-	use({ "tpope/vim-fugitive" })
-	use({ "tpope/vim-unimpaired" })
-
-	use({ "preservim/nerdcommenter" })
-	use({ "preservim/vimux" })
-
-	-- Themes
-	--use("ayu-theme/ayu-vim")
-	use("nyoom-engineering/oxocarbon.nvim")
-	use("ellisonleao/gruvbox.nvim")
-
-	--
-	use("nvim-tree/nvim-web-devicons")
-	use({
-		"nvim-lualine/lualine.nvim",
-		requires = { "nvim-tree/nvim-web-devicons", opt = true },
-	})
-
+	"nvim-lualine/lualine.nvim",
 	-- Documentation
-	use({
+	{
 		"kkoomen/vim-doge",
-		run = function()
+		build = function()
 			vim.fn["doge#install"]()
 		end,
-	})
-
+	},
 	-- Misc
-	use({
+	{
 		"lewis6991/gitsigns.nvim",
-		requires = { "nvim-lua/plenary.nvim" },
 		config = function()
 			require("gitsigns").setup()
 		end,
-	})
-	use({ "folke/lsp-colors.nvim" })
-	use({
+	},
+	{ "folke/lsp-colors.nvim" },
+	{
 		"folke/trouble.nvim",
-		requires = { "nvim-tree/nvim-web-devicons" },
 		config = function()
 			require("trouble").setup({})
 		end,
-	})
-	use({
+	},
+	{
 		"folke/todo-comments.nvim",
-		requires = "nvim-lua/plenary.nvim",
 		config = function()
 			require("todo-comments").setup()
 		end,
-	})
-
+	},
 	-- Fuzzy Finder
-	use({
-		"nvim-telescope/telescope.nvim",
-		requires = { { "nvim-lua/plenary.nvim" } },
-	})
-	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
-
+	"nvim-telescope/telescope.nvim",
+	{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 	-- Path
-	use({
+	{
 		"ahmedkhalf/project.nvim",
-	})
-
+	},
 	-- Completion
-	use({ "windwp/nvim-autopairs" })
-
+	{ "windwp/nvim-autopairs" },
 	-- Tests
-	use({
-		"nvim-neotest/neotest",
-		requires = {
-			"nvim-lua/plenary.nvim",
-			"nvim-treesitter/nvim-treesitter",
-			"antoinemadec/FixCursorHold.nvim",
-			-- OPTIONAL
-			"nvim-neotest/neotest-python",
-			"nvim-neotest/neotest-plenary",
-			"rouge8/neotest-rust",
-		},
-	})
-
+	"nvim-neotest/neotest-plenary",
+	"nvim-treesitter/nvim-treesitter",
+	"antoinemadec/FixCursorHold.nvim",
+	"nvim-neotest/neotest-python",
+	"rouge8/neotest-rust",
+	"nvim-neotest/neotest",
 	-- Debuggers
-	use({ "mfussenegger/nvim-dap" })
-	use({ "theHamsta/nvim-dap-virtual-text" })
-	use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } })
-	use({ "mfussenegger/nvim-dap-python" })
-
+	{ "mfussenegger/nvim-dap" },
+	{ "theHamsta/nvim-dap-virtual-text" },
+	{ "rcarriga/nvim-dap-ui" },
+	{ "mfussenegger/nvim-dap-python" },
 	-- LSP Tools
-	use({ "lervag/vimtex", ft = "tex" })
-	use({ "simrat39/rust-tools.nvim" })
-	use({ "mfussenegger/nvim-jdtls" })
-	use({ "udalov/kotlin-vim" })
-	use({ "b0O/schemastore.nvim" })
-
+	{ "lervag/vimtex",                  ft = "tex" },
+	{ "simrat39/rust-tools.nvim" },
+	{ "mfussenegger/nvim-jdtls" },
+	{ "udalov/kotlin-vim" },
+	{ "b0O/schemastore.nvim" },
 	-- Utils
-	use({
+	{
 		"iamcco/markdown-preview.nvim",
-		run = function()
+		build = function()
 			vim.fn["mkdp#util#install"]()
 		end,
-	})
-	use({ "urmzd/lume.nvim" })
-	use({ "jose-elias-alvarez/null-ls.nvim" })
-	use({ "folke/neodev.nvim" })
-	use({ "j-hui/fidget.nvim" })
-	use({ "ms-jpq/chadtree", branch = "chad", run = "python3 -m chadtree deps" })
-
-	use({ "ms-jpq/coq_nvim", branch = "coq" })
-	use({ "ms-jpq/coq.artifacts", branch = "artifacts" })
-	use({ "ms-jpq/coq.thirdparty", branch = "3p" })
-
-	use("mbbill/undotree")
-
-	use({
+	},
+	{ "urmzd/lume.nvim" },
+	{ "jose-elias-alvarez/null-ls.nvim" },
+	{ "folke/neodev.nvim" },
+	{ "j-hui/fidget.nvim" },
+	{ "ms-jpq/chadtree",                branch = "chad",     build = "python3 -m chadtree deps" },
+	{ "ms-jpq/coq_nvim",                branch = "coq" },
+	{ "ms-jpq/coq.artifacts",           branch = "artifacts" },
+	{ "ms-jpq/coq.thirdparty",          branch = "3p" },
+	"mbbill/undotree",
+	{
 		"anuvyklack/pretty-fold.nvim",
 		config = function()
 			require("pretty-fold").setup()
 		end,
-	})
-
-	use("https://github.com/github/copilot.vim")
-
-	if packer_bootstrapped then
-		packer.sync()
-	end
-end)
+	},
+	"https://github.com/github/copilot.vim",
+	-- Lua
+	{
+		"folke/which-key.nvim",
+		config = function()
+			vim.o.timeout = true
+			vim.o.timeoutlen = 300
+			require("which-key").setup({
+				-- your configuration comes here
+				-- or leave it empty to , the default settings
+				-- refer to the configuration section below
+			})
+		end,
+	},
+})
