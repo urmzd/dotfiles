@@ -13,12 +13,6 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	"nvim-lua/plenary.nvim",
-	{
-		"nathom/filetype.nvim",
-		config = function()
-			require("filetype").setup({})
-		end,
-	},
 	{ "neovim/nvim-lspconfig" },
 	{
 		"williamboman/mason.nvim",
@@ -34,7 +28,7 @@ require("lazy").setup({
 	{ "tpope/vim-repeat" },
 	{ "tpope/vim-fugitive" },
 	{ "tpope/vim-unimpaired" },
-	{ "preservim/nerdcommenter" },
+	{ "preservim/nerdcommenter", lazy=false},
 	{ "preservim/vimux" },
 	"nyoom-engineering/oxocarbon.nvim",
 	"ellisonleao/gruvbox.nvim",
@@ -119,17 +113,4 @@ require("lazy").setup({
 		end,
 	},
 	"https://github.com/github/copilot.vim",
-	-- Lua
-	{
-		"folke/which-key.nvim",
-		config = function()
-			vim.o.timeout = true
-			vim.o.timeoutlen = 300
-			require("which-key").setup({
-				-- your configuration comes here
-				-- or leave it empty to , the default settings
-				-- refer to the configuration section below
-			})
-		end,
-	},
 })

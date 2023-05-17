@@ -1,4 +1,7 @@
-require("plugins.packer")
+require("settings")
+require("key_mappings")
+
+require("plugins.plugins")
 require("plugins.null-ls")
 require("plugins.mason")
 require("plugins.treesitter")
@@ -7,8 +10,6 @@ require("plugins.dap")
 require("plugins.doge")
 
 require("servers")
-require("settings")
-require("key_mappings")
 require("auto_groups")
 require("theme")
 

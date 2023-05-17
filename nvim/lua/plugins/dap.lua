@@ -1,24 +1,24 @@
 function get_python_path()
-    local file = io.popen("which python")
-    local output = file:read('*all')
-    file:close()
-    return output
+  local file = io.popen("which python")
+  local output = file:read("*all")
+  file:close()
+  return output
 end
 
 local python_path = get_python_path()
 
 local dap, dap_ui = require("dap"), require("dapui")
 
-require("nvim-dap-virtual-text").setup {
-  commented = true
-}
+require("nvim-dap-virtual-text").setup({
+  commented = true,
+})
 
 dap_ui.setup()
 
 local dap_python = require("dap-python")
 local jdtls = require("jdtls")
 
-jdtls.setup_dap({ hotcodereplace = 'auto' })
+jdtls.setup_dap({ hotcodereplace = "auto" })
 
 dap_python.setup(python_path)
 dap_python.test_runner = "pytest"
@@ -34,7 +34,6 @@ end
 dap.listeners.before.event_exited["dapui_config"] = function()
   dap_ui.close()
 end
-
 
 vim.keymap.set("n", "<F5>", dap.continue)
 vim.keymap.set("n", "<F10>", dap.step_over)

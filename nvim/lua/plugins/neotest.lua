@@ -6,9 +6,16 @@ nt.setup({
     require("neotest-python")({
       runner = "pytest",
     }),
-    require("neotest-rust")
-  }
+    require("neotest-rust"),
+  },
 })
 
-vim.keymap.set("n", '<leader>ts', function() nt.summary.toggle() end, {remap=true})
-vim.keymap.set("n", '<leader>tr', function() nt.summary.run_marked() end,{remap=true})
+vim.keymap.set("n", "<leader>ts", function()
+  nt.summary.toggle()
+end, { remap = true })
+vim.keymap.set("n", "<leader>tr", function()
+  nt.summary.run_marked()
+end, { remap = true })
+vim.keymap.set("n", "<leader>td", function()
+  nt.run.run({ strategy = "dap" })
+end, { remap = true })
