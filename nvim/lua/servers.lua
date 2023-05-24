@@ -45,16 +45,16 @@ for _, server in ipairs(servers) do
     -- TODO: Add appropriate overrides to account for wire tags
   end
 
-  --if server == "pyright" then
-    --util = require("lspconfig.util")
-    --overrides = {
-      --root_dir = util.root_pattern(
-        --".git"
-        ----"pyrightconfig.json",
-        ----"pyproject.toml"
-      --)
-    --}
-  --end
+  if server == "pyright" then
+    local util = require("lspconfig.util")
+    overrides = {
+      root_dir = util.root_pattern(
+        ".git"
+        --"pyrightconfig.json",
+        --"pyproject.toml"
+      )
+    }
+  end
 
   if server == "jsonls" then
     overrides = {

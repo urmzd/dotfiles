@@ -35,7 +35,7 @@ source "$ROOT/zconf/nvim.sh"
 #source "$ROOT/zconf/java.sh"
 
 # Terraform
-# source "$ROOT/zconf/terraform.sh"
+ source "$ROOT/zconf/terraform.sh"
 
 # Lua
 # source "$ROOT/zconf/lua.sh"
