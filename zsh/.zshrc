@@ -57,3 +57,6 @@ source "$ROOT/zconf/bfg.sh"
 source "$ROOT/zconf/go.sh"
 
 source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
+fpath+=${ZDOTDIR:-~}/.zsh_functions
+fpath+=${ZDOTDIR:-~}/.zsh_functions
+fpath+=${ZDOTDIR:-~}/.zsh_functions
