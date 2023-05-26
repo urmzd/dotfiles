@@ -3,6 +3,7 @@
 sudo apt install cmake pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3
 cd /tmp
 git clone git@github.com:alacritty/alacritty.git
+git checkout 32ea98deeba5f0eb6c51062cfb0fd2caa802054d
 cd alacritty
 cargo build --release
 
