@@ -12,23 +12,37 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	"nvim-lua/plenary.nvim",
-	{ "neovim/nvim-lspconfig" },
+	{
+		"neovim/nvim-lspconfig",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+	},
 	{
 		"williamboman/mason.nvim",
-		"williamboman/mason-lspconfig.nvim",
-		requires = { "neovim/nvim-lspconfig" },
+		dependencies = { "neovim/nvim-lspconfig" },
+		config = function()
+			require("plugins.mason")
+			require("servers")
+		end,
 	},
+	{ "williamboman/mason-lspconfig.nvim" },
 	{
 		"jayp0521/mason-null-ls.nvim",
 	},
 	{ "sheerun/vim-polyglot" },
-	{ "nvim-treesitter/nvim-treesitter", build = ":TsUpdate" },
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TsUpdate",
+		config = function()
+			require("plugins.treesitter")
+		end
+	},
 	{ "tpope/vim-surround" },
 	{ "tpope/vim-repeat" },
 	{ "tpope/vim-fugitive" },
 	{ "tpope/vim-unimpaired" },
-	{ "preservim/nerdcommenter",         lazy = false },
+	{ "preservim/nerdcommenter" },
 	{ "preservim/vimux" },
 	{
 		"nyoom-engineering/oxocarbon.nvim",
@@ -42,12 +56,15 @@ require("lazy").setup({
 
 	{ "nvim-tree/nvim-web-devicons", opt = true },
 
-	"nvim-lualine/lualine.nvim",
+	{ "nvim-lualine/lualine.nvim" },
 	-- Documentation
 	{
 		"kkoomen/vim-doge",
 		build = function()
 			vim.fn["doge#install"]()
+		end,
+		config = function()
+			require("plugins.doge")
 		end,
 	},
 	-- Misc
@@ -71,24 +88,49 @@ require("lazy").setup({
 		end,
 	},
 	-- Fuzzy Finder
-	"nvim-telescope/telescope.nvim",
-	{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			"nvim-telescope/telescope-fzf-native.nvim", build = "make"
+		},
+		config = function()
+			require("plugins.telescope")
+		end,
+	},
 	-- Completion
-	{ "windwp/nvim-autopairs" },
+	{
+		"windwp/nvim-autopairs",
+		config = function()
+			require("plugins.autopairs")
+		end,
+	},
 	-- Tests
-	"nvim-neotest/neotest-plenary",
-	"nvim-treesitter/nvim-treesitter",
-	"antoinemadec/FixCursorHold.nvim",
-	"nvim-neotest/neotest-python",
-	"rouge8/neotest-rust",
-	"nvim-neotest/neotest",
+	{
+		"nvim-neotest/neotest",
+		dependencies = {
+			"nvim-neotest/neotest-plenary",
+			"antoinemadec/FixCursorHold.nvim",
+			"nvim-neotest/neotest-python",
+			"rouge8/neotest-rust",
+		},
+		config = function()
+			require("plugins.neotest")
+		end
+	},
 	-- Debuggers
-	{ "mfussenegger/nvim-dap" },
-	{ "theHamsta/nvim-dap-virtual-text" },
-	{ "rcarriga/nvim-dap-ui" },
-	{ "mfussenegger/nvim-dap-python" },
+	{
+		"mfussenegger/nvim-dap",
+		dependencies = {
+			{ "theHamsta/nvim-dap-virtual-text" },
+			{ "rcarriga/nvim-dap-ui" },
+			{ "mfussenegger/nvim-dap-python" },
+		},
+		config = function()
+			require("plugins.dap")
+		end,
+	},
 	-- LSP Tools
-	{ "lervag/vimtex",                  ft = "tex" },
+	{ "lervag/vimtex",           ft = "tex" },
 	{ "simrat39/rust-tools.nvim" },
 	{ "mfussenegger/nvim-jdtls" },
 	{ "udalov/kotlin-vim" },
@@ -102,7 +144,12 @@ require("lazy").setup({
 	},
 	{ "urmzd/lume.nvim" },
 	{ "jose-elias-alvarez/null-ls.nvim" },
-	{ "folke/neodev.nvim" },
+	{
+		"folke/neodev.nvim",
+		config = function()
+			require("plugins.neodev")
+		end
+	},
 	{ "j-hui/fidget.nvim" },
 	{
 		"ms-jpq/chadtree",
@@ -113,6 +160,9 @@ require("lazy").setup({
 			{ "ms-jpq/coq.artifacts",  branch = "artifacts" },
 			{ "ms-jpq/coq.thirdparty", branch = "3p" },
 		},
+		config = function()
+			require("plugins.chad-tree")
+		end,
 	},
 	"mbbill/undotree",
 	{
