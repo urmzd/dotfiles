@@ -11,12 +11,10 @@ require("plugins.doge")
 
 require("servers")
 require("auto_groups")
-require("theme")
 
 require("plugins.neotest")
 require("plugins.chad-tree")
 require("plugins.telescope")
-require("plugins.project_nvim")
 require("plugins.fidget")
 require("plugins.lualine")
 require("plugins.neovide")

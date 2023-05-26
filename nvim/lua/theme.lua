@@ -1,4 +1,4 @@
-local colorscheme = "gruvbox"
+local colorscheme = "oxocarbon"
 local style = "dark"
 
 vim.opt.background = style

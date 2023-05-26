@@ -28,11 +28,18 @@ require("lazy").setup({
 	{ "tpope/vim-repeat" },
 	{ "tpope/vim-fugitive" },
 	{ "tpope/vim-unimpaired" },
-	{ "preservim/nerdcommenter", lazy=false},
+	{ "preservim/nerdcommenter",         lazy = false },
 	{ "preservim/vimux" },
-	"nyoom-engineering/oxocarbon.nvim",
-	"ellisonleao/gruvbox.nvim",
-	"nvim-tree/nvim-web-devicons",
+	{
+		"nyoom-engineering/oxocarbon.nvim",
+		--"ellisonleao/gruvbox.nvim",
+		lazy = false,
+		priority = 1000,
+		config = function()
+			require("theme")
+		end,
+	},
+
 	{ "nvim-tree/nvim-web-devicons", opt = true },
 
 	"nvim-lualine/lualine.nvim",
@@ -66,10 +73,6 @@ require("lazy").setup({
 	-- Fuzzy Finder
 	"nvim-telescope/telescope.nvim",
 	{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-	-- Path
-	{
-		"ahmedkhalf/project.nvim",
-	},
 	-- Completion
 	{ "windwp/nvim-autopairs" },
 	-- Tests
@@ -101,10 +104,16 @@ require("lazy").setup({
 	{ "jose-elias-alvarez/null-ls.nvim" },
 	{ "folke/neodev.nvim" },
 	{ "j-hui/fidget.nvim" },
-	{ "ms-jpq/chadtree",                branch = "chad",     build = "python3 -m chadtree deps" },
-	{ "ms-jpq/coq_nvim",                branch = "coq" },
-	{ "ms-jpq/coq.artifacts",           branch = "artifacts" },
-	{ "ms-jpq/coq.thirdparty",          branch = "3p" },
+	{
+		"ms-jpq/chadtree",
+		branch = "chad",
+		build = "python3 -m chadtree deps",
+		dependencies = {
+			{ "ms-jpq/coq_nvim",       branch = "coq" },
+			{ "ms-jpq/coq.artifacts",  branch = "artifacts" },
+			{ "ms-jpq/coq.thirdparty", branch = "3p" },
+		},
+	},
 	"mbbill/undotree",
 	{
 		"anuvyklack/pretty-fold.nvim",
