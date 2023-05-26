@@ -18,9 +18,9 @@ require("lazy").setup({
 			"nvim-lua/plenary.nvim",
 		},
 	},
+
 	{
 		"williamboman/mason.nvim",
-		dependencies = { "neovim/nvim-lspconfig" },
 		config = function()
 			require("plugins.mason")
 			require("servers")
@@ -29,14 +29,23 @@ require("lazy").setup({
 	{ "williamboman/mason-lspconfig.nvim" },
 	{
 		"jayp0521/mason-null-ls.nvim",
+		dependencies = {
+			{
+				"jose-elias-alvarez/null-ls.nvim",
+				config = function()
+					require("plugins.null-ls")
+				end,
+			},
+		},
 	},
+
 	{ "sheerun/vim-polyglot" },
 	{
 		"nvim-treesitter/nvim-treesitter",
-		build = ":TsUpdate",
+		build = ":TSUpdate",
 		config = function()
 			require("plugins.treesitter")
-		end
+		end,
 	},
 	{ "tpope/vim-surround" },
 	{ "tpope/vim-repeat" },
@@ -54,9 +63,12 @@ require("lazy").setup({
 		end,
 	},
 
-	{ "nvim-tree/nvim-web-devicons", opt = true },
-
-	{ "nvim-lualine/lualine.nvim" },
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = {
+			{ "nvim-tree/nvim-web-devicons" },
+		},
+	},
 	-- Documentation
 	{
 		"kkoomen/vim-doge",
@@ -83,7 +95,8 @@ require("lazy").setup({
 	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
-			"nvim-telescope/telescope-fzf-native.nvim", build = "make"
+			"nvim-telescope/telescope-fzf-native.nvim",
+			build = "make",
 		},
 		config = function()
 			require("plugins.telescope")
@@ -107,7 +120,7 @@ require("lazy").setup({
 		},
 		config = function()
 			require("plugins.neotest")
-		end
+		end,
 	},
 	-- Debuggers
 	{
@@ -135,12 +148,11 @@ require("lazy").setup({
 		end,
 	},
 	{ "urmzd/lume.nvim" },
-	{ "jose-elias-alvarez/null-ls.nvim" },
 	{
 		"folke/neodev.nvim",
 		config = function()
 			require("plugins.neodev")
-		end
+		end,
 	},
 	{ "j-hui/fidget.nvim" },
 	{
@@ -148,9 +160,23 @@ require("lazy").setup({
 		branch = "chad",
 		build = "python3 -m chadtree deps",
 		dependencies = {
-			{ "ms-jpq/coq_nvim",       branch = "coq" },
-			{ "ms-jpq/coq.artifacts",  branch = "artifacts" },
-			{ "ms-jpq/coq.thirdparty", branch = "3p" },
+			{ "ms-jpq/coq_nvim",      branch = "coq" },
+			{ "ms-jpq/coq.artifacts", branch = "artifacts" },
+			{
+				"ms-jpq/coq.thirdparty",
+				branch = "3p",
+				config = function()
+					require("coq_3p")({
+						{ src = "copilot", short_name = "COP", accept_key = "<c-f>" },
+						{ src = "dap" },
+					})
+				end,
+				dependendencies = {
+					{
+						"https://github.com/github/copilot.vim",
+					},
+				},
+			},
 		},
 		config = function()
 			require("plugins.chad-tree")
@@ -159,9 +185,5 @@ require("lazy").setup({
 	"mbbill/undotree",
 	{
 		"anuvyklack/pretty-fold.nvim",
-		config = function()
-			require("pretty-fold").setup()
-		end,
 	},
-	"https://github.com/github/copilot.vim",
 })
