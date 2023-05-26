@@ -60,9 +60,7 @@ require("lazy").setup({
 	-- Documentation
 	{
 		"kkoomen/vim-doge",
-		build = function()
-			vim.fn["doge#install"]()
-		end,
+		build = ":call doge#install()",
 		config = function()
 			require("plugins.doge")
 		end,
@@ -77,15 +75,9 @@ require("lazy").setup({
 	{ "folke/lsp-colors.nvim" },
 	{
 		"folke/trouble.nvim",
-		config = function()
-			require("trouble").setup({})
-		end,
 	},
 	{
 		"folke/todo-comments.nvim",
-		config = function()
-			require("todo-comments").setup()
-		end,
 	},
 	-- Fuzzy Finder
 	{
