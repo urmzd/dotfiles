@@ -171,16 +171,14 @@ require("lazy").setup({
 						{ src = "dap" },
 					})
 				end,
-				dependendencies = {
-					{
-						"https://github.com/github/copilot.vim",
-					},
-				},
 			},
 		},
 		config = function()
 			require("plugins.chad-tree")
 		end,
+	},
+	{
+		"https://github.com/github/copilot.vim",
 	},
 	"mbbill/undotree",
 	{
