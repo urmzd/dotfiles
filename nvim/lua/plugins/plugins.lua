@@ -54,8 +54,8 @@ require("lazy").setup({
 	{ "preservim/nerdcommenter" },
 	{ "preservim/vimux" },
 	{
-		"nyoom-engineering/oxocarbon.nvim",
-		--"ellisonleao/gruvbox.nvim",
+		--"nyoom-engineering/oxocarbon.nvim",
+		"ellisonleao/gruvbox.nvim",
 		lazy = false,
 		priority = 1000,
 		config = function()
