@@ -84,12 +84,19 @@ require("lazy").setup({
 			require("gitsigns").setup()
 		end,
 	},
-	{ "folke/lsp-colors.nvim" },
 	{
 		"folke/trouble.nvim",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
+		},
+		opts = {},
 	},
 	{
 		"folke/todo-comments.nvim",
+		dependencies = {
+			{ "nvim-lua/plenary.nvim" },
+		},
+		opts = {},
 	},
 	-- Fuzzy Finder
 	{
@@ -184,4 +191,11 @@ require("lazy").setup({
 	{
 		"anuvyklack/pretty-fold.nvim",
 	},
+
+	{
+		"ahmedkhalf/project.nvim",
+		config = function()
+			require("project_nvim").setup()
+		end,
+	}
 })
