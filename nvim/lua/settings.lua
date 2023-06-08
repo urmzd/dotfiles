@@ -15,7 +15,6 @@ vim.opt.smartindent = true
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.incsearch = true
-vim.opt.termguicolors = true
 vim.opt.scrolloff = 16
 vim.opt.signcolumn = "yes"
 vim.opt.colorcolumn = "80"

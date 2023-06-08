@@ -52,7 +52,6 @@ require("lazy").setup({
 	{ "tpope/vim-fugitive" },
 	{ "tpope/vim-unimpaired" },
 	{ "preservim/nerdcommenter" },
-	{ "preservim/vimux" },
 	{
 		--"nyoom-engineering/oxocarbon.nvim",
 		"ellisonleao/gruvbox.nvim",
@@ -120,10 +119,9 @@ require("lazy").setup({
 	{
 		"nvim-neotest/neotest",
 		dependencies = {
-			"nvim-neotest/neotest-plenary",
-			"antoinemadec/FixCursorHold.nvim",
-			"nvim-neotest/neotest-python",
-			"rouge8/neotest-rust",
+			{ "nvim-neotest/neotest-plenary" },
+			{ "nvim-neotest/neotest-python", ft = "python" },
+			{ "rouge8/neotest-rust",         ft = "rust" },
 		},
 		config = function()
 			require("plugins.neotest")
@@ -135,24 +133,25 @@ require("lazy").setup({
 		dependencies = {
 			{ "theHamsta/nvim-dap-virtual-text" },
 			{ "rcarriga/nvim-dap-ui" },
-			{ "mfussenegger/nvim-dap-python" },
+			{ "mfussenegger/nvim-dap-python",   ft = "python" },
 		},
 		config = function()
 			require("plugins.dap")
 		end,
 	},
 	-- LSP Tools
-	{ "lervag/vimtex",           ft = "tex" },
-	{ "simrat39/rust-tools.nvim" },
-	{ "mfussenegger/nvim-jdtls" },
-	{ "udalov/kotlin-vim" },
-	{ "b0O/schemastore.nvim" },
+	{ "lervag/vimtex",            ft = "tex" },
+	{ "simrat39/rust-tools.nvim", ft = "rust" },
+	{ "mfussenegger/nvim-jdtls",  ft = "java" },
+	{ "udalov/kotlin-vim",        ft = "kotlin" },
+	{ "b0O/schemastore.nvim",     ft = { "yaml", "json" } },
 	-- Utils
 	{
 		"iamcco/markdown-preview.nvim",
 		build = function()
 			vim.fn["mkdp#util#install"]()
 		end,
+		ft = "markdown",
 	},
 	{ "urmzd/lume.nvim" },
 	{
@@ -160,6 +159,7 @@ require("lazy").setup({
 		config = function()
 			require("plugins.neodev")
 		end,
+		ft = "lua",
 	},
 	{ "j-hui/fidget.nvim" },
 	{
@@ -197,5 +197,5 @@ require("lazy").setup({
 		config = function()
 			require("project_nvim").setup()
 		end,
-	}
+	},
 })

@@ -1,3 +1,5 @@
+vim.loader.enable()
+
 require("settings")
 require("key_mappings")
 require("auto_groups")

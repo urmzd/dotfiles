@@ -48,11 +48,20 @@ for _, server in ipairs(servers) do
   if server == "pyright" then
     local util = require("lspconfig.util")
     overrides = {
+      settings = {
+        python = {
+          analysis = {
+            autoSearchPaths = true,
+            useLibraryCodeForTypes = true,
+            diagnosticMode = "openFilesOnly",
+          },
+        },
+      },
       root_dir = util.root_pattern(
         ".git"
-        --"pyrightconfig.json",
-        --"pyproject.toml"
-      )
+      --"pyrightconfig.json",
+      --"pyproject.toml"
+      ),
     }
   end
 
