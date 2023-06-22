@@ -1,0 +1,10 @@
+[[tools]]
+
+[[tools.ripgrep]]
+version = ""
+completion_enabled = ""
+repository = ""
+check_sum=""
+
+[[tools.ripgrep.completion]]
+
