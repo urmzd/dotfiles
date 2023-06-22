@@ -15,6 +15,7 @@ local servers = {
   "lua_ls",
   "rust_analyzer",
   "jsonls",
+  "terraformls"
 }
 
 for _, server in ipairs(servers) do
@@ -46,7 +47,7 @@ for _, server in ipairs(servers) do
   end
 
   if server == "pyright" then
-    local util = require("lspconfig.util")
+    --local util = require("lspconfig.util")
     overrides = {
       settings = {
         python = {
@@ -57,11 +58,11 @@ for _, server in ipairs(servers) do
           },
         },
       },
-      root_dir = util.root_pattern(
-        ".git"
-      --"pyrightconfig.json",
-      --"pyproject.toml"
-      ),
+      --root_dir = util.root_pattern(
+        --".git"
+      ----"pyrightconfig.json",
+      ----"pyproject.toml"
+      --),
     }
   end
 
