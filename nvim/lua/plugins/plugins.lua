@@ -55,7 +55,6 @@ require("lazy").setup({
 	{
 		--"nyoom-engineering/oxocarbon.nvim",
 		"ellisonleao/gruvbox.nvim",
-		lazy = false,
 		priority = 1000,
 		config = function()
 			require("theme")
@@ -198,4 +197,7 @@ require("lazy").setup({
 			require("project_nvim").setup()
 		end,
 	},
+	{
+		"Bekaboo/deadcolumn.nvim"
+	}
 })

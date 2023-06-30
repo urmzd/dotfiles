@@ -6,3 +6,6 @@ vim.keymap.set('n', '<leader>j', ':wincmd j<CR>')
 
 -- Escape
 vim.keymap.set("i", "jj", "<ESC>")
+vim.keymap.set("i", "jk", "<ESC>")
+vim.keymap.set("i", "kk", "<ESC>")
+vim.keymap.set("i", "kj", "<ESC>")
