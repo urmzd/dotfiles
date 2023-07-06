@@ -35,17 +35,6 @@ for _, server in ipairs(servers) do
     }
   end
 
-  if server == "gopls" then
-    overrides = {
-      settings = {
-        gopls = {
-          buildFlags = { "-tags=wire" },
-        },
-      },
-    }
-    -- TODO: Add appropriate overrides to account for wire tags
-  end
-
   if server == "pyright" then
     local util = require("lspconfig.util")
     overrides = {
@@ -58,7 +47,7 @@ for _, server in ipairs(servers) do
           },
         },
       },
-      root_dir = util.root_pattern(".git", "pyrightconfig.json", "pyproject.toml", "requirements.txt"),
+      root_dir = util.root_pattern(".git"),
     }
   end
 

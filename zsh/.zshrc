@@ -15,9 +15,6 @@ source "$ROOT/zconf/powerlevel10k.sh"
 # Tools
 source "$ROOT/zconf/fzf.sh"
 
-## Gradle
-#source "$ROOT/zconf/gradle.sh"
-
 # K8
 source "$ROOT/zconf/k8.sh"
 
@@ -32,7 +29,8 @@ source "$ROOT/zconf/node.sh"
 source "$ROOT/zconf/nvim.sh"
 
 ## Java
-#source "$ROOT/zconf/java.sh"
+#source "$ROOT/zconf/gradle.sh"
+source "$ROOT/zconf/java.sh"
 
 # Terraform
  source "$ROOT/zconf/terraform.sh"
@@ -57,6 +55,7 @@ source "$ROOT/zconf/bfg.sh"
 source "$ROOT/zconf/go.sh"
 
 source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
+
 fpath+=${ZDOTDIR:-~}/.zsh_functions
-fpath+=${ZDOTDIR:-~}/.zsh_functions
-fpath+=${ZDOTDIR:-~}/.zsh_functions
+
+source "$ROOT/zconf/sdkman.sh"

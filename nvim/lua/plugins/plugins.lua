@@ -158,7 +158,7 @@ require("lazy").setup({
 		config = function()
 			require("plugins.neodev")
 		end,
-		ft = "lua",
+		opts = {},
 	},
 	{ "j-hui/fidget.nvim" },
 	{
@@ -198,6 +198,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"Bekaboo/deadcolumn.nvim"
-	}
+		"Bekaboo/deadcolumn.nvim",
+	},
 })

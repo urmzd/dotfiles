@@ -1,3 +1,3 @@
 #!/usr/bin/env
 
-PATH="$PATH:$HOME/.sdkman/bin"
+source "$HOME/.sdkman/bin/sdkman-init.sh"
