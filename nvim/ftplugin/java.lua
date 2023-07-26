@@ -1,12 +1,15 @@
 local path = require("mason-core.path")
 local jdtls_path = path.concat({ vim.fn.stdpath("data"), "mason", "packages", "jdtls" });
-local lsp_version = "1.6.400.v20210924-0641"
+local lsp_version = "1.6.500.v20230622-2056"
 local lsp_path = path.concat({ jdtls_path, "plugins", "org.eclipse.equinox.launcher_" .. lsp_version .. ".jar" })
 local config_path = path.concat({ jdtls_path, "config_linux" })
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-local workspace_dir = '/home/urmzd/.workspace/' .. project_name
+local home = vim.fn.expand("$HOME")
+local workspace_dir = home .. '/.workspace/' .. project_name
 local lombok_jar = path.concat({ jdtls_path, "lombok.jar" })
-local java_path = "/home/urmzd/.sdkman/candidates/java/17.0.4-tem/bin/java"
+
+local java_path = home .. "/.sdkman/candidates/java/current/bin/java"
+
 local cmd = {
    java_path,
    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
@@ -23,6 +26,8 @@ local cmd = {
    "-configuration", config_path,
    "-data", workspace_dir
 }
+
+print(vim.inspect(cmd))
 
 local M = {
    cmd = cmd,
