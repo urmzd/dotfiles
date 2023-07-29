@@ -1,3 +1,2 @@
-#!/usr/bin/env bash
-
+export KUBECONFIG="$HOME/.kube/config.yaml"
 source <(kubectl completion zsh)

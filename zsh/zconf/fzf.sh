@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export FZF_DEFAULT_COMMAND="fd . ./"

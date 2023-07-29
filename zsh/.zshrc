@@ -25,9 +25,6 @@ source "$ROOT/zconf/completion.sh"
 source "$ROOT/zconf/nvm.sh"
 source "$ROOT/zconf/node.sh"
 
-# NVIM
-source "$ROOT/zconf/nvim.sh"
-
 ## Java
 #source "$ROOT/zconf/gradle.sh"
 source "$ROOT/zconf/java.sh"

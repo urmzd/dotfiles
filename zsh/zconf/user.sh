@@ -1,5 +1,3 @@
-#!/usr/bin/env zsh
-
 EDITOR_CMD="nvim"
 
 alias sudo='sudo '
