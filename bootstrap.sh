@@ -26,3 +26,5 @@ ln -sf "$DOTFILES_DIR/alacritty.yml" "$HOME/.alacritty.yml"
 
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config"
 ln -sf "$DOTFILES_DIR/helix" "$HOME/.config"
+
+ln -sf "$HOME/dotfiles/config/tmux/tmux.conf.local" "$HOME/.config/tmux/tmux.conf.local"
