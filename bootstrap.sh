@@ -20,11 +20,6 @@ ln -sf "$DOTFILES_DIR/zsh/.zprofile" "$HOME/.zprofile"
 ln -sf "$DOTFILES_DIR/zsh/.zshenv" "$HOME/.zshenv"
 ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
 
-ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
-ln -sf "$DOTFILES_DIR/alacritty.yml" "$HOME/.alacritty.yml"
 
-ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config"
-ln -sf "$DOTFILES_DIR/helix" "$HOME/.config"
-
-ln -sf "$HOME/dotfiles/config/tmux/tmux.conf.local" "$HOME/.config/tmux/tmux.conf.local"
+ln -sf "$DOTFILES_DIR/config" "$HOME/.config"

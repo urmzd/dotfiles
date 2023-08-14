@@ -1,5 +1,11 @@
 FROM ubuntu:latest
 
-# Install dependencies
+# Install build dependencies via apt
 
-# Configure editor
+# Install terminal emulator
+
+# Install shell
+
+# Install tmux
+
+# Install editor
