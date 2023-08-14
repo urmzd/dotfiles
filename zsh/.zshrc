@@ -53,6 +53,7 @@ source "$ROOT/zconf/go.sh"
 
 source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
 
+# for alacritty
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
 source "$ROOT/zconf/sdkman.sh"

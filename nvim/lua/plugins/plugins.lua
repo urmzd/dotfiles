@@ -212,4 +212,11 @@ require("lazy").setup({
 			require("plugins.which_key")
 		end,
 	},
+	{
+		"junegunn/fzf.vim",
+		requires = {
+			"junegunn/fzf",
+			build = ":call fzf#install()",
+		},
+	},
 })
