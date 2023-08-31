@@ -1,8 +1,8 @@
 FROM ubuntu:latest as base
 
 # Step 1
-RUN apt-get update -y && \
-    apt-get install -y \
+RUN apt update -y && \
+    apt install -y \
     jq \
     tldr \
     software-properties-common \
@@ -29,7 +29,7 @@ RUN chsh -s $(which zsh)
 
 ENTRYPOINT ["/bin/zsh"]
 
-FROM base
+FROM base as zsh-base
 
 # Step 2
 RUN mkdir -p "$HOME/.fonts"
@@ -50,9 +50,25 @@ RUN mv *.otf "$HOME/.fonts"
 
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
+ENTRYPOINT [ "/usr/bin/zsh" ]
 
-ENTRYPOINT [ "/bin/zsh" ]
+FROM zsh-base
+
+RUN apt update -y && apt upgrade -y && apt install -y neovim
+RUN update-alternatives --install /usr/bin/vi vi /usr/bin/nvim 60
+RUN update-alternatives --config vi
+RUN update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60
+RUN update-alternatives --config vim
+RUN update-alternatives --install /usr/bin/editor editor /usr/bin/nvim 60
+RUN update-alternatives --config editor
+
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+RUN export ZSH_THEME="powerlevel10k/powerlevel10k"
+
+ENTRYPOINT [ "/usr/bin/zsh" ]
+
+
 
 # install oh-my-zsh
 
