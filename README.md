@@ -13,3 +13,11 @@ docker run -it urmzd/dotfiles:latest
 ## Road Map
 
 - We want feature flags.
+
+## Awesome Stuff To Add (For Local Only)
+
+- Gogh
+- BFG
+
+
+- Conda?

@@ -1,1 +1,0 @@
-eval "$( pip completion --zsh )"

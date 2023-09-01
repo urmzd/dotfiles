@@ -1,4 +1,6 @@
-FROM ubuntu:latest as base
+FROM ubuntu:latest as zsh-base
+
+ENV DEBIAN_FRONTEND noninteractive
 
 # Step 1
 RUN apt update -y && \
@@ -27,10 +29,6 @@ RUN apt update -y && \
 
 RUN chsh -s $(which zsh)
 
-ENTRYPOINT ["/bin/zsh"]
-
-FROM base as zsh-base
-
 # Step 2
 RUN mkdir -p "$HOME/.fonts"
 
@@ -50,11 +48,15 @@ RUN mv *.otf "$HOME/.fonts"
 
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-ENTRYPOINT [ "/usr/bin/zsh" ]
+# TODO: update zsh to include power level config
+RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
-FROM zsh-base
+FROM zsh-base as nvim-base
 
-RUN apt update -y && apt upgrade -y && apt install -y neovim
+# use this by default, -i if you need interactive
+SHELL [ "/bin/zsh", "-c" ]
+
+RUN apt update -y && apt install -y neovim
 RUN update-alternatives --install /usr/bin/vi vi /usr/bin/nvim 60
 RUN update-alternatives --config vi
 RUN update-alternatives --install /usr/bin/vim vim /usr/bin/nvim 60
@@ -62,20 +64,39 @@ RUN update-alternatives --config vim
 RUN update-alternatives --install /usr/bin/editor editor /usr/bin/nvim 60
 RUN update-alternatives --config editor
 
-RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+FROM nvim-base as go-base
+RUN apt update -y && apt install -y \
+    bison \
+    bsdmainutils
+RUN zsh < <(curl -s -S -L https://raw.githubusercontent.com/urmzd/gvm/master/binscripts/gvm-installer)
+RUN source ~/.zshrc && gvm install go1.4 -B \
+    && gvm use go1.4 \
+    && export GOROOT_BOOTSTRAP=$GOROOT \
+    && gvm install go1.21.0 -B \
+    && gvm use go1.21.0 --default
 
-RUN export ZSH_THEME="powerlevel10k/powerlevel10k"
+FROM go-base as tmux-base
+RUN apt update -y && apt install -y \
+    autoconf \
+    automake \ 
+    pkg-config
 
-ENTRYPOINT [ "/usr/bin/zsh" ]
+WORKDIR /tmp
+# dependencies
+RUN wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+RUN tar -xvzf libevent-2.1.12-stable.tar.gz
+RUN ./configure && make && make install
 
+RUN git clone https://github.com/tmux/tmux.git
+WORKDIR /tmp/tmux
+RUN sh autogen.sh && ./configure && make
 
+# install nvm, pyenv, rust, luaver, sdkman + (vm for julia, R, ruby)
+# install fzf + zsh-completions
 
-# install oh-my-zsh
+# utilties: fdfind + ripgrep
+# more: terraform + aws + kubernetes
 
-# Install terminal emulator
+RUN https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
 
-# Install shell
-
-# Install tmux
-
-# Install editor
+ENTRYPOINT [ "/bin/zsh" ]
