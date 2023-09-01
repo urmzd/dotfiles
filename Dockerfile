@@ -79,17 +79,22 @@ FROM go-base as tmux-base
 RUN apt update -y && apt install -y \
     autoconf \
     automake \ 
-    pkg-config
+    pkg-config \
+    libssl-dev \
+    libevent-dev \ 
+    libncurses-dev
 
 WORKDIR /tmp
 # dependencies
-RUN wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
-RUN tar -xvzf libevent-2.1.12-stable.tar.gz
-RUN ./configure && make && make install
+# RUN wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+# RUN tar -zxf libevent-*.tar.gz
+# RUN cd libevent-*/ && ./configure --prefix=$HOME/local --enable-shared && make && make install
 
 RUN git clone https://github.com/tmux/tmux.git
 WORKDIR /tmp/tmux
-RUN sh autogen.sh && ./configure && make
+RUN sh autogen.sh && ./configure && make && make install
+
+RUN rm -rf *
 
 # install nvm, pyenv, rust, luaver, sdkman + (vm for julia, R, ruby)
 # install fzf + zsh-completions
@@ -97,6 +102,6 @@ RUN sh autogen.sh && ./configure && make
 # utilties: fdfind + ripgrep
 # more: terraform + aws + kubernetes
 
-RUN https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+WORKDIR /root
 
 ENTRYPOINT [ "/bin/zsh" ]
