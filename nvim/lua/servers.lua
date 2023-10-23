@@ -20,6 +20,7 @@ local servers = {
 
 for _, server in ipairs(servers) do
   local overrides = nil
+  local util = require("lspconfig.util")
 
   if server == "yamlls" then
     overrides = {
@@ -38,8 +39,14 @@ for _, server in ipairs(servers) do
     }
   end
 
+  if server == "terraformls" then
+    overrides = {
+      single_file_support = false,
+      root_dir = util.root_pattern(".terraform", ".git"),
+    }
+  end
+
   if server == "pyright" then
-    local util = require("lspconfig.util")
     overrides = {
       settings = {
         python = {
@@ -50,7 +57,6 @@ for _, server in ipairs(servers) do
           },
         },
       },
-      root_dir = util.root_pattern(".git"),
     }
   end
 

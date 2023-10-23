@@ -9,10 +9,6 @@ local python_path = get_python_path()
 
 local dap, dap_ui = require("dap"), require("dapui")
 
-require("nvim-dap-virtual-text").setup({
-  commented = true,
-})
-
 dap_ui.setup()
 
 local dap_python = require("dap-python")

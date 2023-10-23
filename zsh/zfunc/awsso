@@ -1,3 +1,4 @@
 awsso() {
-  aws sso login
+  aws sso login --profile "$1"
+  export AWS_PROFILE="$1"
 }

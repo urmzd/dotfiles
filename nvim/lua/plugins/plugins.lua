@@ -130,9 +130,8 @@ require("lazy").setup({
 	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
-			{ "theHamsta/nvim-dap-virtual-text" },
 			{ "rcarriga/nvim-dap-ui" },
-			{ "mfussenegger/nvim-dap-python",   ft = "python" },
+			{ "mfussenegger/nvim-dap-python", ft = "python" },
 		},
 		config = function()
 			require("plugins.dap")
@@ -173,7 +172,6 @@ require("lazy").setup({
 				branch = "3p",
 				config = function()
 					require("coq_3p")({
-						{ src = "copilot", short_name = "COP", accept_key = "<c-f>" },
 						{ src = "dap" },
 					})
 				end,
@@ -184,19 +182,16 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"https://github.com/github/copilot.vim",
+		"zbirenbaum/copilot.lua",
+		config = function()
+			require("copilot").setup()
+		end,
 	},
 	"mbbill/undotree",
 	{
 		"anuvyklack/pretty-fold.nvim",
 	},
 
-	{
-		"ahmedkhalf/project.nvim",
-		config = function()
-			require("project_nvim").setup()
-		end,
-	},
 	{
 		"Bekaboo/deadcolumn.nvim",
 	},
@@ -218,5 +213,11 @@ require("lazy").setup({
 			"junegunn/fzf",
 			build = ":call fzf#install()",
 		},
+	},
+	{
+		"sindrets/diffview.nvim",
+	},
+	{
+		"preservim/vimux",
 	},
 })
