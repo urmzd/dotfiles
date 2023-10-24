@@ -1,8 +1,31 @@
+local cmp = require("cmp")
+local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+local lspkind = require("lspkind")
+
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
+cmp.setup({
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = "symbol",
+      maxwidth = 50,
+      ellipsis_char = "...",
+      before = function(entry, vim_item)
+        return vim_item
+      end,
+    }),
+  },
+  sources = {
+    { name = "copilot" },
+    { name = "path" },
+    { name = "buffer" },
+    { name = "cmdline" },
+  },
+})
+
 local M = {}
 
 M.opts = {}
-
-vim.g.coq_settings = { auto_start = "shut-up" }
 
 vim.keymap.set("n", "<space>e", vim.diagnostic.open_float)
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
@@ -38,15 +61,13 @@ function M.opts.on_attach(client, bufnr)
   end
 end
 
-function M.setup_with_coq(overrides)
-  local lume = require("lume")
-  local merged_opts = lume.merge(M.opts, overrides or {})
-  return require("coq").lsp_ensure_capabilities(merged_opts)
-end
-
 function M.setup(lsp, overrides)
   local lspconfig = require("lspconfig")
-  lspconfig[lsp].setup(M.setup_with_coq(overrides))
+  local capabilities = require("cmp_nvim_lsp").default_capabilities()
+  local lume = require("lume")
+  M.opts.capabilities = capabilities
+  local merged_opts = lume.merge(M.opts, overrides or {})
+  lspconfig[lsp].setup(merged_opts)
 end
 
 return M

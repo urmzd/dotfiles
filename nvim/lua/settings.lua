@@ -22,3 +22,6 @@ vim.opt.fileformat = "unix"
 vim.opt.nrformats = "alpha"
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("config") .. "/undo"
+
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1

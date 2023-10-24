@@ -66,6 +66,9 @@ require("lazy").setup({
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
 		},
+		config = function()
+			vim.keymap.set("n", "<leader>v", ":NvimTreeOpen<CR>")
+		end,
 	},
 	-- Documentation
 	{
@@ -110,9 +113,6 @@ require("lazy").setup({
 	-- Completion
 	{
 		"windwp/nvim-autopairs",
-		config = function()
-			require("plugins.autopairs")
-		end,
 	},
 	-- Tests
 	{
@@ -154,37 +154,27 @@ require("lazy").setup({
 	{ "urmzd/lume.nvim" },
 	{
 		"folke/neodev.nvim",
-		config = function()
-			require("plugins.neodev")
-		end,
-		opts = {},
 	},
 	{ "j-hui/fidget.nvim" },
 	{
-		"ms-jpq/chadtree",
-		branch = "chad",
-		build = "python3 -m chadtree deps",
+		"nvim-tree/nvim-tree.lua",
+		version = "*",
+		lazy = false,
 		dependencies = {
-			{ "ms-jpq/coq_nvim",      branch = "coq" },
-			{ "ms-jpq/coq.artifacts", branch = "artifacts" },
-			{
-				"ms-jpq/coq.thirdparty",
-				branch = "3p",
-				config = function()
-					require("coq_3p")({
-						{ src = "dap" },
-					})
-				end,
-			},
+			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
-			require("plugins.chad-tree")
+			require("nvim-tree").setup({})
 		end,
 	},
+
 	{
 		"zbirenbaum/copilot.lua",
 		config = function()
-			require("copilot").setup()
+			require("copilot").setup({
+				suggestion = { enabled = false },
+				panel = { enabled = false },
+			})
 		end,
 	},
 	"mbbill/undotree",
@@ -219,5 +209,21 @@ require("lazy").setup({
 	},
 	{
 		"preservim/vimux",
+	},
+	{
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-buffer",
+			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-cmdline",
+			"onsails/lspkind.nvim"
+		},
+	},
+	{
+		"zbirenbaum/copilot-cmp",
+		config = function()
+			require("copilot_cmp").setup()
+		end,
 	},
 })

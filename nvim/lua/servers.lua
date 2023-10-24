@@ -22,6 +22,15 @@ for _, server in ipairs(servers) do
   local overrides = nil
   local util = require("lspconfig.util")
 
+  if server == "lua_ls" then
+    require("neodev").setup({
+      library = {
+        plugins = { "neotest" },
+        types = true,
+      },
+    })
+  end
+
   if server == "yamlls" then
     overrides = {
       settings = {
@@ -74,9 +83,12 @@ for _, server in ipairs(servers) do
 
   if server == "rust_analyzer" then
     local rt = require("rust-tools")
+    local capabilities = require("cmp_nvim_lsp")
 
     rt.setup({
-      server = config.setup_with_coq(),
+      server = {
+        capabilities = capabilities,
+      },
     })
   else
     config.setup(server, overrides)
