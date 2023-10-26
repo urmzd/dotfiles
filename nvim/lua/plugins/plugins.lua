@@ -67,7 +67,7 @@ require("lazy").setup({
 			{ "nvim-tree/nvim-web-devicons" },
 		},
 		config = function()
-			vim.keymap.set("n", "<leader>v", ":NvimTreeOpen<CR>")
+			vim.keymap.set("n", "<leader>v", ":NvimTreeToggle<CR>")
 		end,
 	},
 	-- Documentation
@@ -217,13 +217,26 @@ require("lazy").setup({
 			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
-			"onsails/lspkind.nvim"
+			"onsails/lspkind.nvim",
 		},
 	},
 	{
 		"zbirenbaum/copilot-cmp",
 		config = function()
 			require("copilot_cmp").setup()
+		end,
+	},
+	{
+		"L3MON4D3/LuaSnip",
+		-- follow latest release.
+		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+		-- install jsregexp (optional!).
+		build = "make install_jsregexp",
+	},
+	{
+		"ahmedkhalf/project.nvim",
+		config = function()
+			require("project_nvim").setup({})
 		end,
 	},
 })
