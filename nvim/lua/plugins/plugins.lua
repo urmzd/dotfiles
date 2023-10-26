@@ -218,8 +218,8 @@ require("lazy").setup({
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
 			"onsails/lspkind.nvim",
-		},
-	},
+		}
+  },
 	{
 		"zbirenbaum/copilot-cmp",
 		config = function()
