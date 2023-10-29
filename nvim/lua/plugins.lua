@@ -21,7 +21,22 @@ require("lazy").setup({
 	{
 		"williamboman/mason.nvim",
 		config = function()
-			require("plugins.mason")
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"lua_ls",
+					"rust_analyzer",
+					"tsserver",
+					"pyright",
+					"jdtls",
+					"yamlls",
+					"bashls",
+					"gopls",
+				},
+			})
+			require("mason-null-ls").setup({
+				automatic_installation = true,
+			})
 			require("servers")
 		end,
 	},
@@ -32,7 +47,26 @@ require("lazy").setup({
 			{
 				"jose-elias-alvarez/null-ls.nvim",
 				config = function()
-					require("plugins.null-ls")
+					local nls = require("null-ls")
+
+					local sources = {
+						nls.builtins.code_actions.gitsigns,
+						nls.builtins.hover.dictionary,
+						nls.builtins.formatting.stylua,
+						nls.builtins.formatting.prettierd,
+						nls.builtins.formatting.beautysh,
+						nls.builtins.formatting.taplo,
+						nls.builtins.formatting.npm_groovy_lint,
+						nls.builtins.formatting.markdownlint,
+						nls.builtins.formatting.mdformat,
+						nls.builtins.formatting.black,
+					}
+
+					nls.setup({
+						sources = sources,
+						save_after_format = true,
+						debounce = 150,
+					})
 				end,
 			},
 		},
@@ -42,7 +76,9 @@ require("lazy").setup({
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
 		config = function()
-			require("plugins.treesitter")
+			require("nvim-treesitter.configs").setup({
+				ensure_installed = { "rust", "python", "c", "lua" },
+			})
 		end,
 	},
 	{ "tpope/vim-surround" },
@@ -72,7 +108,7 @@ require("lazy").setup({
 		"kkoomen/vim-doge",
 		build = ":call doge#install()",
 		config = function()
-			require("plugins.doge")
+			vim.g.doge_doc_standard_python = "google"
 		end,
 	},
 	-- Misc
@@ -122,7 +158,15 @@ require("lazy").setup({
 			{ "rouge8/neotest-rust",         ft = "rust" },
 		},
 		config = function()
-			require("plugins.neotest")
+			require("neotest").setup({
+				adapters = {
+					require("neotest-plenary"),
+					require("neotest-python")({
+						runner = "pytest",
+					}),
+					require("neotest-rust"),
+				},
+			})
 		end,
 	},
 	-- Debuggers
@@ -215,6 +259,7 @@ require("lazy").setup({
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
 			"onsails/lspkind.nvim",
+			"saadparwaiz1/cmp_luasnip",
 		},
 	},
 	{
@@ -232,5 +277,10 @@ require("lazy").setup({
 	{
 		"hinell/lsp-timeout.nvim",
 		dependencies = { "neovim/nvim-lspconfig" },
+	},
+	{
+		"L3MON4D3/LuaSnip",
+		version = "v2.0.0",
+		build = "make install_jsregexp",
 	},
 })
