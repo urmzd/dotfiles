@@ -79,15 +79,13 @@ for _, server in ipairs(servers) do
   end
 
   if server == "rust_analyzer" then
-    local rt = require("rust-tools")
-
-    rt.setup({
+    require("rust-tools").setup({
       server = {
         on_attach = config.opts.on_attach,
+        capabilities = config.opts.capabilities,
       },
     })
   else
     config.setup(server, overrides)
   end
-
 end

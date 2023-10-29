@@ -18,7 +18,6 @@ require("lazy").setup({
 			"nvim-lua/plenary.nvim",
 		},
 	},
-
 	{
 		"williamboman/mason.nvim",
 		config = function()
@@ -38,7 +37,6 @@ require("lazy").setup({
 			},
 		},
 	},
-
 	{ "sheerun/vim-polyglot" },
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -53,8 +51,8 @@ require("lazy").setup({
 	{ "tpope/vim-unimpaired" },
 	{ "preservim/nerdcommenter" },
 	{
-		"nyoom-engineering/oxocarbon.nvim",
-		--"ellisonleao/gruvbox.nvim",
+		--"nyoom-engineering/oxocarbon.nvim",
+		"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
 			require("theme")
@@ -113,7 +111,7 @@ require("lazy").setup({
 	{
 		"windwp/nvim-autopairs",
 		event = "InsertEnter",
-		opts = {}
+		opts = {},
 	},
 	-- Tests
 	{
@@ -178,7 +176,7 @@ require("lazy").setup({
 			})
 		end,
 	},
-	"mbbill/undotree",
+	{ "mbbill/undotree" },
 	{
 		"anuvyklack/pretty-fold.nvim",
 	},
@@ -194,9 +192,6 @@ require("lazy").setup({
 			vim.o.timeoutlen = 300
 		end,
 		opts = {},
-		config = function()
-			require("plugins.which_key")
-		end,
 	},
 	{
 		"junegunn/fzf.vim",
@@ -213,15 +208,15 @@ require("lazy").setup({
 	},
 	{
 		"hrsh7th/nvim-cmp",
-		event = {"InsertEnter", "CmdlineEnter"},
+		event = { "InsertEnter", "CmdlineEnter" },
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
 			"onsails/lspkind.nvim",
-		}
-  },
+		},
+	},
 	{
 		"zbirenbaum/copilot-cmp",
 		config = function()
@@ -229,16 +224,13 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"L3MON4D3/LuaSnip",
-		-- follow latest release.
-		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-		-- install jsregexp (optional!).
-		build = "make install_jsregexp",
-	},
-	{
 		"ahmedkhalf/project.nvim",
 		config = function()
 			require("project_nvim").setup({})
 		end,
+	},
+	{
+		"hinell/lsp-timeout.nvim",
+		dependencies = { "neovim/nvim-lspconfig" },
 	},
 })
