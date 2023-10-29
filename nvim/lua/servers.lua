@@ -1,4 +1,5 @@
 local config = require("lsp_config")
+local util = require("lspconfig.util")
 
 local servers = {
   "bashls",
@@ -20,7 +21,6 @@ local servers = {
 
 for _, server in ipairs(servers) do
   local overrides = nil
-  local util = require("lspconfig.util")
 
   if server == "lua_ls" then
     require("neodev").setup({
@@ -38,9 +38,6 @@ for _, server in ipairs(servers) do
           yaml = {
             format = {
               singleQuote = true,
-            },
-            schemas = {
-              ["https://raw.githubusercontent.com/open-telemetry/opentelemetry-specification/main/schemas/1.9.0"] = "/otel-collector-config.yaml",
             },
           },
         },
@@ -83,14 +80,14 @@ for _, server in ipairs(servers) do
 
   if server == "rust_analyzer" then
     local rt = require("rust-tools")
-    local capabilities = require("cmp_nvim_lsp")
 
     rt.setup({
       server = {
-        capabilities = capabilities,
+        on_attach = config.opts.on_attach,
       },
     })
   else
     config.setup(server, overrides)
   end
+
 end

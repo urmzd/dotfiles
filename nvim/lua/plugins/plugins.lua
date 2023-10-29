@@ -53,14 +53,13 @@ require("lazy").setup({
 	{ "tpope/vim-unimpaired" },
 	{ "preservim/nerdcommenter" },
 	{
-		--"nyoom-engineering/oxocarbon.nvim",
-		"ellisonleao/gruvbox.nvim",
+		"nyoom-engineering/oxocarbon.nvim",
+		--"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
 			require("theme")
 		end,
 	},
-
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = {
@@ -113,6 +112,8 @@ require("lazy").setup({
 	-- Completion
 	{
 		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		opts = {}
 	},
 	-- Tests
 	{
@@ -212,6 +213,7 @@ require("lazy").setup({
 	},
 	{
 		"hrsh7th/nvim-cmp",
+		event = {"InsertEnter", "CmdlineEnter"},
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
