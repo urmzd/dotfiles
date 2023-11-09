@@ -139,15 +139,22 @@ require("lazy").setup({
 	},
 	{ "tpope/vim-surround" },
 	{ "tpope/vim-repeat" },
-	{ "tpope/vim-fugitive" },
 	{ "tpope/vim-unimpaired" },
-	{ "preservim/nerdcommenter" },
+	-- add this to your lua/plugins.lua, lua/plugins/init.lua,  or the file you keep your other plugins:
 	{
-		--"nyoom-engineering/oxocarbon.nvim",
-		"ellisonleao/gruvbox.nvim",
+		"numToStr/Comment.nvim",
+		opts = {
+			-- add any options here
+		},
+		lazy = false,
+	},
+	{
+		"nyoom-engineering/oxocarbon.nvim",
+		--"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
-			local colorscheme = "gruvbox"
+			--local colorscheme = "gruvbox"
+			local colorscheme = "oxocarbon"
 			local style = "dark"
 
 			vim.opt.termguicolors = true
@@ -205,7 +212,7 @@ require("lazy").setup({
 		},
 		config = function()
 			local telescope = require("telescope")
-
+			telescope.load_extension("fzf")
 			telescope.load_extension("project")
 
 			telescope.setup({
@@ -218,8 +225,6 @@ require("lazy").setup({
 					},
 				},
 			})
-
-			telescope.load_extension("fzf")
 
 			local builtin = require("telescope.builtin")
 
@@ -266,6 +271,9 @@ require("lazy").setup({
 		config = function()
 			local function get_python_path()
 				local file = io.popen("which python")
+				if file == nil then
+					return
+				end
 				local output = file:read("*all")
 				file:close()
 				return output
@@ -370,13 +378,6 @@ require("lazy").setup({
 		opts = {},
 	},
 	{
-		"junegunn/fzf.vim",
-		requires = {
-			"junegunn/fzf",
-			build = ":call fzf#install()",
-		},
-	},
-	{
 		"sindrets/diffview.nvim",
 	},
 	{
@@ -403,5 +404,42 @@ require("lazy").setup({
 		"L3MON4D3/LuaSnip",
 		version = "v2.0.0",
 		build = "make install_jsregexp",
+	},
+	{
+		"NeogitOrg/neogit",
+		dependencies = {
+			"nvim-lua/plenary.nvim",      -- required
+			"nvim-telescope/telescope.nvim", -- optional
+			"sindrets/diffview.nvim",     -- optional
+		},
+		config = true,
+	},
+	{ "junegunn/fzf",   build = "./install --bin" },
+	--[[ {
+		"kevinhwang91/nvim-ufo",
+		dependencies = "kevinhwang91/promise-async",
+		config = function()
+			vim.o.foldcolumn = "1"
+			vim.o.foldlevel = 99
+			vim.o.foldlevelstart = 99
+			vim.o.foldenable = true
+
+			vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+			vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+		end,
+	}, ]]
+	{
+		"folke/flash.nvim",
+		event = "VeryLazy",
+		---@type Flash.Config
+		opts = {},
+		-- stylua: ignore
+		keys = {
+			{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+			{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+			{ "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+			{ "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+			{ "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+		},
 	},
 })
