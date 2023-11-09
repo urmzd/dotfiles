@@ -200,10 +200,13 @@ require("lazy").setup({
 		dependencies = {
 			"junegunn/fzf",
 			"nvim-telescope/telescope-fzf-native.nvim",
+			"nvim-telescope/telescope-project.nvim",
 			build = "make",
 		},
 		config = function()
 			local telescope = require("telescope")
+
+			telescope.load_extension("project")
 
 			telescope.setup({
 				defaults = {
@@ -220,6 +223,7 @@ require("lazy").setup({
 
 			local builtin = require("telescope.builtin")
 
+			vim.keymap.set("n", "<leader>fp", telescope.extensions.project.project)
 			vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
@@ -394,10 +398,6 @@ require("lazy").setup({
 		config = function()
 			require("project_nvim").setup({})
 		end,
-	},
-	{
-		"hinell/lsp-timeout.nvim",
-		dependencies = { "neovim/nvim-lspconfig" },
 	},
 	{
 		"L3MON4D3/LuaSnip",

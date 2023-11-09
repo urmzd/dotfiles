@@ -10,6 +10,7 @@ local servers = {
   "graphql",
   "groovyls",
   "pyright",
+  "pyre",
   "kotlin_language_server",
   "perlls",
   "texlab",
@@ -63,6 +64,7 @@ for _, server in ipairs(servers) do
           },
         },
       },
+      --root_dir = util.root_pattern(".git")
     }
   end
 
