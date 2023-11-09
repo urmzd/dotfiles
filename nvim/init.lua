@@ -395,12 +395,6 @@ require("lazy").setup({
 		},
 	},
 	{
-		"ahmedkhalf/project.nvim",
-		config = function()
-			require("project_nvim").setup({})
-		end,
-	},
-	{
 		"L3MON4D3/LuaSnip",
 		version = "v2.0.0",
 		build = "make install_jsregexp",
@@ -442,4 +436,31 @@ require("lazy").setup({
 			{ "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
 		},
 	},
+	-- lazy.nvim
+	{
+		"sontungexpt/url-open",
+		event = "VeryLazy",
+		cmd = "URLOpenUnderCursor",
+		config = function()
+			local status_ok, url_open = pcall(require, "url-open")
+			if not status_ok then
+				return
+			end
+			url_open.setup({})
+		end,
+	},
+	--[[ {
+		"coffebar/neovim-project",
+		init = function()
+			-- enable saving the state of plugins in the session
+			vim.opt.sessionoptions:append("globals") -- save global variables that start with an uppercase letter and contain at least one lowercase letter.
+		end,
+		dependencies = {
+			{ "nvim-lua/plenary.nvim" },
+			{ "nvim-telescope/telescope.nvim", tag = "0.1.4" },
+			{ "Shatur/neovim-session-manager" },
+		},
+		lazy = false,
+		priority = 100,
+	}, ]]
 })
