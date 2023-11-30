@@ -40,13 +40,6 @@ vim.keymap.set("i", "jk", "<ESC>")
 vim.keymap.set("i", "kk", "<ESC>")
 vim.keymap.set("i", "kj", "<ESC>")
 
-vim.api.nvim_create_autocmd({ "InsertEnter" }, {
-	pattern = { "*" },
-	callback = function()
-		vim.api.nvim_set_option("hlsearch", false)
-	end,
-})
-
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 	pattern = { "*.md" },
 	callback = function()
@@ -337,9 +330,6 @@ require("lazy").setup({
 		dependencies = {
 			"nvim-tree/nvim-web-devicons",
 		},
-		config = function()
-			require("nvim-tree").setup({})
-		end,
 	},
 	{
 		"zbirenbaum/copilot.lua",
@@ -409,19 +399,6 @@ require("lazy").setup({
 		config = true,
 	},
 	{ "junegunn/fzf",   build = "./install --bin" },
-	--[[ {
-		"kevinhwang91/nvim-ufo",
-		dependencies = "kevinhwang91/promise-async",
-		config = function()
-			vim.o.foldcolumn = "1"
-			vim.o.foldlevel = 99
-			vim.o.foldlevelstart = 99
-			vim.o.foldenable = true
-
-			vim.keymap.set("n", "zR", require("ufo").openAllFolds)
-			vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
-		end,
-	}, ]]
 	{
 		"folke/flash.nvim",
 		event = "VeryLazy",
@@ -436,7 +413,6 @@ require("lazy").setup({
 			{ "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
 		},
 	},
-	-- lazy.nvim
 	{
 		"sontungexpt/url-open",
 		event = "VeryLazy",
@@ -449,18 +425,21 @@ require("lazy").setup({
 			url_open.setup({})
 		end,
 	},
-	--[[ {
-		"coffebar/neovim-project",
-		init = function()
-			-- enable saving the state of plugins in the session
-			vim.opt.sessionoptions:append("globals") -- save global variables that start with an uppercase letter and contain at least one lowercase letter.
-		end,
+	{
+		"ahmedkhalf/project.nvim",
 		dependencies = {
-			{ "nvim-lua/plenary.nvim" },
-			{ "nvim-telescope/telescope.nvim", tag = "0.1.4" },
-			{ "Shatur/neovim-session-manager" },
+			"nvim-tree/nvim-tree.lua",
 		},
-		lazy = false,
-		priority = 100,
-	}, ]]
+		config = function()
+			require("project_nvim").setup({})
+			require("nvim-tree").setup({
+				sync_root_with_cwd = true,
+				respect_buf_cwd = true,
+				update_focused_file = {
+					enable = true,
+					update_root = true,
+				},
+			})
+		end,
+	},
 })

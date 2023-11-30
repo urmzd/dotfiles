@@ -49,7 +49,7 @@ for _, server in ipairs(servers) do
   if server == "terraformls" then
     overrides = {
       single_file_support = false,
-      root_dir = util.root_pattern(".terraform", ".git"),
+      root_dir = util.root_pattern(".terraform"),
     }
   end
 
