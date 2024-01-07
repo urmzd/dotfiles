@@ -19,10 +19,10 @@
   copy:
     src: zshrc.sh
     dest: ~/.zshrc
-    force: yes
+    force: no
 
 - name: "Copy zshenv"
   copy:
     src: zshenv.sh
     dest: ~/.zshenv
-    force: yes
+    force: no

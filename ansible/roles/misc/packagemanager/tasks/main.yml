@@ -1,0 +1,35 @@
+- name: Install nvm
+  shell: >
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+    executable: /bin/zsh
+
+- name: Install pyenv
+  shell: >
+    curl -o- https://pyenv.run | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.pyenv"
+    executable: /bin/zsh
+
+- name: Enable integration with shell
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: |
+      eval "$(pyenv init -)"
+      eval "$(pyenv virtualenv-init -)"
+    insertafter: EOF
+    state: present
+
+- name: Install bison for gvm
+  become: true
+  package:
+    name: bison
+    state: present
+
+- name: Install gvm
+  shell: >
+    zsh < <(curl -s -S -L https://raw.githubusercontent.com/bipinshashi/gvm/fix/zsh/binscripts/gvm-installer)
+  args:
+    executable: /bin/zsh
+    creates: "{{ ansible_env.HOME }}/.gvm"

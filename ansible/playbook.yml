@@ -3,3 +3,4 @@
   roles:
     - role: zsh
     - role: nvim
+    - role: misc/packagemanager
