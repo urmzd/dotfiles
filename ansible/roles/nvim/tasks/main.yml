@@ -17,6 +17,7 @@
   git:
     repo: "https://github.com/neovim/neovim.git"
     dest: /tmp/neovim
+    force: true
   
 - name: "Set make type"
   make:
@@ -30,7 +31,7 @@
     target: install
 
 - name: "Copy files over to ~/.config/nvim"
-  copy:
-    src: files/
-    dest: ~/.config/nvim
-    force: yes
+  file:
+    src: "{{ role_path }}/files/"
+    path: ~/.config/nvim
+    state: link

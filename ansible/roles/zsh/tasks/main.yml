@@ -15,14 +15,13 @@
     repo: https://github.com/ohmyzsh/ohmyzsh.git
     dest: ~/.oh-my-zsh
 
-- name: "Copy zshrc"
-  copy:
-    src: zshrc.sh
-    dest: ~/.zshrc
-    force: no
-
-- name: "Copy zshenv"
-  copy:
-    src: zshenv.sh
-    dest: ~/.zshenv
-    force: no
+- name: "Syslink all files"
+  file:
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
+    state: link
+  with_items:
+    - src: "{{role_path}}/files/zshrc.sh"
+      path: "{{ ansible_env.HOME }}/.zshrc"
+    - src: "{{role_path}}/files/zshenv.sh"
+      path: "{{ ansible_env.HOME }}/.zshenv"

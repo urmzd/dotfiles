@@ -33,3 +33,24 @@
   args:
     executable: /bin/zsh
     creates: "{{ ansible_env.HOME }}/.gvm"
+
+- name: Install node
+  shell: >
+    nvm install node
+  args:
+    executable: /bin/zsh
+
+- name: Install go
+  shell: >
+    gvm install go1.4 -B
+    gvm use go1.4
+    export GOROOT_BOOTSTRAP=$GOROOT
+    gvm install go1.21.5
+  args:
+    executable: /bin/zsh
+
+# install 3.8-dev
+# install node latest
+# install go latest
+
+
