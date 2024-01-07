@@ -1,4 +1,5 @@
-- name: install zsh
-  tasks:
-    - name: 
-
+- name: "Set up shell"
+  hosts: localhost
+  roles:
+    - role: zsh
+    - role: nvim

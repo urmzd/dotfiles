@@ -1,0 +1,36 @@
+- name: "Install neovim dependencies"
+  become: true
+  package:
+    name:
+      - ninja-build
+      - gettext
+      - libtool
+      - libtool-bin
+      - autoconf
+      - automake
+      - cmake
+      - g++
+      - pkg-config
+      - unzip
+    
+- name: "Clone neovim"
+  git:
+    repo: "https://github.com/neovim/neovim.git"
+    dest: /tmp/neovim
+  
+- name: "Set make type"
+  make:
+    chdir: /tmp/neovim
+    target: CMAKE_BUILD_TYPE=RelWithDebInfo
+
+- name: "Install neovim"
+  become: true
+  make:
+    chdir: /tmp/neovim
+    target: install
+
+- name: "Copy files over to ~/.config/nvim"
+  copy:
+    src: files/
+    dest: ~/.config/nvim
+    force: yes

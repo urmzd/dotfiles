@@ -1,0 +1,28 @@
+- name: Install zsh
+  become: true
+  package:
+    name: zsh
+    state: present
+
+- name: Set zsh as default shell
+  become: True
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/zsh
+
+- name: "Install oh-my-zsh"
+  git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: ~/.oh-my-zsh
+
+- name: "Copy zshrc"
+  copy:
+    src: zshrc.sh
+    dest: ~/.zshrc
+    force: yes
+
+- name: "Copy zshenv"
+  copy:
+    src: zshenv.sh
+    dest: ~/.zshenv
+    force: yes
