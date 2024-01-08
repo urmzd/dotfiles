@@ -82,5 +82,6 @@
     pyenv install 3.8-dev
   args:
     executable: /bin/zsh
+    creates:  "{{ ansible_env.HOME }}/.pyenv/versions/3.8-dev"
 
 

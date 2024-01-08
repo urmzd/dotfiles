@@ -1,4 +1,5 @@
 local config = require("lsp_config")
+local util = require("lspconfig.util")
 
 local servers = {
   "bashls",
@@ -9,6 +10,7 @@ local servers = {
   "graphql",
   "groovyls",
   "pyright",
+  "pyre",
   "kotlin_language_server",
   "perlls",
   "texlab",
@@ -21,6 +23,15 @@ local servers = {
 for _, server in ipairs(servers) do
   local overrides = nil
 
+  if server == "lua_ls" then
+    require("neodev").setup({
+      library = {
+        plugins = { "neotest" },
+        types = true,
+      },
+    })
+  end
+
   if server == "yamlls" then
     overrides = {
       settings = {
@@ -29,17 +40,20 @@ for _, server in ipairs(servers) do
             format = {
               singleQuote = true,
             },
-            schemas = {
-              ["https://raw.githubusercontent.com/open-telemetry/opentelemetry-specification/main/schemas/1.9.0"] = "/otel-collector-config.yaml",
-            },
           },
         },
       },
     }
   end
 
+  if server == "terraformls" then
+    overrides = {
+      single_file_support = false,
+      root_dir = util.root_pattern(".terraform"),
+    }
+  end
+
   if server == "pyright" then
-    local util = require("lspconfig.util")
     overrides = {
       settings = {
         python = {
@@ -50,7 +64,7 @@ for _, server in ipairs(servers) do
           },
         },
       },
-      root_dir = util.root_pattern(".git"),
+      --root_dir = util.root_pattern(".git")
     }
   end
 
@@ -67,10 +81,11 @@ for _, server in ipairs(servers) do
   end
 
   if server == "rust_analyzer" then
-    local rt = require("rust-tools")
-
-    rt.setup({
-      server = config.setup_with_coq(),
+    require("rust-tools").setup({
+      server = {
+        on_attach = config.opts.on_attach,
+        capabilities = config.opts.capabilities,
+      },
     })
   else
     config.setup(server, overrides)

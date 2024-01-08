@@ -16,6 +16,7 @@
 - name: "Clone neovim"
   git:
     repo: "https://github.com/neovim/neovim.git"
+    version: stable
     dest: /tmp/neovim
     force: true
   
@@ -30,7 +31,7 @@
     chdir: /tmp/neovim
     target: install
 
-- name: "Copy files over to ~/.config/nvim"
+- name: "Link config"
   file:
     src: "{{ role_path }}/files/"
     path: ~/.config/nvim
