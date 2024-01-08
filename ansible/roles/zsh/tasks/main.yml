@@ -5,7 +5,7 @@
     state: present
 
 - name: Set zsh as default shell
-  become: True
+  become: true
   user:
     name: "{{ ansible_user }}"
     shell: /bin/zsh
@@ -15,13 +15,12 @@
     repo: https://github.com/ohmyzsh/ohmyzsh.git
     dest: ~/.oh-my-zsh
 
-- name: "Syslink all files"
+- name: "Syslink all zsh files"
   file:
-    src: "{{ item.src }}"
-    path: "{{ item.path }}"
+    src: "{{role_path}}/files/{{ item.src }}.sh"
+    path: "{{ ansible_env.HOME }}/.{{ item.src }}"
     state: link
   with_items:
-    - src: "{{role_path}}/files/zshrc.sh"
-      path: "{{ ansible_env.HOME }}/.zshrc"
-    - src: "{{role_path}}/files/zshenv.sh"
-      path: "{{ ansible_env.HOME }}/.zshenv"
+    - src: "zshrc"
+    - src: "zshenv"
+    - src: "zprofile"

@@ -1,3 +1,32 @@
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 # One day
+
+- name: Install dependencies
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - curl
+    - libncursesw5-dev
+    - xz-utils
+    - tk-dev
+    - libxml2-dev
+    - libxmlsec1-dev
+    - libffi-dev
+    - liblzma-dev
+    - bison
+
 - name: Install nvm
   shell: >
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -14,18 +43,13 @@
 
 - name: Enable integration with shell
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.zshrc"
-    line: |
-      eval "$(pyenv init -)"
-      eval "$(pyenv virtualenv-init -)"
-    insertafter: EOF
-    state: present
+    path: "{{ ansible_env.HOME }}/.zprofile"
+    line: 'eval "$(pyenv init -)"'
 
-- name: Install bison for gvm
-  become: true
-  package:
-    name: bison
-    state: present
+- name: Enable virtualenv integration with shell
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zprofile"
+    line: 'eval "$(pyenv virtualenv-init -)"'
 
 - name: Install gvm
   shell: >
@@ -36,21 +60,27 @@
 
 - name: Install node
   shell: >
-    nvm install node
+    source ~/.zprofile
+    nvm install --lts
   args:
     executable: /bin/zsh
 
 - name: Install go
-  shell: >
-    gvm install go1.4 -B
-    gvm use go1.4
+  shell: |
+    source ~/.zprofile
+    gvm install go1.21.0 -B
+    gvm use go1.21.0
     export GOROOT_BOOTSTRAP=$GOROOT
     gvm install go1.21.5
+    gvm use go1.21.5 --default
   args:
     executable: /bin/zsh
 
-# install 3.8-dev
-# install node latest
-# install go latest
+- name: Install python
+  shell: |
+    source ~/.zprofile
+    pyenv install 3.8-dev
+  args:
+    executable: /bin/zsh
 
 
