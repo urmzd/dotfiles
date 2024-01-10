@@ -24,3 +24,20 @@
     - src: "zshrc"
     - src: "zshenv"
     - src: "zprofile"
+
+- name: "Syslink p10k config"
+  file:
+    src: "{{role_path}}/files/p10k.zsh"
+    path: "{{ ansible_env.HOME}}/.p10k.zsh"
+    state: link
+
+- name: "Copy fonts over"
+  copy:
+    src: "files/fonts/"
+    dest: "{{ ansible_env.HOME}}/.local/share/fonts"
+
+- name: "Install powerlevel10k"
+  git:
+    repo: https://github.com/romkatv/powerlevel10k.git 
+    depth: 1
+    dest: "{{ ansible_env.HOME}}/.oh-my-zsh/custom/themes/powerlevel10k"
