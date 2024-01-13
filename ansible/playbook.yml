@@ -4,3 +4,4 @@
     - role: zsh
     - role: nvim
     - role: misc/packagemanager
+    - role: tmux

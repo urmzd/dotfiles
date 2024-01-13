@@ -1,0 +1,20 @@
+- name: Install tmux
+  become: true
+  package:
+    name: tmux
+    state: present
+
+- name: Install tpm
+  git:
+    repo: https://github.com/tmux-plugins/tpm
+    dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+
+- name: Link config
+  file:
+    src: "{{ role_path }}/files/tmux.conf"
+    path: ~/.config/tmux/tmux.conf
+    state: link
+    force: true
+
+- name: Install plugins
+  shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"

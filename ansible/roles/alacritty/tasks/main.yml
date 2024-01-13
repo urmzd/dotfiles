@@ -1,0 +1,16 @@
+- name: clone repo
+  git:
+    repo: https://github.com/alacritty/alacritty.git
+    dest: /tmp/alacritty
+
+# - name: Check whether machine is WSL
+#   set_fact:
+      # if /mnt/c/Windows exists, we're on WSL
+      # is_wsl:  "{{ ansible_facts.mounts | map(attribute='mount') | list | contains('/mnt/c/Windows') }}"
+
+# - name: Install alacritty for WSL
+#   become: true
+#   package:
+#     name: alacritty
+#     state: present
+#   when: not is_wsl

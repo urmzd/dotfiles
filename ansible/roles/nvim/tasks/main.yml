@@ -12,20 +12,26 @@
       - g++
       - pkg-config
       - unzip
-    
+
 - name: "Clone neovim"
   git:
     repo: "https://github.com/neovim/neovim.git"
-    version: stable
+    version: nightly
     dest: /tmp/neovim
-    force: true
-  
+
+- name: "Check if Neovim was cloned"
+  stat:
+    path: /tmp/neovim
+  register: neovim_cloned
+
 - name: "Set make type"
+  when: neovim_cloned.stat.exists
   make:
     chdir: /tmp/neovim
     target: CMAKE_BUILD_TYPE=RelWithDebInfo
 
 - name: "Install neovim"
+  when: neovim_cloned.stat.exists
   become: true
   make:
     chdir: /tmp/neovim

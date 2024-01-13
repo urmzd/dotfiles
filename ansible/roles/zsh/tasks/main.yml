@@ -30,6 +30,7 @@
     src: "{{role_path}}/files/p10k.zsh"
     path: "{{ ansible_env.HOME}}/.p10k.zsh"
     state: link
+    force: true
 
 - name: "Copy fonts over"
   copy:
