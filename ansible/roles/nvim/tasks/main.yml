@@ -40,5 +40,5 @@
 - name: "Link config"
   file:
     src: "{{ role_path }}/files/"
-    path: ~/.config/nvim
+    path: "{{ ansible_env.HOME }}/.config/nvim"
     state: link

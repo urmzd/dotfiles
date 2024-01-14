@@ -9,12 +9,16 @@
     repo: https://github.com/tmux-plugins/tpm
     dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
 
+- name: Create config directory
+  file:
+    path: "{{ ansible_env.HOME }}/.config/tmux"
+    state: directory
+
 - name: Link config
   file:
     src: "{{ role_path }}/files/tmux.conf"
-    path: ~/.config/tmux/tmux.conf
+    path: "{{ ansible_env.HOME }}/.config/tmux/tmux.conf"
     state: link
-    force: true
 
 - name: Install plugins
   shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
