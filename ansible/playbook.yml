@@ -2,6 +2,17 @@
   hosts: localhost
   roles:
     - role: zsh
+      tags:
+        - zsh
     - role: nvim
+      tags: 
+        - nvim
     - role: misc/packagemanager
+      tags:
+        - packagemanager
     - role: tmux
+      tags:
+        - tmux
+    - role: misc/rust
+      tags:
+        - rust
