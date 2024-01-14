@@ -16,3 +16,6 @@
     - role: misc/rust
       tags:
         - rust
+    - role: misc/clang
+      tags:
+        - clang
