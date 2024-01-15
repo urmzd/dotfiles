@@ -64,7 +64,7 @@ for _, server in ipairs(servers) do
           },
         },
       },
-      --root_dir = util.root_pattern(".git")
+      root_dir = util.root_pattern(".git")
     }
   end
 

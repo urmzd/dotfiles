@@ -3,6 +3,18 @@
     repo: https://github.com/alacritty/alacritty.git
     dest: /tmp/alacritty
 
+- name: Make directory for config
+  file:
+    path: ~/.config/alacritty
+    state: directory
+
+- name: Syslink to .config
+  file:
+    src: "{{ role_path }}/files/alacritty.yml"
+    dest: ~/.config/alacritty/alacritty.yml
+    state: link
+
+
 # - name: Check whether machine is WSL
 #   set_fact:
       # if /mnt/c/Windows exists, we're on WSL

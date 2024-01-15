@@ -52,14 +52,14 @@
     line: 'eval "$(pyenv virtualenv-init -)"'
 
 - name: Install gvm
-  shell: >
-    zsh < <(curl -s -S -L https://raw.githubusercontent.com/bipinshashi/gvm/fix/zsh/binscripts/gvm-installer)
+  shell: |
+    zsh < <(curl -s -S -L https://raw.githubusercontent.com/urmzd/gvm/fix/zsh/binscripts/gvm-installer)
   args:
     executable: /bin/zsh
     creates: "{{ ansible_env.HOME }}/.gvm"
 
 - name: Install node
-  shell: >
+  shell: |
     source ~/.zprofile
     nvm install --lts
   args:

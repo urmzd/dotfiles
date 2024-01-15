@@ -5,4 +5,4 @@ export NVM_DIR="$HOME/.nvm"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-[[ -s "/home/urmzd/.gvm/scripts/gvm" ]] && source "/home/urmzd/.gvm/scripts/gvm"
+[[ -s "/home/reeldata/.gvm/scripts/gvm" ]] && source "/home/reeldata/.gvm/scripts/gvm"
