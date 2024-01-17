@@ -455,9 +455,16 @@ require("lazy").setup({
 	{
 		"f-person/git-blame.nvim",
 		config = function()
-			require("gitblame").setup {
-				enabled = false
-			}
-		end
-	}
+			require("gitblame").setup({
+				enabled = false,
+			})
+		end,
+	},
+	{
+		"olimorris/persisted.nvim",
+		config = function()
+			require("persisted").setup({})
+			require("telescope").load_extension("persisted")
+		end,
+	},
 })
