@@ -156,14 +156,14 @@ require("lazy").setup({
 			--local colorscheme = "gruvbox"
 			local colorscheme = "oxocarbon"
 			-- light | dark
-			local style = "light"
+			local style = "dark"
 
 			vim.opt.termguicolors = true
 			vim.opt.background = style
 
 			vim.cmd.colorscheme(colorscheme)
-			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+			-- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+			-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 		end,
 	},
 	{
