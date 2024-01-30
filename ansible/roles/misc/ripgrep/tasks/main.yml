@@ -1,0 +1,11 @@
+- name: Install ripgrep via cargo
+  shell:
+    cmd: cargo install ripgrep
+    creates: ~/.cargo/bin/rg
+  register: rg_install
+
+- name: Install shell completions for ripgrep
+  shell:
+    cmd: rg --generate complete-zsh > ~/.oh-my-zsh/completions/_rg
+    creates: ~/.oh-my-zsh/completions/_rg
+  when: rg_install.changed

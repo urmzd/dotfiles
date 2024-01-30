@@ -23,3 +23,9 @@
     - role: alacritty
       tags:
         - alacritty
+    - role: misc/fzf
+      tags:
+        - fzf
+    - role: misc/ripgrep
+      tags:
+        - ripgrep
