@@ -175,6 +175,14 @@ require("lazy").setup({
 				options = {
 					theme = "cyberdream",
 				},
+				sections = {
+					lualine_x = {
+						"copilot",
+						"encoding",
+						"fileformat",
+						"filetype",
+					},
+				},
 			})
 
 			vim.opt.termguicolors = true
@@ -381,6 +389,7 @@ require("lazy").setup({
 			"zbirenbaum/copilot.lua",
 		},
 	},
+	{ "AndreM222/copilot-lualine" },
 	{ "mbbill/undotree" },
 	{
 		"Bekaboo/deadcolumn.nvim",
@@ -416,7 +425,7 @@ require("lazy").setup({
 		},
 		config = true,
 	},
-	{ "junegunn/fzf",   build = "./install --bin" },
+	{ "junegunn/fzf", build = "./install --bin" },
 	{
 		"sontungexpt/url-open",
 		event = "VeryLazy",
