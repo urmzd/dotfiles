@@ -4,12 +4,7 @@
     dest: /tmp/ninja
     depth: 1
     version: release
-- name: Check if ninja was cloned
-  stat:
-    path: /tmp/ninja
-  register: ninja_cloned
 - name: Build ninja
-  when: ninja_cloned.stat.exists
   shell: >-
     ./configure.py --bootstrap
   args:
@@ -22,20 +17,16 @@
 - name: Check if repo was cloned
   stat:
     path: /tmp/llvm-project
-  register: llvm_cloned
 - name: Create build directory
-  when: llvm_cloned.stat.exists
   file:
     path: /tmp/llvm-project/build
     state: directory
 - name: Build LLVM
-  when: llvm_cloned.stat.exists
   shell: >-
     cmake -G Ninja ../llvm -DLLVM_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE
   args:
     chdir: /tmp/llvm-project/build
 - name: Install LLVM
-  when: llvm_cloned.stat.exists
   shell: make
   args:
     chdir: /tmp/llvm-project/build

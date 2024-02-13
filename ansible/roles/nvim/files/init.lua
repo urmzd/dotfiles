@@ -175,6 +175,9 @@ require("lazy").setup({
 				options = {
 					theme = "cyberdream",
 				},
+				filetypes = {
+					["yaml.*"] = true,
+				},
 				sections = {
 					lualine_x = {
 						"copilot",
