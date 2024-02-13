@@ -8,5 +8,5 @@ An automated set up for Debian-based operating systems.
 	# Step 2. Clean all files (if existing).
 	rm -rf ~/.zshrc ~/.zshenv ~/.nvm ~/.gvm ~/.pyenv
 	# Step 3. Execute the playbook.
-	ansible-playbook ansible/playbook --ask-became-pass --user=urmzd
+	ansible-playbook ansible/playbook --ask-become-pass --user=urmzd
 ```

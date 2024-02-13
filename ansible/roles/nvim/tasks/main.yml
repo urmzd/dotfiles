@@ -19,26 +19,14 @@
     version: nightly
     dest: /tmp/neovim
 
-- name: "Check if Neovim was cloned"
-  stat:
-    path: /tmp/neovim
-  register: neovim_cloned
-
-- name: "Set make type"
-  when: neovim_cloned.stat.exists
-  make:
-    chdir: /tmp/neovim
-    target: CMAKE_BUILD_TYPE=RelWithDebInfo
-
-- name: "Install neovim"
-  when: neovim_cloned.stat.exists
+- name: "Set make type and install neovim"
   become: true
   make:
     chdir: /tmp/neovim
-    target: install
+    target: CMAKE_BUILD_TYPE=RelWithDebInfo install
 
 - name: "Link config"
   file:
     src: "{{ role_path }}/files/"
-    path: "{{ ansible_env.HOME }}/.config/nvim"
+    dest: "{{ ansible_env.HOME }}/.config/nvim"
     state: link
