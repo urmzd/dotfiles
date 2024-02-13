@@ -45,8 +45,8 @@ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 	pattern = { "*.md" },
 	callback = function()
 		vim.api.nvim_exec2("e", {
-				output=false
-			})
+			output = false,
+		})
 	end,
 })
 
@@ -152,14 +152,30 @@ require("lazy").setup({
 		lazy = false,
 	},
 	{
-		"nyoom-engineering/oxocarbon.nvim",
+		"scottmckendry/cyberdream.nvim",
+		-- "nyoom-engineering/oxocarbon.nvim",
 		--"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
 			--local colorscheme = "gruvbox"
-			local colorscheme = "oxocarbon"
+			local colorscheme = "cyberdream"
 			-- light | dark
 			local style = "dark"
+
+			require(colorscheme).setup({
+				-- Recommended - see "Configuring" below for more config options
+				transparent = true,
+				italic_comments = true,
+				hide_fillchars = true,
+				borderless_telescope = true,
+			})
+
+			local cyberdream = require("lualine.themes.cyberdream")
+			require("lualine").setup({
+				options = {
+					theme = "cyberdream",
+				},
+			})
 
 			vim.opt.termguicolors = true
 			vim.opt.background = style
@@ -426,5 +442,28 @@ require("lazy").setup({
 				enabled = false,
 			})
 		end,
+	},
+	{
+		"chentoast/marks.nvim",
+		config = function()
+			require("marks").setup({})
+		end,
+	},
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
 	},
 })
