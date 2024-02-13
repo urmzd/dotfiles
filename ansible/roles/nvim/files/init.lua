@@ -24,6 +24,7 @@ vim.opt.fileformat = "unix"
 vim.opt.nrformats = "alpha"
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("config") .. "/undo"
+vim.o.hlsearch = not vim.o.hlsearch
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -43,7 +44,9 @@ vim.keymap.set("i", "kj", "<ESC>")
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 	pattern = { "*.md" },
 	callback = function()
-		vim.api.nvim_exec("e", false)
+		vim.api.nvim_exec2("e", {
+				output=false
+			})
 	end,
 })
 
@@ -171,9 +174,6 @@ require("lazy").setup({
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
 		},
-		config = function()
-			vim.keymap.set("n", "<leader>v", ":NvimTreeToggle<CR>")
-		end,
 	},
 	-- Documentation
 	{
@@ -204,13 +204,26 @@ require("lazy").setup({
 		},
 		opts = {},
 	},
-	-- Fuzzy Finder
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v3.x",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+			"MunifTanjim/nui.nvim",
+			-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+		},
+		config = function()
+			vim.keymap.set("n", "<leader>v", ":Neotree<CR>")
+		end,
+	},
 	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			"junegunn/fzf",
 			"nvim-telescope/telescope-fzf-native.nvim",
 			"nvim-telescope/telescope-project.nvim",
+
 			build = "make",
 		},
 		config = function()
@@ -334,14 +347,6 @@ require("lazy").setup({
 	},
 	{ "j-hui/fidget.nvim" },
 	{
-		"nvim-tree/nvim-tree.lua",
-		version = "*",
-		lazy = false,
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-		},
-	},
-	{
 		"zbirenbaum/copilot.lua",
 		event = { "InsertEnter" },
 		config = function()
@@ -362,21 +367,8 @@ require("lazy").setup({
 	},
 	{ "mbbill/undotree" },
 	{
-		"anuvyklack/pretty-fold.nvim",
-	},
-
-	{
 		"Bekaboo/deadcolumn.nvim",
 	},
-	--[[ {
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-		init = function()
-			vim.o.timeout = true
-			vim.o.timeoutlen = 300
-		end,
-		opts = {},
-	}, ]]
 	{
 		"sindrets/diffview.nvim",
 	},
@@ -409,20 +401,6 @@ require("lazy").setup({
 		config = true,
 	},
 	{ "junegunn/fzf",   build = "./install --bin" },
-	-- {
-	-- 	"folke/flash.nvim",
-	-- 	event = "VeryLazy",
-	-- 	---@type Flash.Config
-	-- 	opts = {},
-	-- 	-- stylua: ignore
-	-- 	keys = {
-	-- 		{ "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
-	-- 		{ "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
-	-- 		{ "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
-	-- 		{ "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-	-- 		{ "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
-	-- 	},
-	-- },
 	{
 		"sontungexpt/url-open",
 		event = "VeryLazy",
@@ -437,19 +415,8 @@ require("lazy").setup({
 	},
 	{
 		"ahmedkhalf/project.nvim",
-		dependencies = {
-			"nvim-tree/nvim-tree.lua",
-		},
 		config = function()
 			require("project_nvim").setup({})
-			require("nvim-tree").setup({
-				sync_root_with_cwd = true,
-				respect_buf_cwd = true,
-				update_focused_file = {
-					enable = true,
-					update_root = true,
-				},
-			})
 		end,
 	},
 	{
@@ -458,13 +425,6 @@ require("lazy").setup({
 			require("gitblame").setup({
 				enabled = false,
 			})
-		end,
-	},
-	{
-		"olimorris/persisted.nvim",
-		config = function()
-			require("persisted").setup({})
-			require("telescope").load_extension("persisted")
 		end,
 	},
 })
