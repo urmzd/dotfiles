@@ -22,6 +22,7 @@
         - dev
     - role: alacritty
       tags:
+        - dev
         - alacritty
     - role: misc/fzf
       tags:

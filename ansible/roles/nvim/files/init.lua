@@ -175,9 +175,6 @@ require("lazy").setup({
 				options = {
 					theme = "cyberdream",
 				},
-				filetypes = {
-					["yaml.*"] = true,
-				},
 				sections = {
 					lualine_x = {
 						"copilot",
@@ -241,7 +238,7 @@ require("lazy").setup({
 			-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		},
 		config = function()
-			vim.keymap.set("n", "<leader>v", ":Neotree<CR>")
+			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>")
 		end,
 	},
 	{
@@ -380,6 +377,9 @@ require("lazy").setup({
 			require("copilot").setup({
 				suggestion = { enabled = false },
 				panel = { enabled = false },
+				filetypes={
+					yaml = true
+				}
 			})
 		end,
 	},

@@ -2,12 +2,10 @@
   become: true
   git:
     repo: https://github.com/junegunn/fzf.git
-    dest: ~/.fzf
+    dest: "{{ansible_env.HOME}}/.fzf"
     depth: 1
-  register: fzf_install
 
 - name: Run fzf install script
-  shell:
-    cmd: ~/.fzf/install
-    creates: ~/.fzf/bin/fzf
-  when: fzf_install.changed
+  script: "{{ansible_env.HOME}}/.fzf/install"
+  args:
+    creates: "{{ansible_env.HOME}}/.fzf/bin/fzf"

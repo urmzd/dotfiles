@@ -4,35 +4,47 @@
     dest: /tmp/ninja
     depth: 1
     version: release
+  tags:
+    - ninja
 - name: Build ninja
   shell: >-
     ./configure.py --bootstrap
   args:
     chdir: /tmp/ninja
+  tags:
+    - ninja
 - name: Clone repo
   git:
     repo: https://github.com/llvm/llvm-project.git
     depth: 1
     dest: /tmp/llvm-project
-- name: Check if repo was cloned
-  stat:
-    path: /tmp/llvm-project
+  tags:
+    - llvm
 - name: Create build directory
   file:
     path: /tmp/llvm-project/build
     state: directory
+  tags:
+    - llvm
 - name: Build LLVM
   shell: >-
-    cmake -G Ninja ../llvm -DLLVM_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE
+    cmake -G Ninja ../llvm -DLLVM_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang
+  tags:
+    - llvm
   args:
     chdir: /tmp/llvm-project/build
 - name: Install LLVM
-  shell: make
+  shell: ninja
   args:
     chdir: /tmp/llvm-project/build
+  tags: 
+    - llvm
 - name: Add LLVM to PATH
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.profile"
+    path: "{{ ansible_env.HOME }}/.zprofile"
     line: "export PATH=$PATH:/tmp/llvm-project/build/bin"
     state: present
+  tags:
+    - llvm
+
 

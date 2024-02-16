@@ -1,7 +1,7 @@
 - name: Check whether machine is WSL
   set_fact:
-      if /mnt/c/Windows exists, we're on WSL
-      is_wsl:  "{{ ansible_facts.mounts | map(attribute='mount') | list | contains('/mnt/c/Windows') }}"
+      # if /mnt/c/Windows exists, we're on WSL
+      is_wsl: "{{ ansible_facts.mounts | map(attribute='mount') | list | contains('/mnt/c/Windows') }}"
 
 - name: Clone repo
   git:
