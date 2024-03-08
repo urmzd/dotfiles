@@ -19,11 +19,17 @@
     version: nightly
     dest: /tmp/neovim
 
+- name: "Set make type"
+  make:
+    chdir: /tmp/neovim
+    params:
+      CMAKE_BUILD_TYPE: Release
+
 - name: "Set make type and install neovim"
   become: true
   make:
     chdir: /tmp/neovim
-    target: CMAKE_BUILD_TYPE=RelWithDebInfo install
+    target: install
 
 - name: "Link config"
   file:

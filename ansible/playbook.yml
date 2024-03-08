@@ -9,7 +9,7 @@
         - nvim
     - role: misc/packagemanager
       tags:
-        - packagemanager
+        - pm
     - role: tmux
       tags:
         - tmux
@@ -27,6 +27,7 @@
     - role: misc/fzf
       tags:
         - fzf
+        - dev
     - role: misc/ripgrep
       tags:
         - ripgrep
