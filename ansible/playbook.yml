@@ -2,32 +2,8 @@
   hosts: localhost
   roles:
     - role: zsh
-      tags:
-        - zsh
     - role: nvim
-      tags: 
-        - nvim
-    - role: misc/packagemanager
-      tags:
-        - pm
+    - role: nvm
+    - role: gvm
+    - role: pyenv
     - role: tmux
-      tags:
-        - tmux
-    - role: misc/rust
-      tags:
-        - rust
-    - role: misc/clang
-      tags:
-        - clang
-        - dev
-    - role: alacritty
-      tags:
-        - dev
-        - alacritty
-    - role: misc/fzf
-      tags:
-        - fzf
-        - dev
-    - role: misc/ripgrep
-      tags:
-        - ripgrep
