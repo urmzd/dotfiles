@@ -1,11 +1,10 @@
 - name: Install fzf
-  become: true
   git:
     repo: https://github.com/junegunn/fzf.git
     dest: "{{ansible_env.HOME}}/.fzf"
     depth: 1
 
 - name: Run fzf install script
-  script: "{{ansible_env.HOME}}/.fzf/install"
+  command: ./.fzf/install
   args:
-    creates: "{{ansible_env.HOME}}/.fzf/bin/fzf"
+    chdir: "{{ansible_env.HOME}}"

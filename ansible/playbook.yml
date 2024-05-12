@@ -7,3 +7,6 @@
     - role: gvm
     - role: pyenv
     - role: tmux
+    - role: fzf
+      tags:
+        - fzf
