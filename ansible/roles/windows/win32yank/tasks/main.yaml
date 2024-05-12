@@ -1,0 +1,10 @@
+# TODO: 
+
+# cd /tmp
+# clone repo git@github.com:equalsraf/win32yank.git
+# rustup target add x86_64-pc-windows-gnu
+# cargo build --release --target x86_64-pc-windows-gnu
+# cd win32yank/target/x86_64-pc-windows-gnu/release/
+# mkdir /mnt/c/ProgramData/win32yank && cp win32yank.exe /mnt/c/ProgramData/
+# TODO: get the command to add win32yank.exe to PATH and append to ~/.zshrc
+# cd /tmp && rm -rf win32yank
