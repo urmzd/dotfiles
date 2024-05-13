@@ -177,7 +177,7 @@ require("lazy").setup({
 				},
 				sections = {
 					lualine_x = {
-						"copilot",
+						-- "copilot",
 						"encoding",
 						"fileformat",
 						"filetype",
@@ -370,29 +370,29 @@ require("lazy").setup({
 		"folke/neodev.nvim",
 	},
 	{ "j-hui/fidget.nvim" },
-	{
-		"zbirenbaum/copilot.lua",
-		event = { "InsertEnter" },
-		config = function()
-			require("copilot").setup({
-				suggestion = { enabled = false },
-				panel = { enabled = false },
-				filetypes={
-					yaml = true
-				}
-			})
-		end,
-	},
-	{
-		"zbirenbaum/copilot-cmp",
-		config = function()
-			require("copilot_cmp").setup()
-		end,
-		dependencies = {
-			"zbirenbaum/copilot.lua",
-		},
-	},
-	{ "AndreM222/copilot-lualine" },
+	-- {
+	-- 	"zbirenbaum/copilot.lua",
+	-- 	event = { "InsertEnter" },
+	-- 	config = function()
+	-- 		require("copilot").setup({
+	-- 			suggestion = { enabled = false },
+	-- 			panel = { enabled = false },
+	-- 			filetypes={
+	-- 				yaml = true
+	-- 			}
+	-- 		})
+	-- 	end,
+	-- },
+	-- {
+	-- 	"zbirenbaum/copilot-cmp",
+	-- 	config = function()
+	-- 		require("copilot_cmp").setup()
+	-- 	end,
+	-- 	dependencies = {
+	-- 		"zbirenbaum/copilot.lua",
+	-- 	},
+	-- },
+	-- { "AndreM222/copilot-lualine" },
 	{ "mbbill/undotree" },
 	{
 		"Bekaboo/deadcolumn.nvim",
@@ -444,7 +444,7 @@ require("lazy").setup({
 	{
 		"ahmedkhalf/project.nvim",
 		config = function()
-			require("project_nvim").setup({})
+			require("project_nvim").setup()
 		end,
 	},
 	{

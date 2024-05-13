@@ -1,0 +1,6 @@
+- name: "install java plugin"
+  shell: "asdf plugin add java"
+- name: "install java"
+  shell: "asdf install java openjdk-22"
+- name: "global java"
+  shell: "asdf global java openjdk-22"

@@ -1,0 +1,12 @@
+- name: "clone"
+  git:
+    depth: 1
+    repo: https://github.com/asdf-vm/asdf.git 
+    dest: "{{ansible_env.HOME}}/.asdf"
+    refspec: v0.14.0
+    update: no
+
+- name: copy over completions
+  copy: 
+    src: "{{ansible_env.HOME}}/.asdf/completions/_asdf"
+    dest: "{{ansible_env.HOME}}/.oh-my-zsh/completions"

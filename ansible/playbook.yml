@@ -3,10 +3,23 @@
   roles:
     - role: zsh
     - role: nvim
-    - role: nvm
-    - role: gvm
-    - role: pyenv
     - role: tmux
+    - role: asdf
+      tags:
+        - asdf
     - role: fzf
       tags:
         - fzf
+    - role: java
+      tags:
+        - java
+    - role: elixir/tools
+      tags:
+        - elixir
+      dependencies:
+        - role: java
+    - role: elixir/frameworks/pheonix
+      tags:
+        - elixir
+      dependencies:
+        - role: elixir

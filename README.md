@@ -9,4 +9,6 @@ An automated set up for Debian-based operating systems.
 	rm -rf ~/.zshrc ~/.zshenv ~/.nvm ~/.gvm ~/.pyenv
 	# Step 3. Execute the playbook.
 	ansible-playbook ansible/playbook --ask-become-pass --user=urmzd
+    # Step 4. Restart shell
+    exec $SHELL -l
 ```

@@ -22,3 +22,7 @@ alias vim="nvim"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+alias vimrc="nvim ~/.config/nvim/init.lua"
+
+[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh" 

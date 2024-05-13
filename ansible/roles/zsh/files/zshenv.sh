@@ -8,9 +8,7 @@ if [ -d "/mnt/c" ]; then
   export PATH="$PATH:/mnt/c/ProgramData/win32yank"
 fi
 
-export PYENV_ROOT="$HOME/.pyenv"
 
 export PATH="/home/urmzd/.local/bin:$PATH"
-export PATH="$PYENV_ROOT/bin:$PATH"
 
 source "$HOME/.cargo/env"
