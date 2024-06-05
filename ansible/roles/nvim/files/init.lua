@@ -77,13 +77,12 @@ require("lazy").setup({
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"lua_ls",
-					"rust_analyzer",
-					"tsserver",
-					"pyright",
-					"jdtls",
+					-- "pyright",
 					"yamlls",
 					"bashls",
-					"gopls",
+					"taplo",
+					"terraformls",
+					"dockerls",
 				},
 			})
 			require("mason-null-ls").setup({
@@ -164,7 +163,7 @@ require("lazy").setup({
 
 			require(colorscheme).setup({
 				-- Recommended - see "Configuring" below for more config options
-				transparent = true,
+				transparent = false,
 				italic_comments = true,
 				hide_fillchars = true,
 				borderless_telescope = true,
@@ -177,7 +176,7 @@ require("lazy").setup({
 				},
 				sections = {
 					lualine_x = {
-						-- "copilot",
+						"copilot",
 						"encoding",
 						"fileformat",
 						"filetype",
@@ -247,7 +246,6 @@ require("lazy").setup({
 			"junegunn/fzf",
 			"nvim-telescope/telescope-fzf-native.nvim",
 			"nvim-telescope/telescope-project.nvim",
-
 			build = "make",
 		},
 		config = function()
@@ -370,29 +368,29 @@ require("lazy").setup({
 		"folke/neodev.nvim",
 	},
 	{ "j-hui/fidget.nvim" },
-	-- {
-	-- 	"zbirenbaum/copilot.lua",
-	-- 	event = { "InsertEnter" },
-	-- 	config = function()
-	-- 		require("copilot").setup({
-	-- 			suggestion = { enabled = false },
-	-- 			panel = { enabled = false },
-	-- 			filetypes={
-	-- 				yaml = true
-	-- 			}
-	-- 		})
-	-- 	end,
-	-- },
-	-- {
-	-- 	"zbirenbaum/copilot-cmp",
-	-- 	config = function()
-	-- 		require("copilot_cmp").setup()
-	-- 	end,
-	-- 	dependencies = {
-	-- 		"zbirenbaum/copilot.lua",
-	-- 	},
-	-- },
-	-- { "AndreM222/copilot-lualine" },
+	{
+		"zbirenbaum/copilot.lua",
+		event = { "InsertEnter" },
+		config = function()
+			require("copilot").setup({
+				suggestion = { enabled = false },
+				panel = { enabled = false },
+				filetypes = {
+					yaml = true,
+				},
+			})
+		end,
+	},
+	{
+		"zbirenbaum/copilot-cmp",
+		config = function()
+			require("copilot_cmp").setup()
+		end,
+		dependencies = {
+			"zbirenbaum/copilot.lua",
+		},
+	},
+	{ "AndreM222/copilot-lualine" },
 	{ "mbbill/undotree" },
 	{
 		"Bekaboo/deadcolumn.nvim",
@@ -444,7 +442,7 @@ require("lazy").setup({
 	{
 		"ahmedkhalf/project.nvim",
 		config = function()
-			require("project_nvim").setup()
+			require("project_nvim").setup({})
 		end,
 	},
 	{
@@ -477,5 +475,15 @@ require("lazy").setup({
 			{ "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
 			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
 		},
+	},
+	{
+		"ThePrimeagen/refactoring.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
+		config = function()
+			require("refactoring").setup()
+		end,
 	},
 })
