@@ -6,18 +6,19 @@ local servers = {
   -- "gopls",
   "dockerls",
   "yamlls",
-  "tsserver",
+  -- "tsserver",
   -- "graphql",
   -- "groovyls",
   "pyright",
   -- "pyre",
   -- "kotlin_language_server",
   -- "perlls",
-  "texlab",
+  -- "texlab",
   "lua_ls",
-  "rust_analyzer",
+  -- "rust_analyzer",
   "jsonls",
   "terraformls",
+  "taplo"
 }
 
 for _, server in ipairs(servers) do
