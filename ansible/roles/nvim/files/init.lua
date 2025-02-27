@@ -151,6 +151,12 @@ require("lazy").setup({
 		lazy = false,
 	},
 	{
+		"IndianBoy42/tree-sitter-just"
+	},
+	{
+		"nvim-neotest/nvim-nio"
+	},
+	{
 		"scottmckendry/cyberdream.nvim",
 		-- "nyoom-engineering/oxocarbon.nvim",
 		--"ellisonleao/gruvbox.nvim",
