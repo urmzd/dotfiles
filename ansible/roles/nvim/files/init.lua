@@ -85,43 +85,10 @@ require("lazy").setup({
 					"dockerls",
 				},
 			})
-			require("mason-null-ls").setup({
-				automatic_installation = true,
-			})
 			require("servers")
 		end,
 	},
 	{ "williamboman/mason-lspconfig.nvim" },
-	{
-		"jayp0521/mason-null-ls.nvim",
-		dependencies = {
-			{
-				"jose-elias-alvarez/null-ls.nvim",
-				config = function()
-					local nls = require("null-ls")
-
-					local sources = {
-						nls.builtins.code_actions.gitsigns,
-						nls.builtins.hover.dictionary,
-						nls.builtins.formatting.stylua,
-						nls.builtins.formatting.prettierd,
-						nls.builtins.formatting.beautysh,
-						nls.builtins.formatting.taplo,
-						nls.builtins.formatting.npm_groovy_lint,
-						nls.builtins.formatting.markdownlint,
-						nls.builtins.formatting.mdformat,
-						nls.builtins.formatting.black,
-					}
-
-					nls.setup({
-						sources = sources,
-						save_after_format = true,
-						debounce = 150,
-					})
-				end,
-			},
-		},
-	},
 	{ "sheerun/vim-polyglot" },
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -492,4 +459,11 @@ require("lazy").setup({
 			require("refactoring").setup()
 		end,
 	},
+	{
+		'stevearc/conform.nvim',
+		opts = {
+			python = { "ruff" }
+		},
+	}
 })
+
