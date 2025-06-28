@@ -24,7 +24,7 @@ vim.opt.fileformat = "unix"
 vim.opt.nrformats = "alpha"
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("config") .. "/undo"
-vim.o.hlsearch = not vim.o.hlsearch
+vim.o.hlsearch = not vim.o.hlsearch -- Toggles search highlighting on each config load
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -44,7 +44,7 @@ vim.keymap.set("i", "kj", "<ESC>")
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 	pattern = { "*.md" },
 	callback = function()
-		vim.api.nvim_exec2("e", {
+		vim.api.nvim_exec2("e", { -- Reloads markdown files on entry
 			output = false,
 		})
 	end,
@@ -77,7 +77,7 @@ require("lazy").setup({
 			require("mason-lspconfig").setup({
 				ensure_installed = {
 					"lua_ls",
-					-- "pyright",
+					"pyright",
 					"yamlls",
 					"bashls",
 					"taplo",
@@ -85,7 +85,7 @@ require("lazy").setup({
 					"dockerls",
 				},
 			})
-			require("servers")
+			require("servers") -- Assumes you have a servers.lua for LSP setup
 		end,
 	},
 	{ "williamboman/mason-lspconfig.nvim" },
@@ -100,6 +100,22 @@ require("lazy").setup({
 		end,
 	},
 	{
+
+		"jay-babu/mason-nvim-dap.nvim",
+		dependencies = {
+			"williamboman/mason.nvim",
+			"mfussenegger/nvim-dap",
+		},
+		config = function()
+			require("mason-nvim-dap").setup({
+				ensure_installed = {
+					"python",
+				},
+				automatic_installation = true,
+			})
+		end,
+	},
+	{
 		"kylechui/nvim-surround",
 		version = "*", -- Use for stability; omit to use `main` branch for the latest features
 		event = "VeryLazy",
@@ -109,7 +125,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- add this to your lua/plugins.lua, lua/plugins/init.lua,  or the file you keep your other plugins:
 	{
 		"numToStr/Comment.nvim",
 		opts = {
@@ -117,59 +132,68 @@ require("lazy").setup({
 		},
 		lazy = false,
 	},
-	{
-		"IndianBoy42/tree-sitter-just"
-	},
-	{
-		"nvim-neotest/nvim-nio"
-	},
+	{ "IndianBoy42/tree-sitter-just" },
+	{ "nvim-neotest/nvim-nio" },
 	{
 		"scottmckendry/cyberdream.nvim",
-		-- "nyoom-engineering/oxocarbon.nvim",
-		--"ellisonleao/gruvbox.nvim",
 		priority = 1000,
 		config = function()
-			--local colorscheme = "gruvbox"
 			local colorscheme = "cyberdream"
-			-- light | dark
-			local style = "dark"
+			local style = "dark" -- light | dark
 
 			require(colorscheme).setup({
-				-- Recommended - see "Configuring" below for more config options
 				transparent = false,
 				italic_comments = true,
 				hide_fillchars = true,
 				borderless_telescope = true,
 			})
 
-			local cyberdream = require("lualine.themes.cyberdream")
-			require("lualine").setup({
-				options = {
-					theme = "cyberdream",
-				},
-				sections = {
-					lualine_x = {
-						"copilot",
-						"encoding",
-						"fileformat",
-						"filetype",
+			-- Lualine setup for cyberdream theme
+			if pcall(require, "lualine") and pcall(require, "lualine.themes.cyberdream") then
+				require("lualine").setup({
+					options = {
+						theme = "cyberdream",
 					},
-				},
-			})
+					sections = {
+						lualine_x = {
+							"copilot",
+							"encoding",
+							"fileformat",
+							"filetype",
+						},
+					},
+				})
+			end
 
 			vim.opt.termguicolors = true
 			vim.opt.background = style
-
 			vim.cmd.colorscheme(colorscheme)
-			-- vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-			-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 		end,
 	},
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
+			{ "AndreM222/copilot-lualine" },
 		},
+		config = function()
+			if not (vim.g.colors_name == "cyberdream" and require("lualine").global.options.theme == "cyberdream") then
+				require("lualine").setup({
+					options = {
+						theme = "auto",
+						icons_enabled = true,
+					},
+					sections = {
+						lualine_x = {
+							"copilot",
+							"encoding",
+							"fileformat",
+							"filetype",
+						},
+					},
+				})
+			end
+		end,
 	},
 	-- Documentation
 	{
@@ -188,16 +212,12 @@ require("lazy").setup({
 	},
 	{
 		"folke/trouble.nvim",
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-		},
+		dependencies = { "nvim-tree/nvim-web-devicons" },
 		opts = {},
 	},
 	{
 		"folke/todo-comments.nvim",
-		dependencies = {
-			{ "nvim-lua/plenary.nvim" },
-		},
+		dependencies = { { "nvim-lua/plenary.nvim" } },
 		opts = {},
 	},
 	{
@@ -205,21 +225,19 @@ require("lazy").setup({
 		branch = "v3.x",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
-			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+			"nvim-tree/nvim-web-devicons",
 			"MunifTanjim/nui.nvim",
-			-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		},
 		config = function()
-			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>")
+			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
 		end,
 	},
 	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			"junegunn/fzf",
-			"nvim-telescope/telescope-fzf-native.nvim",
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 			"nvim-telescope/telescope-project.nvim",
-			build = "make",
 		},
 		config = function()
 			local telescope = require("telescope")
@@ -238,12 +256,20 @@ require("lazy").setup({
 			})
 
 			local builtin = require("telescope.builtin")
-
-			vim.keymap.set("n", "<leader>fp", telescope.extensions.project.project)
-			vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
-			vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
-			vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
-			vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
+			vim.keymap.set("n", "<leader>fp", telescope.extensions.project.project, { desc = "Find Project" })
+			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find Files" })
+			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live Grep" })
+			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find Buffers" })
+			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help Tags" })
+		end,
+	},
+	{
+		"nvim-telescope/telescope-ui-select.nvim",
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+		},
+		config = function()
+			require("telescope").load_extension("ui-select")
 		end,
 	},
 	-- Completion
@@ -258,7 +284,7 @@ require("lazy").setup({
 		dependencies = {
 			{ "nvim-neotest/neotest-plenary" },
 			{ "nvim-neotest/neotest-python", ft = "python" },
-			{ "rouge8/neotest-rust",         ft = "rust" },
+			{ "rouge8/neotest-rust", ft = "rust" },
 		},
 		config = function()
 			require("neotest").setup({
@@ -266,10 +292,61 @@ require("lazy").setup({
 					require("neotest-plenary"),
 					require("neotest-python")({
 						runner = "pytest",
+						dap_adapter = "python", -- Crucial for DAP integration
+						dap_adapter_config = { -- Template for DAP configuration when debugging tests
+							type = "python",
+							request = "launch",
+							name = "Debug Test (neotest)",
+							module = "pytest",
+							console = "integratedTerminal",
+							justMyCode = false,
+						},
+						dap_test_only = true,
 					}),
 					require("neotest-rust"),
 				},
+				-- Optional: You can add a global DAP strategy preference
+				-- dap_strategy = "toggle",
 			})
+
+			-- New Neotest Keymaps (more structured)
+			local neotest = require("neotest")
+
+			-- Run tests
+			vim.keymap.set("n", "<leader>trc", function()
+				neotest.run.run()
+			end, { desc = "Test: Run Closest/Cursor" })
+			vim.keymap.set("n", "<leader>trf", function()
+				neotest.run.run(vim.fn.expand("%"))
+			end, { desc = "Test: Run File" })
+			vim.keymap.set("n", "<leader>trl", function()
+				neotest.run.run_last()
+			end, { desc = "Test: Run Last" })
+
+			-- Debug tests
+			vim.keymap.set("n", "<leader>tdc", function()
+				neotest.run.run({ strategy = "dap" })
+			end, { desc = "Test: Debug Closest/Cursor" })
+			vim.keymap.set("n", "<leader>tdf", function()
+				neotest.run.run_file({ strategy = "dap", file_path = vim.fn.expand("%") })
+			end, { desc = "Test: Debug File" })
+			vim.keymap.set("n", "<leader>tdl", function()
+				neotest.run.run_last({ strategy = "dap" })
+			end, { desc = "Test: Debug Last Run" })
+
+			-- View/Manage Test UI
+			vim.keymap.set("n", "<leader>ts", function()
+				neotest.summary.toggle()
+			end, { desc = "Test: Summary (Toggle)" })
+			vim.keymap.set("n", "<leader>to", function()
+				neotest.output.open({ enter = true })
+			end, { desc = "Test: Output (Open Focused/Last)" })
+			vim.keymap.set("n", "<leader>tp", function()
+				neotest.output_panel.toggle()
+			end, { desc = "Test: Output Panel (Toggle)" })
+			vim.keymap.set("n", "<leader>tx", function()
+				neotest.run.stop()
+			end, { desc = "Test: Stop Execution" })
 		end,
 	},
 	-- Debuggers
@@ -280,54 +357,96 @@ require("lazy").setup({
 			{ "mfussenegger/nvim-dap-python", ft = "python" },
 		},
 		config = function()
-			local function get_python_path()
-				local file = io.popen("which python")
-				if file == nil then
-					return
-				end
-				local output = file:read("*all")
-				file:close()
-				return output
+			local dap, dap_ui = require("dap"), require("dapui")
+			dap_ui.setup() -- Setup nvim-dap-ui
+
+			-- Python DAP setup using nvim-dap-python
+			local dap_python_ok, dap_python = pcall(require, "dap-python")
+			if dap_python_ok then
+				dap_python.setup() -- Call setup without arguments for auto-detection
+				dap_python.test_runner = "pytest" -- Specify pytest as the test runner
+				vim.notify(
+					"nvim-dap-python setup successful with auto-detection. Test runner: pytest.",
+					vim.log.levels.INFO
+				)
+			else
+				vim.notify("Error: nvim-dap-python plugin not found or failed to load.", vim.log.levels.ERROR)
 			end
 
-			local python_path = get_python_path()
+			-- Java DAP setup
+			local jdtls_ok, jdtls = pcall(require, "jdtls")
+			if jdtls_ok then
+				jdtls.setup_dap({ hotcodereplace = "auto" })
+			end
 
-			local dap, dap_ui = require("dap"), require("dapui")
-
-			dap_ui.setup()
-
-			local dap_python = require("dap-python")
-			local jdtls = require("jdtls")
-
-			jdtls.setup_dap({ hotcodereplace = "auto" })
-
-			dap_python.setup(python_path)
-			dap_python.test_runner = "pytest"
-
+			-- DAP UI listeners
 			dap.listeners.after.event_initialized["dapui_config"] = function()
 				dap_ui.open()
 			end
-
 			dap.listeners.before.event_terminated["dapui_config"] = function()
 				dap_ui.close()
 			end
-
 			dap.listeners.before.event_exited["dapui_config"] = function()
 				dap_ui.close()
 			end
 
-			vim.keymap.set("n", "<F5>", dap.continue)
-			vim.keymap.set("n", "<F10>", dap.step_over)
-			vim.keymap.set("n", "<F11>", dap.step_into)
-			vim.keymap.set("n", "<F12>", dap.step_out)
+			-- DAP Keymaps
+			-- Preserve existing F-key mappings
+			vim.keymap.set("n", "<F5>", dap.continue, { desc = "DAP: Continue" })
+			vim.keymap.set("n", "<F10>", dap.step_over, { desc = "DAP: Step Over" })
+			vim.keymap.set("n", "<F11>", dap.step_into, { desc = "DAP: Step Into" })
+			vim.keymap.set("n", "<F12>", dap.step_out, { desc = "DAP: Step Out" })
+
+			-- Preserve existing breakpoint mappings
+			vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "DAP: Toggle Breakpoint" })
+			vim.keymap.set("n", "<leader>dB", function()
+				dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+			end, { desc = "DAP: Set Conditional Breakpoint" })
+
+			-- New & Enhanced DAP Keymaps
+			-- Stepping alternatives (more mnemonic)
+			vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "DAP: Continue (Alt)" })
+			vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "DAP: Step Over (Alt)" })
+			vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "DAP: Step Into (Alt)" })
+			vim.keymap.set("n", "<leader>du", dap.step_out, { desc = "DAP: Step Out (Alt)" })
+
+			-- Session Management
+			vim.keymap.set("n", "<leader>ds", function()
+				dap.continue()
+			end, { desc = "DAP: Start/Select Session (Prompts)" })
+			vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "DAP: Run Last Session" })
+			vim.keymap.set("n", "<leader>dq", dap.terminate, { desc = "DAP: Quit/Terminate Session" })
+			vim.keymap.set("n", "<leader>dr", dap.restart, { desc = "DAP: Restart Session" })
+
+			-- REPL
+			vim.keymap.set("n", "<leader>dR", dap.repl.open, { desc = "DAP: Open REPL" })
+
+			-- Breakpoints extended
+			vim.keymap.set("n", "<leader>dp", function()
+				dap.set_breakpoint(nil, nil, vim.fn.input("Log message: "))
+			end, { desc = "DAP: Set Log Point" })
+			vim.keymap.set("n", "<leader>dC", function()
+				dap.clear_breakpoints()
+			end, { desc = "DAP: Clear Breakpoints (Buffer/Session)" })
+
+			-- DAP UI & Inspection
+			vim.keymap.set("n", "<leader>dui", function()
+				require("dapui").toggle()
+			end, { desc = "DAP: Toggle UI" })
+			vim.keymap.set("n", "<leader>de", function()
+				require("dapui").eval()
+			end, { desc = "DAP: Evaluate Expression (Cursor/Prompt)" })
+			vim.keymap.set("n", "<leader>dw", function()
+				require("dapui").eval(nil, { enter = true })
+			end, { desc = "DAP: Add Expression to Watch via Eval" })
 		end,
 	},
 	-- LSP Tools
-	{ "lervag/vimtex",            ft = "tex" },
+	{ "lervag/vimtex", ft = "tex" },
 	{ "simrat39/rust-tools.nvim", ft = "rust" },
-	{ "mfussenegger/nvim-jdtls",  ft = "java" },
-	{ "udalov/kotlin-vim",        ft = "kotlin" },
-	{ "b0O/schemastore.nvim",     ft = { "yaml", "json" } },
+	{ "mfussenegger/nvim-jdtls", ft = "java" },
+	{ "udalov/kotlin-vim", ft = "kotlin" },
+	{ "b0O/schemastore.nvim", ft = { "yaml", "json" } },
 	-- Utils
 	{
 		"iamcco/markdown-preview.nvim",
@@ -337,10 +456,9 @@ require("lazy").setup({
 		ft = "markdown",
 	},
 	{ "urmzd/lume.nvim" },
-	{
-		"folke/neodev.nvim",
-	},
-	{ "j-hui/fidget.nvim" },
+	{ "folke/neodev.nvim", opts = {} },
+	{ "j-hui/fidget.nvim", opts = {} },
+	-- copilot stuff
 	{
 		"zbirenbaum/copilot.lua",
 		event = { "InsertEnter" },
@@ -348,31 +466,43 @@ require("lazy").setup({
 			require("copilot").setup({
 				suggestion = { enabled = false },
 				panel = { enabled = false },
-				filetypes = {
-					yaml = true,
-				},
 			})
 		end,
 	},
 	{
 		"zbirenbaum/copilot-cmp",
+		dependencies = { "zbirenbaum/copilot.lua" },
 		config = function()
 			require("copilot_cmp").setup()
 		end,
-		dependencies = {
-			"zbirenbaum/copilot.lua",
-		},
 	},
-	{ "AndreM222/copilot-lualine" },
 	{ "mbbill/undotree" },
-	{
-		"Bekaboo/deadcolumn.nvim",
-	},
-	{
-		"sindrets/diffview.nvim",
-	},
+	{ "Bekaboo/deadcolumn.nvim", opts = {} },
+	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
 	{
 		"preservim/vimux",
+		config = function()
+			vim.keymap.set("n", "<leader>vp", ":VimuxPromptCommand<CR>", { desc = "Vimux Prompt Command" })
+			vim.keymap.set("n", "<leader>vl", ":VimuxRunLastCommand<CR>", { desc = "Vimux Run Last Command" })
+			vim.keymap.set("n", "<leader>vr", function()
+				local filetype = vim.bo.filetype
+				local command = ""
+				if filetype == "python" then
+					command = "python " .. vim.fn.expand("%")
+				elseif filetype == "javascript" then
+					command = "node " .. vim.fn.expand("%")
+				elseif filetype == "rust" then
+					command = "cargo run"
+				elseif filetype == "sh" then
+					command = "./" .. vim.fn.expand("%")
+				end
+				if command ~= "" then
+					vim.cmd('VimuxRunCommand "' .. command .. '"')
+				else
+					print("No Vimux run command defined for filetype: " .. filetype)
+				end
+			end, { desc = "Vimux Run Current File" })
+		end,
 	},
 	{
 		"hrsh7th/nvim-cmp",
@@ -383,19 +513,76 @@ require("lazy").setup({
 			"hrsh7th/cmp-path",
 			"onsails/lspkind.nvim",
 			"saadparwaiz1/cmp_luasnip",
+			"zbirenbaum/copilot-cmp",
 		},
+		config = function()
+			local cmp = require("cmp")
+			local luasnip = require("luasnip")
+			local lspkind = require("lspkind")
+
+			cmp.setup({
+				snippet = {
+					expand = function(args)
+						luasnip.lsp_expand(args.body)
+					end,
+				},
+				mapping = cmp.mapping.preset.insert({
+					["<C-b>"] = cmp.mapping.scroll_docs(-4),
+					["<C-f>"] = cmp.mapping.scroll_docs(4),
+					["<C-Space>"] = cmp.mapping.complete(),
+					["<C-e>"] = cmp.mapping.abort(),
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
+					["<Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_next_item()
+						elseif luasnip.expand_or_jumpable() then
+							luasnip.expand_or_jump()
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+					["<S-Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						elseif luasnip.jumpable(-1) then
+							luasnip.jump(-1)
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+				}),
+				sources = cmp.config.sources({
+					{ name = "nvim_lsp" },
+					{ name = "copilot" },
+					{ name = "luasnip" },
+					{ name = "buffer" },
+					{ name = "path" },
+				}),
+				formatting = {
+					format = lspkind.cmp_format({
+						mode = "symbol_text",
+						maxwidth = 50,
+						ellipsis_char = "...",
+					}),
+				},
+			})
+		end,
 	},
 	{
 		"L3MON4D3/LuaSnip",
-		version = "v2.0.0",
+		version = "v2.*",
 		build = "make install_jsregexp",
+		dependencies = { "rafamadriz/friendly-snippets" },
+		config = function()
+			-- require("luasnip.loaders.from_vscode").lazy_load()
+		end,
 	},
 	{
 		"NeogitOrg/neogit",
 		dependencies = {
-			"nvim-lua/plenary.nvim",      -- required
-			"nvim-telescope/telescope.nvim", -- optional
-			"sindrets/diffview.nvim",     -- optional
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+			"sindrets/diffview.nvim",
 		},
 		config = true,
 	},
@@ -405,11 +592,7 @@ require("lazy").setup({
 		event = "VeryLazy",
 		cmd = "URLOpenUnderCursor",
 		config = function()
-			local status_ok, url_open = pcall(require, "url-open")
-			if not status_ok then
-				return
-			end
-			url_open.setup({})
+			require("url-open").setup({})
 		end,
 	},
 	{
@@ -424,6 +607,14 @@ require("lazy").setup({
 			require("gitblame").setup({
 				enabled = false,
 			})
+			vim.keymap.set("n", "<leader>gb", function()
+				local gb = require("gitblame")
+				if gb.is_blame_enabled_for_buffer() then
+					gb.close()
+				else
+					gb.popup_blame()
+				end
+			end, { desc = "Toggle Git Blame" })
 		end,
 	},
 	{
@@ -442,10 +633,10 @@ require("lazy").setup({
 			"TmuxNavigatePrevious",
 		},
 		keys = {
-			{ "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
-			{ "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
-			{ "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
-			{ "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
 			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
 		},
 	},
@@ -457,13 +648,54 @@ require("lazy").setup({
 		},
 		config = function()
 			require("refactoring").setup()
+
+			vim.keymap.set({ "n", "x" }, "<leader>re", function()
+				return require("refactoring").refactor("Extract Function")
+			end, { expr = true })
+			vim.keymap.set({ "n", "x" }, "<leader>rf", function()
+				return require("refactoring").refactor("Extract Function To File")
+			end, { expr = true })
+			vim.keymap.set({ "n", "x" }, "<leader>rv", function()
+				return require("refactoring").refactor("Extract Variable")
+			end, { expr = true })
+			vim.keymap.set({ "n", "x" }, "<leader>rI", function()
+				return require("refactoring").refactor("Inline Function")
+			end, { expr = true })
+			vim.keymap.set({ "n", "x" }, "<leader>ri", function()
+				return require("refactoring").refactor("Inline Variable")
+			end, { expr = true })
+
+			vim.keymap.set({ "n", "x" }, "<leader>rbb", function()
+				return require("refactoring").refactor("Extract Block")
+			end, { expr = true })
+			vim.keymap.set({ "n", "x" }, "<leader>rbf", function()
+				return require("refactoring").refactor("Extract Block To File")
+			end, { expr = true })
+
+			require("telescope").load_extension("refactoring")
+
+			vim.keymap.set({ "n", "x" }, "<leader>rr", function()
+				require("telescope").extensions.refactoring.refactors()
+			end)
 		end,
 	},
 	{
-		'stevearc/conform.nvim',
+		"stevearc/conform.nvim",
 		opts = {
-			python = { "ruff" }
+			formatters_by_ft = {
+				python = { "ruff_fix", "ruff_format" },
+				lua = { "stylua" },
+			},
+			format_on_save = {
+				timeout_ms = 500,
+				lsp_fallback = true,
+			},
 		},
-	}
+	},
 })
 
+-- Undotree Keymap
+vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "Toggle Undotree" })
+
+-- Keymap to toggle hlsearch
+vim.keymap.set("n", "<leader>/", "<cmd>set hlsearch!<CR>", { desc = "Toggle Highlight Search" })
