@@ -12,7 +12,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git)
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
 autoload -U compinit && compinit
+
 source "$ZSH/oh-my-zsh.sh"
 
 source $ZSH/oh-my-zsh.sh
@@ -36,5 +38,9 @@ export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 # append completions to fpath
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+
 # initialise completions with ZSH's compinit
 autoload -Uz compinit && compinit
+
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)

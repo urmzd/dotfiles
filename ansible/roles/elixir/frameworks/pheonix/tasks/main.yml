@@ -1,2 +1,0 @@
-- name: "install phx"
-  shell: "mix archive.install hex phx_new"

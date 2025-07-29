@@ -1,16 +1,6 @@
 # dotfiles
 
-## List of Tools
+Within this repository exists all the configurations I use for my development environment.
 
-- [ ] ASDF
-- [ ] RipGrep
-- [ ] FdFind 
-- [ ] NeoVim
-- [ ] Tmux
-- [ ] Fzf
+> It primairly consists of asdf, tmux, nvim and zsh.
 
-## List of Language Tools
-
-- [ ] Cargo + Rust
-- [ ] Java
-- [ ] Python
