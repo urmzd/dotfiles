@@ -19,18 +19,18 @@ curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-c
 - 🚀 Automatic environment switching with direnv
 - 📖 [Full Nix + Chezmoi Guide](NIX-CHEZMOI.md)
 
-### Legacy Shell-Based Setup  
+### Setup
 **One-command setup:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
 **Manual setup:**
 ```bash
 git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-chmod +x bootstrap.sh install.sh update.sh backup.sh
-./bootstrap.sh
+chmod +x bootstrap-nix-chezmoi.sh
+./bootstrap-nix-chezmoi.sh
 ```
 
 ## 🛠️ What's Included
@@ -72,10 +72,7 @@ chmod +x bootstrap.sh install.sh update.sh backup.sh
 
 ```
 ~/.dotfiles/
-├── bootstrap.sh           # One-command setup script
-├── install.sh            # Main installation script
-├── update.sh             # Update tools and configurations
-├── backup.sh             # Backup existing configurations
+├── bootstrap-nix-chezmoi.sh # Modern Nix + Chezmoi setup script
 ├── Brewfile              # Homebrew packages
 ├── .tool-versions        # asdf language versions
 ├── requirements-pipx.txt # Python applications via pipx

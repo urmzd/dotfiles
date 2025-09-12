@@ -103,9 +103,6 @@ ssh_config merge=ours
 
 # Shell scripts
 *.sh text eol=lf
-install.sh text eol=lf
-bootstrap*.sh text eol=lf
-secrets-setup.sh text eol=lf
 
 # Nix files
 *.nix text eol=lf

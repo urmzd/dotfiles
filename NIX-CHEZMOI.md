@@ -37,10 +37,8 @@ This setup combines the best of both worlds:
 │   ├── dot_tmux.conf.tmpl      # Templated tmux config
 │   ├── private_dot_ssh/        # SSH configurations
 │   └── encrypted_*.age         # Encrypted secret files
-└── legacy/                     # Original shell-based setup
-    ├── install.sh
-    ├── update.sh
-    └── backup.sh
+└── scripts/                    # Utility scripts
+    └── security-audit.sh
 ```
 
 ## 🎯 Key Features
@@ -188,10 +186,10 @@ myproject = pkgs.mkShell {
 
 ### From Existing Shell Setup
 
-Your existing setup is preserved in the `legacy/` directory:
-- `install.sh` - Original installation script
-- `update.sh` - Update mechanism  
-- `backup.sh` - Backup functionality
+The legacy shell-based setup has been removed in favor of the modern Nix + Chezmoi approach.
+
+**Updates:** Use `nix flake update` to update dependencies
+**Backups:** Chezmoi provides built-in backup functionality via `chezmoi diff` and version control
 
 ### From asdf to Nix
 

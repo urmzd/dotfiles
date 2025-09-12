@@ -180,11 +180,7 @@ cat ~/.env.personal
 
 ### Legacy vs Modern Comparison
 ```bash
-# Test legacy setup
-./bootstrap.sh
-source ~/.zshrc
-
-# Test modern setup  
+# Modern setup (only option)
 ./bootstrap-nix-chezmoi.sh
 source ~/.zshrc
 
@@ -195,9 +191,6 @@ source ~/.zshrc
 
 ### Performance Benchmarking
 ```bash
-# Time legacy setup
-time ./install.sh
-
 # Time modern setup
 time nix develop .#full --command echo "ready"
 
