@@ -38,9 +38,12 @@ export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 # append completions to fpath
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+eval "$(register-python-argcomplete pipx)"
 
 # initialise completions with ZSH's compinit
 autoload -Uz compinit && compinit
 
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
+
+. "$HOME/.local/bin/env"
