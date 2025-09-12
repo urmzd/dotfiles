@@ -55,8 +55,8 @@ install_nix() {
         return
     fi
     
-    # Install Nix with flakes support
-    sh <(curl -L https://nixos.org/nix/install) --daemon
+    # Install Nix with flakes support (using official secure method)
+    sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
     
     # Enable flakes
     mkdir -p ~/.config/nix

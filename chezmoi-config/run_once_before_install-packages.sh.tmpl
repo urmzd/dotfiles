@@ -34,7 +34,7 @@ if command -v brew >/dev/null 2>&1; then
     # Install Nix if not present
     if ! command -v nix >/dev/null 2>&1; then
         echo "🗄️ Installing Nix package manager..."
-        sh <(curl -L https://nixos.org/nix/install) --daemon
+        sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
         
         # Enable flakes
         mkdir -p ~/.config/nix
@@ -84,7 +84,7 @@ if command -v apt >/dev/null 2>&1; then
     # Install Nix if not present
     if ! command -v nix >/dev/null 2>&1; then
         echo "🗄️ Installing Nix package manager..."
-        sh <(curl -L https://nixos.org/nix/install) --daemon
+        sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
         
         # Enable flakes
         mkdir -p ~/.config/nix
