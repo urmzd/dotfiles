@@ -1,0 +1,5 @@
+# Python packages to install via pipx (isolated environments)
+# Install with: pipx install <package>
+
+nox
+argcomplete

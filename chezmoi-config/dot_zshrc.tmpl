@@ -1,0 +1,205 @@
+# Zsh configuration template
+# Managed by Chezmoi - adapts to different systems and preferences
+
+# Enable Powerlevel10k instant prompt
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+{{- if .has_homebrew }}
+# Homebrew setup for macOS
+{{-   if eq .chezmoi.arch "arm64" }}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{-   else }}
+eval "$(/usr/local/bin/brew shellenv)"
+{{-   end }}
+{{- end }}
+
+# Oh My Zsh configuration
+export ZSH=$HOME/.oh-my-zsh
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Plugins based on available tools
+plugins=(
+    git
+{{- if .has_asdf }}
+    asdf
+{{- end }}
+{{- if .has_direnv }}
+    direnv
+{{- end }}
+{{- if .is_macos }}
+    macos
+{{- end }}
+{{- if .has_homebrew }}
+    brew
+{{- end }}
+    zsh-syntax-highlighting
+    zsh-autosuggestions
+)
+
+# Load Oh My Zsh
+source $ZSH/oh-my-zsh.sh
+
+# Environment variables
+export EDITOR='nvim'
+export VISUAL='nvim'
+{{- if .use_nix }}
+export NIX_SHELL_PRESERVE_PROMPT=1
+{{- end }}
+
+# Language and locale
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# Path modifications
+{{- if .has_nix }}
+# Nix package manager
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+{{- end }}
+
+{{- if .has_asdf }}
+# asdf version manager
+[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh"
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+{{- end }}
+
+# pipx applications
+export PATH="$HOME/.local/bin:$PATH"
+
+# Aliases
+alias vi="nvim"
+alias vim="nvim"
+alias vimrc="nvim ~/.config/nvim/init.lua"
+alias zshrc="nvim ~/.zshrc"
+
+{{- if .is_macos }}
+# macOS specific aliases
+alias ll="ls -la"
+alias la="ls -la"
+alias l="ls -l"
+alias ..="cd .."
+alias ...="cd ../.."
+{{- else }}
+# Linux specific aliases  
+alias ll="ls -alF --color=auto"
+alias la="ls -A --color=auto"
+alias l="ls -CF --color=auto"
+{{- end }}
+
+# Git aliases
+alias g="git"
+alias gs="git status"
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gl="git pull"
+alias gd="git diff"
+alias gb="git branch"
+alias gco="git checkout"
+
+{{- if .is_work }}
+# Work-specific aliases and functions
+alias work="cd ~/work"
+alias vpn-connect="sudo openconnect your-company-vpn.com"
+{{- end }}
+
+{{- if .is_personal }}
+# Personal aliases and functions
+alias personal="cd ~/personal"
+alias blog="cd ~/personal/blog"
+{{- end }}
+
+{{- if .use_nix }}
+# Nix development environment helpers
+alias ndev="nix develop"
+alias nshell="nix-shell"
+alias nix-search="nix search nixpkgs"
+
+# Quick access to development environments
+alias dev-node="nix develop ~/.dotfiles#node"
+alias dev-python="nix develop ~/.dotfiles#python"
+alias dev-rust="nix develop ~/.dotfiles#rust"
+alias dev-go="nix develop ~/.dotfiles#go"
+{{- end }}
+
+# Docker aliases (if available)
+{{- if lookPath "docker" }}
+alias d="docker"
+alias dc="docker-compose"
+alias dps="docker ps"
+alias di="docker images"
+{{- end }}
+
+{{- if lookPath "kubectl" }}
+# Kubernetes aliases
+alias k="kubectl"
+alias kgp="kubectl get pods"
+alias kgs="kubectl get services"
+alias kgd="kubectl get deployments"
+{{- end }}
+
+# FZF configuration
+{{- if lookPath "fzf" }}
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Custom FZF settings
+export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='find . -type d -name ".*" -prune -o -type d -print 2>/dev/null | cut -b3-'
+
+# FZF colors to match terminal theme
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --inline-info"
+{{- end }}
+
+{{- if .has_direnv }}
+# Direnv integration
+eval "$(direnv hook zsh)"
+{{- end }}
+
+# Python development
+{{- if lookPath "python3" }}
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONUNBUFFERED=1
+{{- end }}
+
+{{- if lookPath "pipx" }}
+# pipx completions
+eval "$(register-python-argcomplete pipx)"
+{{- end }}
+
+# Node.js development
+{{- if lookPath "node" }}
+export NODE_OPTIONS="--max-old-space-size=4096"
+{{- end }}
+
+# Load machine-specific configuration
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# Powerlevel10k configuration
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Completion system
+autoload -Uz compinit && compinit
+
+{{- if .use_nix }}
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh) 2>/dev/null || true
+{{- else }}
+# Set up fzf key bindings and fuzzy completion (non-Nix)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+{{- end }}
+
+# Environment-specific sourcing
+{{- if .is_work }}
+[ -f ~/.env.work ] && source ~/.env.work
+{{- end }}
+{{- if .is_personal }}  
+[ -f ~/.env.personal ] && source ~/.env.personal
+{{- end }}
+
+# Final path cleanup and local customizations
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"

@@ -1,0 +1,8 @@
+# asdf version definitions based on current system state
+nodejs 23.9.0
+python 3.13.5
+rust stable
+lua 5.4.7
+terraform 1.12.2
+neovim stable
+tmux 3.5a

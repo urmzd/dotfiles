@@ -1,0 +1,68 @@
+# Chezmoi configuration template
+# This file configures chezmoi behavior and contains template variables
+
+{{- $name := promptStringOnce . "name" "What is your full name" -}}
+{{- $email := promptStringOnce . "email" "What is your email address" -}}
+{{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
+
+{{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine" -}}
+{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
+{{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management" -}}
+{{- $use_nix := promptBoolOnce . "use_nix" "Do you want to use Nix for development" -}}
+
+[data]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
+    github_username = {{ $github_username | quote }}
+    
+    # Machine type flags
+    is_personal = {{ $is_personal }}
+    is_work = {{ $is_work }}
+    
+    # Feature flags
+    use_secrets = {{ $use_secrets }}
+    use_nix = {{ $use_nix }}
+    
+    # System detection
+    is_macos = {{ eq .chezmoi.os "darwin" }}
+    is_linux = {{ eq .chezmoi.os "linux" }}
+    is_wsl = {{ env "WSL_DISTRO_NAME" | not | not }}
+    
+    # Package manager detection
+    has_homebrew = {{ lookPath "brew" | not | not }}
+    has_nix = {{ lookPath "nix" | not | not }}
+    has_apt = {{ lookPath "apt" | not | not }}
+    
+    # Development tools detection
+    has_asdf = {{ lookPath "asdf" | not | not }}
+    has_direnv = {{ lookPath "direnv" | not | not }}
+
+[git]
+    autoCommit = true
+    autoPush = false
+
+{{- if $use_secrets }}
+[encryption]
+    suffix = ".age"
+[age]
+    identity = "~/.config/age/key.txt"
+    recipient = "age1..."  # Replace with your actual age public key
+{{- end }}
+
+[cd]
+    command = "code"
+
+[edit]
+    command = "nvim"
+
+[merge]
+    command = "nvim"
+    args = ["-d", "{{ "{{ .Destination }}" }}", "{{ "{{ .Source }}" }}", "{{ "{{ .Target }}" }}"]
+
+[diff]
+    command = "nvim"
+    args = ["-d", "{{ "{{ .Destination }}" }}", "{{ "{{ .Target }}" }}"]
+
+# Template options
+[template]
+    options = ["missingkey=error"]

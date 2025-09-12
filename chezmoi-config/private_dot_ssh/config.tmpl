@@ -1,0 +1,106 @@
+# SSH configuration template
+# Managed by Chezmoi - adapts to different environments
+
+# Global settings
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+{{- if .is_macos }}
+# macOS specific settings
+Host *
+    UseKeychain yes
+    AddKeysToAgent yes
+{{- end }}
+
+# GitHub configuration
+{{- if .is_work }}
+# Work GitHub account
+Host github-work
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/work_key
+    IdentitiesOnly yes
+
+# Personal GitHub (when on work machine)
+Host github-personal  
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/personal_key
+    IdentitiesOnly yes
+
+# Default to work account
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/work_key
+    IdentitiesOnly yes
+{{- else }}
+# Personal GitHub account
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/main_key
+    IdentitiesOnly yes
+{{- end }}
+
+{{- if .is_work }}
+# Work-specific servers (configure manually for your organization)
+# 
+# Example server configuration:
+# Host work-server
+#     HostName your-work-server.com
+#     User {{ .github_username }}
+#     IdentityFile ~/.ssh/work_key
+#     Port 22
+#     ForwardAgent yes
+{{- end }}
+
+{{- if .is_personal }}
+# Personal servers (configure manually for your setup)
+#
+# Example personal server configuration:
+# Host homelab
+#     HostName homelab.local
+#     User {{ .github_username }}
+#     IdentityFile ~/.ssh/personal_key
+#     Port 22
+#
+# Host pi
+#     HostName raspberrypi.local  
+#     User pi
+#     IdentityFile ~/.ssh/personal_key
+#     Port 22
+{{- end }}
+
+# Cloud providers (configure with your actual keys)
+# 
+# Example AWS configuration:
+# Host *.amazonaws.com
+#     User ec2-user
+#     IdentityFile ~/.ssh/aws_key.pem
+#     StrictHostKeyChecking no
+#
+# Example GCP configuration:  
+# Host *.googleusercontent.com
+#     User {{ .github_username }}
+#     IdentityFile ~/.ssh/gcp_key
+#     StrictHostKeyChecking no
+
+# Local development
+Host localhost
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host 127.0.0.1
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+# Docker containers
+Host docker-*
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    LogLevel ERROR

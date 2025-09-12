@@ -1,0 +1,126 @@
+# Git configuration template
+# Managed by Chezmoi - template adapts to different machines
+
+[user]
+    name = {{ .name | quote }}
+    email = {{ .email | quote }}
+{{- if and .is_work .use_secrets }}
+    # Work-specific signing key (configure manually)
+    # signingkey = "YOUR_WORK_GPG_KEY_ID"
+{{- else if and .is_personal .use_secrets }}
+    # Personal signing key (configure manually)
+    # signingkey = "YOUR_PERSONAL_GPG_KEY_ID"
+{{- end }}
+
+[github]
+    user = {{ .github_username | quote }}
+
+[core]
+    editor = nvim
+    autocrlf = false
+    safecrlf = false
+    excludesfile = ~/.gitignore_global
+{{- if .is_macos }}
+    # macOS specific settings
+    precomposeUnicode = true
+    trustctime = false
+{{- end }}
+{{- if .is_linux }}
+    # Linux specific settings
+    filemode = true
+{{- end }}
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[fetch]
+    prune = true
+
+[push]
+    default = simple
+    autoSetupRemote = true
+{{- if or .is_work .use_secrets }}
+    # Enable commit signing for work/secure environments
+    gpgsign = true
+{{- end }}
+
+[commit]
+{{- if or .is_work .use_secrets }}
+    gpgsign = true
+{{- end }}
+    verbose = true
+
+[diff]
+    colorMoved = zebra
+    algorithm = histogram
+
+[merge]
+    tool = nvim
+    conflictStyle = diff3
+
+[mergetool "nvim"]
+    cmd = nvim -d -c \"wincmd l\" -c \"norm ]c\" \"$LOCAL\" \"$MERGED\" \"$REMOTE\"
+
+[rebase]
+    autosquash = true
+    updateRefs = true
+
+[log]
+    date = relative
+
+[color]
+    ui = auto
+    branch = auto
+    diff = auto
+    status = auto
+
+[color "diff"]
+    meta = blue
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[alias]
+    # Short status
+    st = status -s
+    
+    # Pretty log
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    
+    # Show branches
+    br = branch -v
+    
+    # Quick commit
+    cm = commit -m
+    ca = commit -am
+    
+    # Undo last commit but keep changes
+    undo = reset --soft HEAD^
+    
+    # Show what I did today
+    today = log --since='1 day ago' --oneline --author={{ .email | quote }}
+    
+    # Clean merged branches
+    cleanup = "!git branch --merged | grep -v '\\*\\|main\\|develop' | xargs -n 1 git branch -d"
+
+{{- if .is_work }}
+# Work-specific configurations
+[url "git@github-work:company/"]
+    insteadOf = git@github.com:company/
+
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+{{- end }}
+
+{{- if .has_homebrew }}
+# Homebrew git settings
+[difftool "sourcetree"]
+    cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+    path = 
+[mergetool "sourcetree"]
+    cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    trustExitCode = true
+{{- end }}

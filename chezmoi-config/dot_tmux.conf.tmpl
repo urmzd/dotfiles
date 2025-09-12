@@ -1,0 +1,146 @@
+# Tmux configuration template
+# Managed by Chezmoi - adapts to different systems
+
+# Reload config
+unbind r
+bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
+
+# Change prefix key to Ctrl-a
+unbind C-b
+set-option -g prefix C-a
+bind-key C-a send-prefix
+
+# Enable mouse support
+set -g mouse on
+
+# Set vi mode
+setw -g mode-keys vi
+
+# Start windows and panes at 1, not 0
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumber windows when one is closed
+set -g renumber-windows on
+
+# Increase scrollback buffer size
+set -g history-limit 10000
+
+# Enable 256 colors
+set -g default-terminal "screen-256color"
+{{- if .is_macos }}
+# macOS specific terminal settings
+set-option -ga terminal-overrides ",xterm-256color:Tc"
+{{- else }}
+# Linux specific terminal settings  
+set-option -ga terminal-overrides ",*256col*:Tc"
+{{- end }}
+
+# Vim-style pane selection
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# Vim-style pane resizing
+bind H resize-pane -L 5
+bind J resize-pane -D 5
+bind K resize-pane -U 5
+bind L resize-pane -R 5
+
+# Better window splitting
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# Create new window in current path
+bind c new-window -c "#{pane_current_path}"
+
+# Vi copy mode
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+{{- if .is_macos }}
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+{{- else }}
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"
+{{- end }}
+
+# Status bar configuration
+set -g status on
+set -g status-interval 5
+set -g status-position bottom
+
+# Status bar content based on environment
+{{- if .is_work }}
+set -g status-left "#[fg=green]#S #[fg=yellow][WORK] "
+{{- else }}
+set -g status-left "#[fg=green]#S #[fg=cyan][PERSONAL] "
+{{- end }}
+
+set -g status-left-length 40
+set -g status-right-length 60
+
+{{- if .has_nix }}
+# Show Nix environment in status
+set -g status-right "#[fg=magenta]#{?IN_NIX_SHELL,❄️ Nix,} #[fg=cyan]%H:%M #[fg=green]%d-%b-%y"
+{{- else }}
+set -g status-right "#[fg=cyan]%H:%M #[fg=green]%d-%b-%y"
+{{- end }}
+
+# Window status format
+set -g window-status-format "#I:#W"
+set -g window-status-current-format "#[bold]#I:#W"
+
+# Plugin configuration
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'catppuccin/tmux'
+set -g @plugin 'christoomey/vim-tmux-navigator'
+
+{{- if .is_personal }}
+# Personal plugins
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
+{{- end }}
+
+# Catppuccin theme configuration
+{{- if .is_work }}
+set -g @catppuccin_flavour 'mocha'
+set -g @catppuccin_status_modules_right "directory date_time"
+{{- else }}
+set -g @catppuccin_flavour 'macchiato'  
+set -g @catppuccin_status_modules_right "weather directory date_time"
+{{- end }}
+
+# Don't exit tmux when closing a session
+set -g detach-on-destroy off
+
+# Reduce escape time for better vim experience
+set -sg escape-time 0
+
+# Automatically set window title
+set-window-option -g automatic-rename on
+set-option -g set-titles on
+
+{{- if .is_macos }}
+# macOS specific settings
+set -g default-command "reattach-to-user-namespace -l ${SHELL}"
+{{- end }}
+
+# Activity monitoring
+setw -g monitor-activity on
+set -g visual-activity off
+
+# Pane borders
+{{- if .is_work }}
+set -g pane-border-style fg=colour238
+set -g pane-active-border-style fg=colour51
+{{- else }}
+set -g pane-border-style fg=colour235
+set -g pane-active-border-style fg=colour196
+{{- end }}
+
+# Message styling
+set -g message-style bg=colour166,fg=colour232
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'

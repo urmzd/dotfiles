@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+
+# Chezmoi run_once script - installs packages based on system detection
+# This runs once before applying dotfiles
+
+set -euo pipefail
+
+echo "🔧 Installing packages for {{ .chezmoi.os }}/{{ .chezmoi.arch }}..."
+
+{{- if .is_macos }}
+# macOS package installation
+if command -v brew >/dev/null 2>&1; then
+    echo "📦 Installing Homebrew packages..."
+    
+    # Essential tools
+    brew_packages=(
+        "git"
+        "tree" 
+        "fzf"
+        "ripgrep"
+        "the_silver_searcher"
+        "jq"
+        "yq"
+    )
+    
+    for package in "${brew_packages[@]}"; do
+        if ! brew list "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            brew install "$package"
+        fi
+    done
+    
+    {{- if .use_nix }}
+    # Install Nix if not present
+    if ! command -v nix >/dev/null 2>&1; then
+        echo "🗄️ Installing Nix package manager..."
+        sh <(curl -L https://nixos.org/nix/install) --daemon
+        
+        # Enable flakes
+        mkdir -p ~/.config/nix
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
+    {{- end }}
+    
+    # Install direnv for Nix integration
+    if ! command -v direnv >/dev/null 2>&1; then
+        echo "🔄 Installing direnv..."
+        brew install direnv
+    fi
+    
+else
+    echo "⚠️ Homebrew not found. Please install it first."
+fi
+
+{{- else if .is_linux }}
+# Linux package installation
+if command -v apt >/dev/null 2>&1; then
+    echo "📦 Installing packages with apt..."
+    
+    # Update package list
+    sudo apt update
+    
+    # Essential tools
+    apt_packages=(
+        "git"
+        "tree"
+        "fzf" 
+        "ripgrep"
+        "silversearcher-ag"
+        "jq"
+        "curl"
+        "wget"
+        "direnv"
+    )
+    
+    for package in "${apt_packages[@]}"; do
+        if ! dpkg -l "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo apt install -y "$package"
+        fi
+    done
+    
+    {{- if .use_nix }}
+    # Install Nix if not present
+    if ! command -v nix >/dev/null 2>&1; then
+        echo "🗄️ Installing Nix package manager..."
+        sh <(curl -L https://nixos.org/nix/install) --daemon
+        
+        # Enable flakes
+        mkdir -p ~/.config/nix
+        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    fi
+    {{- end }}
+    
+elif command -v dnf >/dev/null 2>&1; then
+    echo "📦 Installing packages with dnf..."
+    
+    # Fedora/RHEL packages
+    dnf_packages=(
+        "git"
+        "tree"
+        "fzf"
+        "ripgrep" 
+        "the_silver_searcher"
+        "jq"
+        "curl"
+        "wget"
+        "direnv"
+    )
+    
+    for package in "${dnf_packages[@]}"; do
+        if ! rpm -q "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo dnf install -y "$package"
+        fi
+    done
+    
+elif command -v pacman >/dev/null 2>&1; then
+    echo "📦 Installing packages with pacman..."
+    
+    # Arch packages
+    pacman_packages=(
+        "git"
+        "tree"
+        "fzf"
+        "ripgrep"
+        "the_silver_searcher"
+        "jq" 
+        "curl"
+        "wget"
+        "direnv"
+    )
+    
+    for package in "${pacman_packages[@]}"; do
+        if ! pacman -Q "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo pacman -S --noconfirm "$package"
+        fi
+    done
+    
+else
+    echo "⚠️ No supported package manager found"
+fi
+{{- end }}
+
+{{- if not .has_nix }}
+# Install asdf as fallback if Nix is not used
+if ! command -v asdf >/dev/null 2>&1; then
+    echo "🔧 Installing asdf version manager..."
+    git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
+    
+    # Add plugins
+    source ~/.asdf/asdf.sh
+    asdf plugin add nodejs
+    asdf plugin add python
+    asdf plugin add rust
+fi
+{{- end }}
+
+echo "✅ Package installation completed!"

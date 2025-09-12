@@ -1,0 +1,166 @@
+# =============================================================================
+# Git Attributes for Enhanced Security
+# =============================================================================
+
+# =============================================================================
+# SENSITIVE FILES - PREVENT DIFF EXPOSURE
+# =============================================================================
+
+# Environment files - treat as binary to prevent diff leaks
+.env* binary
+*env* binary
+*.env binary
+.envrc.local binary
+secrets.* binary
+.secrets binary
+
+# SSH Keys and Certificates - never show in diff
+id_rsa* binary
+id_ecdsa* binary  
+id_ed25519* binary
+*.key binary
+*.pem binary
+*.p8 binary
+*.p12 binary
+*.pfx binary
+*.crt binary
+*.cert binary
+authorized_keys* binary
+known_hosts* binary
+
+# Age encryption keys - protect from exposure
+key.txt binary
+*.age-key binary
+age-key* binary
+age_key* binary
+
+# GPG Keys - treat as binary
+*.gpg binary
+*.asc binary
+secring.* binary
+pubring.* binary
+
+# API Keys and Tokens - prevent accidental exposure
+*api*key* binary
+*secret* binary
+*token* binary
+*password* binary
+*passwd* binary
+
+# Cloud Provider Credentials
+.aws/credentials binary
+.aws/config binary
+*aws*credentials* binary
+*gcp*credentials* binary
+*google*credentials* binary
+service-account*.json binary
+
+# Database files
+*.sqlite binary
+*.sqlite3 binary
+*.db binary
+
+# =============================================================================
+# CHEZMOI SPECIFIC SECURITY
+# =============================================================================
+
+# Chezmoi templates - ensure proper line endings for cross-platform
+*.tmpl text eol=lf
+.chezmoi.* text eol=lf
+
+# Encrypted files - definitely binary
+*.age binary
+encrypted_* binary
+
+# Chezmoi state files - binary treatment  
+.chezmoistate binary
+.chezmoitemplates/* binary
+
+# =============================================================================
+# MERGE CONFLICT PROTECTION
+# =============================================================================
+
+# Never auto-merge sensitive files - require manual resolution
+.env* merge=ours
+*secret* merge=ours
+*.key merge=ours
+*.pem merge=ours
+*credentials* merge=ours
+*password* merge=ours
+*.age merge=ours
+
+# Chezmoi config requires manual attention
+.chezmoi.toml merge=ours
+chezmoi.toml merge=ours
+
+# SSH configs need careful review
+*ssh/config* merge=ours
+ssh_config merge=ours
+
+# =============================================================================
+# FILE TYPE DETECTION
+# =============================================================================
+
+# Shell scripts
+*.sh text eol=lf
+install.sh text eol=lf
+bootstrap*.sh text eol=lf
+secrets-setup.sh text eol=lf
+
+# Nix files
+*.nix text eol=lf
+flake.lock text eol=lf
+
+# Configuration files
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+
+# Markdown documentation
+*.md text eol=lf
+README* text eol=lf
+
+# =============================================================================
+# EXPORT IGNORE (FILES NOT INCLUDED IN ARCHIVE EXPORTS)
+# =============================================================================
+
+# Don't include these in git archives
+.git* export-ignore
+.chezmoistate export-ignore
+*.tmp export-ignore
+*.backup export-ignore
+debug* export-ignore
+*.log export-ignore
+.DS_Store export-ignore
+
+# Test and development files
+*test* export-ignore
+*debug* export-ignore
+*.local export-ignore
+
+# =============================================================================
+# FILTER CONFIGURATION
+# =============================================================================
+
+# Clean filter for removing secrets (if needed)
+# This can be configured with git config filter.secrets.clean
+# secrets.* filter=secrets
+# *.env filter=secrets
+
+# =============================================================================
+# SECURITY NOTES
+# =============================================================================
+
+# This .gitattributes file provides:
+# 1. Binary treatment for sensitive files (prevents diff exposure)
+# 2. Merge conflict protection for critical files
+# 3. Export filtering to exclude sensitive files from archives
+# 4. Proper line ending handling for cross-platform compatibility
+# 5. File type detection for proper handling
+
+# Additional security measures should include:
+# - Pre-commit hooks with secret detection
+# - Regular security audits  
+# - Proper .gitignore configuration
+# - User education on handling sensitive data

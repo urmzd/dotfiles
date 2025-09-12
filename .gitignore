@@ -1,1 +1,250 @@
+# =============================================================================
+# SENSITIVE DATA - NEVER COMMIT THESE FILES
+# =============================================================================
+
+# Environment Variables and Secrets
 .env
+.env.*
+.envrc.local
+*.env
+.secrets
+secrets.*
+
+# API Keys and Tokens
+*api*key*
+*secret*
+*token*
+*.key
+*.pem
+*.p8
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# SSH Keys and Certificates
+id_rsa*
+id_ecdsa*
+id_ed25519*
+*.crt
+*.cert
+*.ca-bundle
+*.cer
+*.der
+*.ca
+authorized_keys*
+known_hosts*
+
+# Age Encryption Keys
+key.txt
+*.age-key
+age-key*
+age_key*
+
+# GPG Keys
+*.gpg
+*.asc
+secring.*
+pubring.*
+trustdb.gpg
+*.sec
+
+# AWS Credentials
+.aws/credentials
+.aws/config
+*aws*credentials*
+*aws*config*
+
+# Google Cloud Credentials  
+*gcp*credentials*
+*google*credentials*
+service-account*.json
+*.googleapis.com.json
+
+# Database Credentials
+*.db-journal
+*.sqlite
+*.sqlite3
+database.yml
+mongod.conf
+
+# Docker Secrets
+docker-compose.override.yml
+.dockerignore.local
+
+# Terraform State and Variables
+*.tfstate*
+*.tfvars
+terraform.rc
+.terraformrc
+
+# Kubernetes Configs
+kubeconfig*
+kube-config*
+*.kubeconfig
+
+# Password Files
+password*
+passwd*
+*.password
+*.pwd
+
+# =============================================================================
+# TEMPORARY AND CACHE FILES
+# =============================================================================
+
+# Chezmoi
+.chezmoistate
+.chezmoitemplates
+chezmoi-*temp*
+
+# Nix
+result
+result-*
+.direnv/
+.envrc.*
+
+# Age Temporary Files
+*.age.tmp
+age-tmp-*
+
+# Backup Files
+*.backup
+*.bak
+*.orig
+*.save
+*.tmp
+*.temp
+*~
+
+# =============================================================================
+# OS SPECIFIC
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+
+# =============================================================================
+# EDITOR AND IDE SPECIFIC
+# =============================================================================
+
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-workspace
+
+# Vim
+.viminfo
+.vim/
+.netrwhist
+*.swp
+*.swo
+*~
+.*.sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# =============================================================================
+# LOCAL CUSTOMIZATIONS (USER SPECIFIC)
+# =============================================================================
+
+# Local configuration overrides
+*.local
+*local*
+.local-*
+local-*
+
+# Machine-specific files
+.machine-*
+machine-*
+hostname-*
+.hostname-*
+
+# User-specific scripts
+user-*
+.user-*
+
+# Development overrides
+dev-override*
+.dev-*
+
+# Personal notes and drafts
+NOTES*
+notes*
+draft*
+TODO.personal
+todo.personal
+
+# =============================================================================
+# LOGS AND DEBUG FILES
+# =============================================================================
+
+# General logs
+*.log
+logs/
+*.out
+
+# Debug files
+debug*
+.debug*
+*.debug
+
+# Core dumps
+core.*
+*.dump
+
+# =============================================================================
+# VERSION CONTROL ARTIFACTS
+# =============================================================================
+
+# Git
+.git/hooks/pre-push.local
+.git/hooks/pre-commit.local
+
+# Other VCS
+.svn/
+.hg/
+.bzr/
