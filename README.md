@@ -2,7 +2,7 @@
 
 A comprehensive development environment setup for macOS, featuring modern tools and configurations for a productive development workflow.
 
-> **Note:** This setup is optimized for macOS and includes configurations for zsh, asdf, Neovim, tmux, and various development tools.
+> **Note:** This setup is optimized for macOS and includes configurations for zsh, Nix, Neovim, tmux, and various development tools.
 
 ## 🚀 Quick Start
 
@@ -37,7 +37,7 @@ chmod +x bootstrap-nix-chezmoi.sh
 
 ### Package Managers
 - **Homebrew** - macOS package manager
-- **asdf** - Version manager for programming languages
+- **Nix** - Reproducible package manager with development shells
 - **pipx** - Install Python applications in isolated environments
 
 ### Development Tools
@@ -74,7 +74,7 @@ chmod +x bootstrap-nix-chezmoi.sh
 ~/.dotfiles/
 ├── bootstrap-nix-chezmoi.sh # Modern Nix + Chezmoi setup script
 ├── Brewfile              # Homebrew packages
-├── .tool-versions        # asdf language versions
+├── .tool-versions        # Deprecated - using nix flake.nix instead
 ├── requirements-pipx.txt # Python applications via pipx
 ├── zsh/                  # Zsh configuration
 │   ├── .zshrc           # Main zsh configuration
@@ -95,7 +95,7 @@ chmod +x bootstrap-nix-chezmoi.sh
 ### Zsh Configuration
 - **oh-my-zsh** framework with git plugin
 - **Powerlevel10k** theme for enhanced prompts
-- **asdf** integration for language version management
+- **Nix** integration for reproducible development environments
 - **fzf** integration for fuzzy searching
 - Custom aliases and environment variables
 
@@ -143,7 +143,7 @@ cd ~/.dotfiles
 
 ### Add New Packages
 - **Homebrew**: Edit `Brewfile` and run `brew bundle`
-- **asdf**: Edit `.tool-versions` and run `asdf install`
+- **Nix**: Edit `flake.nix` and run `nix develop`
 - **pipx**: Edit `requirements-pipx.txt` and install manually
 
 ## 🐛 Troubleshooting
@@ -156,10 +156,12 @@ source ~/.zshrc
 # or restart terminal
 ```
 
-**asdf commands not working:**
+**Nix development shell not working:**
 ```bash
-echo 'source "$HOME/.asdf/asdf.sh"' >> ~/.zshrc
-source ~/.zshrc
+# Enable flakes if not already enabled
+echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+# Enter development environment
+nix develop .#go  # or .#python, .#rust, etc.
 ```
 
 **Neovim plugins not loading:**

@@ -1,9 +1,9 @@
 # Brewfile for dotfiles setup
 # Install with: brew bundle
 
-# Package managers and version managers
-brew "asdf"
+# Package managers
 brew "pipx"
+# Note: Using Nix for reproducible development environments instead of asdf
 
 # Core development tools
 brew "git"

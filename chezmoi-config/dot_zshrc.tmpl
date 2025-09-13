@@ -22,9 +22,6 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Plugins based on available tools
 plugins=(
     git
-{{- if .has_asdf }}
-    asdf
-{{- end }}
 {{- if .has_direnv }}
     direnv
 {{- end }}
@@ -60,12 +57,6 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
 fi
 {{- end }}
 
-{{- if .has_asdf }}
-# asdf version manager
-[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh"
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-{{- end }}
 
 # pipx applications
 export PATH="$HOME/.local/bin:$PATH"

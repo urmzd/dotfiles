@@ -32,13 +32,9 @@ alias vim="nvim"
 
 alias vimrc="nvim ~/.config/nvim/init.lua"
 
-[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh"
+# asdf removed - using nix for package management
 
-export PATH="$PATH:$HOME/.asdf/bin/"
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
-# append completions to fpath
-fpath=("${ASDF_DATA_DIR:-$HOME/.asdf}/completions" "${fpath[@]}")
 eval "$(register-python-argcomplete pipx)"
 
 # initialise completions with ZSH's compinit

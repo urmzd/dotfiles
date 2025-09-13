@@ -143,18 +143,6 @@ else
 fi
 {{- end }}
 
-{{- if not .has_nix }}
-# Install asdf as fallback if Nix is not used
-if ! command -v asdf >/dev/null 2>&1; then
-    echo "🔧 Installing asdf version manager..."
-    git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
-
-    # Add plugins
-    source ~/.asdf/asdf.sh
-    asdf plugin add nodejs
-    asdf plugin add python
-    asdf plugin add rust
-fi
-{{- end }}
+# Note: Using Nix for package management - no fallback version manager needed
 
 echo "✅ Package installation completed!"
