@@ -247,3 +247,5 @@ core.*
 .svn/
 .hg/
 .bzr/
+
+node_modules
