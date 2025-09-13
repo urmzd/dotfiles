@@ -26,7 +26,7 @@ Host github-work
     IdentitiesOnly yes
 
 # Personal GitHub (when on work machine)
-Host github-personal  
+Host github-personal
     HostName github.com
     User git
     IdentityFile ~/.ssh/personal_key
@@ -49,7 +49,7 @@ Host github.com
 
 {{- if .is_work }}
 # Work-specific servers (configure manually for your organization)
-# 
+#
 # Example server configuration:
 # Host work-server
 #     HostName your-work-server.com
@@ -70,21 +70,21 @@ Host github.com
 #     Port 22
 #
 # Host pi
-#     HostName raspberrypi.local  
+#     HostName raspberrypi.local
 #     User pi
 #     IdentityFile ~/.ssh/personal_key
 #     Port 22
 {{- end }}
 
 # Cloud providers (configure with your actual keys)
-# 
+#
 # Example AWS configuration:
 # Host *.amazonaws.com
 #     User ec2-user
 #     IdentityFile ~/.ssh/aws_key.pem
 #     StrictHostKeyChecking no
 #
-# Example GCP configuration:  
+# Example GCP configuration:
 # Host *.googleusercontent.com
 #     User {{ .github_username }}
 #     IdentityFile ~/.ssh/gcp_key

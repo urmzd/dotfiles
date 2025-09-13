@@ -10,7 +10,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        
+
         # Common development tools used across environments
         commonTools = with pkgs; [
           git
@@ -118,12 +118,12 @@
           default = pkgs.mkShell {
             name = "default-dev-shell";
             buildInputs = commonTools;
-            
+
             shellHook = ''
               echo "🚀 Welcome to Urmzd's development environment!"
               echo "Available environments:"
               echo "  • nix develop .#node     - Node.js development"
-              echo "  • nix develop .#python   - Python development"  
+              echo "  • nix develop .#python   - Python development"
               echo "  • nix develop .#rust     - Rust development"
               echo "  • nix develop .#go       - Go development"
               echo "  • nix develop .#devops   - DevOps/Infrastructure"
@@ -139,7 +139,7 @@
           node = pkgs.mkShell {
             name = "nodejs-dev-shell";
             buildInputs = commonTools ++ nodeEnv;
-            
+
             shellHook = ''
               echo "📦 Node.js Development Environment"
               echo "Node: $(node --version)"
@@ -153,7 +153,7 @@
           python = pkgs.mkShell {
             name = "python-dev-shell";
             buildInputs = commonTools ++ pythonEnv;
-            
+
             shellHook = ''
               echo "🐍 Python Development Environment"
               echo "Python: $(python --version)"
@@ -167,7 +167,7 @@
           rust = pkgs.mkShell {
             name = "rust-dev-shell";
             buildInputs = commonTools ++ rustEnv;
-            
+
             shellHook = ''
               echo "🦀 Rust Development Environment"
               echo "Rust: $(rustc --version)"
@@ -181,7 +181,7 @@
           go = pkgs.mkShell {
             name = "go-dev-shell";
             buildInputs = commonTools ++ goEnv;
-            
+
             shellHook = ''
               echo "🐹 Go Development Environment"
               echo "Go: $(go version)"
@@ -196,7 +196,7 @@
           devops = pkgs.mkShell {
             name = "devops-dev-shell";
             buildInputs = commonTools ++ devopsEnv;
-            
+
             shellHook = ''
               echo "⚙️  DevOps/Infrastructure Environment"
               echo "Terraform: $(terraform version | head -1)"
@@ -210,7 +210,7 @@
           data = pkgs.mkShell {
             name = "data-science-shell";
             buildInputs = commonTools ++ dataEnv;
-            
+
             shellHook = ''
               echo "📊 Data Science Environment"
               echo "Python: $(python --version)"
@@ -225,7 +225,7 @@
           lua = pkgs.mkShell {
             name = "lua-dev-shell";
             buildInputs = commonTools ++ luaEnv;
-            
+
             shellHook = ''
               echo "🌙 Lua Development Environment"
               echo "Lua: $(lua -v)"
@@ -238,7 +238,7 @@
           full = pkgs.mkShell {
             name = "full-dev-shell";
             buildInputs = commonTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv;
-            
+
             shellHook = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
@@ -261,12 +261,12 @@
             name = "dev-node";
             paths = commonTools ++ nodeEnv;
           };
-          
+
           dev-python = pkgs.buildEnv {
             name = "dev-python";
             paths = commonTools ++ pythonEnv;
           };
-          
+
           dev-rust = pkgs.buildEnv {
             name = "dev-rust";
             paths = commonTools ++ rustEnv;
@@ -279,21 +279,21 @@
           setup = flake-utils.lib.mkApp {
             drv = pkgs.writeShellScriptBin "setup" ''
               echo "Setting up Nix development environment..."
-              
+
               # Enable direnv integration
               if ! grep -q "nix-direnv" ~/.config/direnv/direnvrc 2>/dev/null; then
                 mkdir -p ~/.config/direnv
                 echo "source /etc/profiles/per-user/$USER/share/nix-direnv/direnvrc" >> ~/.config/direnv/direnvrc
                 echo "✓ Configured direnv for Nix"
               fi
-              
+
               # Create .envrc template
               if [ ! -f .envrc ]; then
                 echo "use flake" > .envrc
                 echo "✓ Created .envrc file"
                 echo "Run 'direnv allow' to activate the environment"
               fi
-              
+
               echo "🎉 Setup complete!"
             '';
           };

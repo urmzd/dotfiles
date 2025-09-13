@@ -3,3 +3,4 @@
 
 nox
 argcomplete
+detect-secrets

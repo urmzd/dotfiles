@@ -7,6 +7,7 @@ brew "pipx"
 
 # Core development tools
 brew "git"
+brew "just"
 brew "tree"
 brew "fzf"
 brew "ripgrep"

@@ -84,7 +84,7 @@ alias l="ls -l"
 alias ..="cd .."
 alias ...="cd ../.."
 {{- else }}
-# Linux specific aliases  
+# Linux specific aliases
 alias ll="ls -alF --color=auto"
 alias la="ls -A --color=auto"
 alias l="ls -CF --color=auto"
@@ -197,7 +197,7 @@ source <(fzf --zsh) 2>/dev/null || true
 {{- if .is_work }}
 [ -f ~/.env.work ] && source ~/.env.work
 {{- end }}
-{{- if .is_personal }}  
+{{- if .is_personal }}
 [ -f ~/.env.personal ] && source ~/.env.personal
 {{- end }}
 

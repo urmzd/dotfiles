@@ -5,11 +5,13 @@ This guide explains how to use the enhanced dotfiles setup with Nix and Chezmoi 
 ## 🚀 Quick Start
 
 ### One-Command Setup
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
 ### Manual Setup
+
 ```bash
 git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
@@ -44,12 +46,14 @@ This setup combines the best of both worlds:
 ## 🎯 Key Features
 
 ### Reproducible Development Environments
+
 - **Language-specific shells**: Node.js, Python, Rust, Go, Lua
 - **Pinned dependencies**: Exact versions via flake.lock
 - **Instant activation**: direnv automatically switches environments
 - **Cross-platform**: Works on macOS, Linux, and WSL
 
 ### Intelligent Configuration Management
+
 - **Machine-aware templates**: Different configs for work/personal
 - **Secrets management**: Encrypted files with age
 - **Cross-platform detection**: Automatic OS/package manager detection
@@ -60,16 +64,18 @@ This setup combines the best of both worlds:
 ### Development Environments
 
 #### Automatic Activation (Recommended)
+
 ```bash
 cd ~/.dotfiles
 # Environment automatically activates via direnv
 ```
 
 #### Manual Activation
+
 ```bash
 # Enter specific development shells
 nix develop .#node      # Node.js environment
-nix develop .#python    # Python environment  
+nix develop .#python    # Python environment
 nix develop .#rust      # Rust environment
 nix develop .#go        # Go environment
 nix develop .#devops    # DevOps tools
@@ -77,6 +83,7 @@ nix develop .#full      # All environments
 ```
 
 #### Project-Specific Environments
+
 ```bash
 # In any project directory
 echo "use flake ~/.dotfiles#node" > .envrc
@@ -87,23 +94,27 @@ direnv allow
 ### Configuration Management
 
 #### Apply Configurations
+
 ```bash
 chezmoi apply
 ```
 
 #### Edit Templates
+
 ```bash
 chezmoi edit ~/.gitconfig    # Edit templated git config
 chezmoi edit ~/.zshrc        # Edit templated zsh config
 ```
 
 #### View Differences
+
 ```bash
 chezmoi diff                 # See what would change
 chezmoi diff ~/.gitconfig    # Check specific file
 ```
 
 #### Machine Configuration
+
 ```bash
 chezmoi data                 # View current template variables
 chezmoi edit-config          # Edit chezmoi configuration
@@ -112,11 +123,13 @@ chezmoi edit-config          # Edit chezmoi configuration
 ### Secrets Management
 
 #### Setup Encryption
+
 ```bash
 ./secrets-setup.sh
 ```
 
 #### Add Encrypted Files
+
 ```bash
 chezmoi add --encrypt ~/.env.work
 chezmoi add --encrypt ~/.ssh/id_ed25519
@@ -124,6 +137,7 @@ chezmoi add --encrypt ~/.aws/credentials
 ```
 
 #### Edit Encrypted Files
+
 ```bash
 chezmoi edit --apply ~/.env.work
 ```
@@ -133,6 +147,7 @@ chezmoi edit --apply ~/.env.work
 ### Template Variables
 
 Templates can use these variables:
+
 - `{{ .name }}` - Your full name
 - `{{ .email }}` - Your email address
 - `{{ .is_personal }}` - Personal machine flag
@@ -152,7 +167,7 @@ Templates can use these variables:
 {{- if .is_work }}
     signingkey = "work-gpg-key"
 {{- else }}
-    signingkey = "personal-gpg-key"  
+    signingkey = "personal-gpg-key"
 {{- end }}
 
 {{- if .has_homebrew }}
@@ -165,6 +180,7 @@ Templates can use these variables:
 ### Custom Development Shells
 
 Add to `flake.nix`:
+
 ```nix
 # Custom project shell
 myproject = pkgs.mkShell {
@@ -174,7 +190,7 @@ myproject = pkgs.mkShell {
     pkgs.redis
     pkgs.nodejs_20
   ];
-  
+
   shellHook = ''
     echo "🚀 MyProject Development Environment"
     export DATABASE_URL="postgresql://localhost/myproject"
@@ -194,12 +210,14 @@ The legacy shell-based setup has been removed in favor of the modern Nix + Chezm
 ### From asdf to Nix
 
 **Before:**
+
 ```bash
 asdf install nodejs 23.9.0
 asdf global nodejs 23.9.0
 ```
 
 **After:**
+
 ```bash
 nix develop .#node
 # or with direnv: just cd into directory with .envrc
@@ -208,11 +226,13 @@ nix develop .#node
 ### From Manual Dotfiles to Chezmoi
 
 **Before:**
+
 ```bash
 ln -s ~/.dotfiles/zsh/.zshrc ~/.zshrc
 ```
 
 **After:**
+
 ```bash
 chezmoi add ~/.zshrc
 chezmoi apply
@@ -221,13 +241,14 @@ chezmoi apply
 ## 🛠️ Maintenance
 
 ### Update All Systems
+
 ```bash
 cd ~/.dotfiles
 
 # Update Nix packages
 nix flake update
 
-# Update Homebrew (GUI apps)  
+# Update Homebrew (GUI apps)
 brew update && brew upgrade
 
 # Update Chezmoi templates
@@ -240,7 +261,9 @@ git pull origin main
 ### Add New Tools
 
 #### Add to Nix Environment
+
 Edit `flake.nix` and add to appropriate environment:
+
 ```nix
 pythonEnv = with pkgs; [
   python313
@@ -250,6 +273,7 @@ pythonEnv = with pkgs; [
 ```
 
 #### Add Homebrew GUI App
+
 ```bash
 brew install --cask your-new-app
 ```
@@ -257,6 +281,7 @@ brew install --cask your-new-app
 ### Troubleshooting
 
 #### Nix Issues
+
 ```bash
 # Rebuild environment
 nix develop .#node --rebuild
@@ -269,6 +294,7 @@ nix flake check
 ```
 
 #### Chezmoi Issues
+
 ```bash
 # Verify templates
 chezmoi execute-template --init --promptString name=test < ~/.dotfiles/.chezmoi.toml.tmpl
@@ -280,7 +306,8 @@ chezmoi init --force
 chezmoi execute-template < file.tmpl
 ```
 
-#### direnv Issues  
+#### direnv Issues
+
 ```bash
 # Reload environment
 direnv reload
@@ -295,18 +322,21 @@ direnv allow
 ## 🌟 Benefits Over Traditional Approaches
 
 ### vs. Shell Scripts Only
+
 - ✅ Reproducible environments (Nix)
 - ✅ Intelligent templating (Chezmoi)
 - ✅ Secrets management built-in
 - ✅ Cross-platform compatibility
 
 ### vs. Ansible
+
 - ✅ Faster iteration (no YAML complexity)
 - ✅ Better for personal use
 - ✅ Reproducible package versions
 - ✅ Development-focused
 
 ### vs. Docker
+
 - ✅ Native performance
 - ✅ Host system integration
 - ✅ Persistent environments
@@ -321,4 +351,4 @@ direnv allow
 
 ---
 
-*This modern approach combines the power of Nix's reproducible environments with Chezmoi's intelligent configuration management for a truly next-generation dotfiles experience.*
+_This modern approach combines the power of Nix's reproducible environments with Chezmoi's intelligent configuration management for a truly next-generation dotfiles experience._

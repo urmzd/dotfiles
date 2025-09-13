@@ -32,7 +32,7 @@ set -g default-terminal "screen-256color"
 # macOS specific terminal settings
 set-option -ga terminal-overrides ",xterm-256color:Tc"
 {{- else }}
-# Linux specific terminal settings  
+# Linux specific terminal settings
 set-option -ga terminal-overrides ",*256col*:Tc"
 {{- end }}
 
@@ -107,7 +107,7 @@ set -g @continuum-restore 'on'
 set -g @catppuccin_flavour 'mocha'
 set -g @catppuccin_status_modules_right "directory date_time"
 {{- else }}
-set -g @catppuccin_flavour 'macchiato'  
+set -g @catppuccin_flavour 'macchiato'
 set -g @catppuccin_status_modules_right "weather directory date_time"
 {{- end }}
 

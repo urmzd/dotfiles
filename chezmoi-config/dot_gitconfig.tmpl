@@ -6,10 +6,10 @@
     email = {{ .email | quote }}
 {{- if and .is_work .use_secrets }}
     # Work-specific signing key (configure manually)
-    # signingkey = "YOUR_WORK_GPG_KEY_ID"
+    # signingkey = YOUR_WORK_GPG_KEY_ID
 {{- else if and .is_personal .use_secrets }}
     # Personal signing key (configure manually)
-    # signingkey = "YOUR_PERSONAL_GPG_KEY_ID"
+    # signingkey = YOUR_PERSONAL_GPG_KEY_ID
 {{- end }}
 
 [github]
@@ -86,23 +86,23 @@
 [alias]
     # Short status
     st = status -s
-    
+
     # Pretty log
     lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    
+
     # Show branches
     br = branch -v
-    
+
     # Quick commit
     cm = commit -m
     ca = commit -am
-    
+
     # Undo last commit but keep changes
     undo = reset --soft HEAD^
-    
+
     # Show what I did today
     today = log --since='1 day ago' --oneline --author={{ .email | quote }}
-    
+
     # Clean merged branches
     cleanup = "!git branch --merged | grep -v '\\*\\|main\\|develop' | xargs -n 1 git branch -d"
 
@@ -119,7 +119,7 @@
 # Homebrew git settings
 [difftool "sourcetree"]
     cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-    path = 
+    path =
 [mergetool "sourcetree"]
     cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
     trustExitCode = true

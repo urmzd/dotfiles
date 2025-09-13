@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -17,7 +18,7 @@ autoload -U compinit && compinit
 
 source "$ZSH/oh-my-zsh.sh"
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH"/oh-my-zsh.sh
 
 export EDITOR='nvim'
 
@@ -31,13 +32,13 @@ alias vim="nvim"
 
 alias vimrc="nvim ~/.config/nvim/init.lua"
 
-[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh" 
+[ -f "$HOME/.asdf/asdf.sh" ] && . "$HOME/.asdf/asdf.sh"
 
 export PATH="$PATH:$HOME/.asdf/bin/"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 # append completions to fpath
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+fpath=("${ASDF_DATA_DIR:-$HOME/.asdf}/completions" "${fpath[@]}")
 eval "$(register-python-argcomplete pipx)"
 
 # initialise completions with ZSH's compinit
@@ -47,3 +48,9 @@ autoload -Uz compinit && compinit
 source <(fzf --zsh)
 
 . "$HOME/.local/bin/env"
+eval "$(direnv hook $(basename "$SHELL"))"
+
+# Nix
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi

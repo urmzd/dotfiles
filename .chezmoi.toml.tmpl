@@ -14,25 +14,25 @@
     name = {{ $name | quote }}
     email = {{ $email | quote }}
     github_username = {{ $github_username | quote }}
-    
+
     # Machine type flags
     is_personal = {{ $is_personal }}
     is_work = {{ $is_work }}
-    
+
     # Feature flags
     use_secrets = {{ $use_secrets }}
     use_nix = {{ $use_nix }}
-    
+
     # System detection
     is_macos = {{ eq .chezmoi.os "darwin" }}
     is_linux = {{ eq .chezmoi.os "linux" }}
     is_wsl = {{ env "WSL_DISTRO_NAME" | not | not }}
-    
+
     # Package manager detection
     has_homebrew = {{ lookPath "brew" | not | not }}
     has_nix = {{ lookPath "nix" | not | not }}
     has_apt = {{ lookPath "apt" | not | not }}
-    
+
     # Development tools detection
     has_asdf = {{ lookPath "asdf" | not | not }}
     has_direnv = {{ lookPath "direnv" | not | not }}

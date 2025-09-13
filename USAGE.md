@@ -5,6 +5,7 @@ This guide provides comprehensive instructions for testing and using all feature
 ## 🚀 Quick Testing Overview
 
 ### Prerequisites Check
+
 ```bash
 # Verify your system is ready
 cd ~/.dotfiles
@@ -12,6 +13,7 @@ cd ~/.dotfiles
 ```
 
 ### Security Pre-flight Check
+
 ```bash
 # Run comprehensive security audit
 ./security-audit.sh
@@ -23,6 +25,7 @@ git status --ignored
 ## 🔒 Security Features Testing
 
 ### 1. Pre-commit Hooks Validation
+
 ```bash
 # Install pre-commit hooks
 pre-commit install
@@ -39,6 +42,7 @@ git reset HEAD~1
 ```
 
 ### 2. Security Audit Script
+
 ```bash
 # Run full security scan
 ./security-audit.sh
@@ -51,6 +55,7 @@ git reset HEAD~1
 ```
 
 ### 3. Secrets Management Testing
+
 ```bash
 # Setup age encryption (follow prompts)
 ./secrets-setup.sh
@@ -71,6 +76,7 @@ chezmoi apply
 ## 🎯 Modern Nix + Chezmoi Workflow Testing
 
 ### 1. Fresh Installation Test
+
 ```bash
 # Test complete modern setup (use test VM/container)
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
@@ -83,6 +89,7 @@ command -v age
 ```
 
 ### 2. Development Environment Testing
+
 ```bash
 cd ~/.dotfiles
 
@@ -90,7 +97,7 @@ cd ~/.dotfiles
 nix develop .#node
 # In new shell: node --version, npm --version
 
-nix develop .#python  
+nix develop .#python
 # In new shell: python --version, pip --version
 
 nix develop .#rust
@@ -104,6 +111,7 @@ nix develop .#devops
 ```
 
 ### 3. Automatic Environment Switching
+
 ```bash
 cd ~/.dotfiles
 
@@ -118,6 +126,7 @@ node --version  # Should work without manual activation
 ```
 
 ### 4. Cross-platform Testing
+
 ```bash
 # Run comprehensive platform tests
 ./cross-platform-test.sh
@@ -133,6 +142,7 @@ node --version  # Should work without manual activation
 ## 🔄 Template System Validation
 
 ### 1. Chezmoi Configuration Testing
+
 ```bash
 # Test template rendering with different configurations
 chezmoi execute-template --init \
@@ -150,11 +160,12 @@ chezmoi execute-template < chezmoi-config/dot_gitconfig.tmpl
 ```
 
 ### 2. Multi-machine Configuration Testing
+
 ```bash
 # Test work machine configuration
 chezmoi init --data '{"is_work": true, "is_personal": false}'
 
-# Test personal machine configuration  
+# Test personal machine configuration
 chezmoi init --data '{"is_work": false, "is_personal": true}'
 
 # Verify different templates are applied
@@ -162,6 +173,7 @@ chezmoi diff
 ```
 
 ### 3. Encrypted Templates Testing
+
 ```bash
 # Add secret template
 chezmoi add --encrypt --template ~/.env.personal
@@ -179,6 +191,7 @@ cat ~/.env.personal
 ## 📊 Feature Comparison Testing
 
 ### Legacy vs Modern Comparison
+
 ```bash
 # Modern setup (only option)
 ./bootstrap-nix-chezmoi.sh
@@ -190,6 +203,7 @@ source ~/.zshrc
 ```
 
 ### Performance Benchmarking
+
 ```bash
 # Time modern setup
 time nix develop .#full --command echo "ready"
@@ -201,6 +215,7 @@ time zsh -c "exit"
 ## 🧪 Advanced Feature Testing
 
 ### 1. Nix Flake Validation
+
 ```bash
 cd ~/.dotfiles
 
@@ -215,6 +230,7 @@ nix eval .#devShells.x86_64-darwin.default.name
 ```
 
 ### 2. Chezmoi Advanced Features
+
 ```bash
 # Test ignore patterns
 echo "ignored-file" > ~/.ignored-test
@@ -231,6 +247,7 @@ chezmoi diff
 ```
 
 ### 3. Security Integration Testing
+
 ```bash
 # Test pre-commit with real commits
 echo "# Safe comment" >> README.md
@@ -249,13 +266,14 @@ rm temp.py
 ## 🔍 Validation Commands & Expected Outputs
 
 ### Essential Validation Commands
+
 ```bash
 # 1. Security validation
 ./security-audit.sh
 # Expected: All checks pass, no secrets detected
 
 # 2. Cross-platform compatibility
-./cross-platform-test.sh  
+./cross-platform-test.sh
 # Expected: Platform detected, tools available
 
 # 3. Development environment check
@@ -277,6 +295,7 @@ echo $?
 ```
 
 ### Health Check Script
+
 ```bash
 #!/bin/bash
 # Create this as health-check.sh
@@ -286,7 +305,7 @@ echo "🔍 Running comprehensive health check..."
 # Test each major component
 tests=(
     "nix --version"
-    "chezmoi --version" 
+    "chezmoi --version"
     "direnv --version"
     "age --version"
     "pre-commit --version"
@@ -308,6 +327,7 @@ echo "🎯 Health check complete!"
 ### Common Issues & Solutions
 
 **1. Nix environment not loading:**
+
 ```bash
 # Verify Nix installation
 ls -la /nix
@@ -318,6 +338,7 @@ curl -L https://nixos.org/nix/install | sh
 ```
 
 **2. Chezmoi templates failing:**
+
 ```bash
 # Check template syntax
 chezmoi execute-template --init --dry-run < .chezmoi.toml.tmpl
@@ -328,6 +349,7 @@ chezmoi init
 ```
 
 **3. direnv not auto-loading:**
+
 ```bash
 # Add to shell profile
 echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
@@ -338,6 +360,7 @@ direnv allow .
 ```
 
 **4. Pre-commit hooks not running:**
+
 ```bash
 # Reinstall hooks
 pre-commit uninstall
@@ -348,6 +371,7 @@ pre-commit run --all-files
 ```
 
 **5. Secrets decryption failing:**
+
 ```bash
 # Check age key
 ls -la ~/.config/age/key.txt
@@ -360,6 +384,7 @@ age --decrypt -i ~/.config/age/key.txt encrypted_file.age
 ```
 
 ### Debug Mode Testing
+
 ```bash
 # Enable verbose output for troubleshooting
 export CHEZMOI_DEBUG=1
@@ -371,6 +396,7 @@ direnv status
 ```
 
 ### Log Analysis
+
 ```bash
 # Check installation logs
 tail -f /tmp/dotfiles-install.log
@@ -387,7 +413,7 @@ git log --oneline --decorate
 Your dotfiles setup is successful when:
 
 - ✅ All security audits pass
-- ✅ Cross-platform tests complete successfully  
+- ✅ Cross-platform tests complete successfully
 - ✅ All development environments load properly
 - ✅ Templates render without errors
 - ✅ Secrets are encrypted and decrypt correctly
@@ -400,7 +426,7 @@ Your dotfiles setup is successful when:
 ## 📚 Additional Resources
 
 - **Security Documentation**: [SECURITY.md](SECURITY.md)
-- **Nix + Chezmoi Guide**: [NIX-CHEZMOI.md](NIX-CHEZMOI.md) 
+- **Nix + Chezmoi Guide**: [NIX-CHEZMOI.md](NIX-CHEZMOI.md)
 - **Architecture Overview**: [README.md](README.md)
 - **Cross-platform Testing**: `./cross-platform-test.sh --help`
 - **Security Auditing**: `./security-audit.sh --help`

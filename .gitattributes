@@ -16,7 +16,7 @@ secrets.* binary
 
 # SSH Keys and Certificates - never show in diff
 id_rsa* binary
-id_ecdsa* binary  
+id_ecdsa* binary
 id_ed25519* binary
 *.key binary
 *.pem binary
@@ -72,7 +72,7 @@ service-account*.json binary
 *.age binary
 encrypted_* binary
 
-# Chezmoi state files - binary treatment  
+# Chezmoi state files - binary treatment
 .chezmoistate binary
 .chezmoitemplates/* binary
 
@@ -158,6 +158,6 @@ debug* export-ignore
 
 # Additional security measures should include:
 # - Pre-commit hooks with secret detection
-# - Regular security audits  
+# - Regular security audits
 # - Proper .gitignore configuration
 # - User education on handling sensitive data

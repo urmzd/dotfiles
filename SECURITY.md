@@ -36,7 +36,7 @@ chezmoi add --encrypt ~/.ssh/id_ed25519
 
 - **Environment Variables**: API keys, tokens, passwords
 - **SSH Private Keys**: Authentication keys for servers
-- **Cloud Credentials**: AWS, GCP, Azure configurations  
+- **Cloud Credentials**: AWS, GCP, Azure configurations
 - **Application Configs**: Database URLs, service endpoints
 - **Certificates**: TLS/SSL certificates and private keys
 
@@ -68,6 +68,7 @@ pre-commit run --all-files
 ```
 
 **Detected Patterns:**
+
 - API keys (OpenAI: `sk-*`, GitHub: `ghp_*`, AWS: `AKIA*`)
 - Slack tokens (`xoxb-*`)
 - Private SSH keys
@@ -83,8 +84,9 @@ Run comprehensive security checks:
 ```
 
 **Audit Coverage:**
+
 - ✅ Accidentally committed sensitive files
-- ✅ Git security configuration  
+- ✅ Git security configuration
 - ✅ Template file safety
 - ✅ Encrypted file integrity
 - ✅ Pre-commit hook setup
@@ -96,6 +98,7 @@ Run comprehensive security checks:
 ### Safe Template Practices
 
 **✅ Do This:**
+
 ```bash
 # Use template variables
 [user]
@@ -109,6 +112,7 @@ Run comprehensive security checks:
 ```
 
 **❌ Never Do This:**
+
 ```bash
 # Hardcoded secrets
 export API_KEY="sk-1234567890abcdef"
@@ -118,8 +122,9 @@ export PASSWORD="mysecretpassword"
 ### Template Variables
 
 Safe variables to use in templates:
+
 - `{{ .name }}` - User's full name
-- `{{ .email }}` - Email address  
+- `{{ .email }}` - Email address
 - `{{ .github_username }}` - GitHub username
 - `{{ .is_work }}` - Work machine flag
 - `{{ .is_personal }}` - Personal machine flag
@@ -130,17 +135,20 @@ Safe variables to use in templates:
 ### Before Committing
 
 1. **Run Security Audit**:
+
    ```bash
    ./security-audit.sh
    ```
 
-2. **Pre-commit Checks**: 
+2. **Pre-commit Checks**:
    Hooks run automatically, but manually check with:
+
    ```bash
    pre-commit run --all-files
    ```
 
 3. **Review Changes**:
+
    ```bash
    git diff --cached
    ```
@@ -153,11 +161,13 @@ Safe variables to use in templates:
 ### Setting Up Secrets
 
 1. **Initialize Age Encryption**:
+
    ```bash
    ./secrets-setup.sh
    ```
 
 2. **Create Secret Files**:
+
    ```bash
    # Edit your actual secrets
    vim ~/.env.work
@@ -165,6 +175,7 @@ Safe variables to use in templates:
    ```
 
 3. **Encrypt and Add to Chezmoi**:
+
    ```bash
    chezmoi add --encrypt ~/.env.work
    chezmoi add --encrypt ~/.env.personal
@@ -202,12 +213,13 @@ Safe variables to use in templates:
 ### If Secrets Are Accidentally Committed
 
 1. **Immediate Actions**:
+
    ```bash
    # Remove from history
    git filter-branch --force --index-filter \
      'git rm --cached --ignore-unmatch SENSITIVE_FILE' \
      --prune-empty --tag-name-filter cat -- --all
-   
+
    # Force push (if safe to do so)
    git push --force-with-lease --all
    ```
@@ -226,11 +238,13 @@ Safe variables to use in templates:
 ### If Age Key Is Compromised
 
 1. **Generate New Key**:
+
    ```bash
    age-keygen -o ~/.config/age/new_key.txt
    ```
 
 2. **Re-encrypt All Files**:
+
    ```bash
    # Decrypt with old key, encrypt with new key
    for file in ~/.local/share/chezmoi/encrypted_*; do
@@ -267,18 +281,21 @@ pip install gitguardian
 ## 📋 Security Checklist
 
 ### Initial Setup
+
 - [ ] Run `./secrets-setup.sh`
 - [ ] Install pre-commit hooks: `pre-commit install`
 - [ ] Run initial audit: `./security-audit.sh`
 - [ ] Backup age private key securely
 
 ### Before Each Commit
+
 - [ ] Run `./security-audit.sh`
 - [ ] Check `git diff --cached` for secrets
 - [ ] Verify pre-commit hooks pass
 - [ ] Test encrypted files decrypt correctly
 
 ### Monthly Maintenance
+
 - [ ] Run full security audit
 - [ ] Review and update .gitignore
 - [ ] Check for new secret patterns
@@ -286,8 +303,9 @@ pip install gitguardian
 - [ ] Verify backup integrity
 
 ### Key Rotation (Quarterly)
+
 - [ ] Generate new age key
-- [ ] Re-encrypt all secret files  
+- [ ] Re-encrypt all secret files
 - [ ] Update Chezmoi configuration
 - [ ] Test full deployment
 - [ ] Securely dispose of old key

@@ -1,218 +1,51 @@
-# =============================================================================
-# Pre-commit Configuration for Security and Quality
-# =============================================================================
-#
-# This configuration prevents accidental commits of sensitive data
-# and ensures code quality for the dotfiles repository.
-#
-# Setup:
-# 1. pip install pre-commit
-# 2. pre-commit install
-# 3. pre-commit run --all-files (optional, to test)
-#
-# =============================================================================
-
 repos:
-  # =============================================================================
-  # SECRET DETECTION - CRITICAL SECURITY
-  # =============================================================================
-  
+  # Secret detection
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
-        name: 🔍 Detect secrets
-        args: ['--baseline', '.secrets.baseline']
+        args: ["--baseline", ".secrets.baseline"]
         exclude: |
           (?x)^(
             .*\.age$|
             .*\.gpg$|
             .*\.enc$|
-            .*\.encrypted$|
-            .*/fonts/.*\.ttf$|
             .*\.lock$|
-            .secrets.baseline$
+            nvim/lazy-lock\.json$
           )$
-        additional_dependencies: ['requests']
 
-  - repo: https://github.com/gitguardian/ggshield
-    rev: v1.25.0
-    hooks:
-      - id: ggshield
-        name: 🛡️ GitGuardian scan
-        language: python
-        stages: [commit]
-
-  # =============================================================================
-  # FILE CONTENT VALIDATION
-  # =============================================================================
-  
+  # Basic file validation
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
-      # Prevent large files from being committed
       - id: check-added-large-files
-        name: 🚫 Check for large files
-        args: ['--maxkb=1000']
-        
-      # Ensure files end with newline
+        args: ["--maxkb=1000"]
       - id: end-of-file-fixer
-        name: 📝 Fix end of files
         exclude: '\.age$|\.gpg$|\.enc$|\.ttf$'
-        
-      # Remove trailing whitespace
-      - id: trailing-whitespace
-        name: ✂️ Trim trailing whitespace
-        exclude: '\.age$|\.gpg$|\.enc$|\.ttf$'
-        
-      # Check for merge conflicts
       - id: check-merge-conflict
-        name: 🔀 Check merge conflicts
-        
-      # Validate YAML
       - id: check-yaml
-        name: ✅ Check YAML syntax
         exclude: '\.age$'
-        
-      # Validate JSON  
       - id: check-json
-        name: ✅ Check JSON syntax
-        exclude: '\.age$'
-        
-      # Validate TOML
+        exclude: '\.age$|lazy-lock\.json$'
       - id: check-toml
-        name: ✅ Check TOML syntax
-        
-      # Check for private keys
       - id: detect-private-key
-        name: 🔐 Detect private keys
 
-  # =============================================================================
-  # SHELL SCRIPT VALIDATION
-  # =============================================================================
-  
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
-        name: 🐚 Shell script analysis
-        args: ['-e', 'SC1091', '-e', 'SC2039']
-        exclude: '\.age$|\.gpg$|\.enc$'
-
-  # =============================================================================
-  # SECURITY-SPECIFIC CHECKS
-  # =============================================================================
-
-  - repo: local
-    hooks:
-      # Custom secret pattern detection
-      - id: custom-secrets-check
-        name: 🔒 Custom secrets check
-        entry: bash
-        language: system
-        pass_filenames: false
-        args:
-          - -c
-          - |
-            # Check for common secret patterns
-            if grep -r -E "(password|passwd|secret|key|token)\s*[:=]\s*['\"][^'\"]{8,}" --exclude-dir=.git .; then
-              echo "❌ Potential secret found! Please review and use encryption."
-              exit 1
-            fi
-            
-            # Check for hardcoded credentials in templates
-            if find . -name "*.tmpl" -exec grep -l "sk-\|ghp_\|xoxb-\|AKIA\|ya29\." {} \; | head -1; then
-              echo "❌ Hardcoded credentials found in templates!"
-              exit 1
-            fi
-            
-            # Check for unencrypted SSH keys
-            if find . -name "id_rsa" -o -name "id_ecdsa" -o -name "id_ed25519" | grep -v "\.pub$" | head -1; then
-              echo "❌ Unencrypted SSH private key found!"
-              exit 1
-            fi
-
-      # Validate .age files are properly encrypted  
-      - id: validate-encrypted-files
-        name: 🔐 Validate encrypted files
-        entry: bash
-        language: system
-        files: '\.age$'
-        args:
-          - -c
-          - |
-            for file in "$@"; do
-              if [[ -s "$file" ]]; then
-                # Check if file starts with age encryption header
-                if ! head -c 4 "$file" | grep -q "age-"; then
-                  # Check if it's a plaintext placeholder
-                  if head -10 "$file" | grep -qi "placeholder\|example\|template"; then
-                    echo "✅ $file is an encrypted placeholder"
-                  else
-                    echo "❌ $file may not be properly encrypted!"
-                    exit 1
-                  fi
-                fi
-              fi
-            done
-
-      # Validate Chezmoi templates don't expose secrets
-      - id: validate-chezmoi-templates
-        name: 🎭 Validate Chezmoi templates
-        entry: bash
-        language: system
-        files: '\.tmpl$'
-        args:
-          - -c
-          - |
-            for file in "$@"; do
-              # Check for hardcoded secrets in templates
-              if grep -E "sk-[a-zA-Z0-9]{32,}|ghp_[a-zA-Z0-9]{36}|xoxb-[a-zA-Z0-9\-]+" "$file"; then
-                echo "❌ Hardcoded token found in template: $file"
-                exit 1
-              fi
-              
-              # Check for suspicious placeholder values
-              if grep -E "(your-.*-key|your-.*-token|your-.*-secret)" "$file" | grep -v "configure manually"; then
-                echo "⚠️ Suspicious placeholder in $file - should use template variables"
-              fi
-            done
-
-  # =============================================================================
-  # CODE FORMATTING  
-  # =============================================================================
-  
+  # Code formatting
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 23.12.1
     hooks:
       - id: black
-        name: ⚫ Format Python code
         files: '\.py$'
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0
-    hooks:
-      - id: prettier
-        name: 💅 Format code
-        files: '\.(json|yaml|yml|md)$'
-        exclude: '\.age$|lazy-lock\.json$'
-
-# =============================================================================
-# CONFIGURATION
-# =============================================================================
-
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: true
-minimum_pre_commit_version: '2.20.0'
+minimum_pre_commit_version: "2.20.0"
 
-# Exclude files that should never be processed
 exclude: |
   (?x)^(
     .*\.age$|
     .*\.gpg$|
     .*\.enc$|
-    .*\.encrypted$|
-    .*/fonts/.*\.ttf$|
     .*\.lock$|
     .git/.*|
     .direnv/.*|

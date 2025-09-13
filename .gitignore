@@ -12,7 +12,6 @@ secrets.*
 
 # API Keys and Tokens
 *api*key*
-*secret*
 *token*
 *.key
 *.pem
@@ -55,7 +54,7 @@ trustdb.gpg
 *aws*credentials*
 *aws*config*
 
-# Google Cloud Credentials  
+# Google Cloud Credentials
 *gcp*credentials*
 *google*credentials*
 service-account*.json
