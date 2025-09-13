@@ -306,6 +306,42 @@ chezmoi init --force
 chezmoi execute-template < file.tmpl
 ```
 
+#### Template Variable Errors (`map has no entry for key "is_macos"`)
+
+This error occurs when the chezmoi configuration isn't properly loaded, usually due to encryption configuration issues:
+
+```bash
+# Check if template variables are available
+chezmoi data | jq '.is_macos'  # Should return true/false, not null
+
+# If null, check chezmoi config
+cat ~/.config/chezmoi/chezmoi.toml | grep -A 10 "\[data\]"
+
+# Verify age encryption is properly configured
+ls -la ~/.config/age/key.txt  # Should exist
+chezmoi data | grep -A 5 "age"  # Should show age configuration
+
+# Fix: Regenerate config if needed
+rm ~/.config/chezmoi/chezmoi.toml
+chezmoi init  # Will prompt for configuration
+```
+
+#### Age Encryption Issues (`no encryption` or `failed to read header`)
+
+```bash
+# Check for improperly encrypted files (plain text with .age extension)
+find ~/.local/share/chezmoi -name "*.age" -exec file {} \; | grep -v "ASCII"
+
+# Remove any plain text files masquerading as encrypted
+rm ~/.local/share/chezmoi/path/to/plain-text.age
+
+# Ensure encryption config is at top level of chezmoi.toml
+head -10 ~/.config/chezmoi/chezmoi.toml  # Should show 'encryption = "age"'
+
+# Re-encrypt files properly if needed
+chezmoi add --encrypt ~/.env.personal
+```
+
 #### direnv Issues
 
 ```bash

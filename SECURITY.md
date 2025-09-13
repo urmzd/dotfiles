@@ -310,6 +310,83 @@ pip install gitguardian
 - [ ] Test full deployment
 - [ ] Securely dispose of old key
 
+## 🔧 Troubleshooting Encryption Issues
+
+### Common Age Encryption Problems
+
+#### Error: `chezmoi: no encryption`
+
+This usually means age encryption isn't properly configured:
+
+```bash
+# Check if encryption is configured
+cat ~/.config/chezmoi/chezmoi.toml | head -10
+# Should show: encryption = "age"
+
+# Check if age key exists
+ls -la ~/.config/age/key.txt
+
+# Regenerate config if needed
+rm ~/.config/chezmoi/chezmoi.toml
+chezmoi init
+```
+
+#### Error: `failed to read header: parsing age header`
+
+This occurs when `.age` files aren't actually encrypted:
+
+```bash
+# Find plain text files with .age extension
+find ~/.local/share/chezmoi -name "*.age" -exec file {} \; | grep -v "ASCII"
+
+# Remove placeholder files that aren't encrypted
+rm ~/.local/share/chezmoi/path/to/plaintext.age
+
+# Properly encrypt files
+chezmoi add --encrypt ~/.env.personal
+```
+
+#### Error: `map has no entry for key "is_macos"`
+
+Template variables not loading due to config issues:
+
+```bash
+# Test template variable access
+chezmoi data | jq '.is_macos'  # Should return true/false, not null
+
+# If null, check data section exists
+cat ~/.config/chezmoi/chezmoi.toml | grep -A 10 "\[data\]"
+
+# Verify encryption config is properly formatted
+chezmoi data  # Should not show errors
+```
+
+### Recovery Procedures
+
+#### Corrupted Chezmoi Config
+
+```bash
+# Backup current config
+cp ~/.config/chezmoi/chezmoi.toml ~/.config/chezmoi/chezmoi.toml.backup
+
+# Start fresh (will prompt for setup)
+rm ~/.config/chezmoi/chezmoi.toml
+chezmoi init
+```
+
+#### Lost Age Key
+
+```bash
+# Generate new key
+age-keygen -o ~/.config/age/new_key.txt
+
+# Update chezmoi config with new public key
+chezmoi edit-config
+
+# Re-add encrypted files (will use new key)
+chezmoi add --encrypt ~/.env.personal
+```
+
 ## 🆘 Getting Help
 
 ### Security Issues

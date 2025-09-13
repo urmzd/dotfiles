@@ -5,10 +5,14 @@
 {{- $email := promptStringOnce . "email" "What is your email address" -}}
 {{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
 
-{{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine" -}}
-{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine" -}}
-{{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management" -}}
-{{- $use_nix := promptBoolOnce . "use_nix" "Do you want to use Nix for development" -}}
+{{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine (y/n)" -}}
+{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine (y/n)" -}}
+{{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management (y/n)" -}}
+{{- $use_nix := promptBoolOnce . "use_nix" "Do you want to use Nix for development (y/n)" -}}
+
+{{- if $use_secrets }}
+encryption = "age"
+{{- end }}
 
 [data]
     name = {{ $name | quote }}
@@ -41,11 +45,10 @@
     autoPush = false
 
 {{- if $use_secrets }}
-[encryption]
-    suffix = ".age"
 [age]
+    suffix = ".age"
     identity = "~/.config/age/key.txt"
-    recipient = "age1..."  # Replace with your actual age public key
+    recipient = "age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2"  # pragma: allowlist secret
 {{- end }}
 
 [cd]

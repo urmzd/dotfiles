@@ -1,6 +1,9 @@
 # SSH configuration template
 # Managed by Chezmoi - adapts to different environments
 
+# Include colima SSH config
+Include {{ .chezmoi.homeDir }}/.colima/ssh_config
+
 # Global settings
 Host *
     AddKeysToAgent yes
@@ -17,35 +20,11 @@ Host *
 {{- end }}
 
 # GitHub configuration
-{{- if .is_work }}
-# Work GitHub account
-Host github-work
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/work_key
-    IdentitiesOnly yes
-
-# Personal GitHub (when on work machine)
-Host github-personal
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/personal_key
-    IdentitiesOnly yes
-
-# Default to work account
 Host github.com
-    HostName github.com
     User git
-    IdentityFile ~/.ssh/work_key
-    IdentitiesOnly yes
-{{- else }}
-# Personal GitHub account
-Host github.com
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/main_key
-    IdentitiesOnly yes
-{{- end }}
+    AddKeysToAgent yes
+    UseKeychain yes
+    IdentityFile ~/.ssh/github
 
 {{- if .is_work }}
 # Work-specific servers (configure manually for your organization)

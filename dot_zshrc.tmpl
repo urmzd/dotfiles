@@ -111,10 +111,10 @@ alias nshell="nix-shell"
 alias nix-search="nix search nixpkgs"
 
 # Quick access to development environments
-alias dev-node="nix develop ~/.dotfiles#node"
-alias dev-python="nix develop ~/.dotfiles#python"
-alias dev-rust="nix develop ~/.dotfiles#rust"
-alias dev-go="nix develop ~/.dotfiles#go"
+alias dev-node="nix develop {{ .chezmoi.sourceDir }}#node"
+alias dev-python="nix develop {{ .chezmoi.sourceDir }}#python"
+alias dev-rust="nix develop {{ .chezmoi.sourceDir }}#rust"
+alias dev-go="nix develop {{ .chezmoi.sourceDir }}#go"
 {{- end }}
 
 # Docker aliases (if available)

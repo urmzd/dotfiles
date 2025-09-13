@@ -90,6 +90,64 @@ chmod +x bootstrap-nix-chezmoi.sh
 └── .gitconfig           # Git global configuration
 ```
 
+## 🔐 Encryption & Secrets Management
+
+This dotfiles setup includes **age encryption** for securely storing sensitive configuration files like API keys, SSH configs, and environment variables.
+
+### Age Encryption Setup
+
+**Automatic Setup (Recommended):**
+The bootstrap script automatically configures age encryption if you choose to enable secrets management.
+
+**Manual Setup:**
+```bash
+# 1. Generate age key pair
+age-keygen -o ~/.config/age/key.txt
+
+# 2. The public key will be displayed - save it for later
+# Example: age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2
+
+# 3. Update chezmoi config to use the public key
+# Edit ~/.config/chezmoi/chezmoi.toml and ensure:
+encryption = "age"
+[age]
+    suffix = ".age"
+    identity = "~/.config/age/key.txt" 
+    recipient = "age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2"  # pragma: allowlist secret
+```
+
+### Adding Encrypted Files
+
+```bash
+# Add an encrypted file to chezmoi
+chezmoi add --encrypt ~/.ssh/config
+chezmoi add --encrypt ~/.env.personal
+
+# Edit encrypted files (automatically decrypts/re-encrypts)
+chezmoi edit ~/.ssh/config
+```
+
+### Template Variables
+
+The setup includes these template variables for conditional configurations:
+- `{{ .is_macos }}` - True on macOS systems
+- `{{ .is_linux }}` - True on Linux systems  
+- `{{ .is_personal }}` - True for personal machines
+- `{{ .is_work }}` - True for work machines
+- `{{ .use_nix }}` - True if Nix is enabled
+- `{{ .has_homebrew }}` - True if Homebrew is installed
+
+**Example usage in templates:**
+```bash
+{{- if .is_macos }}
+# macOS-specific configuration
+export BROWSER="open"
+{{- else if .is_linux }}
+# Linux-specific configuration
+export BROWSER="firefox"
+{{- end }}
+```
+
 ## 🔧 Configuration Details
 
 ### Zsh Configuration
@@ -172,6 +230,31 @@ nvim --headless "+Lazy! sync" +qa
 **tmux plugins not working:**
 - Press `prefix + I` to install plugins
 - Press `prefix + U` to update plugins
+
+**Chezmoi template errors (`map has no entry for key "is_macos"`):**
+```bash
+# This error occurs when age encryption is not properly configured
+# Solution: 
+1. Check if ~/.config/chezmoi/chezmoi.toml exists and contains [data] section
+2. Verify encryption is properly configured:
+   chezmoi data | jq '.is_macos'  # Should return true/false, not null
+3. If age encryption is configured but not working:
+   # Check age key exists
+   ls -la ~/.config/age/key.txt
+   # Regenerate config if needed
+   rm ~/.config/chezmoi/chezmoi.toml && chezmoi init
+```
+
+**Age encryption errors (`no encryption` or `failed to read header`):**
+```bash
+# Remove any placeholder encrypted files that aren't actually encrypted
+find ~/.local/share/chezmoi -name "*.age" -exec file {} \; | grep -v "ASCII"
+# If any files show as plain text, remove them:
+rm ~/.local/share/chezmoi/path/to/plain-text-file.age
+
+# Ensure encryption is properly configured
+chezmoi data | grep -A5 "\[age\]"
+```
 
 ### Getting Help
 

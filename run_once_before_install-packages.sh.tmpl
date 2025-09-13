@@ -30,17 +30,16 @@ if command -v brew >/dev/null 2>&1; then
         fi
     done
 
-    {{- if .use_nix }}
-    # Install Nix if not present
-    if ! command -v nix >/dev/null 2>&1; then
-        echo "🗄️ Installing Nix package manager..."
-        sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-
-        # Enable flakes
-        mkdir -p ~/.config/nix
-        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-    fi
-    {{- end }}
+    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
+    # Uncomment below if you want conditional Nix installation after bootstrap
+    # if ! command -v nix >/dev/null 2>&1; then
+    #     echo "🗄️ Installing Nix package manager..."
+    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+    #
+    #     # Enable flakes
+    #     mkdir -p ~/.config/nix
+    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    # fi
 
     # Install direnv for Nix integration
     if ! command -v direnv >/dev/null 2>&1; then
@@ -80,17 +79,16 @@ if command -v apt >/dev/null 2>&1; then
         fi
     done
 
-    {{- if .use_nix }}
-    # Install Nix if not present
-    if ! command -v nix >/dev/null 2>&1; then
-        echo "🗄️ Installing Nix package manager..."
-        sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-
-        # Enable flakes
-        mkdir -p ~/.config/nix
-        echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-    fi
-    {{- end }}
+    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
+    # Uncomment below if you want conditional Nix installation after bootstrap
+    # if ! command -v nix >/dev/null 2>&1; then
+    #     echo "🗄️ Installing Nix package manager..."
+    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+    #
+    #     # Enable flakes
+    #     mkdir -p ~/.config/nix
+    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    # fi
 
 elif command -v dnf >/dev/null 2>&1; then
     echo "📦 Installing packages with dnf..."

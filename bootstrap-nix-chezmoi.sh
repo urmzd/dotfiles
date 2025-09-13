@@ -145,7 +145,7 @@ setup_precommit() {
     fi
 
     # Install pre-commit hooks in the dotfiles repository
-    local dotfiles_dir="$HOME/.dotfiles"
+    local dotfiles_dir=$(chezmoi source-path)
     if [[ -f "$dotfiles_dir/.pre-commit-config.yaml" ]]; then
         cd "$dotfiles_dir"
 
@@ -191,54 +191,56 @@ setup_precommit() {
     fi
 }
 
-# Setup dotfiles repository
+# Setup dotfiles repository via chezmoi
 setup_dotfiles_repo() {
-    local dotfiles_dir="$HOME/.dotfiles"
+    log_info "Setting up dotfiles repository via chezmoi..."
 
-    log_info "Setting up dotfiles repository..."
-
-    if [[ -d "$dotfiles_dir" ]]; then
-        log_info "Dotfiles directory exists, updating..."
-        cd "$dotfiles_dir"
-        git pull origin main || {
-            log_warn "Failed to update repository, continuing with existing files"
-        }
+    # Check if chezmoi is already initialized
+    if chezmoi source-path >/dev/null 2>&1 && [[ -d "$(chezmoi source-path)" ]]; then
+        log_info "Chezmoi already initialized, updating..."
+        chezmoi update
     else
-        log_info "Cloning dotfiles repository..."
-        git clone https://github.com/urmzd/dotfiles.git "$dotfiles_dir"
-        cd "$dotfiles_dir"
+        log_info "Initializing chezmoi with GitHub repository..."
+        # Use chezmoi init with GitHub username to clone and initialize
+        chezmoi init urmzd
     fi
 
-    log_success "Dotfiles repository ready at $dotfiles_dir"
+    log_success "Dotfiles repository ready via chezmoi"
 }
 
-# Initialize Chezmoi with configuration
+# Initialize Chezmoi configuration
 init_chezmoi() {
-    log_info "Initializing Chezmoi..."
+    log_info "Configuring Chezmoi..."
 
-    local dotfiles_dir="$HOME/.dotfiles"
+    local chezmoi_source=$(chezmoi source-path)
 
-    # Initialize chezmoi with the chezmoi-config directory as source
-    if [[ ! -d "$HOME/.local/share/chezmoi" ]]; then
-        chezmoi init --source="$dotfiles_dir/chezmoi-config"
-    fi
-
-    # Apply the configuration template
-    if [[ -f "$dotfiles_dir/.chezmoi.toml.tmpl" ]]; then
-        log_info "Configuring Chezmoi settings..."
+    # Apply the configuration template if it exists
+    if [[ -f "$chezmoi_source/.chezmoi.toml.tmpl" ]]; then
+        log_info "Processing Chezmoi configuration template..."
         mkdir -p "$HOME/.config/chezmoi"
-        chezmoi execute-template --init --promptString "name=Urmzd" --promptString "email=urmzd.consulting@gmail.com" --promptString "github_username=urmzd" --promptBool "is_personal=true" --promptBool "is_work=false" --promptBool "use_secrets=false" --promptBool "use_nix=true" < "$dotfiles_dir/.chezmoi.toml.tmpl" > "$HOME/.config/chezmoi/chezmoi.toml"
+        
+        # Process the template with proper values
+        chezmoi execute-template \
+            --init \
+            --promptString "name=Urmzd" \
+            --promptString "email=urmzd.consulting@gmail.com" \
+            --promptString "github_username=urmzd" \
+            --promptBool "is_personal=true" \
+            --promptBool "is_work=false" \
+            --promptBool "use_secrets=false" \
+            --promptBool "use_nix=true" \
+            < "$chezmoi_source/.chezmoi.toml.tmpl" > "$HOME/.config/chezmoi/chezmoi.toml"
     fi
 
-    log_success "Chezmoi initialized"
+    log_success "Chezmoi configuration complete"
 }
 
 # Setup Nix development environment
 setup_nix_environment() {
     log_info "Setting up Nix development environment..."
 
-    local dotfiles_dir="$HOME/.dotfiles"
-    cd "$dotfiles_dir"
+    local chezmoi_source=$(chezmoi source-path)
+    cd "$chezmoi_source"
 
     # Enable direnv in the dotfiles directory
     if [[ -f ".envrc" ]]; then
@@ -342,20 +344,20 @@ ${BLUE}Next Steps:${NC}
 1. ${YELLOW}Restart your terminal${NC} or run:
    ${YELLOW}source ~/.zshrc${NC}
 
-2. ${YELLOW}Configure Chezmoi${NC} for your machine:
-   ${YELLOW}cd ~/.dotfiles && chezmoi apply${NC}
+2. ${YELLOW}Apply your dotfiles configuration${NC}:
+   ${YELLOW}chezmoi apply${NC}
 
 3. ${YELLOW}Set up secrets management${NC} (optional):
-   ${YELLOW}./secrets-setup.sh${NC}
+   ${YELLOW}cd $(chezmoi source-path) && ./secrets-setup.sh${NC}
 
 4. ${YELLOW}Test a development environment${NC}:
-   ${YELLOW}cd ~/.dotfiles && nix develop .#node${NC}
+   ${YELLOW}cd $(chezmoi source-path) && nix develop .#node${NC}
 
 5. ${YELLOW}Enable automatic environment switching${NC}:
    ${YELLOW}direnv allow${NC} (in any project with .envrc)
 
 ${BLUE}Documentation:${NC}
-• Nix environments: ${YELLOW}cat ~/.dotfiles/nix-shells.md${NC}
+• Nix environments: ${YELLOW}cat $(chezmoi source-path)/nix-shells.md${NC}
 • Chezmoi usage: ${YELLOW}chezmoi help${NC}
 • direnv usage: ${YELLOW}direnv help${NC}
 
