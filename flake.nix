@@ -9,7 +9,10 @@
   outputs = { self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
 
         # Common development tools used across environments
         commonTools = with pkgs; [
@@ -25,6 +28,8 @@
           nix-direnv
           chezmoi
           age
+          neovim
+          tmux
         ];
 
         # Node.js development environment
@@ -36,7 +41,6 @@
           nodePackages.typescript
           nodePackages.typescript-language-server
           nodePackages.vscode-langservers-extracted
-          nodePackages."@anthropic-ai/claude-code"
         ];
 
         # Python development environment
@@ -83,7 +87,7 @@
           docker
           docker-compose
           kubectl
-          helm
+          kubernetes-helm
           k9s
           awscli2
           google-cloud-sdk
@@ -105,7 +109,7 @@
 
         # Lua development environment (for Neovim configuration)
         luaEnv = with pkgs; [
-          lua54
+          lua5_4
           luajitPackages.luacheck
           stylua
           lua-language-server
@@ -256,6 +260,12 @@
 
         # Packages that can be installed with 'nix profile install'
         packages = {
+          # Default package for 'nix shell'
+          default = pkgs.buildEnv {
+            name = "default-dev-env";
+            paths = commonTools;
+          };
+
           # Development environments as packages
           dev-node = pkgs.buildEnv {
             name = "dev-node";
