@@ -39,8 +39,7 @@
     default = simple
     autoSetupRemote = true
 {{- if .gpg_signing_key }}
-    # Enable commit signing when GPG key is available
-    gpgsign = true
+    # Note: GitHub doesn't support signed pushes (causes "fatal: the receiving end does not support --signed push")
 {{- end }}
 
 [commit]
