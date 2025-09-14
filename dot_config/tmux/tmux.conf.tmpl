@@ -3,7 +3,7 @@
 
 # Reload config
 unbind r
-bind r source-file ~/.tmux.conf \; display-message "Config reloaded!"
+bind r source-file ~/.config/tmux/tmux.conf \; display-message "Config reloaded!"
 
 # Change prefix key to Ctrl-a
 unbind C-b
@@ -143,4 +143,4 @@ set -g pane-active-border-style fg=colour196
 set -g message-style bg=colour166,fg=colour232
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'

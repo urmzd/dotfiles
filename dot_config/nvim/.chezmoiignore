@@ -2,3 +2,4 @@ undo/
 *.tmp
 *.backup
 .luarc.json
+lazy-lock.json
