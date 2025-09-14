@@ -148,9 +148,8 @@ require("lazy").setup({
 				borderless_telescope = true,
 			})
 
-			-- Lualine setup for cyberdream theme
-			if pcall(require, "lualine") and pcall(require, "lualine.themes.cyberdream") then
-				require("lualine").setup({
+			-- Lualine set for cyberdream theme
+			require("lualine").setup({
 					options = {
 						theme = "cyberdream",
 					},
@@ -163,7 +162,6 @@ require("lazy").setup({
 						},
 					},
 				})
-			end
 
 			vim.opt.termguicolors = true
 			vim.opt.background = style
@@ -175,25 +173,7 @@ require("lazy").setup({
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
 			{ "AndreM222/copilot-lualine" },
-		},
-		config = function()
-			if not (vim.g.colors_name == "cyberdream" and require("lualine").global.options.theme == "cyberdream") then
-				require("lualine").setup({
-					options = {
-						theme = "auto",
-						icons_enabled = true,
-					},
-					sections = {
-						lualine_x = {
-							"copilot",
-							"encoding",
-							"fileformat",
-							"filetype",
-						},
-					},
-				})
-			end
-		end,
+		}
 	},
 	-- Documentation
 	{

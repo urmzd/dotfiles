@@ -73,6 +73,27 @@ else
     echo "✅ TPM already installed"
 fi
 
+# Install Catppuccin tmux theme (manual installation - recommended)
+CATPPUCCIN_PATH="$HOME/.config/tmux/plugins/catppuccin"
+if [ ! -d "$CATPPUCCIN_PATH/tmux" ]; then
+    echo "🎨 Installing Catppuccin tmux theme..."
+    mkdir -p "$CATPPUCCIN_PATH"
+    git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$CATPPUCCIN_PATH/tmux"
+    echo "✅ Catppuccin tmux theme installed"
+else
+    echo "✅ Catppuccin tmux theme already installed"
+fi
+
+# Install Cyberdream theme for Catppuccin
+CYBERDREAM_THEME="$CATPPUCCIN_PATH/tmux/themes/catppuccin_cyberdream_tmux.conf"
+if [ ! -f "$CYBERDREAM_THEME" ]; then
+    echo "🌊 Installing Cyberdream theme..."
+    curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME"
+    echo "✅ Cyberdream theme installed"
+else
+    echo "✅ Cyberdream theme already installed"
+fi
+
 {{- else if .is_linux }}
 # Linux package installation
 if command -v apt >/dev/null 2>&1; then

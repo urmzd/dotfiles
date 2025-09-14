@@ -26,8 +26,9 @@ set -g renumber-windows on
 # Increase scrollback buffer size
 set -g history-limit 10000
 
-# Enable 256 colors
+# Enable 256 colors and set default shell
 set -g default-terminal "screen-256color"
+set -g default-shell /bin/zsh
 {{- if .is_macos }}
 # macOS specific terminal settings
 set-option -ga terminal-overrides ",xterm-256color:Tc"
@@ -94,24 +95,22 @@ set -g window-status-current-format "#[bold]#I:#W"
 # Plugin configuration
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
-set -g @plugin 'catppuccin/tmux'
 set -g @plugin 'christoomey/vim-tmux-navigator'
+# Note: Using manual catppuccin installation (not TPM) to avoid conflicts
 
 {{- if .is_personal }}
 # Personal plugins
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
-set -g @continuum-restore 'on'
+# Disable auto-restore to prevent multiple sessions on startup
+set -g @continuum-restore 'off'
 {{- end }}
 
-# Catppuccin theme configuration
-{{- if .is_work }}
-set -g @catppuccin_flavour 'mocha'
-set -g @catppuccin_status_modules_right "directory date_time"
-{{- else }}
-set -g @catppuccin_flavour 'macchiato'
-set -g @catppuccin_status_modules_right "weather directory date_time"
-{{- end }}
+# Catppuccin theme configuration - using cyberdream
+set -g @catppuccin_flavour 'cyberdream'
+
+# Load Catppuccin theme manually (recommended over TPM)
+run '~/.config/tmux/plugins/tmux/catppuccin.tmux'
 
 # Don't exit tmux when closing a session
 set -g detach-on-destroy off
@@ -124,8 +123,8 @@ set-window-option -g automatic-rename on
 set-option -g set-titles on
 
 {{- if .is_macos }}
-# macOS specific settings
-set -g default-command "reattach-to-user-namespace -l ${SHELL}"
+# macOS specific settings - modern macOS doesn't need reattach-to-user-namespace
+# Remove default-command to prevent nested sessions
 {{- end }}
 
 # Activity monitoring
