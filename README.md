@@ -87,10 +87,6 @@ which git fzf ripgrep tree jq just gh direnv nvim
 - macOS-specific: Docker Desktop, `colima`, `docker`
 - Python tools: `pipx`
 - AI tools: `gemini-cli`
-cd ~/.dotfiles
-chmod +x bootstrap-nix-chezmoi.sh
-./bootstrap-nix-chezmoi.sh
-```
 
 ## 🛠️ What's Included
 
