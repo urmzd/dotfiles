@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Global .envrc - Provides access to Nix development tools globally
+# Managed by Chezmoi - adapts to different systems
+
+{{- if .use_nix }}
+# Use the Nix flake from chezmoi directory for global development tools
+use flake ~/.local/share/chezmoi
+
+# Enable nix-direnv for faster shell loading
+if ! has nix_direnv_version || ! nix_direnv_version 3.0.4; then
+  source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/3.0.4/direnvrc" "sha256-DzlYZ33mWF/Gs8DDeyjr8mnVmQGx7ASYqA5WlxwvBG4=" # pragma: allowlist secret
+fi
+
+# Project-specific environment variables
+export PROJECT_NAME="global-dev-env"
+export NIX_SHELL_PRESERVE_PROMPT=1
+{{- else }}
+# Nix integration disabled - using system tools
+echo "⚠️  Nix integration disabled. Enable with 'use_nix = true' in chezmoi config"
+{{- end }}

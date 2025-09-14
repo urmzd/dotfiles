@@ -32,6 +32,7 @@
           tmux
           just  # Task runner
           gh    # GitHub CLI
+          gnupg # GPG for signing
         ];
 
         # Node.js development environment
@@ -115,6 +116,7 @@
           luajitPackages.luacheck
           stylua
           lua-language-server
+          luarocks
         ];
 
       in {

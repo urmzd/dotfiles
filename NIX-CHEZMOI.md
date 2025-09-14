@@ -98,9 +98,51 @@ Templates (`.tmpl` files) are processed with context from `.chezmoi.toml`:
 
 ### Setup Flow
 1. **Bootstrap script** installs Nix + minimal Homebrew packages
-2. **Chezmoi init** processes templates with your configuration
+2. **Chezmoi init <repo>** clones repository to ~/.local/share/chezmoi and processes templates
 3. **Chezmoi apply** creates symlinks and copies files to target locations
 4. **Direnv** automatically activates Nix environments per directory
+
+### ⚠️ Critical Setup Notes for New Users
+
+**After running the bootstrap script, you MUST initialize chezmoi:**
+
+```bash
+# Initialize chezmoi with this repository (REQUIRED for new users)
+chezmoi init https://github.com/urmzd/.dotfiles.git
+
+# This will:
+# - Clone the repository to ~/.local/share/chezmoi
+# - Prompt for your personal configuration (name, email, etc.)
+# - Set up template variables for intelligent dotfile generation
+
+# Apply the configuration
+chezmoi apply
+```
+
+**Required Dependencies:**
+The setup script now automatically installs:
+- `reattach-to-user-namespace` - Required for tmux clipboard integration on macOS
+- Oh My Zsh and Powerlevel10k theme
+- TPM (Tmux Plugin Manager)
+
+### 🌍 Global Development Tools Access
+
+**New Feature:** Nix development tools (nvim, python, etc.) are now available globally by default!
+
+The setup creates a global `~/.envrc` that provides access to all Nix development tools from any directory:
+
+```bash
+# Works from anywhere now:
+cd ~/Documents        # ✅ nvim, python, etc. available
+cd ~/projects/work    # ✅ Tools available here too
+cd /tmp              # ✅ And here as well
+```
+
+**How it works:**
+- Chezmoi creates `~/.envrc` that references the main Nix flake
+- Direnv automatically loads the environment in any directory
+- All development tools become globally accessible
+- Project-specific `.envrc` files can still override for specialized environments
 
 ## 🎯 Key Features
 
@@ -365,6 +407,37 @@ chezmoi init --force
 chezmoi execute-template < file.tmpl
 ```
 
+#### Tmux Exits with "[exited]" Status
+
+Common on macOS when `reattach-to-user-namespace` is missing:
+
+```bash
+# Install the required dependency
+brew install reattach-to-user-namespace
+
+# Test tmux
+tmux new-session -d -s test 'echo "test"'
+tmux list-sessions  # Should show the session
+tmux kill-session -t test
+```
+
+#### Chezmoi Init Not Prompting
+
+If `chezmoi init` exits immediately without prompting:
+
+```bash
+# Use explicit prompts if TTY access fails
+chezmoi init --promptString name="Your Name" \
+           --promptString email="your@email.com" \
+           --promptString github_username="yourusername" \
+           --promptBool is_personal=true \
+           --promptBool use_nix=true
+
+# Or manually create config and then apply
+chezmoi edit-config  # Edit with system editor
+chezmoi apply        # Apply with new config
+```
+
 #### Template Variable Errors (`map has no entry for key "is_macos"`)
 
 This error occurs when the chezmoi configuration isn't properly loaded, usually due to encryption configuration issues:
@@ -382,7 +455,7 @@ chezmoi data | grep -A 5 "age"  # Should show age configuration
 
 # Fix: Regenerate config if needed
 rm ~/.config/chezmoi/chezmoi.toml
-chezmoi init  # Will prompt for configuration
+chezmoi init https://github.com/urmzd/.dotfiles.git  # Will prompt for configuration
 ```
 
 #### Age Encryption Issues (`no encryption` or `failed to read header`)

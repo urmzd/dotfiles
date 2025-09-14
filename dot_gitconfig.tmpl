@@ -4,12 +4,8 @@
 [user]
     name = {{ .name | quote }}
     email = {{ .email | quote }}
-{{- if and .is_work .use_secrets }}
-    # Work-specific signing key (configure manually)
-    # signingkey = YOUR_WORK_GPG_KEY_ID
-{{- else if and .is_personal .use_secrets }}
-    # Personal signing key (configure manually)
-    # signingkey = YOUR_PERSONAL_GPG_KEY_ID
+{{- if .gpg_signing_key }}
+    signingkey = {{ .gpg_signing_key | quote }}
 {{- end }}
 
 [github]
@@ -42,13 +38,13 @@
 [push]
     default = simple
     autoSetupRemote = true
-{{- if or .is_work .use_secrets }}
-    # Enable commit signing for work/secure environments
+{{- if .gpg_signing_key }}
+    # Enable commit signing when GPG key is available
     gpgsign = true
 {{- end }}
 
 [commit]
-{{- if or .is_work .use_secrets }}
+{{- if .gpg_signing_key }}
     gpgsign = true
 {{- end }}
     verbose = true

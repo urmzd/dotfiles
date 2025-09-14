@@ -4,6 +4,7 @@
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
 {{- $email := promptStringOnce . "email" "What is your email address" -}}
 {{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
+{{- $gpg_signing_key := promptStringOnce . "gpg_signing_key" "GPG signing key ID (optional)" -}}
 
 {{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine (y/n)" -}}
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine (y/n)" -}}
@@ -18,6 +19,7 @@ encryption = "age"
     name = {{ $name | quote }}
     email = {{ $email | quote }}
     github_username = {{ $github_username | quote }}
+    gpg_signing_key = {{ $gpg_signing_key | quote }}
 
     # Machine type flags
     is_personal = {{ $is_personal }}

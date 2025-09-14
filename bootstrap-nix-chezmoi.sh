@@ -127,6 +127,107 @@ install_direnv() {
     log_success "direnv installed"
 }
 
+# Install GPG for Git signing
+install_gpg() {
+    log_info "Installing GPG for Git commit signing..."
+
+    if command -v gpg &> /dev/null; then
+        log_success "GPG is already installed"
+        return
+    fi
+
+    if command -v brew &> /dev/null; then
+        brew install gnupg pinentry-mac
+    elif command -v nix &> /dev/null; then
+        nix profile install nixpkgs#gnupg nixpkgs#pinentry-mac
+    fi
+
+    # Configure GPG agent for GUI password entry
+    mkdir -p ~/.gnupg
+    cat > ~/.gnupg/gpg-agent.conf << EOF
+pinentry-program /opt/homebrew/bin/pinentry-mac
+default-cache-ttl 34560000
+max-cache-ttl 34560000
+EOF
+
+    log_success "GPG installed and configured"
+}
+
+# Install system tools required by configurations
+install_system_tools() {
+    log_info "Installing required system tools..."
+
+    if command -v brew &> /dev/null; then
+        # Tools required by tmux and shell configurations
+        local tools=(
+            "reattach-to-user-namespace"  # Required for tmux clipboard integration
+        )
+
+        for tool in "${tools[@]}"; do
+            if ! brew list "$tool" &> /dev/null 2>&1; then
+                log_info "Installing $tool..."
+                brew install "$tool" || log_warn "Failed to install $tool"
+            else
+                log_info "$tool already installed"
+            fi
+        done
+    fi
+
+    log_success "System tools installed"
+}
+
+# Install Oh My Zsh
+install_oh_my_zsh() {
+    log_info "Installing Oh My Zsh..."
+
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        log_success "Oh My Zsh already installed"
+        return
+    fi
+
+    # Install Oh My Zsh without changing shell or running zsh
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+    log_success "Oh My Zsh installed"
+}
+
+# Install Powerlevel10k theme
+install_powerlevel10k() {
+    log_info "Installing Powerlevel10k theme..."
+
+    local p10k_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+
+    if [[ -d "$p10k_path" ]]; then
+        log_success "Powerlevel10k already installed"
+        return
+    fi
+
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_path"
+        log_success "Powerlevel10k installed"
+    else
+        log_warn "Oh My Zsh not found, skipping Powerlevel10k installation"
+    fi
+}
+
+# Install TPM (Tmux Plugin Manager)
+install_tpm() {
+    log_info "Installing TPM (Tmux Plugin Manager)..."
+
+    local tpm_path="$HOME/.config/tmux/plugins/tpm"
+
+    if [[ -d "$tpm_path" ]]; then
+        log_success "TPM already installed"
+        return
+    fi
+
+    mkdir -p "$(dirname "$tpm_path")"
+    git clone https://github.com/tmux-plugins/tpm "$tpm_path"
+    chmod +x "$tpm_path/tpm"
+
+    log_success "TPM installed"
+}
+
 # Install and setup pre-commit hooks
 setup_precommit() {
     log_info "Setting up pre-commit hooks..."
@@ -208,6 +309,56 @@ setup_dotfiles_repo() {
     log_success "Dotfiles repository ready via chezmoi"
 }
 
+# Setup GPG key for Git signing
+setup_gpg_key() {
+    log_info "Setting up GPG key for Git signing..."
+
+    # Check if GPG key already exists
+    local existing_keys=$(gpg --list-secret-keys --keyid-format=LONG 2>/dev/null | grep -E "^sec\s+[^\s]+/([A-F0-9]+)" | head -1)
+
+    if [[ -n "$existing_keys" ]]; then
+        GPG_KEY_ID=$(echo "$existing_keys" | sed -n 's/.*\/\([A-F0-9]\{16\}\).*/\1/p')
+        log_success "Using existing GPG key: $GPG_KEY_ID"
+    else
+        log_info "No GPG key found. Generating new GPG key..."
+
+        # Generate GPG key non-interactively
+        cat > /tmp/gpg-key-spec << EOF
+%echo Generating GPG key for Git signing
+Key-Type: RSA
+Key-Length: 4096
+Subkey-Type: RSA
+Subkey-Length: 4096
+Name-Real: Urmzd Mukhammadnaim
+Name-Email: urmzd.consulting@gmail.com
+Expire-Date: 2y
+%no-protection
+%commit
+%echo Done
+EOF
+
+        gpg --batch --generate-key /tmp/gpg-key-spec
+        rm /tmp/gpg-key-spec
+
+        # Get the new key ID
+        GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "^sec\s+[^\s]+/([A-F0-9]+)" | head -1 | sed -n 's/.*\/\([A-F0-9]\{16\}\).*/\1/p')
+
+        log_success "Generated new GPG key: $GPG_KEY_ID"
+    fi
+
+    # Export the key for GitHub (optional)
+    log_info "GPG public key for GitHub (save this):"
+    echo "----------------------------------------"
+    gpg --armor --export "$GPG_KEY_ID"
+    echo "----------------------------------------"
+    log_info "Add this public key to GitHub: https://github.com/settings/keys"
+
+    # Make key available globally for template processing
+    export GPG_SIGNING_KEY="$GPG_KEY_ID"
+
+    log_success "GPG key setup complete"
+}
+
 # Initialize Chezmoi configuration
 init_chezmoi() {
     log_info "Configuring Chezmoi..."
@@ -218,13 +369,14 @@ init_chezmoi() {
     if [[ -f "$chezmoi_source/.chezmoi.toml.tmpl" ]]; then
         log_info "Processing Chezmoi configuration template..."
         mkdir -p "$HOME/.config/chezmoi"
-        
-        # Process the template with proper values
+
+        # Process the template with proper values including GPG key
         chezmoi execute-template \
             --init \
-            --promptString "name=Urmzd" \
+            --promptString "name=Urmzd Mukhammadnaim" \
             --promptString "email=urmzd.consulting@gmail.com" \
             --promptString "github_username=urmzd" \
+            --promptString "gpg_signing_key=${GPG_SIGNING_KEY:-}" \
             --promptBool "is_personal=true" \
             --promptBool "is_work=false" \
             --promptBool "use_secrets=false" \
@@ -235,6 +387,24 @@ init_chezmoi() {
     log_success "Chezmoi configuration complete"
 }
 
+# Setup global direnv permissions
+setup_global_direnv() {
+    log_info "Setting up global development environment access..."
+
+    # Allow global .envrc if it was created by chezmoi
+    if [[ -f "$HOME/.envrc" ]]; then
+        direnv allow "$HOME/.envrc"
+        log_success "Global .envrc enabled - development tools available everywhere"
+    fi
+
+    # Allow chezmoi source directory .envrc
+    local chezmoi_source=$(chezmoi source-path)
+    if [[ -f "$chezmoi_source/.envrc" ]]; then
+        direnv allow "$chezmoi_source/.envrc"
+        log_success "Chezmoi source .envrc enabled"
+    fi
+}
+
 # Setup Nix development environment
 setup_nix_environment() {
     log_info "Setting up Nix development environment..."
@@ -242,18 +412,14 @@ setup_nix_environment() {
     local chezmoi_source=$(chezmoi source-path)
     cd "$chezmoi_source"
 
-    # Enable direnv in the dotfiles directory
-    if [[ -f ".envrc" ]]; then
-        direnv allow
-        log_success "Direnv enabled for dotfiles directory"
-    fi
-
     # Test that Nix flake works
     if command -v nix &> /dev/null; then
         log_info "Testing Nix development environments..."
 
-        # Run setup script from flake
-        nix run .#setup
+        # Run setup script from flake if it exists
+        if nix flake show 2>/dev/null | grep -q "apps.*setup"; then
+            nix run .#setup || log_warn "Nix setup app failed, continuing..."
+        fi
 
         log_success "Nix development environments configured"
     fi
@@ -326,10 +492,15 @@ ${GREEN}========================================${NC}
 ${BLUE}What was installed:${NC}
 ✓ Nix package manager with flakes support
 ✓ Homebrew for GUI applications
+✓ GPG for Git commit signing
+✓ Oh My Zsh with Powerlevel10k theme
+✓ TPM (Tmux Plugin Manager) with plugins
+✓ System tools (reattach-to-user-namespace, etc.)
 ✓ Chezmoi for dotfiles management
 ✓ direnv for automatic environment switching
 ✓ pre-commit hooks for code quality and security
 ✓ Your dotfiles repository and configurations
+✓ Global development environment access
 
 ${BLUE}Development Environments Available:${NC}
 • ${YELLOW}nix develop .#node${NC}     - Node.js development
@@ -341,20 +512,20 @@ ${BLUE}Development Environments Available:${NC}
 
 ${BLUE}Next Steps:${NC}
 
-1. ${YELLOW}Restart your terminal${NC} or run:
+1. ${YELLOW}Restart your terminal${NC} to activate all configurations:
    ${YELLOW}source ~/.zshrc${NC}
 
-2. ${YELLOW}Apply your dotfiles configuration${NC}:
-   ${YELLOW}chezmoi apply${NC}
+2. ${YELLOW}Your development tools are now globally available!${NC}
+   Try: ${YELLOW}nvim${NC}, ${YELLOW}python${NC}, ${YELLOW}tmux${NC} from any directory
 
-3. ${YELLOW}Set up secrets management${NC} (optional):
+3. ${YELLOW}Add your GPG public key to GitHub${NC}:
+   The key was displayed above - add it at: ${YELLOW}https://github.com/settings/keys${NC}
+
+4. ${YELLOW}Set up secrets management${NC} (optional):
    ${YELLOW}cd $(chezmoi source-path) && ./secrets-setup.sh${NC}
 
-4. ${YELLOW}Test a development environment${NC}:
+5. ${YELLOW}Test a development environment${NC}:
    ${YELLOW}cd $(chezmoi source-path) && nix develop .#node${NC}
-
-5. ${YELLOW}Enable automatic environment switching${NC}:
-   ${YELLOW}direnv allow${NC} (in any project with .envrc)
 
 ${BLUE}Documentation:${NC}
 • Nix environments: ${YELLOW}cat $(chezmoi source-path)/nix-shells.md${NC}
@@ -373,13 +544,33 @@ main() {
 
     log_info "Starting Nix + Chezmoi development environment setup..."
 
+    # Phase 1: System Preparation
     check_macos
     install_nix
     install_homebrew
-    install_chezmoi
+    install_gpg
+    install_system_tools
+
+    # Phase 2: Development Environment Setup
+    install_oh_my_zsh
+    install_powerlevel10k
+    install_tpm
     install_direnv
+    install_chezmoi
+
+    # Phase 3: GPG Configuration
+    setup_gpg_key
+
+    # Phase 4: Dotfiles Integration
     setup_dotfiles_repo
     init_chezmoi
+
+    # Apply dotfiles configuration (includes global .envrc)
+    log_info "Applying dotfiles configuration..."
+    chezmoi apply
+
+    # Phase 5: Environment Activation
+    setup_global_direnv
     setup_precommit
     setup_nix_environment
     setup_shell_integration

@@ -20,7 +20,7 @@ A modern, reproducible development environment setup featuring Nix for package m
 
 ### One-Command Setup (Recommended)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
 **This automatically:**
@@ -43,7 +43,7 @@ If you prefer step-by-step setup:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
+git clone https://github.com/urmzd/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
 # 2. Run bootstrap script

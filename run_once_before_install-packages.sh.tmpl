@@ -16,6 +16,7 @@ if command -v brew >/dev/null 2>&1; then
     brew_packages=(
         # Only install Homebrew packages not available or better via Nix
         # Note: git, fzf, ripgrep, tree, jq, yq, just, gh are in Nix flake
+        "reattach-to-user-namespace"  # Required for tmux clipboard integration on macOS
     )
 
     for package in "${brew_packages[@]}"; do
@@ -41,6 +42,35 @@ if command -v brew >/dev/null 2>&1; then
 
 else
     echo "⚠️ Homebrew not found. Please install it first."
+fi
+
+# Install Oh My Zsh if not present
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "🐚 Installing Oh My Zsh..."
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo "✅ Oh My Zsh already installed"
+fi
+
+# Install Powerlevel10k theme
+P10K_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+if [ ! -d "$P10K_PATH" ]; then
+    echo "⚡ Installing Powerlevel10k theme..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_PATH"
+else
+    echo "✅ Powerlevel10k already installed"
+fi
+
+# Install TPM (Tmux Plugin Manager)
+TPM_PATH="$HOME/.config/tmux/plugins/tpm"
+if [ ! -d "$TPM_PATH" ]; then
+    echo "🔌 Installing TPM (Tmux Plugin Manager)..."
+    mkdir -p "$(dirname "$TPM_PATH")"
+    git clone https://github.com/tmux-plugins/tpm "$TPM_PATH"
+    chmod +x "$TPM_PATH/tpm"
+    echo "✅ TPM installed. Run 'tmux' and press 'prefix + I' to install plugins"
+else
+    echo "✅ TPM already installed"
 fi
 
 {{- else if .is_linux }}
