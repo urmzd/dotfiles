@@ -128,18 +128,21 @@
             buildInputs = commonTools;
 
             shellHook = ''
-              echo "🚀 Welcome to Urmzd's development environment!"
-              echo "Available environments:"
-              echo "  • nix develop .#node     - Node.js development"
-              echo "  • nix develop .#python   - Python development"
-              echo "  • nix develop .#rust     - Rust development"
-              echo "  • nix develop .#go       - Go development"
-              echo "  • nix develop .#devops   - DevOps/Infrastructure"
-              echo "  • nix develop .#data     - Data science & ML"
-              echo "  • nix develop .#lua      - Lua development"
-              echo "  • nix develop .#full     - All tools combined"
-              echo ""
-              echo "Current environment: Default (basic tools)"
+              # Only show welcome message for interactive shells and explicit nix develop usage
+              if [[ $- == *i* ]] && [[ -z "$DIRENV_IN_ENVRC" || -n "$NIX_DEVELOP_EXPLICIT" ]]; then
+                echo "🚀 Welcome to Urmzd's development environment!"
+                echo "Available environments:"
+                echo "  • nix develop .#node     - Node.js development"
+                echo "  • nix develop .#python   - Python development"
+                echo "  • nix develop .#rust     - Rust development"
+                echo "  • nix develop .#go       - Go development"
+                echo "  • nix develop .#devops   - DevOps/Infrastructure"
+                echo "  • nix develop .#data     - Data science & ML"
+                echo "  • nix develop .#lua      - Lua development"
+                echo "  • nix develop .#full     - All tools combined"
+                echo ""
+                echo "Current environment: Default (basic tools)"
+              fi
             '';
           };
 
