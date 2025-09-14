@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+# ~/.zprofile: Sourced for login shells
+
+{{- if .is_macos }}
+# macOS specific login shell configuration
+
+# Homebrew configuration
+if [ -d "/opt/homebrew/bin" ]; then
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+elif [ -d "/usr/local/bin" ]; then
+    export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+fi
+
+{{- if .use_nix }}
+# Source Nix for login shells
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+{{- end }}
+{{- end }}
+
+{{- if .is_linux }}
+# Linux specific login shell configuration
+
+{{- if .use_nix }}
+# Source Nix for login shells
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+fi
+{{- end }}
+{{- end }}
+
+# Add user's private bin to PATH if it exists
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin:$PATH"
+fi

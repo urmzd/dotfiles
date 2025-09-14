@@ -20,28 +20,87 @@ cd ~/.dotfiles
 
 ## 🏗️ Architecture Overview
 
-This setup combines the best of both worlds:
+This setup combines the best of both worlds with a clear separation of responsibilities:
 
-**Nix**: Reproducible development environments and package management
-**Chezmoi**: Intelligent dotfiles management with templating and secrets
+**Nix** (`flake.nix`):
+- Primary package manager for all development tools
+- Reproducible development environments
+- Language-specific toolchains (Node.js, Python, Rust, Go, etc.)
+
+**Homebrew** (`Brewfile`):
+- Minimal macOS-specific packages only
+- Docker ecosystem (`colima`, `docker`, Docker Desktop)
+- System utilities (`pipx`, `gemini-cli`)
+
+**Chezmoi**:
+- Intelligent dotfiles management with templating
+- Cross-platform configuration adaptation
+- Encrypted secrets management
+- Automatic symlinking to proper locations
 
 ```
 ~/.dotfiles/
 ├── flake.nix                    # Nix development environments
 ├── flake.lock                   # Pinned dependencies
+├── Brewfile                     # Minimal macOS-specific packages
 ├── .envrc                       # direnv configuration
 ├── .chezmoi.toml.tmpl          # Chezmoi configuration template
 ├── bootstrap-nix-chezmoi.sh    # Unified setup script
 ├── secrets-setup.sh            # Secrets management setup
-├── chezmoi-config/             # Chezmoi source directory
-│   ├── dot_gitconfig.tmpl      # Templated git config
-│   ├── dot_zshrc.tmpl          # Templated zsh config
-│   ├── dot_tmux.conf.tmpl      # Templated tmux config
-│   ├── private_dot_ssh/        # SSH configurations
+│
+├── dot_zshrc.tmpl              # Zsh configuration template
+├── dot_zshenv.tmpl             # Zsh environment template
+├── dot_zprofile.tmpl           # Zsh profile template
+├── dot_gitconfig.tmpl          # Git configuration template
+├── dot_tmux.conf.tmpl          # Tmux configuration template
+├── dot_config/                 # XDG config directory
+│   └── nvim/                   # Neovim configuration
+│       ├── init.lua            # Main Neovim config
+│       ├── lua/                # Lua modules
+│       └── ftplugin/           # File type plugins
+├── private_dot_ssh/            # SSH configurations
 │   └── encrypted_*.age         # Encrypted secret files
 └── scripts/                    # Utility scripts
     └── security-audit.sh
 ```
+
+## 🔗 Configuration Linking Process
+
+Chezmoi automatically links dotfiles from the repository to your home directory:
+
+### File Mapping
+```bash
+# Chezmoi source → Target location
+~/.dotfiles/dot_zshrc.tmpl        → ~/.zshrc
+~/.dotfiles/dot_zshenv.tmpl       → ~/.zshenv
+~/.dotfiles/dot_zprofile.tmpl     → ~/.zprofile
+~/.dotfiles/dot_gitconfig.tmpl    → ~/.gitconfig
+~/.dotfiles/dot_tmux.conf.tmpl    → ~/.tmux.conf
+~/.dotfiles/dot_config/nvim/      → ~/.config/nvim/
+~/.dotfiles/private_dot_ssh/      → ~/.ssh/
+```
+
+### Template Processing
+Templates (`.tmpl` files) are processed with context from `.chezmoi.toml`:
+
+```bash
+# Variables available in templates:
+{{ .name }}                    # Your full name
+{{ .email }}                   # Your email address
+{{ .github_username }}         # Your GitHub username
+{{ .is_personal }}             # Personal machine flag
+{{ .is_work }}                 # Work machine flag
+{{ .use_nix }}                 # Nix usage flag
+{{ .is_macos }}                # macOS detection
+{{ .is_linux }}                # Linux detection
+{{ lookPath "command" }}       # Check if command exists
+```
+
+### Setup Flow
+1. **Bootstrap script** installs Nix + minimal Homebrew packages
+2. **Chezmoi init** processes templates with your configuration
+3. **Chezmoi apply** creates symlinks and copies files to target locations
+4. **Direnv** automatically activates Nix environments per directory
 
 ## 🎯 Key Features
 

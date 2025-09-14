@@ -30,6 +30,8 @@
           age
           neovim
           tmux
+          just  # Task runner
+          gh    # GitHub CLI
         ];
 
         # Node.js development environment

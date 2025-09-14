@@ -1,33 +1,92 @@
 # dotfiles
 
-A comprehensive development environment setup for macOS, featuring modern tools and configurations for a productive development workflow.
+A modern, reproducible development environment setup featuring Nix for package management and Chezmoi for intelligent dotfiles management.
 
-> **Note:** This setup is optimized for macOS and includes configurations for zsh, Nix, Neovim, tmux, and various development tools.
+> **Architecture:** Nix → Homebrew (minimal) → Chezmoi → Complete Environment
+
+## 🏗️ Setup Architecture
+
+**Package Management Strategy:**
+- **Nix**: Primary package manager for all development tools (git, fzf, ripgrep, nvim, etc.)
+- **Homebrew**: Minimal macOS-specific tools only (Docker, colima, pipx)
+- **Chezmoi**: Smart dotfiles management with templating and cross-platform support
+
+**Configuration Management:**
+- **Chezmoi templates** manage all dotfiles (`.zshrc`, `.tmux.conf`, `nvim/`)
+- **Automatic linking** to proper locations (`~/.config/nvim/`, etc.)
+- **Environment-aware** templates adapt to personal/work/system differences
 
 ## 🚀 Quick Start
 
-### Modern Nix + Chezmoi Setup (Recommended)
-**One-command setup:**
+### One-Command Setup (Recommended)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
-**Features:**
+**This automatically:**
+1. ✅ Installs Nix package manager with flakes enabled
+2. ✅ Installs minimal Homebrew packages (Docker, etc.)
+3. ✅ Sets up Chezmoi with this repository
+4. ✅ Links all configurations (zsh, nvim, tmux)
+5. ✅ Enables direnv for automatic environment switching
+
+**What you get:**
 - 🎯 Reproducible development environments with Nix
-- 🔧 Intelligent dotfiles with Chezmoi templating  
-- 🔒 Built-in secrets management with encryption
+- 🔧 Intelligent dotfiles with Chezmoi templating
+- 🔒 Built-in secrets management with age encryption
 - 🚀 Automatic environment switching with direnv
-- 📖 [Full Nix + Chezmoi Guide](NIX-CHEZMOI.md)
+- 📖 [Full Setup Guide](NIX-CHEZMOI.md)
 
-### Setup
-**One-command setup:**
+## 📋 Manual Setup
+
+If you prefer step-by-step setup:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+# 1. Clone repository
+git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+# 2. Run bootstrap script
+./bootstrap-nix-chezmoi.sh
+
+# 3. Verify setup
+just --version      # Task runner
+gh --version         # GitHub CLI
+nvim --version       # Neovim
+chezmoi --version    # Dotfiles manager
 ```
 
-**Manual setup:**
+## ✅ Post-Setup Verification
+
+After setup, verify everything is working:
+
 ```bash
-git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
+# Check Nix development environments
+nix develop          # Default environment
+nix develop .#node   # Node.js environment
+nix develop .#python # Python environment
+
+# Check dotfiles are linked correctly
+ls -la ~/.zshrc      # Should link to chezmoi
+ls -la ~/.config/nvim # Should exist and contain config
+ls -la ~/.tmux.conf  # Should link to chezmoi
+
+# Check package availability
+which git fzf ripgrep tree jq just gh direnv nvim
+```
+
+## 🔧 Package Management
+
+**What's managed by Nix** (`flake.nix`):
+- Development tools: `git`, `fzf`, `ripgrep`, `tree`, `jq`, `yq`, `just`, `gh`
+- Editors: `neovim`, `tmux`
+- Environment: `direnv`, `nix-direnv`, `chezmoi`, `age`
+- Language environments: Node.js, Python, Rust, Go, etc.
+
+**What's managed by Homebrew** (`Brewfile`):
+- macOS-specific: Docker Desktop, `colima`, `docker`
+- Python tools: `pipx`
+- AI tools: `gemini-cli`
 cd ~/.dotfiles
 chmod +x bootstrap-nix-chezmoi.sh
 ./bootstrap-nix-chezmoi.sh

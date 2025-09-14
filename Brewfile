@@ -1,37 +1,16 @@
 # Brewfile for dotfiles setup
 # Install with: brew bundle
+#
+# NOTE: Most development tools are managed by Nix (see flake.nix)
+# This Brewfile contains only macOS-specific tools and essentials
 
 # Package managers
-brew "pipx"
-# Note: Using Nix for reproducible development environments instead of asdf
+brew "pipx"  # For global Python tools
 
-# Core development tools
-brew "git"
-brew "just"
-brew "tree"
-brew "fzf"
-brew "ripgrep"
-brew "the_silver_searcher"  # ag
-
-# Development dependencies
-brew "autoconf"
-brew "automake"
-brew "gettext"
-brew "m4"
-brew "pkgconf"
-
-# Container and virtualization tools
-brew "colima"
-brew "docker"
-cask "docker"
+# Container and virtualization tools (macOS-specific)
+brew "colima"  # Container runtime for macOS
+brew "docker"  # Docker CLI
+cask "docker"  # Docker Desktop
 
 # AI and productivity tools
 brew "gemini-cli"
-
-# Additional utilities
-brew "readline"
-brew "xz"
-brew "zstd"
-brew "brotli"
-brew "lz4"
-brew "utf8proc"

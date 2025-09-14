@@ -1,0 +1,4 @@
+undo/
+*.tmp
+*.backup
+.luarc.json
