@@ -1,0 +1,14 @@
+{{- if .use_nix }}
+# Direnv configuration
+# This file configures direnv behavior globally
+
+[global]
+# Suppress loading/unloading messages for cleaner shell startup
+silent = true
+
+# Keep a reasonable timeout for environment loading
+warn_timeout = "5s"
+
+# Disable stdin to prevent interactive prompts
+disable_stdin = true
+{{- end }}

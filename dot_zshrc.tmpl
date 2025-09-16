@@ -25,6 +25,8 @@ plugins=(git)
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
+alias ls='ls --color=auto'
+
 # Initialize completions before loading oh-my-zsh
 autoload -U compinit && compinit
 
