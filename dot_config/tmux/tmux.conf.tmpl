@@ -29,6 +29,10 @@ set -g history-limit 10000
 # Enable 256 colors and set default shell
 set -g default-terminal "screen-256color"
 set -g default-shell /bin/zsh
+
+# Ensure tmux starts with a clean environment for proper shell initialization
+set -g default-command "exec /bin/zsh"
+
 {{- if .is_macos }}
 # macOS specific terminal settings
 set-option -ga terminal-overrides ",xterm-256color:Tc"
@@ -66,32 +70,6 @@ bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection c
 bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"
 {{- end }}
 
-# Status bar configuration
-set -g status on
-set -g status-interval 5
-set -g status-position bottom
-
-# Status bar content based on environment
-{{- if .is_work }}
-set -g status-left "#[fg=green]#S #[fg=yellow][WORK] "
-{{- else }}
-set -g status-left "#[fg=green]#S #[fg=cyan][PERSONAL] "
-{{- end }}
-
-set -g status-left-length 40
-set -g status-right-length 60
-
-{{- if .has_nix }}
-# Show Nix environment in status
-set -g status-right "#[fg=magenta]#{?IN_NIX_SHELL,❄️ Nix,} #[fg=cyan]%H:%M #[fg=green]%d-%b-%y"
-{{- else }}
-set -g status-right "#[fg=cyan]%H:%M #[fg=green]%d-%b-%y"
-{{- end }}
-
-# Window status format
-set -g window-status-format "#I:#W"
-set -g window-status-current-format "#[bold]#I:#W"
-
 # Plugin configuration
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
@@ -110,7 +88,7 @@ set -g @continuum-restore 'off'
 set -g @catppuccin_flavour 'cyberdream'
 
 # Load Catppuccin theme manually (recommended over TPM)
-run '~/.config/tmux/plugins/tmux/catppuccin.tmux'
+run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
 
 # Don't exit tmux when closing a session
 set -g detach-on-destroy off
@@ -122,26 +100,9 @@ set -sg escape-time 0
 set-window-option -g automatic-rename on
 set-option -g set-titles on
 
-{{- if .is_macos }}
-# macOS specific settings - modern macOS doesn't need reattach-to-user-namespace
-# Remove default-command to prevent nested sessions
-{{- end }}
-
 # Activity monitoring
 setw -g monitor-activity on
 set -g visual-activity off
-
-# Pane borders
-{{- if .is_work }}
-set -g pane-border-style fg=colour238
-set -g pane-active-border-style fg=colour51
-{{- else }}
-set -g pane-border-style fg=colour235
-set -g pane-active-border-style fg=colour196
-{{- end }}
-
-# Message styling
-set -g message-style bg=colour166,fg=colour232
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run '~/.config/tmux/plugins/tpm/tpm'

@@ -95,9 +95,63 @@ require("lazy").setup({
 		build = ":TSUpdate",
 		config = function()
 			require("nvim-treesitter.configs").setup({
-				ensure_installed = { "rust", "python", "c", "lua" },
+				ensure_installed = {
+					"rust",
+					"python",
+					"c",
+					"lua",
+					"javascript",
+					"typescript",
+					"tsx",
+					"json",
+					"yaml",
+					"toml",
+					"markdown",
+					"markdown_inline",
+					"bash",
+					"go",
+					"html",
+					"css",
+					"dockerfile",
+					"gitignore",
+					"vim",
+					"vimdoc",
+				},
+				sync_install = false,
+				auto_install = true,
+				highlight = {
+					enable = true,
+					additional_vim_regex_highlighting = false,
+				},
+				indent = {
+					enable = true,
+				},
+				incremental_selection = {
+					enable = true,
+					keymaps = {
+						init_selection = "gnn",
+						node_incremental = "grn",
+						scope_incremental = "grc",
+						node_decremental = "grm",
+					},
+				},
+				textobjects = {
+					select = {
+						enable = true,
+						lookahead = true,
+						keymaps = {
+							["af"] = "@function.outer",
+							["if"] = "@function.inner",
+							["ac"] = "@class.outer",
+							["ic"] = "@class.inner",
+						},
+					},
+				},
 			})
 		end,
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter-textobjects",
+		},
 	},
 	{
 

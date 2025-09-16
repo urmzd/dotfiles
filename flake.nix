@@ -128,8 +128,8 @@
             buildInputs = commonTools;
 
             shellHook = ''
-              # Only show welcome message for interactive shells and explicit nix develop usage
-              if [[ $- == *i* ]] && [[ -z "$DIRENV_IN_ENVRC" || -n "$NIX_DEVELOP_EXPLICIT" ]]; then
+              # Only show welcome message for explicit nix develop usage, not direnv
+              if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "🚀 Welcome to Urmzd's development environment!"
                 echo "Available environments:"
                 echo "  • nix develop .#node     - Node.js development"

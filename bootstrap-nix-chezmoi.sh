@@ -144,8 +144,19 @@ install_gpg() {
 
     # Configure GPG agent for GUI password entry
     mkdir -p ~/.gnupg
+
+    # Determine pinentry-mac path based on architecture
+    local pinentry_path
+    if [[ -f "/opt/homebrew/bin/pinentry-mac" ]]; then
+        pinentry_path="/opt/homebrew/bin/pinentry-mac"  # Apple Silicon
+    elif [[ -f "/usr/local/bin/pinentry-mac" ]]; then
+        pinentry_path="/usr/local/bin/pinentry-mac"     # Intel
+    else
+        pinentry_path="/opt/homebrew/bin/pinentry-mac"  # Default to Apple Silicon
+    fi
+
     cat > ~/.gnupg/gpg-agent.conf << EOF
-pinentry-program /opt/homebrew/bin/pinentry-mac
+pinentry-program $pinentry_path
 default-cache-ttl 34560000
 max-cache-ttl 34560000
 EOF
@@ -428,6 +439,19 @@ setup_nix_environment() {
 # Setup shell integration
 setup_shell_integration() {
     log_info "Setting up shell integration..."
+
+    # Ensure zsh is set as default shell
+    if [[ "$SHELL" != "/bin/zsh" ]] && command -v zsh &> /dev/null; then
+        log_info "Setting zsh as default shell..."
+        # Check if zsh is in /etc/shells
+        if ! grep -q "$(which zsh)" /etc/shells; then
+            echo "$(which zsh)" | sudo tee -a /etc/shells
+        fi
+        # Change shell to zsh
+        sudo chsh -s "$(which zsh)" "$USER"
+        export SHELL="$(which zsh)"
+        log_success "Default shell changed to zsh"
+    fi
 
     # Add direnv hook to shell if not already present
     local shell_config=""

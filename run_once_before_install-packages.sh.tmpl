@@ -84,12 +84,22 @@ else
     echo "✅ Catppuccin tmux theme already installed"
 fi
 
-# Install Cyberdream theme for Catppuccin
+# Install Cyberdream theme for Catppuccin (copy from nvim plugin if available)
 CYBERDREAM_THEME="$CATPPUCCIN_PATH/tmux/themes/catppuccin_cyberdream_tmux.conf"
 if [ ! -f "$CYBERDREAM_THEME" ]; then
     echo "🌊 Installing Cyberdream theme..."
-    curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME"
-    echo "✅ Cyberdream theme installed"
+
+    # Try to copy from nvim plugin first (if available)
+    CYBERDREAM_NVIM_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/tmux/cyberdream.conf"
+    if [ -f "$CYBERDREAM_NVIM_PATH" ]; then
+        cp "$CYBERDREAM_NVIM_PATH" "$CYBERDREAM_THEME"
+        echo "✅ Cyberdream theme copied from nvim plugin"
+    else
+        # Fallback to curl if nvim plugin not available
+        curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME" || {
+            echo "⚠️ Failed to download cyberdream theme, will be installed later"
+        }
+    fi
 else
     echo "✅ Cyberdream theme already installed"
 fi
