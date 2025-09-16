@@ -41,14 +41,14 @@ vim.keymap.set("i", "jk", "<ESC>")
 vim.keymap.set("i", "kk", "<ESC>")
 vim.keymap.set("i", "kj", "<ESC>")
 
-vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-	pattern = { "*.md" },
-	callback = function()
-		vim.api.nvim_exec2("e", { -- Reloads markdown files on entry
-			output = false,
-		})
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+-- 	pattern = { "*.md" },
+-- 	callback = function()
+-- 		vim.api.nvim_exec2("e", { -- Reloads markdown files on entry
+-- 			output = false,
+-- 		})
+-- 	end,
+-- })
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -191,6 +191,7 @@ require("lazy").setup({
 	{
 		"scottmckendry/cyberdream.nvim",
 		priority = 1000,
+		lazy=false,
 		config = function()
 			local colorscheme = "cyberdream"
 			local style = "dark" -- light | dark

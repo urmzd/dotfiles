@@ -33,13 +33,13 @@ set -g default-shell /bin/zsh
 # Ensure tmux starts with a clean environment for proper shell initialization
 set -g default-command "exec /bin/zsh"
 
-{{- if .is_macos }}
-# macOS specific terminal settings
-set-option -ga terminal-overrides ",xterm-256color:Tc"
-{{- else }}
-# Linux specific terminal settings
-set-option -ga terminal-overrides ",*256col*:Tc"
-{{- end }}
+## {{- if .is_macos }}
+## # macOS specific terminal settings
+## set-option -ga terminal-overrides ",xterm-256color:Tc"
+## {{- else }}
+## # Linux specific terminal settings
+## set-option -ga terminal-overrides ",*256col*:Tc"
+## {{- end }}
 
 # Vim-style pane selection
 bind h select-pane -L
