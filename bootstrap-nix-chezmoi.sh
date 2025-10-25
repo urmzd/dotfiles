@@ -221,6 +221,25 @@ install_powerlevel10k() {
     fi
 }
 
+# Install zsh-completions plugin
+install_zsh_completions() {
+    log_info "Installing zsh-completions plugin..."
+
+    local plugin_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions"
+
+    if [[ -d "$plugin_path" ]]; then
+        log_success "zsh-completions already installed"
+        return
+    fi
+
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        git clone https://github.com/zsh-users/zsh-completions "$plugin_path"
+        log_success "zsh-completions installed"
+    else
+        log_warn "Oh My Zsh not found, skipping zsh-completions installation"
+    fi
+}
+
 # Install TPM (Tmux Plugin Manager)
 install_tpm() {
     log_info "Installing TPM (Tmux Plugin Manager)..."
@@ -518,6 +537,7 @@ ${BLUE}What was installed:${NC}
 ✓ Homebrew for GUI applications
 ✓ GPG for Git commit signing
 ✓ Oh My Zsh with Powerlevel10k theme
+✓ zsh-completions plugin for smarter completions
 ✓ TPM (Tmux Plugin Manager) with plugins
 ✓ System tools (reattach-to-user-namespace, etc.)
 ✓ Chezmoi for dotfiles management
@@ -578,6 +598,7 @@ main() {
     # Phase 2: Development Environment Setup
     install_oh_my_zsh
     install_powerlevel10k
+    install_zsh_completions
     install_tpm
     install_direnv
     install_chezmoi

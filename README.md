@@ -100,7 +100,6 @@ which git fzf ripgrep tree jq just gh direnv nvim
 - **tree** - Directory structure visualization
 - **fzf** - Fuzzy finder for files and command history
 - **ripgrep** - Fast text search tool
-- **ag** (the_silver_searcher) - Code search tool
 - **Docker + Colima** - Containerization without Docker Desktop
 
 ### Programming Languages & Runtimes
@@ -116,6 +115,18 @@ which git fzf ripgrep tree jq just gh direnv nvim
 - **Neovim** with comprehensive plugin ecosystem
 - **Tmux** with plugin manager and custom keybindings
 - **MesloLGS Nerd Font** for proper icon display
+
+### Zsh Completions
+Homebrew installs many completion scripts (including `just`) into `$HOMEBREW_PREFIX/share/zsh/site-functions`. If you maintain a custom `~/.zshrc`, add that directory to `fpath` before calling `compinit`, for example:
+
+```zsh
+eval "$(brew shellenv)"
+fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
+autoload -U compinit
+compinit
+```
+
+Refer to your shell's documentation for details if you prefer a different shell.
 
 ### AI & Productivity Tools
 - **gemini-cli** - Google Gemini CLI interface

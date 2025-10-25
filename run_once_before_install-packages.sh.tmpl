@@ -61,6 +61,15 @@ else
     echo "✅ Powerlevel10k already installed"
 fi
 
+# Install zsh-completions plugin to enhance completions
+ZSH_COMPLETIONS_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions"
+if [ ! -d "$ZSH_COMPLETIONS_PATH" ]; then
+    echo "🧠 Installing zsh-completions plugin..."
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_COMPLETIONS_PATH"
+else
+    echo "✅ zsh-completions already installed"
+fi
+
 # Install TPM (Tmux Plugin Manager)
 TPM_PATH="$HOME/.config/tmux/plugins/tpm"
 if [ ! -d "$TPM_PATH" ]; then
