@@ -50,9 +50,9 @@ if command -v gdircolors >/dev/null 2>&1; then
   alias ls='gls --color=auto'
 elif ls --color=auto &>/dev/null 2>&1; then
   # GNU ls available (from Nix)
-  {{ if lookPath "dircolors" -}}
-  eval "$(dircolors -b)"
-  {{- end }}
+  if command -v dircolors >/dev/null 2>&1; then
+    eval "$(dircolors -b)"
+  fi
   alias ls='ls --color=auto'
 else
   # BSD ls (default macOS)
@@ -62,9 +62,9 @@ else
 fi
 {{- else }}
 # Linux: use GNU coreutils
-{{ if lookPath "dircolors" -}}
-eval "$(dircolors -b)"
-{{- end }}
+if command -v dircolors >/dev/null 2>&1; then
+  eval "$(dircolors -b)"
+fi
 alias ls='ls --color=auto'
 {{- end }}
 
