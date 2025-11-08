@@ -265,6 +265,13 @@ require("lazy").setup({
 		},
 		config = function()
 			require("neo-tree").setup({
+				filesystem = {
+					follow_current_file = {
+						enabled = true, -- Automatically reveal and focus current file
+						leave_dirs_open = false, -- Close folders when moving to another file
+					},
+					hijack_netrw_behavior = "open_current",
+				},
 				window = {
 					mappings = {
 						["Z"] = "expand_all_nodes",
