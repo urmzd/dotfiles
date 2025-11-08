@@ -264,6 +264,14 @@ require("lazy").setup({
 			"MunifTanjim/nui.nvim",
 		},
 		config = function()
+			require("neo-tree").setup({
+				window = {
+					mappings = {
+						["Z"] = "expand_all_nodes",
+						["z"] = "close_all_nodes",
+					},
+				},
+			})
 			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
 		end,
 	},

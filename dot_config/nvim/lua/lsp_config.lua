@@ -125,11 +125,6 @@ function M.opts.on_attach(client, bufnr)
   vim.keymap.set("n", "<space>f", function()
     vim.lsp.buf.format({ timeout_ms = 5000 })
   end, bufopts)
-
-  if client.name ~= "null-ls" then
-    client.server_capabilities.document_formatting = false
-    client.server_capabilities.document_range_formatting = false
-  end
 end
 
 M.opts.capabilities = require("cmp_nvim_lsp").default_capabilities()
