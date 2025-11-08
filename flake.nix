@@ -55,7 +55,7 @@
           python313Packages.pipx
           python313Packages.black
           python313Packages.flake8
-          python313Packages.mypy
+          python3.13Packages.mypy
           python313Packages.pytest
           python313Packages.requests
           ruff

@@ -85,7 +85,7 @@ source <(fzf --zsh)
 
 # Python pipx completions
 {{ if lookPath "pipx" -}}
-eval "$(register-python-argcomplete pipx)"
+eval "$(_PIPX_COMPLETE=zsh_source pipx)"
 {{- end }}
 
 # Load local environment if exists
