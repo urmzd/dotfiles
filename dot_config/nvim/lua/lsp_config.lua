@@ -140,4 +140,26 @@ function M.setup(lsp, overrides)
   -- require("ufo").setup()
 end
 
+-- Enhanced diagnostic configuration
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = "●",
+    spacing = 4,
+    source = "if_many",
+  },
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+  float = {
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+    format = function(diagnostic)
+      return string.format("%s: %s", diagnostic.source or "", diagnostic.message)
+    end,
+  },
+})
+
 return M
