@@ -240,6 +240,25 @@ install_zsh_completions() {
     fi
 }
 
+# Install zsh-syntax-highlighting plugin
+install_zsh_syntax_highlighting() {
+    log_info "Installing zsh-syntax-highlighting plugin..."
+
+    local plugin_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+
+    if [[ -d "$plugin_path" ]]; then
+        log_success "zsh-syntax-highlighting already installed"
+        return
+    fi
+
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$plugin_path"
+        log_success "zsh-syntax-highlighting installed"
+    else
+        log_warn "Oh My Zsh not found, skipping zsh-syntax-highlighting installation"
+    fi
+}
+
 # Install TPM (Tmux Plugin Manager)
 install_tpm() {
     log_info "Installing TPM (Tmux Plugin Manager)..."
@@ -423,15 +442,21 @@ setup_global_direnv() {
 
     # Allow global .envrc if it was created by chezmoi
     if [[ -f "$HOME/.envrc" ]]; then
-        direnv allow "$HOME/.envrc"
-        log_success "Global .envrc enabled - development tools available everywhere"
+        if direnv allow "$HOME/.envrc" 2>/dev/null; then
+            log_success "Global .envrc enabled - development tools available everywhere"
+        else
+            log_warn "Failed to allow global .envrc, you may need to run 'direnv allow ~/.envrc' manually"
+        fi
     fi
 
     # Allow chezmoi source directory .envrc
-    local chezmoi_source=$(chezmoi source-path)
-    if [[ -f "$chezmoi_source/.envrc" ]]; then
-        direnv allow "$chezmoi_source/.envrc"
-        log_success "Chezmoi source .envrc enabled"
+    local chezmoi_source=$(chezmoi source-path 2>/dev/null)
+    if [[ -n "$chezmoi_source" && -f "$chezmoi_source/.envrc" ]]; then
+        if direnv allow "$chezmoi_source/.envrc" 2>/dev/null; then
+            log_success "Chezmoi source .envrc enabled"
+        else
+            log_warn "Failed to allow chezmoi .envrc, you may need to run 'direnv allow $chezmoi_source/.envrc' manually"
+        fi
     fi
 }
 
@@ -524,6 +549,57 @@ install_gui_apps() {
     fi
 }
 
+# Install Claude Code CLI
+install_claude_code() {
+    log_info "Installing Claude Code CLI..."
+
+    if command -v claude &> /dev/null; then
+        log_success "Claude Code CLI is already installed"
+        return
+    fi
+
+    log_info "Downloading and installing Claude Code from official source..."
+    if curl -fsSL https://claude.ai/install.sh | bash; then
+        log_success "Claude Code CLI installed successfully"
+    else
+        log_warn "Failed to install Claude Code CLI"
+    fi
+}
+
+# Install OpenAI Codex CLI (optional, controlled by chezmoi config)
+install_codex_cli() {
+    log_info "Installing OpenAI Codex CLI..."
+
+    if command -v codex &> /dev/null; then
+        log_success "OpenAI Codex CLI is already installed"
+        return
+    fi
+
+    # Check if user wants to install codex (from chezmoi config)
+    local chezmoi_source=$(chezmoi source-path 2>/dev/null || echo "")
+    local install_codex=false
+
+    if [[ -n "$chezmoi_source" ]] && command -v chezmoi &> /dev/null; then
+        install_codex=$(chezmoi data 2>/dev/null | grep -q '"install_codex": true' && echo "true" || echo "false")
+    fi
+
+    if [[ "$install_codex" == "false" ]]; then
+        log_info "Codex installation skipped (disabled in config or work machine)"
+        return
+    fi
+
+    if command -v npm &> /dev/null; then
+        log_info "Installing via npm..."
+        if npm install -g @openai/codex; then
+            log_success "OpenAI Codex CLI installed successfully"
+        else
+            log_warn "Failed to install OpenAI Codex CLI"
+        fi
+    else
+        log_warn "npm not available, skipping Codex installation"
+    fi
+}
+
 # Show completion summary and next steps
 show_completion_summary() {
     cat << EOF
@@ -537,12 +613,13 @@ ${BLUE}What was installed:${NC}
 ✓ Homebrew for GUI applications
 ✓ GPG for Git commit signing
 ✓ Oh My Zsh with Powerlevel10k theme
-✓ zsh-completions plugin for smarter completions
+✓ zsh-completions and zsh-syntax-highlighting plugins
 ✓ TPM (Tmux Plugin Manager) with plugins
 ✓ System tools (reattach-to-user-namespace, etc.)
 ✓ Chezmoi for dotfiles management
 ✓ direnv for automatic environment switching
 ✓ pre-commit hooks for code quality and security
+✓ AI CLI tools (Claude Code, Gemini CLI, and optionally Codex)
 ✓ Your dotfiles repository and configurations
 ✓ Global development environment access
 
@@ -599,6 +676,7 @@ main() {
     install_oh_my_zsh
     install_powerlevel10k
     install_zsh_completions
+    install_zsh_syntax_highlighting
     install_tpm
     install_direnv
     install_chezmoi
@@ -620,6 +698,10 @@ main() {
     setup_nix_environment
     setup_shell_integration
     install_gui_apps
+
+    # Phase 6: AI CLI Tools
+    install_claude_code
+    install_codex_cli
 
     show_completion_summary
 

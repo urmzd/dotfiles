@@ -33,6 +33,7 @@
           just  # Task runner
           gh    # GitHub CLI
           gnupg # GPG for signing
+          coreutils # GNU core utilities (includes dircolors, gls, etc.)
         ];
 
         # Node.js development environment

@@ -129,8 +129,9 @@ compinit
 Refer to your shell's documentation for details if you prefer a different shell.
 
 ### AI & Productivity Tools
-- **gemini-cli** - Google Gemini CLI interface
-- **claude-code** - Anthropic Claude Code CLI
+- **gemini-cli** - Google Gemini CLI interface (installed via Homebrew)
+- **claude-code** - Anthropic Claude Code CLI (installed via official installer)
+- **codex** - OpenAI Codex CLI (optional, installed via npm)
 - **nox** - Python testing automation
 - **argcomplete** - Command-line auto-completion
 
@@ -222,6 +223,13 @@ export BROWSER="firefox"
 - **Nix** integration for reproducible development environments
 - **fzf** integration for fuzzy searching
 - Custom aliases and environment variables
+
+### Git Configuration
+- **Multi-identity support** - Different git identities for work and personal projects
+- Work email used by default across all repositories
+- Personal email automatically used in `~/.local/share/chezmoi` (dotfiles repo)
+- Configured via `includeIf "gitdir:..."` for conditional git configs
+- GPG signing support for commit verification
 
 ### Neovim Setup
 - **Lazy.nvim** plugin manager for fast startup

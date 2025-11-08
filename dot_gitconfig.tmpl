@@ -3,10 +3,15 @@
 
 [user]
     name = {{ .name | quote }}
-    email = {{ .email | quote }}
+    email = {{ .work_email | quote }}
 {{- if .gpg_signing_key }}
     signingkey = {{ .gpg_signing_key | quote }}
 {{- end }}
+
+# Conditional include for personal projects (e.g., dotfiles repository)
+# This overrides user.name and user.email with personal values
+[includeIf "gitdir:~/.local/share/chezmoi/"]
+    path = ~/.gitconfig-personal
 
 [github]
     user = {{ .github_username | quote }}

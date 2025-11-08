@@ -41,12 +41,32 @@ autoload -U compinit && compinit
 # Load oh-my-zsh AFTER environment is properly set
 source "$ZSH/oh-my-zsh.sh"
 
-# Enable colors for ls using dircolors (GNU coreutils from Nix)
+# Enable colors for ls
 # Load AFTER oh-my-zsh to prevent it from being overridden
+{{- if .is_macos }}
+# macOS: use BSD ls with -G for colors, or GNU ls if available from Nix
+if command -v gdircolors >/dev/null 2>&1; then
+  eval "$(gdircolors -b)"
+  alias ls='gls --color=auto'
+elif ls --color=auto &>/dev/null 2>&1; then
+  # GNU ls available (from Nix)
+  {{ if lookPath "dircolors" -}}
+  eval "$(dircolors -b)"
+  {{- end }}
+  alias ls='ls --color=auto'
+else
+  # BSD ls (default macOS)
+  alias ls='ls -G'
+  export CLICOLOR=1
+  export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
+fi
+{{- else }}
+# Linux: use GNU coreutils
 {{ if lookPath "dircolors" -}}
 eval "$(dircolors -b)"
 {{- end }}
 alias ls='ls --color=auto'
+{{- end }}
 
 export EDITOR='nvim'
 

@@ -2,7 +2,9 @@
 # This file configures chezmoi behavior and contains template variables
 
 {{- $name := promptStringOnce . "name" "What is your full name" -}}
-{{- $email := promptStringOnce . "email" "What is your email address" -}}
+{{- $email := promptStringOnce . "email" "What is your primary email address" -}}
+{{- $personal_email := promptStringOnce . "personal_email" "What is your personal email (for dotfiles repo)" -}}
+{{- $work_email := promptStringOnce . "work_email" "What is your work email (optional, defaults to primary)" -}}
 {{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
 {{- $gpg_signing_key := promptStringOnce . "gpg_signing_key" "GPG signing key ID (optional)" -}}
 
@@ -10,6 +12,7 @@
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine (y/n)" -}}
 {{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management (y/n)" -}}
 {{- $use_nix := promptBoolOnce . "use_nix" "Do you want to use Nix for development (y/n)" -}}
+{{- $install_codex := promptBoolOnce . "install_codex" "Install OpenAI Codex CLI (y/n)" -}}
 
 {{- if $use_secrets }}
 encryption = "age"
@@ -18,6 +21,8 @@ encryption = "age"
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
+    personal_email = {{ $personal_email | quote }}
+    work_email = {{ if ne $work_email "" }}{{ $work_email | quote }}{{ else }}{{ $email | quote }}{{ end }}
     github_username = {{ $github_username | quote }}
     gpg_signing_key = {{ $gpg_signing_key | quote }}
 
@@ -28,6 +33,7 @@ encryption = "age"
     # Feature flags
     use_secrets = {{ $use_secrets }}
     use_nix = {{ $use_nix }}
+    install_codex = {{ $install_codex }}
 
     # System detection
     is_macos = {{ eq .chezmoi.os "darwin" }}

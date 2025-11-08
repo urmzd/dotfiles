@@ -1,0 +1,10 @@
+# Personal Git configuration
+# This file is included conditionally for personal projects (e.g., dotfiles repo)
+# Managed by Chezmoi
+
+[user]
+    name = {{ .name | quote }}
+    email = {{ .personal_email | quote }}
+{{- if .gpg_signing_key }}
+    signingkey = {{ .gpg_signing_key | quote }}
+{{- end }}
