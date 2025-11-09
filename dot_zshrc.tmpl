@@ -73,6 +73,14 @@ export EDITOR='nvim'
 alias vi="nvim"
 alias vim="nvim"
 
+# Cloud authentication aliases
+# GCP: User and application-default login
+alias gcpsso="gcloud auth login && gcloud auth application-default login"
+
+# Snowflake: SSO/browser-based authentication
+# Uses SNOWFLAKE_ACCOUNT and SNOWFLAKE_USER from direnv (.envrc.local)
+alias snowsso='snowsql --authenticator externalbrowser -a "$SNOWFLAKE_ACCOUNT" -u "$SNOWFLAKE_USER"'
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Example project-specific .envrc file
+# Copy this to your project directory as .envrc and customize
+#
+# This file overrides baseline settings from ~/.envrc.local
+# for this specific project directory.
+#
+# IMPORTANT:
+# - Add .envrc to your project's .gitignore to avoid committing secrets
+# - Run 'direnv allow' in the project directory after creating/editing
+
+# ============================================================================
+# Nix Environment (Optional)
+# ============================================================================
+# Activate a specific Nix development shell for this project
+# Uncomment one of the following based on your project needs:
+
+# use flake                    # Use project's flake.nix
+# use flake .#devops          # Use devops shell from project flake
+# use flake ~/.local/share/chezmoi#python  # Use Python shell from global flake
+
+# ============================================================================
+# Snowflake Project Overrides
+# ============================================================================
+# These override the baseline settings from ~/.envrc.local
+# Only specify what's different for this project
+
+export SNOWFLAKE_DATABASE="PROJECT_SPECIFIC_DATABASE"
+export SNOWFLAKE_SCHEMA="PROJECT_SPECIFIC_SCHEMA"
+export SNOWFLAKE_ROLE="PROJECT_SPECIFIC_ROLE"
+
+# You can also override warehouse if this project needs a different size
+# export SNOWFLAKE_WAREHOUSE="WH_PROJECT_LARGE"
+
+# ============================================================================
+# Project-Specific Environment Variables
+# ============================================================================
+
+# Application settings
+# export APP_ENV="development"
+# export LOG_LEVEL="debug"
+
+# Project paths
+# export PROJECT_ROOT="$(pwd)"
+# export DATA_DIR="$PROJECT_ROOT/data"
+
+# Database connections (non-Snowflake)
+# export DATABASE_URL="postgresql://localhost:5432/mydb"
+
+# API endpoints
+# export API_BASE_URL="https://api.example.com"
+
+# ============================================================================
+# Python Virtual Environment (Optional)
+# ============================================================================
+# Automatically activate Python venv when entering directory
+
+# layout python  # Creates/activates .venv automatically
+
+# Or point to existing venv:
+# source .venv/bin/activate
+
+# ============================================================================
+# Example: Multi-environment setup
+# ============================================================================
+# Use different settings based on git branch or directory name
+
+# if git branch --show-current | grep -q "prod"; then
+#   export SNOWFLAKE_ROLE="PROD_ROLE"
+#   export APP_ENV="production"
+# else
+#   export SNOWFLAKE_ROLE="DEV_ROLE"
+#   export APP_ENV="development"
+# fi
+
+# ============================================================================
+# Usage
+# ============================================================================
+# 1. Copy to your project: cp ~/.local/share/chezmoi/dot_envrc.project.example /path/to/project/.envrc
+# 2. Customize with your project settings
+# 3. Add to .gitignore: echo ".envrc" >> .gitignore
+# 4. Allow direnv: direnv allow
+# 5. Test: cd into directory and check: echo $SNOWFLAKE_DATABASE

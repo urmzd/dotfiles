@@ -95,6 +95,7 @@
           k9s
           awscli2
           google-cloud-sdk
+          snowflake-cli
         ];
 
         # Data/ML environment

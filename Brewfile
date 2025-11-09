@@ -12,5 +12,9 @@ brew "colima"  # Container runtime for macOS
 brew "docker"  # Docker CLI
 cask "docker"  # Docker Desktop
 
+# Cloud tools
+cask "google-cloud-sdk"  # Google Cloud SDK
+brew "snowflake-cli"     # Snowflake CLI (snowsql)
+
 # AI and productivity tools
 brew "gemini-cli"
