@@ -4,7 +4,8 @@ local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 local lspkind = require("lspkind")
 
 local has_words_before = function()
-  if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then
+  -- Updated to use modern vim.bo API instead of deprecated nvim_buf_get_option
+  if vim.bo[0].buftype == "prompt" then
     return false
   end
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -15,24 +16,39 @@ local luasnip = require("luasnip")
 
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 
+-- Detect subprocess/non-interactive environment
+local is_subprocess = vim.env.NVIM_LISTEN_ADDRESS
+  or os.getenv("NVIM_SUBPROCESS")
+  or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
+  or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
+
+-- Build comparators list conditionally
+local comparators = {
+  -- Below is the default comparitor list and order for nvim-cmp
+  cmp.config.compare.offset,
+  -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
+  cmp.config.compare.exact,
+  cmp.config.compare.score,
+  cmp.config.compare.recently_used,
+  cmp.config.compare.locality,
+  cmp.config.compare.kind,
+  cmp.config.compare.sort_text,
+  cmp.config.compare.length,
+  cmp.config.compare.order,
+}
+
+-- Only add copilot comparator if not in subprocess
+if not is_subprocess then
+  local ok, copilot_cmp = pcall(require, "copilot_cmp.comparators")
+  if ok then
+    table.insert(comparators, 1, copilot_cmp.prioritize)
+  end
+end
+
 cmp.setup({
   sorting = {
     priority_weight = 2,
-    comparators = {
-      require("copilot_cmp.comparators").prioritize,
-
-      -- Below is the default comparitor list and order for nvim-cmp
-      cmp.config.compare.offset,
-      -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
-      cmp.config.compare.exact,
-      cmp.config.compare.score,
-      cmp.config.compare.recently_used,
-      cmp.config.compare.locality,
-      cmp.config.compare.kind,
-      cmp.config.compare.sort_text,
-      cmp.config.compare.length,
-      cmp.config.compare.order,
-    },
+    comparators = comparators,
   },
   snippet = {
     expand = function(args)
@@ -80,14 +96,16 @@ cmp.setup({
       end,
     }),
   },
-  sources = {
-    { name = "copilot" },
+  sources = vim.tbl_filter(function(source)
+    return source ~= nil
+  end, {
+    not is_subprocess and { name = "copilot" } or nil,
     { name = "nvim_lsp" },
     { name = "luasnip" },
     { name = "nvim_lua" },
     { name = "path" },
     { name = "buffer" },
-  },
+  }),
 })
 
 local M = {}

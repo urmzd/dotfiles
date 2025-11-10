@@ -26,6 +26,16 @@ if command -v brew >/dev/null 2>&1; then
         fi
     done
 
+    # Install packages from Brewfile (casks and additional tools)
+    BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
+    if [ -f "$BREWFILE" ]; then
+        echo "📦 Installing packages from Brewfile..."
+        brew bundle --file="$BREWFILE" --no-lock
+        echo "✅ Brewfile packages installed"
+    else
+        echo "⚠️ Brewfile not found at $BREWFILE"
+    fi
+
     # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
     # Uncomment below if you want conditional Nix installation after bootstrap
     # if ! command -v nix >/dev/null 2>&1; then

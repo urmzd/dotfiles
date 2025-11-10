@@ -4,7 +4,18 @@ vim.g.mapleader = " "
 
 vim.wo.wrap = false
 
-vim.opt.clipboard = "unnamedplus"
+-- Detect subprocess/non-interactive environment
+-- Check for common subprocess indicators
+local is_subprocess = vim.env.NVIM_LISTEN_ADDRESS
+  or os.getenv("NVIM_SUBPROCESS")
+  or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
+  or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
+
+-- Conditionally enable clipboard sync only in interactive environments
+-- In subprocesses, clipboard sync can cause hanging/freezing
+if not is_subprocess then
+  vim.opt.clipboard = "unnamedplus"
+end
 vim.opt.relativenumber = true
 vim.opt.nu = true
 vim.opt.exrc = true
@@ -85,6 +96,7 @@ require("lazy").setup({
 	},
 	{
 		"williamboman/mason.nvim",
+		event = "VeryLazy", -- Defer loading to avoid blocking subprocess startup
 		config = function()
 			require("mason").setup()
 			require("mason-lspconfig").setup({
@@ -216,6 +228,34 @@ require("lazy").setup({
 				borderless_telescope = true,
 			})
 
+			-- Check subprocess status (redefined for this scope)
+			local is_subprocess_local = vim.env.NVIM_LISTEN_ADDRESS
+				or os.getenv("NVIM_SUBPROCESS")
+				or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
+				or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
+
+			-- Build lualine_x components conditionally
+			local lualine_x_components = vim.tbl_filter(function(component)
+				return component ~= nil
+			end, {
+				{
+					-- Trouble status indicator
+					function()
+						local ok, trouble = pcall(require, "trouble")
+						if ok and trouble.is_open() then
+							return "Trouble"
+						end
+						return ""
+					end,
+					icon = "",
+					color = { fg = "#f7768e" },
+				},
+				not is_subprocess_local and "copilot" or nil,
+				"encoding",
+				"fileformat",
+				"filetype",
+			})
+
 			-- Lualine set for cyberdream theme
 			require("lualine").setup({
 					options = {
@@ -250,24 +290,7 @@ require("lazy").setup({
 								color = { fg = "#7aa2f7" },
 							},
 						},
-						lualine_x = {
-							{
-								-- Trouble status indicator
-								function()
-									local ok, trouble = pcall(require, "trouble")
-									if ok and trouble.is_open() then
-										return "Trouble"
-									end
-									return ""
-								end,
-								icon = "",
-								color = { fg = "#f7768e" },
-							},
-							"copilot",
-							"encoding",
-							"fileformat",
-							"filetype",
-						},
+						lualine_x = lualine_x_components,
 					},
 				})
 
@@ -652,7 +675,8 @@ require("lazy").setup({
 	{ "folke/neodev.nvim", opts = {} },
 	{ "j-hui/fidget.nvim", opts = {} },
 	-- copilot stuff
-	{
+	-- Skip loading in subprocess environments to avoid network delays
+	not is_subprocess and {
 		"zbirenbaum/copilot.lua",
 		event = { "InsertEnter" },
 		config = function()
@@ -661,14 +685,14 @@ require("lazy").setup({
 				panel = { enabled = false },
 			})
 		end,
-	},
-	{
+	} or nil,
+	not is_subprocess and {
 		"zbirenbaum/copilot-cmp",
 		dependencies = { "zbirenbaum/copilot.lua" },
 		config = function()
 			require("copilot_cmp").setup()
 		end,
-	},
+	} or nil,
 	{ "mbbill/undotree" },
 	{ "Bekaboo/deadcolumn.nvim", opts = {} },
 	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -744,13 +768,17 @@ require("lazy").setup({
 						end
 					end, { "i", "s" }),
 				}),
-				sources = cmp.config.sources({
-					{ name = "nvim_lsp" },
-					{ name = "copilot" },
-					{ name = "luasnip" },
-					{ name = "buffer" },
-					{ name = "path" },
-				}),
+				sources = cmp.config.sources(
+					vim.tbl_filter(function(source)
+						return source ~= nil
+					end, {
+						{ name = "nvim_lsp" },
+						not is_subprocess and { name = "copilot" } or nil,
+						{ name = "luasnip" },
+						{ name = "buffer" },
+						{ name = "path" },
+					})
+				),
 				formatting = {
 					format = lspkind.cmp_format({
 						mode = "symbol_text",
@@ -816,7 +844,9 @@ require("lazy").setup({
 			require("marks").setup({})
 		end,
 	},
-	{
+	-- Only load vim-tmux-navigator when actually in a tmux session
+	-- This prevents subprocess hang issues from shell command execution
+	vim.env.TMUX and {
 		"christoomey/vim-tmux-navigator",
 		cmd = {
 			"TmuxNavigateLeft",
@@ -832,7 +862,7 @@ require("lazy").setup({
 			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
 			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
 		},
-	},
+	} or nil,
 	{
 		"ThePrimeagen/refactoring.nvim",
 		dependencies = {
