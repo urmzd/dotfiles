@@ -41,24 +41,31 @@ autoload -U compinit && compinit
 # Load oh-my-zsh AFTER environment is properly set
 source "$ZSH/oh-my-zsh.sh"
 
-# Enable colors for ls
+# Enable colors for ls - Cyberdream theme
 # Load AFTER oh-my-zsh to prevent it from being overridden
 {{- if .is_macos }}
 # macOS: use BSD ls with -G for colors, or GNU ls if available from Nix
+# Cyberdream colors: blue (#5ea1ff), green (#5eff6c), cyan (#5ef1ff), magenta (#bd5eff)
 if command -v gdircolors >/dev/null 2>&1; then
   eval "$(gdircolors -b)"
+  # Customize LS_COLORS with Cyberdream palette (256-color codes)
+  # di=38;5;75 (blue dirs), ex=38;5;83 (green executables), ln=38;5;87 (cyan symlinks)
+  export LS_COLORS="di=38;5;75:ex=38;5;83:ln=38;5;87:or=38;5;141:mi=38;5;203:*.archive=38;5;141:*.tar=38;5;141:*.tgz=38;5;141:*.arc=38;5;141:*.arj=38;5;141:*.taz=38;5;141:*.lha=38;5;141:*.lz4=38;5;141:*.lzh=38;5;141:*.lzma=38;5;141:*.tlz=38;5;141:*.txz=38;5;141:*.tzo=38;5;141:*.t7z=38;5;141:*.zip=38;5;141:*.z=38;5;141:*.dz=38;5;141:*.gz=38;5;141:*.lrz=38;5;141:*.lz=38;5;141:*.lzop=38;5;141:*.xz=38;5;141:*.zst=38;5;141:*.zstd=38;5;141:*.bz2=38;5;141:*.bz=38;5;141:*.tbz=38;5;141:*.tbz2=38;5;141:*.tz=38;5;141:*.deb=38;5;141:*.rpm=38;5;141:*.jar=38;5;141:*.war=38;5;141:*.ear=38;5;141:*.rar=38;5;141:*.aces=38;5;141:*.7z=38;5;141:*.ace=38;5;141:*.apk=38;5;141:*.cpio=38;5;141:*.iso=38;5;141:*.cab=38;5;141:*.img=38;5;141:*.msi=38;5;141"
   alias ls='gls --color=auto'
 elif ls --color=auto &>/dev/null 2>&1; then
   # GNU ls available (from Nix)
   if command -v dircolors >/dev/null 2>&1; then
     eval "$(dircolors -b)"
   fi
+  # Customize LS_COLORS with Cyberdream palette
+  export LS_COLORS="di=38;5;75:ex=38;5;83:ln=38;5;87:or=38;5;141:mi=38;5;203:*.archive=38;5;141:*.tar=38;5;141:*.tgz=38;5;141:*.arc=38;5;141:*.arj=38;5;141:*.taz=38;5;141:*.lha=38;5;141:*.lz4=38;5;141:*.lzh=38;5;141:*.lzma=38;5;141:*.tlz=38;5;141:*.txz=38;5;141:*.tzo=38;5;141:*.t7z=38;5;141:*.zip=38;5;141:*.z=38;5;141:*.dz=38;5;141:*.gz=38;5;141:*.lrz=38;5;141:*.lz=38;5;141:*.lzop=38;5;141:*.xz=38;5;141:*.zst=38;5;141:*.zstd=38;5;141:*.bz2=38;5;141:*.bz=38;5;141:*.tbz=38;5;141:*.tbz2=38;5;141:*.tz=38;5;141:*.deb=38;5;141:*.rpm=38;5;141:*.jar=38;5;141:*.war=38;5;141:*.ear=38;5;141:*.rar=38;5;141:*.aces=38;5;141:*.7z=38;5;141:*.ace=38;5;141:*.apk=38;5;141:*.cpio=38;5;141:*.iso=38;5;141:*.cab=38;5;141:*.img=38;5;141:*.msi=38;5;141"
   alias ls='ls --color=auto'
 else
-  # BSD ls (default macOS)
+  # BSD ls (default macOS) - use LSCOLORS format
   alias ls='ls -G'
   export CLICOLOR=1
-  export LSCOLORS=ExGxBxDxCxEgEdxbxgxcxd
+  # Cyberdream BSD equivalent: directories=blue (B), executables=green (x)
+  export LSCOLORS=BxGxfxfxCxCxBxBxBxBxEx
 fi
 {{- else }}
 # Linux: use GNU coreutils
@@ -93,8 +100,35 @@ source <(fzf --zsh)
 
 # Python pipx completions
 {{ if lookPath "pipx" -}}
-eval "$(_PIPX_COMPLETE=zsh_source pipx)"
+eval "$(register-python-argcomplete --shell zsh pipx)"
 {{- end }}
 
 # Load local environment if exists
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+
+# AI-powered git commit using Claude
+gcai() {
+  local diff=$(git diff --cached)
+
+  if [ -z "$diff" ]; then
+    echo "No staged changes to commit"
+    return 1
+  fi
+
+  echo "Generating commit message with Claude..."
+
+  local message=$(echo "$diff" | claude "Generate a concise, professional git commit message following the Conventional Commits format (feat:, fix:, refactor:, docs:, etc.) for these code changes. Return ONLY the commit message on a single line, nothing else:" 2>/dev/null)
+
+  if [ -z "$message" ]; then
+    echo "Failed to generate commit message"
+    return 1
+  fi
+
+  echo "Generated message: $message"
+  git commit -m "$message"
+}
+
+# Quick navigation to chezmoi directory
+ccd() {
+  cd ~/.local/share/chezmoi
+}

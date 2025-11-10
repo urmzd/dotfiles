@@ -1,112 +1,4 @@
 local lume = require("lume")
-local cmp = require("cmp")
-local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-local lspkind = require("lspkind")
-
-local has_words_before = function()
-  -- Updated to use modern vim.bo API instead of deprecated nvim_buf_get_option
-  if vim.bo[0].buftype == "prompt" then
-    return false
-  end
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return col ~= 0 and vim.api.nvim_buf_get_text(0, line - 1, 0, line - 1, col, {})[1]:match("^%s*$") == nil
-end
-
-local luasnip = require("luasnip")
-
-cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-
--- Detect subprocess/non-interactive environment
-local is_subprocess = vim.env.NVIM_LISTEN_ADDRESS
-  or os.getenv("NVIM_SUBPROCESS")
-  or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
-  or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
-
--- Build comparators list conditionally
-local comparators = {
-  -- Below is the default comparitor list and order for nvim-cmp
-  cmp.config.compare.offset,
-  -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
-  cmp.config.compare.exact,
-  cmp.config.compare.score,
-  cmp.config.compare.recently_used,
-  cmp.config.compare.locality,
-  cmp.config.compare.kind,
-  cmp.config.compare.sort_text,
-  cmp.config.compare.length,
-  cmp.config.compare.order,
-}
-
--- Only add copilot comparator if not in subprocess
-if not is_subprocess then
-  local ok, copilot_cmp = pcall(require, "copilot_cmp.comparators")
-  if ok then
-    table.insert(comparators, 1, copilot_cmp.prioritize)
-  end
-end
-
-cmp.setup({
-  sorting = {
-    priority_weight = 2,
-    comparators = comparators,
-  },
-  snippet = {
-    expand = function(args)
-      require("luasnip").lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ["<Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() and has_words_before() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-
-    ["<S-Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-
-    ["<CR>"] = cmp.mapping({
-      i = function(fallback)
-        if cmp.visible() and cmp.get_selected_entry() then
-          cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true })
-        else
-          fallback()
-        end
-      end,
-      s = cmp.mapping.confirm({ select = true }),
-      c = cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = true }),
-    }),
-  }),
-  formatting = {
-    format = lspkind.cmp_format({
-      ellipsis_char = "...",
-      before = function(entry, vim_item)
-        return vim_item
-      end,
-    }),
-  },
-  sources = vim.tbl_filter(function(source)
-    return source ~= nil
-  end, {
-    not is_subprocess and { name = "copilot" } or nil,
-    { name = "nvim_lsp" },
-    { name = "luasnip" },
-    { name = "nvim_lua" },
-    { name = "path" },
-    { name = "buffer" },
-  }),
-})
 
 local M = {}
 
@@ -145,7 +37,17 @@ function M.opts.on_attach(client, bufnr)
   end, bufopts)
 end
 
-M.opts.capabilities = require("cmp_nvim_lsp").default_capabilities()
+-- Defer cmp_nvim_lsp requirement since cmp is lazy-loaded
+local function get_capabilities()
+  local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+  if ok then
+    return cmp_nvim_lsp.default_capabilities()
+  end
+  -- Fallback if cmp_nvim_lsp is not available
+  return {}
+end
+
+M.opts.capabilities = get_capabilities()
 --[[ M.opts.capabilities.textDocument.foldingRange = {
   dynamicRegistration = false,
   lineFoldingOnly = true,

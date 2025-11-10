@@ -30,7 +30,7 @@ if command -v brew >/dev/null 2>&1; then
     BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
     if [ -f "$BREWFILE" ]; then
         echo "📦 Installing packages from Brewfile..."
-        brew bundle --file="$BREWFILE" --no-lock
+        brew bundle --file="$BREWFILE"
         echo "✅ Brewfile packages installed"
     else
         echo "⚠️ Brewfile not found at $BREWFILE"

@@ -16,7 +16,11 @@
 
         # Common development tools used across environments
         commonTools = with pkgs; [
+          # Version control and shells
           git
+          gh    # GitHub CLI
+
+          # CLI utilities
           fzf
           ripgrep
           tree
@@ -24,16 +28,37 @@
           wget
           jq
           yq
+          just  # Task runner
+
+          # Environment management
           direnv
           nix-direnv
           chezmoi
           age
+
+          # Editors and terminals
           neovim
           tmux
-          just  # Task runner
-          gh    # GitHub CLI
+
+          # Security
           gnupg # GPG for signing
+
+          # System utilities
           coreutils # GNU core utilities (includes dircolors, gls, etc.)
+        ];
+
+        # AI and productivity tools
+        aiTools = with pkgs; [
+          claude-code     # Anthropic Claude Code CLI
+          gemini-cli      # Google Gemini CLI
+        ];
+
+        # Container and cloud tools (macOS-friendly)
+        cloudTools = with pkgs; [
+          colima          # Container runtime for macOS
+          docker          # Docker CLI
+          docker-compose  # Docker Compose
+          google-cloud-sdk
         ];
 
         # Node.js development environment
@@ -55,7 +80,7 @@
           python313Packages.pipx
           python313Packages.black
           python313Packages.flake8
-          python3.13Packages.mypy
+          python313Packages.mypy
           python313Packages.pytest
           python313Packages.requests
           ruff
@@ -88,14 +113,10 @@
         devopsEnv = with pkgs; [
           terraform
           ansible
-          docker
-          docker-compose
           kubectl
           kubernetes-helm
           k9s
           awscli2
-          google-cloud-sdk
-          snowflake-cli
         ];
 
         # Data/ML environment
@@ -124,16 +145,22 @@
       in {
         # Development shells
         devShells = {
-          # Default shell with basic tools
+          # Default shell with basic tools + AI/cloud tools
           default = pkgs.mkShell {
             name = "default-dev-shell";
-            buildInputs = commonTools;
+            buildInputs = commonTools ++ aiTools ++ cloudTools;
 
             shellHook = ''
               # Only show welcome message for explicit nix develop usage, not direnv
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "🚀 Welcome to Urmzd's development environment!"
-                echo "Available environments:"
+                echo ""
+                echo "Included tools:"
+                echo "  • AI: claude-code, gemini-cli"
+                echo "  • Cloud: gcloud, colima, docker"
+                echo "  • CLI: git, gh, fzf, ripgrep, jq, yq, just"
+                echo ""
+                echo "Available specialized environments:"
                 echo "  • nix develop .#node     - Node.js development"
                 echo "  • nix develop .#python   - Python development"
                 echo "  • nix develop .#rust     - Rust development"
@@ -142,8 +169,6 @@
                 echo "  • nix develop .#data     - Data science & ML"
                 echo "  • nix develop .#lua      - Lua development"
                 echo "  • nix develop .#full     - All tools combined"
-                echo ""
-                echo "Current environment: Default (basic tools)"
               fi
             '';
           };
@@ -208,13 +233,15 @@
           # DevOps/Infrastructure shell
           devops = pkgs.mkShell {
             name = "devops-dev-shell";
-            buildInputs = commonTools ++ devopsEnv;
+            buildInputs = commonTools ++ cloudTools ++ devopsEnv;
 
             shellHook = ''
               echo "⚙️  DevOps/Infrastructure Environment"
               echo "Terraform: $(terraform version | head -1)"
               echo "Docker: $(docker --version)"
               echo "kubectl: $(kubectl version --client --short 2>/dev/null || echo 'kubectl available')"
+              echo "Cloud: gcloud"
+              echo "Container runtime: colima (for macOS)"
               echo ""
             '';
           };
@@ -250,7 +277,7 @@
           # Full environment with everything
           full = pkgs.mkShell {
             name = "full-dev-shell";
-            buildInputs = commonTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv;
+            buildInputs = commonTools ++ aiTools ++ cloudTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv;
 
             shellHook = ''
               echo "🌟 Full Development Environment"
@@ -263,6 +290,9 @@
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo ""
+              echo "AI Tools: claude-code, gemini-cli"
+              echo "Cloud: gcloud, docker, colima"
+              echo ""
             '';
           };
         };
@@ -272,7 +302,7 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = commonTools;
+            paths = commonTools ++ aiTools ++ cloudTools;
           };
 
           # Development environments as packages

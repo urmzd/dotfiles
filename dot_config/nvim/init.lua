@@ -4,17 +4,38 @@ vim.g.mapleader = " "
 
 vim.wo.wrap = false
 
--- Detect subprocess/non-interactive environment
--- Check for common subprocess indicators
-local is_subprocess = vim.env.NVIM_LISTEN_ADDRESS
-  or os.getenv("NVIM_SUBPROCESS")
-  or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
-  or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
+-- IMPROVED: Detect subprocess/non-interactive environment
+-- This is crucial for Claude Code performance - incorrect detection causes hangs
+-- The subprocess is when nvim is piped (e.g., Claude Code running nvim in a pipe)
+
+-- Step 1: Check explicit environment variables
+local is_subprocess = vim.env.NVIM_SUBPROCESS == "1"
+  or vim.env.CLAUDE_CODE == "1"
+  or os.getenv("CLAUDECODE") == "1"  -- Claude Code sets this
+  or os.getenv("IN_NIX_SHELL") == "1"  -- In Nix dev environment pipes
+
+-- Step 2: Check if running in tmux without direct TMUX socket
+if not is_subprocess and os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX then
+  is_subprocess = true
+end
+
+-- Step 3: Check for headless/pipe environment (no display server, not SSH)
+if not is_subprocess then
+  local no_display = not vim.env.DISPLAY or vim.env.DISPLAY == ""
+  local no_ssh = not vim.env.SSH_CONNECTION or vim.env.SSH_CONNECTION == ""
+  if no_display and no_ssh then
+    -- Likely running in a pipe/headless environment
+    is_subprocess = true
+  end
+end
 
 -- Conditionally enable clipboard sync only in interactive environments
 -- In subprocesses, clipboard sync can cause hanging/freezing
 if not is_subprocess then
   vim.opt.clipboard = "unnamedplus"
+else
+  -- Explicitly disable clipboard in subprocess to prevent hangs
+  vim.opt.clipboard = ""
 end
 vim.opt.relativenumber = true
 vim.opt.nu = true
@@ -48,6 +69,20 @@ vim.keymap.set("n", "<leader>j", ":wincmd j<CR>", { desc = "Move to window below
 vim.keymap.set("n", "<leader>k", ":wincmd k<CR>", { desc = "Move to window above" })
 vim.keymap.set("n", "<leader>l", ":wincmd l<CR>", { desc = "Move to right window" })
 -- Note: Ctrl-h/j/k/l also work via vim-tmux-navigator for seamless tmux integration
+
+-- Window splitting - Mirror tmux keybindings
+vim.keymap.set("n", "<leader>|", ":vsplit<CR>", { desc = "Split window vertically (open current buffer)" })
+vim.keymap.set("n", "<leader>-", ":split<CR>", { desc = "Split window horizontally (open current buffer)" })
+
+-- Window resizing - Mirror tmux's H/J/K/L pattern (resize in each direction)
+vim.keymap.set("n", "<leader>H", ":vertical resize -5<CR>", { desc = "Resize window left" })
+vim.keymap.set("n", "<leader>J", ":resize +5<CR>", { desc = "Resize window down" })
+vim.keymap.set("n", "<leader>K", ":resize -5<CR>", { desc = "Resize window up" })
+vim.keymap.set("n", "<leader>L", ":vertical resize +5<CR>", { desc = "Resize window right" })
+
+-- Window management
+vim.keymap.set("n", "<leader>o", ":only<CR>", { desc = "Close all other windows" })
+vim.keymap.set("n", "<leader>=", "<C-w>=", { desc = "Equalize all window sizes" })
 
 -- Buffer cycling - Tab key (normal mode only, doesn't affect insert/command mode)
 vim.keymap.set("n", "<Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
@@ -96,21 +131,37 @@ require("lazy").setup({
 	},
 	{
 		"williamboman/mason.nvim",
-		event = "VeryLazy", -- Defer loading to avoid blocking subprocess startup
+		event = "VeryLazy", -- Defer loading to avoid blocking startup
 		config = function()
-			require("mason").setup()
-			require("mason-lspconfig").setup({
-				ensure_installed = {
-					"lua_ls",
-					"pyright",
-					"yamlls",
-					"bashls",
-					"taplo",
-					"terraformls",
-					"dockerls",
-				},
-			})
-			require("servers") -- Assumes you have a servers.lua for LSP setup
+			-- Wrap mason setup in error handling to prevent hangs in subprocess
+			local ok, mason = pcall(require, "mason")
+			if not ok then
+				return  -- Silently skip if mason fails to load
+			end
+
+			mason.setup()
+
+			-- Only auto-install LSPs in interactive mode
+			if not is_subprocess then
+				local ok_lspconfig, mason_lspconfig = pcall(require, "mason-lspconfig")
+				if ok_lspconfig then
+					mason_lspconfig.setup({
+						ensure_installed = {
+							"lua_ls",
+							"pyright",
+							"yamlls",
+							"bashls",
+							"taplo",
+							"terraformls",
+							"dockerls",
+						},
+						automatic_installation = true,
+					})
+				end
+			end
+
+			-- Load LSP configuration
+			pcall(require, "servers")
 		end,
 	},
 	{ "williamboman/mason-lspconfig.nvim" },
@@ -228,11 +279,9 @@ require("lazy").setup({
 				borderless_telescope = true,
 			})
 
-			-- Check subprocess status (redefined for this scope)
-			local is_subprocess_local = vim.env.NVIM_LISTEN_ADDRESS
-				or os.getenv("NVIM_SUBPROCESS")
-				or os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX
-				or not vim.env.DISPLAY and not vim.env.SSH_CONNECTION
+			-- Check subprocess status (use global is_subprocess from earlier)
+			-- This ensures consistent detection across entire config
+			local is_subprocess_local = is_subprocess
 
 			-- Build lualine_x components conditionally
 			local lualine_x_components = vim.tbl_filter(function(component)
@@ -567,6 +616,20 @@ require("lazy").setup({
 	},
 	-- Debuggers
 	{
+		"theHamsta/nvim-dap-virtual-text",
+		dependencies = {
+			"mfussenegger/nvim-dap",
+			"nvim-treesitter/nvim-treesitter",
+		},
+		opts = {
+			enabled = true,
+			all_frames = true,
+			virt_text_pos = "eol",
+			highlight_changed_variables = true,
+			highlight_new_as_changed = true,
+		},
+	},
+	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
 			{ "rcarriga/nvim-dap-ui" },
@@ -675,22 +738,29 @@ require("lazy").setup({
 	{ "folke/neodev.nvim", opts = {} },
 	{ "j-hui/fidget.nvim", opts = {} },
 	-- copilot stuff
-	-- Skip loading in subprocess environments to avoid network delays
+	-- Skip loading in subprocess environments to avoid network delays and authentication hangs
 	not is_subprocess and {
 		"zbirenbaum/copilot.lua",
 		event = { "InsertEnter" },
 		config = function()
-			require("copilot").setup({
-				suggestion = { enabled = false },
-				panel = { enabled = false },
-			})
+			-- Wrap in pcall to silently fail if network is unavailable
+			local ok, copilot = pcall(require, "copilot")
+			if ok then
+				copilot.setup({
+					suggestion = { enabled = false },
+					panel = { enabled = false },
+				})
+			end
 		end,
 	} or nil,
 	not is_subprocess and {
 		"zbirenbaum/copilot-cmp",
 		dependencies = { "zbirenbaum/copilot.lua" },
 		config = function()
-			require("copilot_cmp").setup()
+			-- Silently fail if copilot or copilot-cmp has issues
+			pcall(function()
+				require("copilot_cmp").setup()
+			end)
 		end,
 	} or nil,
 	{ "mbbill/undotree" },
@@ -723,7 +793,6 @@ require("lazy").setup({
 	},
 	{
 		"hrsh7th/nvim-cmp",
-		event = { "InsertEnter", "CmdlineEnter" },
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
@@ -915,7 +984,235 @@ require("lazy").setup({
 			},
 		},
 	},
+	-- ============================================================================
+	-- NEW OPTIMIZATION PLUGINS
+	-- ============================================================================
+
+	-- Command palette & keybinding discovery
+	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		opts = {
+			preset = "helix",
+			icons = {
+				breadcrumb = "»",
+				separator = "➜",
+				group = "+",
+			},
+		},
+		config = function(_, opts)
+			local wk = require("which-key")
+			wk.setup(opts)
+
+			-- Register key groups for better organization
+			wk.add({
+				{ "<leader>d", group = "DEBUG", icon = "🐛" },
+				{ "<leader>t", group = "TEST", icon = "✓" },
+				{ "<leader>f", group = "FILE", icon = "📁" },
+				{ "<leader>b", group = "BUFFER", icon = "📄" },
+				{ "<leader>g", group = "GIT", icon = "" },
+				{ "<leader>x", group = "DIAGNOSTICS", icon = "⚠" },
+				{ "<leader>r", group = "REFACTOR", icon = "✨" },
+				{ "<leader>v", group = "VIMUX", icon = "⚙" },
+				{ "<leader>h", group = "HARPOON", icon = "🎣" },
+				{ "<leader>o", group = "OVERSEER", icon = "🚀" },
+			})
+		end,
+	},
+
+	-- Quick file navigation (harpoon)
+	{
+		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			local harpoon = require("harpoon")
+			harpoon:setup()
+
+			-- Keymaps
+			vim.keymap.set("n", "<leader>ha", function()
+				harpoon:list():add()
+				vim.notify("File marked in harpoon", vim.log.levels.INFO)
+			end, { desc = "Harpoon: Add File" })
+
+			vim.keymap.set("n", "<leader>hh", function()
+				harpoon.ui:toggle_quick_menu(harpoon:list())
+			end, { desc = "Harpoon: Quick Menu" })
+
+			-- Quick access to marked files
+			for i = 1, 5 do
+				vim.keymap.set("n", "<leader>h" .. i, function()
+					harpoon:list():select(i)
+				end, { desc = "Harpoon: File " .. i })
+			end
+		end,
+	},
+
+
+	-- Task runner for builds, tests, debugging
+	{
+		"stevearc/overseer.nvim",
+		opts = {
+			templates = { "builtin", "user" },
+		},
+		config = function(_, opts)
+			require("overseer").setup(opts)
+
+			-- Register custom task templates
+			require("overseer").register_template({
+				name = "python: run file",
+				builder = function()
+					return {
+						cmd = "python",
+						args = { vim.fn.expand("%") },
+						components = { "on_output_quickfix", "on_exit_set_status", "default" },
+					}
+				end,
+				condition = {
+					filetype = { "python" },
+				},
+			})
+
+			require("overseer").register_template({
+				name = "rust: cargo run",
+				builder = function()
+					return {
+						cmd = "cargo",
+						args = { "run" },
+						components = { "on_output_quickfix", "on_exit_set_status", "default" },
+						cwd = vim.fn.getcwd(),
+					}
+				end,
+				condition = {
+					filetype = { "rust" },
+				},
+			})
+
+			-- Keymaps
+			vim.keymap.set("n", "<leader>ot", "<cmd>OverseerToggle<CR>", { desc = "Overseer: Toggle" })
+			vim.keymap.set("n", "<leader>or", "<cmd>OverseerRun<CR>", { desc = "Overseer: Run Task" })
+			vim.keymap.set("n", "<leader>op", "<cmd>OverseerToggle<CR>", { desc = "Overseer: Show Running" })
+		end,
+	},
+
+	-- Better terminal integration
+	{
+		"akinsho/toggleterm.nvim",
+		version = "*",
+		config = function()
+			require("toggleterm").setup({
+				size = 20,
+				open_mapping = [[<C-\>]],
+				hide_numbers = true,
+				shade_filetypes = {},
+				shade_terminals = true,
+				shading_factor = 2,
+				start_in_insert = true,
+				insert_mappings = true,
+				terminal_mappings = true,
+				persist_size = true,
+				direction = "float",
+				close_on_exit = true,
+				shell = vim.o.shell,
+				auto_scroll = true,
+				float_opts = {
+					border = "curved",
+					winblend = 0,
+					highlights = {
+						border = "Normal",
+						background = "Normal",
+					},
+				},
+			})
+
+			-- Keymaps
+			vim.keymap.set("n", "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", { desc = "Toggle Terminal (Float)" })
+			vim.keymap.set("n", "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", { desc = "Toggle Terminal (Horizontal)" })
+			vim.keymap.set("n", "<leader>tv", "<cmd>ToggleTerm direction=vertical<CR>", { desc = "Toggle Terminal (Vertical)" })
+		end,
+	},
+
+	-- Pretty UI for inputs/selections
+	{
+		"stevearc/dressing.nvim",
+		event = "VeryLazy",
+		opts = {
+			input = {
+				enabled = true,
+				border = "rounded",
+				get_config = function()
+					if vim.api.nvim_buf_get_name(0):match("NvimTree_") then
+						return { enabled = false }
+					end
+				end,
+			},
+			select = {
+				enabled = true,
+				backend = { "telescope", "fzf", "builtin" },
+				builtin = {
+					border = "rounded",
+				},
+			},
+		},
+	},
+
+	-- Code outline/symbols
+	{
+		"stevearc/aerial.nvim",
+		opts = {
+			layout = {
+				max_width = { 40, 0.2 },
+				width = nil,
+				min_width = 10,
+				win_opts = {},
+				default_direction = "prefer_right",
+				placement = "window",
+				preserve_equality = false,
+			},
+			keymaps = {
+				["?"] = "actions.show_help",
+				["g?"] = "actions.show_help",
+				["<CR>"] = "actions.jump",
+				["<2-LeftMouse>"] = "actions.jump",
+				["<C-v>"] = "actions.jump_vsplit",
+				["<C-s>"] = "actions.jump_split",
+				["p"] = "actions.scroll",
+				["<C-j>"] = "actions.down_and_scroll",
+				["<C-k>"] = "actions.up_and_scroll",
+				["{"] = "actions.prev",
+				["}"] = "actions.next",
+				["[["] = "actions.prev_up",
+				["]]"] = "actions.next_up",
+				["q"] = "actions.close",
+			},
+		},
+		config = function(_, opts)
+			require("aerial").setup(opts)
+			vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { desc = "Aerial: Toggle Outline" })
+		end,
+	},
 })
+
+-- ============================================================================
+-- DEBUG HELPERS INITIALIZATION
+-- ============================================================================
+local debug_helpers = require("debug_helpers")
+debug_helpers.setup()
+
+-- Debug Helper Keymaps
+vim.keymap.set("n", "<leader>dd", debug_helpers.start_debug, { desc = "Debug: Quick Start" })
+vim.keymap.set("n", "<leader>dD", debug_helpers.quick_debug, { desc = "Debug: Quick (Choose Config)" })
+vim.keymap.set("n", "<leader>dK", debug_helpers.stop_debug, { desc = "Debug: Stop Session" })
+vim.keymap.set("n", "<leader>dR", debug_helpers.restart_debug, { desc = "Debug: Restart Session" })
+vim.keymap.set("n", "<leader>dP", debug_helpers.toggle_breakpoint_persistent, { desc = "Debug: Toggle Breakpoint (Persistent)" })
+vim.keymap.set("n", "<leader>dC", debug_helpers.set_conditional_breakpoint, { desc = "Debug: Conditional Breakpoint" })
+vim.keymap.set("n", "<leader>dL", debug_helpers.set_log_point, { desc = "Debug: Set Log Point" })
+vim.keymap.set("n", "<leader>dX", debug_helpers.clear_breakpoints, { desc = "Debug: Clear All Breakpoints" })
+vim.keymap.set("n", "<leader>d?", debug_helpers.list_breakpoints, { desc = "Debug: List Breakpoints" })
+
+-- ============================================================================
+-- ADDITIONAL KEYMAPS
+-- ============================================================================
 
 -- Undotree Keymap
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "Toggle Undotree" })

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Configure macOS Terminal.app font
+
+{{- if .is_macos }}
+
+osascript -e 'tell application "Terminal" to set font name of default settings to "MesloLGS Nerd Font"' 2>/dev/null
+FONT_NAME=$?
+
+osascript -e 'tell application "Terminal" to set font size of default settings to 13' 2>/dev/null
+FONT_SIZE=$?
+
+if [ $FONT_NAME -eq 0 ] && [ $FONT_SIZE -eq 0 ]; then
+    echo "✅ Terminal.app font set: MesloLGS Nerd Font 13pt"
+else
+    echo "ℹ️  Terminal.app font configuration skipped (AppleScript error)"
+fi
+
+{{- else }}
+echo "⏭️  Skipping Terminal.app configuration (not macOS)"
+{{- end }}
