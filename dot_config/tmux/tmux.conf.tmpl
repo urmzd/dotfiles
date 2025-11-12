@@ -60,14 +60,23 @@ bind - split-window -v -c "#{pane_current_path}"
 # Create new window in current path
 bind c new-window -c "#{pane_current_path}"
 
+# Enable native clipboard integration (tmux 2.6+)
+# This provides seamless integration without needing reattach-to-user-namespace
+set -g set-clipboard on
+
 # Vi copy mode
 bind-key -T copy-mode-vi v send-keys -X begin-selection
 {{- if .is_macos }}
+# macOS: Use pbcopy for explicit clipboard integration
 bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
 bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "pbcopy"
+# Enter key also copies to clipboard (native copy-selection)
+bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
 {{- else }}
+# Linux: Use xclip for clipboard integration
 bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"
 bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -selection clipboard"
+bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
 {{- end }}
 
 # Plugin configuration

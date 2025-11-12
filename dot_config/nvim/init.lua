@@ -4,35 +4,44 @@ vim.g.mapleader = " "
 
 vim.wo.wrap = false
 
--- IMPROVED: Detect subprocess/non-interactive environment
+-- OPTIMIZED: Detect subprocess/non-interactive environment
 -- This is crucial for Claude Code performance - incorrect detection causes hangs
--- The subprocess is when nvim is piped (e.g., Claude Code running nvim in a pipe)
+-- Uses TTY detection as primary method with env var fallback
 
--- Step 1: Check explicit environment variables
-local is_subprocess = vim.env.NVIM_SUBPROCESS == "1"
-  or vim.env.CLAUDE_CODE == "1"
-  or os.getenv("CLAUDECODE") == "1"  -- Claude Code sets this
-  or os.getenv("IN_NIX_SHELL") == "1"  -- In Nix dev environment pipes
+local is_subprocess = false
 
--- Step 2: Check if running in tmux without direct TMUX socket
-if not is_subprocess and os.getenv("TERM_PROGRAM") == "tmux" and not vim.env.TMUX then
+-- Step 1: PRIMARY CHECK - TTY detection (most reliable)
+-- If stdin is not a TTY (terminal), it's likely a pipe/subprocess
+local stdin_handle = vim.loop.guess_handle(0)
+if stdin_handle ~= "tty" then
   is_subprocess = true
 end
 
--- Step 3: Check for headless/pipe environment (no display server, not SSH)
+-- Step 2: FALLBACK - Check specific subprocess indicators
+-- Only check explicit subprocess flags, not broad env vars like CLAUDECODE
 if not is_subprocess then
-  local no_display = not vim.env.DISPLAY or vim.env.DISPLAY == ""
-  local no_ssh = not vim.env.SSH_CONNECTION or vim.env.SSH_CONNECTION == ""
-  if no_display and no_ssh then
-    -- Likely running in a pipe/headless environment
-    is_subprocess = true
-  end
+  is_subprocess = vim.env.NVIM_SUBPROCESS == "1"
+    or vim.env.CLAUDE_CODE_ENTRYPOINT ~= nil  -- More specific than CLAUDECODE
 end
 
 -- Conditionally enable clipboard sync only in interactive environments
 -- In subprocesses, clipboard sync can cause hanging/freezing
 if not is_subprocess then
   vim.opt.clipboard = "unnamedplus"
+
+  -- Explicit clipboard provider for reliability (macOS)
+  vim.g.clipboard = {
+    name = "macOS-clipboard",
+    copy = {
+      ["+"] = "pbcopy",
+      ["*"] = "pbcopy",
+    },
+    paste = {
+      ["+"] = "pbpaste",
+      ["*"] = "pbpaste",
+    },
+    cache_enabled = 0,
+  }
 else
   -- Explicitly disable clipboard in subprocess to prevent hangs
   vim.opt.clipboard = ""
