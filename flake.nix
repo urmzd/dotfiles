@@ -150,10 +150,10 @@
       in {
         # Development shells
         devShells = {
-          # Default shell with basic tools + AI/cloud tools
+          # Default shell with basic tools + AI/cloud tools + DevOps
           default = pkgs.mkShell {
             name = "default-dev-shell";
-            buildInputs = commonTools ++ aiTools ++ cloudTools;
+            buildInputs = commonTools ++ aiTools ++ cloudTools ++ devopsEnv;
 
             shellHook = ''
               # Only show welcome message for explicit nix develop usage, not direnv
@@ -163,6 +163,7 @@
                 echo "Included tools:"
                 echo "  • AI: claude-code, gemini-cli"
                 echo "  • Cloud: gcloud, colima, docker"
+                echo "  • DevOps: terraform, ansible, kubectl, helm, k9s, awscli"
                 echo "  • CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
                 echo "Available specialized environments:"
