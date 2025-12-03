@@ -7,13 +7,13 @@ This guide explains how to use the enhanced dotfiles setup with Nix and Chezmoi 
 ### One-Command Setup
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
 ### Manual Setup
 
 ```bash
-git clone https://github.com/urmzd/dotfiles.git ~/.dotfiles
+git clone https://github.com/urmzd/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ./bootstrap-nix-chezmoi.sh
 ```
@@ -43,25 +43,20 @@ This setup combines the best of both worlds with a clear separation of responsib
 ├── flake.nix                    # Nix development environments
 ├── flake.lock                   # Pinned dependencies
 ├── Brewfile                     # Minimal macOS-specific packages
-├── .envrc                       # direnv configuration
-├── .chezmoi.toml.tmpl          # Chezmoi configuration template
 ├── bootstrap-nix-chezmoi.sh    # Unified setup script
 ├── secrets-setup.sh            # Secrets management setup
-│
+├── dot_envrc.tmpl              # Global direnv configuration
 ├── dot_zshrc.tmpl              # Zsh configuration template
 ├── dot_zshenv.tmpl             # Zsh environment template
 ├── dot_zprofile.tmpl           # Zsh profile template
 ├── dot_gitconfig.tmpl          # Git configuration template
 ├── dot_tmux.conf.tmpl          # Tmux configuration template
 ├── dot_config/                 # XDG config directory
-│   └── nvim/                   # Neovim configuration
-│       ├── init.lua            # Main Neovim config
-│       ├── lua/                # Lua modules
-│       └── ftplugin/           # File type plugins
+│   └── nvim/                   # Neovim configuration (templated)
 ├── private_dot_ssh/            # SSH configurations
-│   └── encrypted_*.age         # Encrypted secret files
-└── scripts/                    # Utility scripts
-    └── security-audit.sh
+├── cross-platform-test.sh      # Cross-platform/toolchain smoke test
+├── security-audit.sh           # Security scanning wrapper
+└── justfile                    # detect-secrets helpers
 ```
 
 ## 🔗 Configuration Linking Process
@@ -124,6 +119,7 @@ The setup script now automatically installs:
 - `reattach-to-user-namespace` - Required for tmux clipboard integration on macOS
 - Oh My Zsh and Powerlevel10k theme
 - TPM (Tmux Plugin Manager)
+- Core tooling via Nix dev shells: terraform, npm, go, java, python, plus AI CLIs (claude-code, gemini-cli)
 
 ### 🌍 Global Development Tools Access
 
@@ -144,11 +140,17 @@ cd /tmp              # ✅ And here as well
 - All development tools become globally accessible
 - Project-specific `.envrc` files can still override for specialized environments
 
+**Verify the toolchain is ready:**
+
+```bash
+nix develop .#full --command "terraform --version && npm --version && go version && java -version && python --version && claude --version && gemini --version"
+```
+
 ## 🎯 Key Features
 
 ### Reproducible Development Environments
 
-- **Language-specific shells**: Node.js, Python, Rust, Go, Lua
+- **Language-specific shells**: Node.js, Python, Rust, Go, Lua (Java available in the full shell for JDTLS and builds)
 - **Pinned dependencies**: Exact versions via flake.lock
 - **Instant activation**: direnv automatically switches environments
 - **Cross-platform**: Works on macOS, Linux, and WSL

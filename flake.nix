@@ -142,6 +142,11 @@
           luarocks
         ];
 
+        # Java runtime for tooling (used by Neovim JDTLS and builds)
+        javaEnv = with pkgs; [
+          jdk17_headless
+        ];
+
       in {
         # Development shells
         devShells = {
@@ -277,7 +282,7 @@
           # Full environment with everything
           full = pkgs.mkShell {
             name = "full-dev-shell";
-            buildInputs = commonTools ++ aiTools ++ cloudTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv;
+            buildInputs = commonTools ++ aiTools ++ cloudTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv ++ javaEnv;
 
             shellHook = ''
               echo "🌟 Full Development Environment"
@@ -289,6 +294,7 @@
               echo "  • Rust: $(rustc --version | cut -d' ' -f2)"
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
+              echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
               echo "AI Tools: claude-code, gemini-cli"
               echo "Cloud: gcloud, docker, colima"

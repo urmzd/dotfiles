@@ -22,6 +22,13 @@ cd ~/.dotfiles
 git status --ignored
 ```
 
+### Toolchain Availability Check
+
+```bash
+# Confirm core languages, infra, and AI CLIs are wired up
+nix develop .#full --command "terraform --version && npm --version && go version && java -version && python --version && claude --version && gemini --version"
+```
+
 ## 🔒 Security Features Testing
 
 ### 1. Pre-commit Hooks Validation
@@ -186,20 +193,6 @@ chezmoi apply
 
 # Verify file was decrypted properly
 cat ~/.env.personal
-```
-
-## 📊 Feature Comparison Testing
-
-### Legacy vs Modern Comparison
-
-```bash
-# Modern setup (only option)
-./bootstrap-nix-chezmoi.sh
-source ~/.zshrc
-
-# Compare features:
-# Legacy: asdf, brew, manual configs
-# Modern: nix, chezmoi, encrypted secrets, direnv
 ```
 
 ### Performance Benchmarking

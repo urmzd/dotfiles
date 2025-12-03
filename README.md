@@ -29,12 +29,14 @@ curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-
 3. ✅ Sets up Chezmoi with this repository
 4. ✅ Links all configurations (zsh, nvim, tmux)
 5. ✅ Enables direnv for automatic environment switching
+6. ✅ Makes core tools (terraform, npm, go, java, python, AI CLIs) available via the Nix dev shells
 
 **What you get:**
 - 🎯 Reproducible development environments with Nix
 - 🔧 Intelligent dotfiles with Chezmoi templating
 - 🔒 Built-in secrets management with age encryption
 - 🚀 Automatic environment switching with direnv
+- 🧰 Core toolchain ready: terraform, npm, go, java, python, plus AI CLIs (claude-code, gemini-cli)
 - 📖 [Full Setup Guide](NIX-CHEZMOI.md)
 
 ## 📋 Manual Setup
@@ -73,6 +75,9 @@ ls -la ~/.tmux.conf  # Should link to chezmoi
 
 # Check package availability
 which git fzf ripgrep tree jq just gh direnv nvim
+
+# Validate language/infra/AI toolchain (uses full dev shell)
+nix develop .#full --command "terraform --version && npm --version && go version && java -version && python --version && claude --version && gemini --version"
 ```
 
 ## 🔧 Package Management
@@ -105,6 +110,8 @@ which git fzf ripgrep tree jq just gh direnv nvim
 ### Programming Languages & Runtimes
 - **Node.js** 23.9.0
 - **Python** 3.13.5 (+ development tools)
+- **Go** (via Nix dev shell)
+- **Java** (JDK for tooling and Neovim JDTLS)
 - **Rust** (stable)
 - **Lua** 5.4.7
 - **Terraform** 1.12.2
@@ -131,7 +138,6 @@ Refer to your shell's documentation for details if you prefer a different shell.
 ### AI & Productivity Tools
 - **gemini-cli** - Google Gemini CLI interface (installed via Homebrew)
 - **claude-code** - Anthropic Claude Code CLI (installed via official installer)
-- **codex** - OpenAI Codex CLI (optional, installed via npm)
 - **nox** - Python testing automation
 - **argcomplete** - Command-line auto-completion
 
@@ -139,22 +145,22 @@ Refer to your shell's documentation for details if you prefer a different shell.
 
 ```
 ~/.dotfiles/
-├── bootstrap-nix-chezmoi.sh # Modern Nix + Chezmoi setup script
-├── Brewfile              # Homebrew packages
-├── .tool-versions        # Deprecated - using nix flake.nix instead
-├── requirements-pipx.txt # Python applications via pipx
-├── zsh/                  # Zsh configuration
-│   ├── .zshrc           # Main zsh configuration
-│   ├── .zprofile        # Zsh profile settings
-│   ├── .zshenv          # Environment variables
-│   └── fonts/           # MesloLGS Nerd Fonts
-├── nvim/                 # Neovim configuration
-│   ├── init.lua         # Main Neovim config
-│   ├── lazy-lock.json   # Plugin version lock file
-│   └── lua/             # Lua configuration modules
-├── tmux/                 # Tmux configuration
-│   └── .tmux.conf       # Tmux settings and keybindings
-└── .gitconfig           # Git global configuration
+├── bootstrap-nix-chezmoi.sh    # Modern Nix + Chezmoi setup script
+├── flake.nix                   # Nix dev shells (node/python/go/devops/full)
+├── Brewfile                    # Minimal macOS packages only
+├── justfile                    # Secret scanning helper tasks
+├── requirements-pipx.txt       # Python CLIs installed via pipx
+├── cross-platform-test.sh      # Toolchain and Nix smoke test
+├── security-audit.sh           # Secret scanning and audit wrapper
+├── dot_zshrc.tmpl              # Zsh configuration template
+├── dot_zprofile.tmpl           # Zsh profile template
+├── dot_zshenv.tmpl             # Environment variables template
+├── dot_gitconfig.tmpl          # Git configuration template
+├── dot_envrc.tmpl              # Global direnv hook for Nix toolchain
+├── dot_config/                 # XDG config directory
+│   └── nvim/                   # Neovim configuration (templated)
+├── private_dot_ssh/            # SSH configurations (encrypted where needed)
+└── run_once_before_install-packages.sh.tmpl # Chezmoi hook for package bootstrapping
 ```
 
 ## 🔐 Encryption & Secrets Management
@@ -346,5 +352,3 @@ Feel free to fork this repository and customize it for your own needs. Pull requ
 This project is licensed under the MIT License - see the repository for details.
 
 ---
-
-*Last updated: September 2025*
