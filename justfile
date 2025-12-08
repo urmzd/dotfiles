@@ -44,3 +44,34 @@ secrets-install:
 # Full security audit including detect-secrets
 security-audit: secrets-check
     ./security-audit.sh
+
+# Nix management recipes
+
+# Update all Nix flake inputs to latest versions
+nix-update:
+    @echo "Updating Nix flake inputs..."
+    nix flake update
+    @echo "✓ Flake updated successfully"
+    @echo ""
+    @echo "Updated packages include: gemini-cli, claude-code, and all dev tools"
+    @echo "Run 'just nix-rebuild' to apply changes"
+
+# Show current versions of AI tools
+nix-versions:
+    @echo "Current versions in nixpkgs:"
+    @echo -n "gemini-cli: "; nix eval nixpkgs#gemini-cli.version
+    @echo -n "claude-code: "; nix eval nixpkgs#claude-code.version
+
+# Rebuild current Nix environment
+nix-rebuild:
+    @echo "Rebuilding Nix environment..."
+    nix develop --command echo "✓ Environment rebuilt"
+
+# Update flake and rebuild in one command
+nix-upgrade: nix-update nix-rebuild
+    @echo "✓ Nix environment upgraded successfully"
+
+# Check which packages have updates available
+nix-check-updates:
+    @echo "Checking for outdated packages..."
+    nix flake metadata | grep "Last modified"
