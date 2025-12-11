@@ -14,149 +14,153 @@
           config.allowUnfree = true;
         };
 
-        # Common development tools used across environments
-        commonTools = with pkgs; [
-          # Version control and shells
-          git
-          gh    # GitHub CLI
+        # Reusable toolsets keep shells small and composable
+        toolsets = rec {
+          common = with pkgs; [
+            git
+            gh
+            fzf
+            ripgrep
+            tree
+            curl
+            wget
+            jq
+            yq
+            just
+            direnv
+            nix-direnv
+            chezmoi
+            age
+            neovim
+            tmux
+            gnupg
+            coreutils
+          ];
 
-          # CLI utilities
-          fzf
-          ripgrep
-          tree
-          curl
-          wget
-          jq
-          yq
-          just  # Task runner
+          ai = with pkgs; [
+            claude-code
+            gemini-cli
+          ];
 
-          # Environment management
-          direnv
-          nix-direnv
-          chezmoi
-          age
+          cloud = with pkgs; [
+            colima
+            docker
+            docker-compose
+            google-cloud-sdk
+          ];
 
-          # Editors and terminals
-          neovim
-          tmux
+          node = with pkgs; [
+            nodejs_20
+            nodePackages.npm
+            nodePackages.yarn
+            nodePackages.pnpm
+            nodePackages.typescript
+            nodePackages.typescript-language-server
+            nodePackages.vscode-langservers-extracted
+          ];
 
-          # Security
-          gnupg # GPG for signing
+          python = with pkgs; [
+            python313
+            python313Packages.pip
+            python313Packages.virtualenv
+            python313Packages.pipx
+            python313Packages.black
+            python313Packages.flake8
+            python313Packages.mypy
+            python313Packages.pytest
+            python313Packages.requests
+            ruff
+            uv
+          ];
 
-          # System utilities
-          coreutils # GNU core utilities (includes dircolors, gls, etc.)
-        ];
+          rust = with pkgs; [
+            rustc
+            cargo
+            rustfmt
+            clippy
+            rust-analyzer
+            cargo-watch
+            cargo-edit
+            cargo-outdated
+          ];
 
-        # AI and productivity tools
-        aiTools = with pkgs; [
-          claude-code     # Anthropic Claude Code CLI
-          gemini-cli      # Google Gemini CLI
-        ];
+          go = with pkgs; [
+            go
+            gopls
+            golangci-lint
+            gotools
+            go-migrate
+            air
+          ];
 
-        # Container and cloud tools (macOS-friendly)
-        cloudTools = with pkgs; [
-          colima          # Container runtime for macOS
-          docker          # Docker CLI
-          docker-compose  # Docker Compose
-          google-cloud-sdk
-        ];
+          devops = with pkgs; [
+            terraform
+            ansible
+            kubectl
+            kubernetes-helm
+            k9s
+            awscli2
+          ];
 
-        # Node.js development environment
-        nodeEnv = with pkgs; [
-          nodejs_20
-          nodePackages.npm
-          nodePackages.yarn
-          nodePackages.pnpm
-          nodePackages.typescript
-          nodePackages.typescript-language-server
-          nodePackages.vscode-langservers-extracted
-        ];
+          data = with pkgs; [
+            python313
+            python313Packages.pandas
+            python313Packages.numpy
+            python313Packages.jupyter
+            python313Packages.matplotlib
+            python313Packages.seaborn
+            python313Packages.scikit-learn
+            R
+            rPackages.tidyverse
+            rPackages.ggplot2
+          ];
 
-        # Python development environment
-        pythonEnv = with pkgs; [
-          python313
-          python313Packages.pip
-          python313Packages.virtualenv
-          python313Packages.pipx
-          python313Packages.black
-          python313Packages.flake8
-          python313Packages.mypy
-          python313Packages.pytest
-          python313Packages.requests
-          ruff
-          uv
-        ];
+          lua = with pkgs; [
+            lua5_4
+            luajitPackages.luacheck
+            stylua
+            lua-language-server
+            luarocks
+          ];
 
-        # Rust development environment
-        rustEnv = with pkgs; [
-          rustc
-          cargo
-          rustfmt
-          clippy
-          rust-analyzer
-          cargo-watch
-          cargo-edit
-          cargo-outdated
-        ];
+          java = with pkgs; [
+            jdk17_headless
+          ];
+        };
 
-        # Go development environment
-        goEnv = with pkgs; [
-          go
-          gopls
-          golangci-lint
-          gotools
-          go-migrate
-          air
-        ];
+        # Adds completions for every package in the shell that exposes zsh functions
+        completionHook = packages:
+          let
+            siteFunctionPkgs = pkgs.lib.filter (pkg: builtins.pathExists "${pkg}/share/zsh/site-functions") packages;
+            addSiteFunctions = pkgs.lib.concatStringsSep "\n" (map
+              (pkg: ''fpath=("${pkg}/share/zsh/site-functions" ''${fpath[@]})'')
+              siteFunctionPkgs);
+            gcloudCompletion = if pkgs.lib.elem pkgs.google-cloud-sdk packages then ''
+              if [ -f "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc" ]; then
+                source "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc"
+              fi
+            '' else "";
+          in pkgs.lib.concatStringsSep "\n" (pkgs.lib.filter (s: s != "") [
+            addSiteFunctions
+            gcloudCompletion
+          ]);
 
-        # DevOps/Infrastructure tools
-        devopsEnv = with pkgs; [
-          terraform
-          ansible
-          kubectl
-          kubernetes-helm
-          k9s
-          awscli2
-        ];
+        mkDevShell = { name, packages, welcome ? "", extraHook ? "" }:
+          pkgs.mkShell {
+            inherit name;
+            buildInputs = packages;
+            shellHook = pkgs.lib.concatStringsSep "\n" (pkgs.lib.filter (s: s != "") [
+              (completionHook packages)
+              welcome
+              extraHook
+            ]);
+          };
 
-        # Data/ML environment
-        dataEnv = with pkgs; [
-          python313
-          python313Packages.pandas
-          python313Packages.numpy
-          python313Packages.jupyter
-          python313Packages.matplotlib
-          python313Packages.seaborn
-          python313Packages.scikit-learn
-          R
-          rPackages.tidyverse
-          rPackages.ggplot2
-        ];
-
-        # Lua development environment (for Neovim configuration)
-        luaEnv = with pkgs; [
-          lua5_4
-          luajitPackages.luacheck
-          stylua
-          lua-language-server
-          luarocks
-        ];
-
-        # Java runtime for tooling (used by Neovim JDTLS and builds)
-        javaEnv = with pkgs; [
-          jdk17_headless
-        ];
-
-      in {
-        # Development shells
-        devShells = {
-          # Default shell with basic tools + AI/cloud tools + DevOps
-          default = pkgs.mkShell {
+        shells = {
+          default = mkDevShell {
             name = "default-dev-shell";
-            buildInputs = commonTools ++ aiTools ++ cloudTools ++ devopsEnv;
-
-            shellHook = ''
-              # Only show welcome message for explicit nix develop usage, not direnv
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops;
+            welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "🚀 Welcome to Urmzd's development environment!"
                 echo ""
@@ -179,69 +183,59 @@
             '';
           };
 
-          # Node.js development shell
-          node = pkgs.mkShell {
+          node = mkDevShell {
             name = "nodejs-dev-shell";
-            buildInputs = commonTools ++ nodeEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.node;
+            welcome = ''
               echo "📦 Node.js Development Environment"
               echo "Node: $(node --version)"
               echo "npm: $(npm --version)"
               echo ""
-              export NODE_ENV=development
             '';
+            extraHook = ''export NODE_ENV=development'';
           };
 
-          # Python development shell
-          python = pkgs.mkShell {
+          python = mkDevShell {
             name = "python-dev-shell";
-            buildInputs = commonTools ++ pythonEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.python;
+            welcome = ''
               echo "🐍 Python Development Environment"
               echo "Python: $(python --version)"
               echo "pip: $(pip --version)"
-              echo ""
-              export PYTHONPATH="./src:$PYTHONPATH"
             '';
           };
 
-          # Rust development shell
-          rust = pkgs.mkShell {
+          rust = mkDevShell {
             name = "rust-dev-shell";
-            buildInputs = commonTools ++ rustEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.rust;
+            welcome = ''
               echo "🦀 Rust Development Environment"
               echo "Rust: $(rustc --version)"
               echo "Cargo: $(cargo --version)"
               echo ""
-              export RUST_BACKTRACE=1
             '';
+            extraHook = ''export RUST_BACKTRACE=1'';
           };
 
-          # Go development shell
-          go = pkgs.mkShell {
+          go = mkDevShell {
             name = "go-dev-shell";
-            buildInputs = commonTools ++ goEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.go;
+            welcome = ''
               echo "🐹 Go Development Environment"
               echo "Go: $(go version)"
               echo ""
+            '';
+            extraHook = ''
               export GO111MODULE=on
               export GOPATH="$HOME/go"
               export PATH="$GOPATH/bin:$PATH"
             '';
           };
 
-          # DevOps/Infrastructure shell
-          devops = pkgs.mkShell {
+          devops = mkDevShell {
             name = "devops-dev-shell";
-            buildInputs = commonTools ++ cloudTools ++ devopsEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops;
+            welcome = ''
               echo "⚙️  DevOps/Infrastructure Environment"
               echo "Terraform: $(terraform version | head -1)"
               echo "Docker: $(docker --version)"
@@ -252,12 +246,10 @@
             '';
           };
 
-          # Data science shell
-          data = pkgs.mkShell {
+          data = mkDevShell {
             name = "data-science-shell";
-            buildInputs = commonTools ++ dataEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.data;
+            welcome = ''
               echo "📊 Data Science Environment"
               echo "Python: $(python --version)"
               echo "R: $(R --version | head -1)"
@@ -267,12 +259,10 @@
             '';
           };
 
-          # Lua development shell
-          lua = pkgs.mkShell {
+          lua = mkDevShell {
             name = "lua-dev-shell";
-            buildInputs = commonTools ++ luaEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.lua;
+            welcome = ''
               echo "🌙 Lua Development Environment"
               echo "Lua: $(lua -v)"
               echo ""
@@ -280,12 +270,10 @@
             '';
           };
 
-          # Full environment with everything
-          full = pkgs.mkShell {
+          full = mkDevShell {
             name = "full-dev-shell";
-            buildInputs = commonTools ++ aiTools ++ cloudTools ++ nodeEnv ++ pythonEnv ++ rustEnv ++ goEnv ++ devopsEnv ++ luaEnv ++ javaEnv;
-
-            shellHook = ''
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.node ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
+            welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
               echo ""
@@ -303,29 +291,32 @@
             '';
           };
         };
+      in {
+        # Development shells
+        devShells = shells;
 
         # Packages that can be installed with 'nix profile install'
         packages = {
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = commonTools ++ aiTools ++ cloudTools;
+            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud;
           };
 
           # Development environments as packages
           dev-node = pkgs.buildEnv {
             name = "dev-node";
-            paths = commonTools ++ nodeEnv;
+            paths = toolsets.common ++ toolsets.node;
           };
 
           dev-python = pkgs.buildEnv {
             name = "dev-python";
-            paths = commonTools ++ pythonEnv;
+            paths = toolsets.common ++ toolsets.python;
           };
 
           dev-rust = pkgs.buildEnv {
             name = "dev-rust";
-            paths = commonTools ++ rustEnv;
+            paths = toolsets.common ++ toolsets.rust;
           };
         };
 
