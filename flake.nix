@@ -40,6 +40,7 @@
           ai = with pkgs; [
             claude-code
             gemini-cli
+            codex
           ];
 
           cloud = with pkgs; [
@@ -63,14 +64,9 @@
             python313
             python313Packages.pip
             python313Packages.virtualenv
-            python313Packages.pipx
-            python313Packages.black
-            python313Packages.flake8
-            python313Packages.mypy
-            python313Packages.pytest
-            python313Packages.requests
-            ruff
             uv
+            pipx
+            ruff  # Rust binary, no Python conflicts
           ];
 
           rust = with pkgs; [
@@ -95,7 +91,6 @@
 
           devops = with pkgs; [
             terraform
-            ansible
             kubectl
             kubernetes-helm
             k9s
@@ -131,19 +126,52 @@
         # Adds completions for every package in the shell that exposes zsh functions
         completionHook = packages:
           let
+            # Auto-discovery for packages with standard zsh site-functions
             siteFunctionPkgs = pkgs.lib.filter (pkg: builtins.pathExists "${pkg}/share/zsh/site-functions") packages;
             addSiteFunctions = pkgs.lib.concatStringsSep "\n" (map
               (pkg: ''fpath=("${pkg}/share/zsh/site-functions" ''${fpath[@]})'')
               siteFunctionPkgs);
+
+            # Google Cloud SDK completion
             gcloudCompletion = if pkgs.lib.elem pkgs.google-cloud-sdk packages then ''
               if [ -f "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc" ]; then
                 source "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc"
               fi
             '' else "";
-          in pkgs.lib.concatStringsSep "\n" (pkgs.lib.filter (s: s != "") [
-            addSiteFunctions
-            gcloudCompletion
-          ]);
+
+            # fzf key-bindings and completion
+            fzfCompletion = if pkgs.lib.elem pkgs.fzf packages then ''
+              if [ -f "${pkgs.fzf}/share/fzf/key-bindings.zsh" ]; then
+                source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
+              fi
+              if [ -f "${pkgs.fzf}/share/fzf/completion.zsh" ]; then
+                source "${pkgs.fzf}/share/fzf/completion.zsh"
+              fi
+            '' else "";
+
+            # Terraform uses bash-style completion
+            terraformCompletion = if pkgs.lib.elem pkgs.terraform packages then ''
+              autoload -U +X bashcompinit && bashcompinit
+              complete -o nospace -C "${pkgs.terraform}/bin/terraform" terraform
+            '' else "";
+
+            # direnv hook
+            direnvHook = if pkgs.lib.elem pkgs.direnv packages then ''
+              eval "$(${pkgs.direnv}/bin/direnv hook zsh)"
+            '' else "";
+
+            zshOnly = pkgs.lib.concatStringsSep "\n" (pkgs.lib.filter (s: s != "") [
+              addSiteFunctions
+              gcloudCompletion
+              fzfCompletion
+              terraformCompletion
+              direnvHook
+            ]);
+          in if zshOnly != "" then ''
+            if [ -n "''${ZSH_VERSION-}" ]; then
+              ${zshOnly}
+            fi
+          '' else "";
 
         mkDevShell = { name, packages, welcome ? "", extraHook ? "" }:
           pkgs.mkShell {
@@ -165,9 +193,9 @@
                 echo "🚀 Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
-                echo "  • AI: claude-code, gemini-cli"
+                echo "  • AI: claude-code, gemini-cli, codex"
                 echo "  • Cloud: gcloud, colima, docker"
-                echo "  • DevOps: terraform, ansible, kubectl, helm, k9s, awscli"
+                echo "  • DevOps: terraform, kubectl, helm, k9s, awscli"
                 echo "  • CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
                 echo "Available specialized environments:"
@@ -201,7 +229,17 @@
             welcome = ''
               echo "🐍 Python Development Environment"
               echo "Python: $(python --version)"
-              echo "pip: $(pip --version)"
+              echo "uv: $(uv --version)"
+              echo ""
+              echo "Dev tools (black, mypy, pytest) should be installed"
+              echo "per-project via: uv add --dev black mypy pytest"
+            '';
+            extraHook = ''
+              unset PYTHONPATH
+              if [ -f ".venv/bin/activate" ]; then
+                source .venv/bin/activate
+                echo "Activated project venv: .venv"
+              fi
             '';
           };
 
@@ -285,7 +323,7 @@
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
-              echo "AI Tools: claude-code, gemini-cli"
+              echo "AI Tools: claude-code, gemini-cli, codex"
               echo "Cloud: gcloud, docker, colima"
               echo ""
             '';
