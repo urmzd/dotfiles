@@ -134,9 +134,8 @@ M.opts.capabilities = require("cmp_nvim_lsp").default_capabilities()
 } ]]
 
 function M.setup(lsp, overrides)
-  local lspconfig = require("lspconfig")
   local merged_opts = lume.merge(M.opts, overrides or {})
-  lspconfig[lsp].setup(merged_opts)
+  vim.lsp.config.setup(lsp, merged_opts)
   -- require("ufo").setup()
 end
 

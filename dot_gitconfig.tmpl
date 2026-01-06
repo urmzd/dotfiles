@@ -6,6 +6,9 @@
     email = {{ .work_email | quote }}
 {{- if .gpg_signing_key }}
     signingkey = {{ .gpg_signing_key | quote }}
+{{- else if .ssh_signing_key }}
+    # Note: SSH signing is allowed but GPG signing is recommended
+    signingkey = {{ .ssh_signing_key | quote }}
 {{- end }}
 
 # Conditional include for personal projects (e.g., dotfiles repository)
@@ -43,15 +46,18 @@
 [push]
     default = simple
     autoSetupRemote = true
-{{- if .gpg_signing_key }}
-    # Note: GitHub doesn't support signed pushes (causes "fatal: the receiving end does not support --signed push")
-{{- end }}
 
 [commit]
-{{- if .gpg_signing_key }}
+{{- if or .gpg_signing_key .ssh_signing_key }}
     gpgsign = true
 {{- end }}
     verbose = true
+{{- if and (not .gpg_signing_key) .ssh_signing_key }}
+
+[gpg]
+    # SSH signing format (GPG signing is recommended instead)
+    format = ssh
+{{- end }}
 
 [diff]
     colorMoved = zebra

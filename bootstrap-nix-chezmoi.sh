@@ -127,9 +127,9 @@ install_direnv() {
     log_success "direnv installed"
 }
 
-# Install GPG for Git signing
+# Install GPG for encryption and signing
 install_gpg() {
-    log_info "Installing GPG for Git commit signing..."
+    log_info "Installing GPG..."
 
     if command -v gpg &> /dev/null; then
         log_success "GPG is already installed"
@@ -380,7 +380,7 @@ Subkey-Type: RSA
 Subkey-Length: 4096
 Name-Real: Urmzd Mukhammadnaim
 Name-Email: urmzd.consulting@gmail.com
-Expire-Date: 2y
+Expire-Date: 1m
 %no-protection
 %commit
 %echo Done
@@ -391,6 +391,14 @@ EOF
 
         # Get the new key ID
         GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=LONG | grep -E "^sec\s+[^\s]+/([A-F0-9]+)" | head -1 | sed -n 's/.*\/\([A-F0-9]\{16\}\).*/\1/p')
+
+        # Generate revocation certificate
+        local revoke_dir="$HOME/.gnupg/revocation-certs"
+        mkdir -p "$revoke_dir"
+        chmod 700 "$revoke_dir"
+        gpg --batch --yes --output "$revoke_dir/$GPG_KEY_ID-revoke.asc" --gen-revoke "$GPG_KEY_ID"
+        chmod 600 "$revoke_dir/$GPG_KEY_ID-revoke.asc"
+        log_success "Revocation certificate saved to $revoke_dir/$GPG_KEY_ID-revoke.asc"
 
         log_success "Generated new GPG key: $GPG_KEY_ID"
     fi
@@ -419,13 +427,13 @@ init_chezmoi() {
         log_info "Processing Chezmoi configuration template..."
         mkdir -p "$HOME/.config/chezmoi"
 
-        # Process the template with proper values including GPG key
+        # Process the template with proper values
         chezmoi execute-template \
             --init \
             --promptString "name=Urmzd Mukhammadnaim" \
             --promptString "email=urmzd.consulting@gmail.com" \
             --promptString "github_username=urmzd" \
-            --promptString "gpg_signing_key=${GPG_SIGNING_KEY:-}" \
+            --promptString "ssh_signing_key=${SSH_SIGNING_KEY:-~/.ssh/github.pub}" \
             --promptBool "is_personal=true" \
             --promptBool "is_work=false" \
             --promptBool "use_secrets=false" \
@@ -611,7 +619,7 @@ ${GREEN}========================================${NC}
 ${BLUE}What was installed:${NC}
 ✓ Nix package manager with flakes support
 ✓ Homebrew for GUI applications
-✓ GPG for Git commit signing
+✓ GPG for encryption, SSH for Git commit signing
 ✓ Oh My Zsh with Powerlevel10k theme
 ✓ zsh-completions and zsh-syntax-highlighting plugins
 ✓ TPM (Tmux Plugin Manager) with plugins
@@ -639,8 +647,8 @@ ${BLUE}Next Steps:${NC}
 2. ${YELLOW}Your development tools are now globally available!${NC}
    Try: ${YELLOW}nvim${NC}, ${YELLOW}python${NC}, ${YELLOW}tmux${NC} from any directory
 
-3. ${YELLOW}Add your GPG public key to GitHub${NC}:
-   The key was displayed above - add it at: ${YELLOW}https://github.com/settings/keys${NC}
+3. ${YELLOW}Add your SSH key to GitHub as a signing key${NC}:
+   ${YELLOW}https://github.com/settings/keys${NC} (add under "Signing keys")
 
 4. ${YELLOW}Set up secrets management${NC} (optional):
    ${YELLOW}cd $(chezmoi source-path) && ./secrets-setup.sh${NC}
@@ -681,10 +689,7 @@ main() {
     install_direnv
     install_chezmoi
 
-    # Phase 3: GPG Configuration
-    setup_gpg_key
-
-    # Phase 4: Dotfiles Integration
+    # Phase 3: Dotfiles Integration
     setup_dotfiles_repo
     init_chezmoi
 
@@ -692,14 +697,13 @@ main() {
     log_info "Applying dotfiles configuration..."
     chezmoi apply
 
-    # Phase 5: Environment Activation
     setup_global_direnv
     setup_precommit
     setup_nix_environment
     setup_shell_integration
     install_gui_apps
 
-    # Phase 6: AI CLI Tools
+    # Phase 5: AI CLI Tools
     install_claude_code
     install_codex_cli
 

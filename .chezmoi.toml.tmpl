@@ -6,7 +6,8 @@
 {{- $personal_email := promptStringOnce . "personal_email" "What is your personal email (for dotfiles repo)" -}}
 {{- $work_email := promptStringOnce . "work_email" "What is your work email (optional, defaults to primary)" -}}
 {{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
-{{- $gpg_signing_key := promptStringOnce . "gpg_signing_key" "GPG signing key ID (optional)" -}}
+{{- $gpg_signing_key := promptStringOnce . "gpg_signing_key" "GPG signing key ID (recommended, run 'gpg --list-secret-keys --keyid-format=long' to find)" -}}
+{{- $ssh_signing_key := promptStringOnce . "ssh_signing_key" "SSH signing key path (not recommended, e.g. ~/.ssh/id_ed25519.pub, optional)" -}}
 
 {{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine (y/n)" -}}
 {{- $is_work := promptBoolOnce . "is_work" "Is this a work machine (y/n)" -}}
@@ -25,6 +26,7 @@ encryption = "age"
     work_email = {{ if ne $work_email "" }}{{ $work_email | quote }}{{ else }}{{ $email | quote }}{{ end }}
     github_username = {{ $github_username | quote }}
     gpg_signing_key = {{ $gpg_signing_key | quote }}
+    ssh_signing_key = {{ $ssh_signing_key | quote }}
 
     # Machine type flags
     is_personal = {{ $is_personal }}
