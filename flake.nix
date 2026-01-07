@@ -35,6 +35,7 @@
             tmux
             gnupg
             coreutils
+            tree-sitter
           ];
 
           ai = with pkgs; [
@@ -187,27 +188,34 @@
         shells = {
           default = mkDevShell {
             name = "default-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops;
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust;
             welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
-                echo "🚀 Welcome to Urmzd's development environment!"
+                echo "Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
-                echo "  • AI: claude-code, gemini-cli, codex"
-                echo "  • Cloud: gcloud, colima, docker"
-                echo "  • DevOps: terraform, kubectl, helm, k9s, awscli"
-                echo "  • CLI: git, gh, fzf, ripgrep, jq, yq, just"
+                echo "  AI: claude-code, gemini-cli, codex"
+                echo "  Cloud: gcloud, colima, docker"
+                echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
+                echo "  Go: go, gopls, golangci-lint, air"
+                echo "  Rust: rustc, cargo, rust-analyzer, clippy"
+                echo "  CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
-                echo "Available specialized environments:"
-                echo "  • nix develop .#node     - Node.js development"
-                echo "  • nix develop .#python   - Python development"
-                echo "  • nix develop .#rust     - Rust development"
-                echo "  • nix develop .#go       - Go development"
-                echo "  • nix develop .#devops   - DevOps/Infrastructure"
-                echo "  • nix develop .#data     - Data science & ML"
-                echo "  • nix develop .#lua      - Lua development"
-                echo "  • nix develop .#full     - All tools combined"
+                echo "Specialized environments:"
+                echo "  nix develop .#node   - Node.js"
+                echo "  nix develop .#python - Python"
+                echo "  nix develop .#data   - Data science"
+                echo "  nix develop .#lua    - Lua"
+                echo "  nix develop .#full   - Everything"
               fi
+            '';
+            extraHook = ''
+              # Go environment
+              export GO111MODULE=on
+              export GOPATH="$HOME/go"
+              export PATH="$GOPATH/bin:$PATH"
+              # Rust environment
+              export RUST_BACKTRACE=1
             '';
           };
 
@@ -338,7 +346,7 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud;
+            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust;
           };
 
           # Development environments as packages

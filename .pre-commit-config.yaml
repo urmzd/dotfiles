@@ -38,6 +38,17 @@ repos:
       - id: black
         files: '\.py$'
 
+  # Nix flake freshness check
+  - repo: local
+    hooks:
+      - id: nix-flake-freshness
+        name: Check Nix flake freshness
+        entry: .scripts/check-flake-freshness.sh
+        language: script
+        always_run: true
+        pass_filenames: false
+        verbose: true
+
 default_stages: [pre-commit]
 fail_fast: true
 minimum_pre_commit_version: "2.20.0"

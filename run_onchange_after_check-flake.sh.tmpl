@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Chezmoi run_onchange - Check flake freshness on apply
+# Triggered by: {{ include "flake.lock" | sha256sum }}
+
+{{- if .use_nix }}
+LOCK_FILE="{{ .chezmoi.sourceDir }}/flake.lock"
+
+if [[ -f "$LOCK_FILE" ]]; then
+    if [[ "$(uname)" == "Darwin" ]]; then
+        AGE=$(( ($(date +%s) - $(/usr/bin/stat -f "%m" "$LOCK_FILE")) / 86400 ))
+    else
+        AGE=$(( ($(date +%s) - $(stat -c %Y "$LOCK_FILE")) / 86400 ))
+    fi
+
+    if [[ $AGE -gt 14 ]]; then
+        echo ""
+        echo "NOTE: flake.lock is $AGE days old"
+        echo "Run: cd ~/.local/share/chezmoi && just update"
+        echo ""
+    fi
+fi
+{{- end }}

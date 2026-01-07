@@ -45,33 +45,40 @@ secrets-install:
 security-audit: secrets-check
     ./security-audit.sh
 
-# Nix management recipes
+# ===========================================
+# Nix management
+# ===========================================
 
-# Update all Nix flake inputs to latest versions
-nix-update:
+# One-command update: updates flake and rebuilds
+update:
     @echo "Updating Nix flake inputs..."
-    nix flake update
-    @echo "✓ Flake updated successfully"
+    @nix flake update
     @echo ""
-    @echo "Updated packages include: gemini-cli, claude-code, and all dev tools"
-    @echo "Run 'just nix-rebuild' to apply changes"
+    @echo "Rebuilding environment..."
+    @nix develop --command echo "Environment rebuilt successfully"
+    @echo ""
+    @echo "Run 'git add flake.lock && git commit -m \"chore: update flake\"' to persist"
 
-# Show current versions of AI tools
-nix-versions:
-    @echo "Current versions in nixpkgs:"
-    @echo -n "gemini-cli: "; nix eval nixpkgs#gemini-cli.version
-    @echo -n "claude-code: "; nix eval nixpkgs#claude-code.version
+# Show environment status and flake age
+status:
+    @echo "=== Nix Environment Status ==="
+    @if [ -f flake.lock ]; then \
+        if [ "$$(uname)" = "Darwin" ]; then \
+            AGE=$$(( ($$(date +%s) - $$(stat -f %m flake.lock)) / 86400 )); \
+        else \
+            AGE=$$(( ($$(date +%s) - $$(stat -c %Y flake.lock)) / 86400 )); \
+        fi; \
+        echo "flake.lock age: $$AGE days"; \
+    fi
+    @echo ""
+    @echo "AI tool versions:"
+    @echo -n "  claude-code: "; nix eval nixpkgs#claude-code.version 2>/dev/null || echo "checking..."
+    @echo -n "  gemini-cli: "; nix eval nixpkgs#gemini-cli.version 2>/dev/null || echo "checking..."
+    @echo -n "  codex: "; nix eval nixpkgs#codex.version 2>/dev/null || echo "checking..."
 
-# Rebuild current Nix environment
+# Aliases for backward compatibility
+nix-update: update
+nix-upgrade: update
 nix-rebuild:
-    @echo "Rebuilding Nix environment..."
-    nix develop --command echo "✓ Environment rebuilt"
-
-# Update flake and rebuild in one command
-nix-upgrade: nix-update nix-rebuild
-    @echo "✓ Nix environment upgraded successfully"
-
-# Check which packages have updates available
-nix-check-updates:
-    @echo "Checking for outdated packages..."
-    nix flake metadata | grep "Last modified"
+    @nix develop --command echo "Environment rebuilt"
+nix-versions: status
