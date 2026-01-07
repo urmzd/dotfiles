@@ -55,7 +55,8 @@ M.opts.capabilities = get_capabilities()
 
 function M.setup(lsp, overrides)
   local merged_opts = lume.merge(M.opts, overrides or {})
-  vim.lsp.config(merged_opts)
+  vim.lsp.enable(lsp)
+  vim.lsp.config(lsp, merged_opts)
   -- require("ufo").setup()
 end
 

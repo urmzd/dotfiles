@@ -1203,23 +1203,6 @@ require("lazy").setup({
 })
 
 -- ============================================================================
--- DEBUG HELPERS INITIALIZATION
--- ============================================================================
-local debug_helpers = require("debug_helpers")
-debug_helpers.setup()
-
--- Debug Helper Keymaps
-vim.keymap.set("n", "<leader>dd", debug_helpers.start_debug, { desc = "Debug: Quick Start" })
-vim.keymap.set("n", "<leader>dD", debug_helpers.quick_debug, { desc = "Debug: Quick (Choose Config)" })
-vim.keymap.set("n", "<leader>dK", debug_helpers.stop_debug, { desc = "Debug: Stop Session" })
-vim.keymap.set("n", "<leader>dR", debug_helpers.restart_debug, { desc = "Debug: Restart Session" })
-vim.keymap.set("n", "<leader>dP", debug_helpers.toggle_breakpoint_persistent, { desc = "Debug: Toggle Breakpoint (Persistent)" })
-vim.keymap.set("n", "<leader>dC", debug_helpers.set_conditional_breakpoint, { desc = "Debug: Conditional Breakpoint" })
-vim.keymap.set("n", "<leader>dL", debug_helpers.set_log_point, { desc = "Debug: Set Log Point" })
-vim.keymap.set("n", "<leader>dX", debug_helpers.clear_breakpoints, { desc = "Debug: Clear All Breakpoints" })
-vim.keymap.set("n", "<leader>d?", debug_helpers.list_breakpoints, { desc = "Debug: List Breakpoints" })
-
--- ============================================================================
 -- ADDITIONAL KEYMAPS
 -- ============================================================================
 
