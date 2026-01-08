@@ -15,8 +15,9 @@
         };
 
         # Reusable toolsets keep shells small and composable
-        toolsets = rec {
+        toolsets = {
           common = with pkgs; [
+            tldr
             git
             gh
             fzf
