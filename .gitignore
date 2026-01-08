@@ -227,7 +227,6 @@ logs/
 *.out
 
 # Debug files
-debug*
 .debug*
 *.debug
 

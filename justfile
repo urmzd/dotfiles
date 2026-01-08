@@ -75,10 +75,3 @@ status:
     @echo -n "  claude-code: "; nix eval nixpkgs#claude-code.version 2>/dev/null || echo "checking..."
     @echo -n "  gemini-cli: "; nix eval nixpkgs#gemini-cli.version 2>/dev/null || echo "checking..."
     @echo -n "  codex: "; nix eval nixpkgs#codex.version 2>/dev/null || echo "checking..."
-
-# Aliases for backward compatibility
-nix-update: update
-nix-upgrade: update
-nix-rebuild:
-    @nix develop --command echo "Environment rebuilt"
-nix-versions: status

@@ -133,6 +133,11 @@ require("lazy").setup({
 					"pyright",
 					"rust_analyzer",
 					"terraformls",
+					"dockerls",
+					"gopls",
+					"jsonls",
+					"terraformls",
+					"yamlls",
 				},
 				automatic_installation = true,
 			})
@@ -211,65 +216,14 @@ require("lazy").setup({
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
-		config = function()
-			require("nvim-treesitter.configs").setup({
-				ensure_installed = {
-					"rust",
-					"python",
-					"c",
-					"lua",
-					"javascript",
-					"typescript",
-					"tsx",
-					"json",
-					"yaml",
-					"toml",
-					"markdown",
-					"markdown_inline",
-					"bash",
-					"go",
-					"html",
-					"css",
-					"dockerfile",
-					"gitignore",
-					"vim",
-					"vimdoc",
-				},
-				sync_install = false,
-				auto_install = true,
-				highlight = {
-					enable = true,
-					additional_vim_regex_highlighting = false,
-				},
-				indent = {
-					enable = true,
-				},
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "gnn",
-						node_incremental = "grn",
-						scope_incremental = "grc",
-						node_decremental = "grm",
-					},
-				},
-				textobjects = {
-					select = {
-						enable = true,
-						lookahead = true,
-						keymaps = {
-							["af"] = "@function.outer",
-							["if"] = "@function.inner",
-							["ac"] = "@class.outer",
-							["ic"] = "@class.inner",
-						},
-					},
-				},
-			})
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
+		init = function()
+			vim.g.no_plugin_maps = true
 		end,
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
-		},
+		config = function() end,
 	},
 	{
 
@@ -289,7 +243,7 @@ require("lazy").setup({
 	},
 	{
 		"kylechui/nvim-surround",
-		version = "*", -- Use for stability; omit to use `main` branch for the latest features
+		version = "^3.0.0", -- Use for stability; omit to use `main` branch for the latest features
 		event = "VeryLazy",
 		config = function()
 			require("nvim-surround").setup({
@@ -304,8 +258,12 @@ require("lazy").setup({
 		},
 		lazy = false,
 	},
-	{ "IndianBoy42/tree-sitter-just" },
-	{ "nvim-neotest/nvim-nio" },
+	{
+		"IndianBoy42/tree-sitter-just",
+		config = function()
+			require("tree-sitter-just").setup({})
+		end,
+	},
 	{
 		"scottmckendry/cyberdream.nvim",
 		priority = 1000,
@@ -509,7 +467,7 @@ require("lazy").setup({
 	},
 	{
 		"folke/todo-comments.nvim",
-		dependencies = { { "nvim-lua/plenary.nvim" } },
+		dependencies = { "nvim-lua/plenary.nvim" },
 		opts = {},
 	},
 	{
@@ -517,8 +475,8 @@ require("lazy").setup({
 		branch = "v3.x",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
-			"nvim-tree/nvim-web-devicons",
 			"MunifTanjim/nui.nvim",
+			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
 			require("neo-tree").setup({
@@ -538,6 +496,7 @@ require("lazy").setup({
 			})
 			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
 		end,
+		lazy = false,
 	},
 	{
 		"nvim-telescope/telescope.nvim",
@@ -589,14 +548,15 @@ require("lazy").setup({
 	{
 		"nvim-neotest/neotest",
 		dependencies = {
-			{ "nvim-neotest/neotest-plenary" },
+			{ "nvim-neotest/nvim-nio" },
+			{ "nvim-lua/plenary.nvim" },
+			{ "antoinemadec/FixCursorHold.nvim" },
 			{ "nvim-neotest/neotest-python", ft = "python" },
 			{ "rouge8/neotest-rust", ft = "rust" },
 		},
 		config = function()
 			require("neotest").setup({
 				adapters = {
-					require("neotest-plenary"),
 					require("neotest-python")({
 						runner = "pytest",
 						dap_adapter = "python", -- Crucial for DAP integration
@@ -762,9 +722,7 @@ require("lazy").setup({
 	},
 	-- LSP Tools
 	{ "lervag/vimtex", ft = "tex" },
-	{ "simrat39/rust-tools.nvim", ft = "rust" },
 	{ "mfussenegger/nvim-jdtls", ft = "java" },
-	{ "udalov/kotlin-vim", ft = "kotlin" },
 	{ "b0O/schemastore.nvim", ft = { "yaml", "json" } },
 	-- Utils
 	{
@@ -775,24 +733,6 @@ require("lazy").setup({
 		ft = "markdown",
 	},
 	{ "j-hui/fidget.nvim", opts = {} },
-			-- copilot stuff
-			-- Skip loading in subprocess environments to avoid network delays and authentication hangs
-	not is_subprocess
-			and {
-				"zbirenbaum/copilot.lua",
-				event = { "InsertEnter" },
-				config = function()
-					-- Wrap in pcall to silently fail if network is unavailable
-					local ok, copilot = pcall(require, "copilot")
-					if ok then
-						copilot.setup({
-							suggestion = { enabled = false },
-							panel = { enabled = false },
-						})
-					end
-				end,
-			}
-		or nil,
 	{ "mbbill/undotree" },
 	{ "Bekaboo/deadcolumn.nvim", opts = {} },
 	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -890,6 +830,11 @@ require("lazy").setup({
 		},
 		version = "1.*",
 		opts = {
+			cmdline = {
+				keymap = {
+					preset = "inherit",
+				},
+			},
 			keymap = {
 				preset = "default",
 				["<CR>"] = { "select_and_accept", "fallback" },
@@ -919,33 +864,28 @@ require("lazy").setup({
 					},
 				},
 			},
-
 			fuzzy = {
 				implementation = "prefer_rust_with_warning",
 			},
 		},
 	},
-	-- Only load vim-tmux-navigator when actually in a tmux session
-	-- This prevents subprocess hang issues from shell command execution
-	vim.env.TMUX
-			and {
-				"christoomey/vim-tmux-navigator",
-				cmd = {
-					"TmuxNavigateLeft",
-					"TmuxNavigateDown",
-					"TmuxNavigateUp",
-					"TmuxNavigateRight",
-					"TmuxNavigatePrevious",
-				},
-				keys = {
-					{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-					{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-					{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-					{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-					{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-				},
-			}
-		or nil,
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
 	{
 		"ThePrimeagen/refactoring.nvim",
 		dependencies = {
@@ -985,12 +925,14 @@ require("lazy").setup({
 			end)
 		end,
 	},
+
 	{
 		"stevearc/conform.nvim",
 		opts = {
 			formatters_by_ft = {
 				python = { "ruff_fix", "ruff_format" },
 				lua = { "stylua" },
+				rust = { "rustfmt", lsp_format = "fallback" },
 			},
 			format_on_save = {
 				timeout_ms = 500,
@@ -1029,7 +971,6 @@ require("lazy").setup({
 				{ "<leader>r", group = "REFACTOR", icon = "✨" },
 				{ "<leader>v", group = "VIMUX", icon = "⚙" },
 				{ "<leader>h", group = "HARPOON", icon = "🎣" },
-				{ "<leader>o", group = "OVERSEER", icon = "🚀" },
 			})
 		end,
 	},
@@ -1062,125 +1003,23 @@ require("lazy").setup({
 		end,
 	},
 
-	-- Task runner for builds, tests, debugging
 	{
-		"stevearc/overseer.nvim",
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false,
 		opts = {
-			templates = { "builtin", "user" },
-		},
-		config = function(_, opts)
-			require("overseer").setup(opts)
-
-			-- Register custom task templates
-			require("overseer").register_template({
-				name = "python: run file",
-				builder = function()
-					return {
-						cmd = "python",
-						args = { vim.fn.expand("%") },
-						components = { "on_output_quickfix", "on_exit_set_status", "default" },
-					}
-				end,
-				condition = {
-					filetype = { "python" },
-				},
-			})
-
-			require("overseer").register_template({
-				name = "rust: cargo run",
-				builder = function()
-					return {
-						cmd = "cargo",
-						args = { "run" },
-						components = { "on_output_quickfix", "on_exit_set_status", "default" },
-						cwd = vim.fn.getcwd(),
-					}
-				end,
-				condition = {
-					filetype = { "rust" },
-				},
-			})
-
-			-- Keymaps
-			vim.keymap.set("n", "<leader>ot", "<cmd>OverseerToggle<CR>", { desc = "Overseer: Toggle" })
-			vim.keymap.set("n", "<leader>or", "<cmd>OverseerRun<CR>", { desc = "Overseer: Run Task" })
-			vim.keymap.set("n", "<leader>op", "<cmd>OverseerToggle<CR>", { desc = "Overseer: Show Running" })
-		end,
-	},
-
-	-- Better terminal integration
-	{
-		"akinsho/toggleterm.nvim",
-		version = "*",
-		config = function()
-			require("toggleterm").setup({
-				size = 20,
-				open_mapping = [[<C-\>]],
-				hide_numbers = true,
-				shade_filetypes = {},
-				shade_terminals = true,
-				shading_factor = 2,
-				start_in_insert = true,
-				insert_mappings = true,
-				terminal_mappings = true,
-				persist_size = true,
-				direction = "float",
-				close_on_exit = true,
-				shell = vim.o.shell,
-				auto_scroll = true,
-				float_opts = {
-					border = "curved",
-					winblend = 0,
-					highlights = {
-						border = "Normal",
-						background = "Normal",
-					},
-				},
-			})
-
-			-- Keymaps
-			vim.keymap.set(
-				"n",
-				"<leader>tf",
-				"<cmd>ToggleTerm direction=float<CR>",
-				{ desc = "Toggle Terminal (Float)" }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>th",
-				"<cmd>ToggleTerm direction=horizontal<CR>",
-				{ desc = "Toggle Terminal (Horizontal)" }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>tv",
-				"<cmd>ToggleTerm direction=vertical<CR>",
-				{ desc = "Toggle Terminal (Vertical)" }
-			)
-		end,
-	},
-
-	-- Pretty UI for inputs/selections
-	{
-		"stevearc/dressing.nvim",
-		event = "VeryLazy",
-		opts = {
-			input = {
-				enabled = true,
-				border = "rounded",
-				get_config = function()
-					if vim.api.nvim_buf_get_name(0):match("NvimTree_") then
-						return { enabled = false }
-					end
-				end,
-			},
-			select = {
-				enabled = true,
-				backend = { "telescope", "fzf", "builtin" },
-				builtin = {
-					border = "rounded",
-				},
-			},
+			bigfile = { enabled = true },
+			dashboard = { enabled = true },
+			explorer = { enabled = true },
+			indent = { enabled = true },
+			input = { enabled = true },
+			picker = { enabled = true },
+			notifier = { enabled = true },
+			quickfile = { enabled = true },
+			scope = { enabled = true },
+			scroll = { enabled = true },
+			statuscolumn = { enabled = true },
+			words = { enabled = true },
 		},
 	},
 
@@ -1227,6 +1066,3 @@ require("lazy").setup({
 
 -- Undotree Keymap
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "Toggle Undotree" })
-
--- Keymap to toggle hlsearch
-vim.keymap.set("n", "<leader>/", "<cmd>set hlsearch!<CR>", { desc = "Toggle Highlight Search" })
