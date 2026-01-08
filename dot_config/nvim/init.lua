@@ -14,37 +14,36 @@ local is_subprocess = false
 -- If stdin is not a TTY (terminal), it's likely a pipe/subprocess
 local stdin_handle = vim.loop.guess_handle(0)
 if stdin_handle ~= "tty" then
-  is_subprocess = true
+	is_subprocess = true
 end
 
 -- Step 2: FALLBACK - Check specific subprocess indicators
 -- Only check explicit subprocess flags, not broad env vars like CLAUDECODE
 if not is_subprocess then
-  is_subprocess = vim.env.NVIM_SUBPROCESS == "1"
-    or vim.env.CLAUDE_CODE_ENTRYPOINT ~= nil  -- More specific than CLAUDECODE
+	is_subprocess = vim.env.NVIM_SUBPROCESS == "1" or vim.env.CLAUDE_CODE_ENTRYPOINT ~= nil -- More specific than CLAUDECODE
 end
 
 -- Conditionally enable clipboard sync only in interactive environments
 -- In subprocesses, clipboard sync can cause hanging/freezing
 if not is_subprocess then
-  vim.opt.clipboard = "unnamedplus"
+	vim.opt.clipboard = "unnamedplus"
 
-  -- Explicit clipboard provider for reliability (macOS)
-  vim.g.clipboard = {
-    name = "macOS-clipboard",
-    copy = {
-      ["+"] = "pbcopy",
-      ["*"] = "pbcopy",
-    },
-    paste = {
-      ["+"] = "pbpaste",
-      ["*"] = "pbpaste",
-    },
-    cache_enabled = 0,
-  }
+	-- Explicit clipboard provider for reliability (macOS)
+	vim.g.clipboard = {
+		name = "macOS-clipboard",
+		copy = {
+			["+"] = "pbcopy",
+			["*"] = "pbcopy",
+		},
+		paste = {
+			["+"] = "pbpaste",
+			["*"] = "pbpaste",
+		},
+		cache_enabled = 0,
+	}
 else
-  -- Explicitly disable clipboard in subprocess to prevent hangs
-  vim.opt.clipboard = ""
+	-- Explicitly disable clipboard in subprocess to prevent hangs
+	vim.opt.clipboard = ""
 end
 vim.opt.relativenumber = true
 vim.opt.nu = true
@@ -109,15 +108,6 @@ vim.keymap.set("i", "jk", "<ESC>")
 vim.keymap.set("i", "kk", "<ESC>")
 vim.keymap.set("i", "kj", "<ESC>")
 
--- vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
--- 	pattern = { "*.md" },
--- 	callback = function()
--- 		vim.api.nvim_exec2("e", { -- Reloads markdown files on entry
--- 			output = false,
--- 		})
--- 	end,
--- })
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -133,44 +123,87 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
-		"neovim/nvim-lspconfig",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
-	},
-	{
 		"williamboman/mason.nvim",
 		event = "VeryLazy", -- Defer loading to avoid blocking startup
 		config = function()
-			-- Wrap mason setup in error handling to prevent hangs in subprocess
-			local ok, mason = pcall(require, "mason")
-			if not ok then
-				return  -- Silently skip if mason fails to load
-			end
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"lua_ls",
+					"pyright",
+					"rust_analyzer",
+					"terraformls",
+				},
+				automatic_installation = true,
+			})
 
-			mason.setup()
+			-- Initialize LSP servers using built-in API
+			local servers = {
+				"gopls",
+				"jsonls",
+				"lua_ls",
+				"pyright",
+				"terraformls",
+				"yamlls",
+			}
 
-			-- Only auto-install LSPs in interactive mode
-			if not is_subprocess then
-				local ok_lspconfig, mason_lspconfig = pcall(require, "mason-lspconfig")
-				if ok_lspconfig then
-					mason_lspconfig.setup({
-						ensure_installed = {
-							"lua_ls",
-							"pyright",
-							"yamlls",
-							"bashls",
-							"taplo",
-							"terraformls",
-							"dockerls",
-						},
-						automatic_installation = true,
-					})
+			-- Load and configure each server
+			for _, server in ipairs(servers) do
+				local ok, config = pcall(require, server)
+				if ok and next(config) ~= nil then
+					vim.lsp.config(server, config)
+					vim.lsp.enable(server)
 				end
 			end
 
-			-- Load LSP configuration
-			pcall(require, "servers")
+			-- Configure global LSP capabilities for blink.cmp
+			vim.lsp.config("*", {
+				capabilities = {
+					textDocument = {
+						completion = {
+							completionItem = {
+								snippetSupport = true,
+							},
+						},
+					},
+				},
+			})
+
+			-- Enhanced diagnostic configuration
+			vim.diagnostic.config({
+				virtual_text = {
+					prefix = "●",
+					spacing = 4,
+					source = "if_many",
+				},
+				signs = true,
+				underline = true,
+				update_in_insert = false,
+				severity_sort = true,
+				float = {
+					border = "rounded",
+					source = "always",
+					header = "",
+					prefix = "",
+					format = function(diagnostic)
+						return string.format("%s: %s", diagnostic.source or "", diagnostic.message)
+					end,
+				},
+			})
+
+			-- Set up diagnostic navigation keymaps on LSP attach
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local bufnr = args.buf
+					local opts = { noremap = true, silent = true, buffer = bufnr }
+
+					-- Diagnostic navigation (custom keymaps)
+					vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
+					vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+					vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+					vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, opts)
+				end,
+			})
 		end,
 	},
 	{ "williamboman/mason-lspconfig.nvim" },
@@ -276,7 +309,7 @@ require("lazy").setup({
 	{
 		"scottmckendry/cyberdream.nvim",
 		priority = 1000,
-		lazy=false,
+		lazy = false,
 		config = function()
 			local colorscheme = "cyberdream"
 			local style = "dark" -- light | dark
@@ -316,41 +349,41 @@ require("lazy").setup({
 
 			-- Lualine set for cyberdream theme
 			require("lualine").setup({
-					options = {
-						theme = "cyberdream",
-					},
-					sections = {
-						lualine_c = {
-							"filename",
-							{
-								"diagnostics",
-								sources = { "nvim_diagnostic" },
-								sections = { "error", "warn", "info", "hint" },
-								symbols = { error = " ", warn = " ", info = " ", hint = " " },
-								update_in_insert = false,
-								always_visible = false,
-							},
-							{
-								-- Current line diagnostic
-								function()
-									local line_diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
-									if #line_diagnostics > 0 then
-										local diag = line_diagnostics[1]
-										local message = diag.message:gsub("\n", " "):sub(1, 50)
-										if #diag.message > 50 then
-											message = message .. "..."
-										end
-										return message
-									end
-									return ""
-								end,
-								icon = "",
-								color = { fg = "#7aa2f7" },
-							},
+				options = {
+					theme = "cyberdream",
+				},
+				sections = {
+					lualine_c = {
+						"filename",
+						{
+							"diagnostics",
+							sources = { "nvim_diagnostic" },
+							sections = { "error", "warn", "info", "hint" },
+							symbols = { error = " ", warn = " ", info = " ", hint = " " },
+							update_in_insert = false,
+							always_visible = false,
 						},
-						lualine_x = lualine_x_components,
+						{
+							-- Current line diagnostic
+							function()
+								local line_diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
+								if #line_diagnostics > 0 then
+									local diag = line_diagnostics[1]
+									local message = diag.message:gsub("\n", " "):sub(1, 50)
+									if #diag.message > 50 then
+										message = message .. "..."
+									end
+									return message
+								end
+								return ""
+							end,
+							icon = "",
+							color = { fg = "#7aa2f7" },
+						},
 					},
-				})
+					lualine_x = lualine_x_components,
+				},
+			})
 
 			vim.opt.termguicolors = true
 			vim.opt.background = style
@@ -362,7 +395,7 @@ require("lazy").setup({
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
 			{ "AndreM222/copilot-lualine" },
-		}
+		},
 	},
 	{
 		"akinsho/bufferline.nvim",
@@ -579,8 +612,6 @@ require("lazy").setup({
 					}),
 					require("neotest-rust"),
 				},
-				-- Optional: You can add a global DAP strategy preference
-				-- dap_strategy = "toggle",
 			})
 
 			-- New Neotest Keymaps (more structured)
@@ -743,35 +774,25 @@ require("lazy").setup({
 		end,
 		ft = "markdown",
 	},
-	{ "urmzd/lume.nvim" },
-	{ "folke/neodev.nvim", opts = {} },
 	{ "j-hui/fidget.nvim", opts = {} },
-	-- copilot stuff
-	-- Skip loading in subprocess environments to avoid network delays and authentication hangs
-	not is_subprocess and {
-		"zbirenbaum/copilot.lua",
-		event = { "InsertEnter" },
-		config = function()
-			-- Wrap in pcall to silently fail if network is unavailable
-			local ok, copilot = pcall(require, "copilot")
-			if ok then
-				copilot.setup({
-					suggestion = { enabled = false },
-					panel = { enabled = false },
-				})
-			end
-		end,
-	} or nil,
-	not is_subprocess and {
-		"zbirenbaum/copilot-cmp",
-		dependencies = { "zbirenbaum/copilot.lua" },
-		config = function()
-			-- Silently fail if copilot or copilot-cmp has issues
-			pcall(function()
-				require("copilot_cmp").setup()
-			end)
-		end,
-	} or nil,
+			-- copilot stuff
+			-- Skip loading in subprocess environments to avoid network delays and authentication hangs
+	not is_subprocess
+			and {
+				"zbirenbaum/copilot.lua",
+				event = { "InsertEnter" },
+				config = function()
+					-- Wrap in pcall to silently fail if network is unavailable
+					local ok, copilot = pcall(require, "copilot")
+					if ok then
+						copilot.setup({
+							suggestion = { enabled = false },
+							panel = { enabled = false },
+						})
+					end
+				end,
+			}
+		or nil,
 	{ "mbbill/undotree" },
 	{ "Bekaboo/deadcolumn.nvim", opts = {} },
 	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -798,73 +819,6 @@ require("lazy").setup({
 					print("No Vimux run command defined for filetype: " .. filetype)
 				end
 			end, { desc = "Vimux Run Current File" })
-		end,
-	},
-	{
-		"hrsh7th/nvim-cmp",
-		dependencies = {
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-buffer",
-			"hrsh7th/cmp-path",
-			"onsails/lspkind.nvim",
-			"saadparwaiz1/cmp_luasnip",
-			"zbirenbaum/copilot-cmp",
-		},
-		config = function()
-			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			local lspkind = require("lspkind")
-
-			cmp.setup({
-				snippet = {
-					expand = function(args)
-						luasnip.lsp_expand(args.body)
-					end,
-				},
-				mapping = cmp.mapping.preset.insert({
-					["<C-b>"] = cmp.mapping.scroll_docs(-4),
-					["<C-f>"] = cmp.mapping.scroll_docs(4),
-					["<C-Space>"] = cmp.mapping.complete(),
-					["<C-e>"] = cmp.mapping.abort(),
-					["<CR>"] = cmp.mapping.confirm({ select = true }),
-					["<Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_next_item()
-						elseif luasnip.expand_or_jumpable() then
-							luasnip.expand_or_jump()
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-					["<S-Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_prev_item()
-						elseif luasnip.jumpable(-1) then
-							luasnip.jump(-1)
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-				}),
-				sources = cmp.config.sources(
-					vim.tbl_filter(function(source)
-						return source ~= nil
-					end, {
-						{ name = "nvim_lsp" },
-						not is_subprocess and { name = "copilot" } or nil,
-						{ name = "luasnip" },
-						{ name = "buffer" },
-						{ name = "path" },
-					})
-				),
-				formatting = {
-					format = lspkind.cmp_format({
-						mode = "symbol_text",
-						maxwidth = 50,
-						ellipsis_char = "...",
-					}),
-				},
-			})
 		end,
 	},
 	{
@@ -922,25 +876,76 @@ require("lazy").setup({
 			require("marks").setup({})
 		end,
 	},
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		opts = {
+			library = {},
+		},
+	},
+	{
+		"saghen/blink.cmp",
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+		},
+		version = "1.*",
+		opts = {
+			keymap = {
+				preset = "default",
+				["<CR>"] = { "select_and_accept", "fallback" },
+			},
+			appearance = {
+				nerd_font_variant = "mono",
+			},
+			completion = {
+				documentation = { auto_show = false },
+			},
+			snippets = {
+				preset = "luasnip",
+			},
+			sources = {
+				default = {
+					"lsp",
+					"snippets",
+					"buffer",
+					"path",
+					"lazydev",
+				},
+				providers = {
+					lazydev = {
+						name = "LazyDev",
+						module = "lazydev.integrations.blink",
+						score_offset = 100,
+					},
+				},
+			},
+
+			fuzzy = {
+				implementation = "prefer_rust_with_warning",
+			},
+		},
+	},
 	-- Only load vim-tmux-navigator when actually in a tmux session
 	-- This prevents subprocess hang issues from shell command execution
-	vim.env.TMUX and {
-		"christoomey/vim-tmux-navigator",
-		cmd = {
-			"TmuxNavigateLeft",
-			"TmuxNavigateDown",
-			"TmuxNavigateUp",
-			"TmuxNavigateRight",
-			"TmuxNavigatePrevious",
-		},
-		keys = {
-			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-		},
-	} or nil,
+	vim.env.TMUX
+			and {
+				"christoomey/vim-tmux-navigator",
+				cmd = {
+					"TmuxNavigateLeft",
+					"TmuxNavigateDown",
+					"TmuxNavigateUp",
+					"TmuxNavigateRight",
+					"TmuxNavigatePrevious",
+				},
+				keys = {
+					{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+					{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+					{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+					{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+					{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+				},
+			}
+		or nil,
 	{
 		"ThePrimeagen/refactoring.nvim",
 		dependencies = {
@@ -948,7 +953,7 @@ require("lazy").setup({
 			"nvim-treesitter/nvim-treesitter",
 		},
 		config = function()
-			require("refactoring").setup()
+			require("refactoring").setup({})
 
 			vim.keymap.set({ "n", "x" }, "<leader>re", function()
 				return require("refactoring").refactor("Extract Function")
@@ -1057,7 +1062,6 @@ require("lazy").setup({
 		end,
 	},
 
-
 	-- Task runner for builds, tests, debugging
 	{
 		"stevearc/overseer.nvim",
@@ -1135,9 +1139,24 @@ require("lazy").setup({
 			})
 
 			-- Keymaps
-			vim.keymap.set("n", "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", { desc = "Toggle Terminal (Float)" })
-			vim.keymap.set("n", "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", { desc = "Toggle Terminal (Horizontal)" })
-			vim.keymap.set("n", "<leader>tv", "<cmd>ToggleTerm direction=vertical<CR>", { desc = "Toggle Terminal (Vertical)" })
+			vim.keymap.set(
+				"n",
+				"<leader>tf",
+				"<cmd>ToggleTerm direction=float<CR>",
+				{ desc = "Toggle Terminal (Float)" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>th",
+				"<cmd>ToggleTerm direction=horizontal<CR>",
+				{ desc = "Toggle Terminal (Horizontal)" }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>tv",
+				"<cmd>ToggleTerm direction=vertical<CR>",
+				{ desc = "Toggle Terminal (Vertical)" }
+			)
 		end,
 	},
 
