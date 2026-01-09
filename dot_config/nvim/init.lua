@@ -124,8 +124,12 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
-		"williamboman/mason.nvim",
+		"mason-org/mason.nvim",
 		event = "VeryLazy", -- Defer loading to avoid blocking startup
+		dependencies = {
+			"mason-org/mason-lspconfig.nvim",
+			"neovim/nvim-lspconfig",
+		},
 		config = function()
 			require("mason").setup()
 			require("mason-lspconfig").setup({
@@ -194,7 +198,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-	{ "williamboman/mason-lspconfig.nvim" },
 	{ "sheerun/vim-polyglot" },
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -282,7 +285,6 @@ require("lazy").setup({
 					icon = "",
 					color = { fg = "#f7768e" },
 				},
-				not is_subprocess_local and "copilot" or nil,
 				"encoding",
 				"fileformat",
 				"filetype",
@@ -335,7 +337,6 @@ require("lazy").setup({
 		"nvim-lualine/lualine.nvim",
 		dependencies = {
 			{ "nvim-tree/nvim-web-devicons" },
-			{ "AndreM222/copilot-lualine" },
 		},
 	},
 	{
@@ -870,46 +871,6 @@ require("lazy").setup({
 		},
 	},
 	{
-		"ThePrimeagen/refactoring.nvim",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-treesitter/nvim-treesitter",
-		},
-		config = function()
-			require("refactoring").setup({})
-
-			vim.keymap.set({ "n", "x" }, "<leader>re", function()
-				return require("refactoring").refactor("Extract Function")
-			end, { expr = true })
-			vim.keymap.set({ "n", "x" }, "<leader>rf", function()
-				return require("refactoring").refactor("Extract Function To File")
-			end, { expr = true })
-			vim.keymap.set({ "n", "x" }, "<leader>rv", function()
-				return require("refactoring").refactor("Extract Variable")
-			end, { expr = true })
-			vim.keymap.set({ "n", "x" }, "<leader>rI", function()
-				return require("refactoring").refactor("Inline Function")
-			end, { expr = true })
-			vim.keymap.set({ "n", "x" }, "<leader>ri", function()
-				return require("refactoring").refactor("Inline Variable")
-			end, { expr = true })
-
-			vim.keymap.set({ "n", "x" }, "<leader>rbb", function()
-				return require("refactoring").refactor("Extract Block")
-			end, { expr = true })
-			vim.keymap.set({ "n", "x" }, "<leader>rbf", function()
-				return require("refactoring").refactor("Extract Block To File")
-			end, { expr = true })
-
-			require("telescope").load_extension("refactoring")
-
-			vim.keymap.set({ "n", "x" }, "<leader>rr", function()
-				require("telescope").extensions.refactoring.refactors()
-			end)
-		end,
-	},
-
-	{
 		"stevearc/conform.nvim",
 		opts = {
 			formatters_by_ft = {
@@ -922,124 +883,6 @@ require("lazy").setup({
 				lsp_fallback = true,
 			},
 		},
-	},
-	-- ============================================================================
-	-- NEW OPTIMIZATION PLUGINS
-	-- ============================================================================
-
-	-- Command palette & keybinding discovery
-	{
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-		opts = {
-			preset = "helix",
-			icons = {
-				breadcrumb = "»",
-				separator = "➜",
-				group = "+",
-			},
-		},
-		config = function(_, opts)
-			local wk = require("which-key")
-			wk.setup(opts)
-
-			-- Register key groups for better organization
-			wk.add({
-				{ "<leader>d", group = "DEBUG", icon = "🐛" },
-				{ "<leader>t", group = "TEST", icon = "✓" },
-				{ "<leader>f", group = "FILE", icon = "📁" },
-				{ "<leader>b", group = "BUFFER", icon = "📄" },
-				{ "<leader>g", group = "GIT", icon = "" },
-				{ "<leader>x", group = "DIAGNOSTICS", icon = "⚠" },
-				{ "<leader>r", group = "REFACTOR", icon = "✨" },
-				{ "<leader>v", group = "VIMUX", icon = "⚙" },
-				{ "<leader>h", group = "HARPOON", icon = "🎣" },
-			})
-		end,
-	},
-
-	-- Quick file navigation (harpoon)
-	{
-		"ThePrimeagen/harpoon",
-		branch = "harpoon2",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			local harpoon = require("harpoon")
-			harpoon:setup()
-
-			-- Keymaps
-			vim.keymap.set("n", "<leader>ha", function()
-				harpoon:list():add()
-				vim.notify("File marked in harpoon", vim.log.levels.INFO)
-			end, { desc = "Harpoon: Add File" })
-
-			vim.keymap.set("n", "<leader>hh", function()
-				harpoon.ui:toggle_quick_menu(harpoon:list())
-			end, { desc = "Harpoon: Quick Menu" })
-
-			-- Quick access to marked files
-			for i = 1, 5 do
-				vim.keymap.set("n", "<leader>h" .. i, function()
-					harpoon:list():select(i)
-				end, { desc = "Harpoon: File " .. i })
-			end
-		end,
-	},
-
-	{
-		"folke/snacks.nvim",
-		priority = 1000,
-		lazy = false,
-		opts = {
-			bigfile = { enabled = true },
-			dashboard = { enabled = true },
-			explorer = { enabled = true },
-			indent = { enabled = true },
-			input = { enabled = true },
-			picker = { enabled = true },
-			notifier = { enabled = true },
-			quickfile = { enabled = true },
-			scope = { enabled = true },
-			scroll = { enabled = true },
-			statuscolumn = { enabled = true },
-			words = { enabled = true },
-		},
-	},
-
-	-- Code outline/symbols
-	{
-		"stevearc/aerial.nvim",
-		opts = {
-			layout = {
-				max_width = { 40, 0.2 },
-				width = nil,
-				min_width = 10,
-				win_opts = {},
-				default_direction = "prefer_right",
-				placement = "window",
-				preserve_equality = false,
-			},
-			keymaps = {
-				["?"] = "actions.show_help",
-				["g?"] = "actions.show_help",
-				["<CR>"] = "actions.jump",
-				["<2-LeftMouse>"] = "actions.jump",
-				["<C-v>"] = "actions.jump_vsplit",
-				["<C-s>"] = "actions.jump_split",
-				["p"] = "actions.scroll",
-				["<C-j>"] = "actions.down_and_scroll",
-				["<C-k>"] = "actions.up_and_scroll",
-				["{"] = "actions.prev",
-				["}"] = "actions.next",
-				["[["] = "actions.prev_up",
-				["]]"] = "actions.next_up",
-				["q"] = "actions.close",
-			},
-		},
-		config = function(_, opts)
-			require("aerial").setup(opts)
-			vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { desc = "Aerial: Toggle Outline" })
-		end,
 	},
 })
 

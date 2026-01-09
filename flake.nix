@@ -32,11 +32,11 @@
             nix-direnv
             chezmoi
             age
-            neovim
             tmux
             gnupg
             coreutils
             tree-sitter
+            neovim
           ];
 
           ai = with pkgs; [
