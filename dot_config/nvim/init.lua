@@ -128,7 +128,7 @@ require("lazy").setup({
 		config = function()
 			local servers = {
 				"lua_ls",
-				"pyright",
+				"basedpyright",
 				"rust_analyzer",
 				"terraformls",
 				"dockerls",
