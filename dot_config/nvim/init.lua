@@ -124,81 +124,30 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
-		"mason-org/mason.nvim",
-		event = "VeryLazy", -- Defer loading to avoid blocking startup
-		dependencies = {
-			"mason-org/mason-lspconfig.nvim",
-			"neovim/nvim-lspconfig",
-		},
+		"https://github.com/neovim/nvim-lspconfig",
 		config = function()
-			require("mason").setup()
-			require("mason-lspconfig").setup({
-				ensure_installed = {
-					"lua_ls",
-					"pyright",
-					"rust_analyzer",
-					"terraformls",
-					"dockerls",
-					"gopls",
-					"jsonls",
-					"terraformls",
-					"yamlls",
-					"copilot",
-				},
-				automatic_installation = true,
-			})
+			local servers = {
+				"lua_ls",
+				"pyright",
+				"rust_analyzer",
+				"terraformls",
+				"dockerls",
+				"gopls",
+				"jsonls",
+				"terraformls",
+				"yamlls",
+				"copilot",
+			}
 
-			-- Configure global LSP capabilities for blink.cmp
-			vim.lsp.config("*", {
-				capabilities = {
-					textDocument = {
-						completion = {
-							completionItem = {
-								snippetSupport = true,
-							},
-						},
-					},
-				},
-			})
-
-			-- Enhanced diagnostic configuration
-			vim.diagnostic.config({
-				virtual_text = {
-					prefix = "●",
-					spacing = 4,
-					source = "if_many",
-				},
-				signs = true,
-				underline = true,
-				update_in_insert = false,
-				severity_sort = true,
-				float = {
-					border = "rounded",
-					source = "always",
-					header = "",
-					prefix = "",
-					format = function(diagnostic)
-						return string.format("%s: %s", diagnostic.source or "", diagnostic.message)
-					end,
-				},
-			})
-
-			-- Set up diagnostic navigation keymaps on LSP attach
-			vim.api.nvim_create_autocmd("LspAttach", {
-				callback = function(args)
-					local bufnr = args.buf
-					local opts = { noremap = true, silent = true, buffer = bufnr }
-
-					-- Diagnostic navigation (custom keymaps)
-					vim.keymap.set("n", "<space>e", vim.diagnostic.open_float, opts)
-					vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-					vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-					vim.keymap.set("n", "<space>q", vim.diagnostic.setloclist, opts)
-				end,
-			})
+			for _, server in ipairs(servers) do
+				vim.lsp.enable(server)
+			end
 		end,
 	},
-	{ "sheerun/vim-polyglot" },
+	{
+		"mason-org/mason.nvim",
+		opts = {},
+	},
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
@@ -264,10 +213,6 @@ require("lazy").setup({
 				hide_fillchars = true,
 				borderless_telescope = true,
 			})
-
-			-- Check subprocess status (use global is_subprocess from earlier)
-			-- This ensures consistent detection across entire config
-			local is_subprocess_local = is_subprocess
 
 			-- Build lualine_x components conditionally
 			local lualine_x_components = vim.tbl_filter(function(component)
