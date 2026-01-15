@@ -130,13 +130,14 @@ require("lazy").setup({
 				"lua_ls",
 				"basedpyright",
 				"rust_analyzer",
+				"gopls",
 				"terraformls",
 				"dockerls",
-				"gopls",
 				"jsonls",
-				"terraformls",
 				"yamlls",
 				"copilot",
+				"bashls",
+				"tsls",
 			}
 
 			for _, server in ipairs(servers) do
