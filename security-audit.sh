@@ -138,48 +138,12 @@ check_template_security() {
     fi
 }
 
-# Check encrypted files
-check_encrypted_files() {
-    log_header "Checking encrypted file integrity..."
-
-    # Find .age files
-    local age_files
-    mapfile -t age_files < <(find . -name "*.age" 2>/dev/null)
-
-    if [[ ${#age_files[@]} -eq 0 ]]; then
-        log_warn "No .age encrypted files found"
-        return
-    fi
-
-    for file in "${age_files[@]}"; do
-        if [[ -s "$file" ]]; then
-            # Check if it starts with age header or is a placeholder
-            if head -c 4 "$file" | grep -q "age-" 2>/dev/null; then
-                log_success "Encrypted file appears valid: $file"
-            elif head -10 "$file" | grep -qi "placeholder\|example" 2>/dev/null; then
-                log_success "Encrypted placeholder file: $file"
-            else
-                log_error "File may not be properly encrypted: $file"
-            fi
-        else
-            log_warn "Empty encrypted file: $file"
-        fi
-    done
-}
-
 # Check for pre-commit hooks
 check_precommit_setup() {
     log_header "Checking pre-commit security setup..."
 
     if [[ -f ".pre-commit-config.yaml" ]]; then
         log_success "Pre-commit configuration found"
-
-        # Check if detect-secrets is configured
-        if grep -q "detect-secrets" .pre-commit-config.yaml; then
-            log_success "Secret detection configured in pre-commit"
-        else
-            log_warn "No secret detection in pre-commit hooks"
-        fi
 
         # Check if hooks are installed
         if [[ -f ".git/hooks/pre-commit" ]]; then
@@ -208,7 +172,7 @@ check_file_permissions() {
     fi
 
     # Check SSH config permissions if it exists
-    if [[ -f "chezmoi-config/private_dot_ssh/config.tmpl" ]]; then
+    if [[ -f "private_dot_ssh/config.tmpl" ]]; then
         log_success "SSH config template properly located in private directory"
     fi
 }
@@ -300,21 +264,17 @@ Your dotfiles repository has ${SECURITY_ISSUES} security issue(s) that should be
 Recommended Actions:
 1. Review and fix all FAIL items above
 2. Run pre-commit hooks: pre-commit install && pre-commit run --all-files
-3. Use encrypted files for secrets: ./secrets-setup.sh
-4. Never commit real secrets to the repository
+3. Never commit real secrets to the repository
 
 EOF
     fi
 
     cat << EOF
 Security Best Practices:
-• Use the secrets-setup.sh script for managing sensitive data
 • Run this audit regularly: ./security-audit.sh
 • Install pre-commit hooks: pre-commit install
 • Keep your .gitignore and .gitattributes updated
 • Review all changes before committing
-
-For more information, see: SECURITY.md
 
 EOF
 }
@@ -331,8 +291,6 @@ main() {
     check_git_security
     echo
     check_template_security
-    echo
-    check_encrypted_files
     echo
     check_precommit_setup
     echo

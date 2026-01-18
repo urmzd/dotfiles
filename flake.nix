@@ -31,7 +31,6 @@
             direnv
             nix-direnv
             chezmoi
-            age
             tmux
             gnupg
             coreutils
@@ -43,6 +42,7 @@
             claude-code
             gemini-cli
             codex
+            github-copilot-cli
           ];
 
           cloud = with pkgs; [
@@ -52,9 +52,9 @@
             google-cloud-sdk
           ];
 
-          node = with pkgs; [
-            nodejs_20
-            nodePackages.npm
+          javascript = with pkgs; [
+            nodejs_22
+            deno
             nodePackages.yarn
             nodePackages.pnpm
             nodePackages.typescript
@@ -114,6 +114,7 @@
 
           lua = with pkgs; [
             lua5_4
+            ninja
             luajitPackages.luacheck
             stylua
             lua-language-server
@@ -121,7 +122,9 @@
           ];
 
           java = with pkgs; [
-            jdk17_headless
+            openjdk17
+            maven
+            gradle
           ];
         };
 
@@ -189,16 +192,19 @@
         shells = {
           default = mkDevShell {
             name = "default-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust;
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
-                echo "  AI: claude-code, gemini-cli, codex"
+                echo "  AI: claude-code, gemini-cli, codex, copilot-cli"
                 echo "  Cloud: gcloud, colima, docker"
                 echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
+                echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
                 echo "  Go: go, gopls, golangci-lint, air"
+                echo "  Java: java (JDK), mvn, gradle"
+                echo "  Lua: lua, luarocks, stylua"
                 echo "  Rust: rustc, cargo, rust-analyzer, clippy"
                 echo "  CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
@@ -221,11 +227,12 @@
           };
 
           node = mkDevShell {
-            name = "nodejs-dev-shell";
-            packages = toolsets.common ++ toolsets.node;
+            name = "js-ts-dev-shell";
+            packages = toolsets.common ++ toolsets.javascript;
             welcome = ''
-              echo "📦 Node.js Development Environment"
+              echo "📦 JavaScript/TypeScript Development Environment"
               echo "Node: $(node --version)"
+              echo "Deno: $(deno --version | head -1)"
               echo "npm: $(npm --version)"
               echo ""
             '';
@@ -319,20 +326,20 @@
 
           full = mkDevShell {
             name = "full-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.node ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
               echo ""
               echo "Languages:"
-              echo "  • Node.js: $(node --version)"
+              echo "  • JavaScript/TypeScript: $(node --version)"
               echo "  • Python: $(python --version)"
               echo "  • Rust: $(rustc --version | cut -d' ' -f2)"
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
-              echo "AI Tools: claude-code, gemini-cli, codex"
+              echo "AI Tools: claude-code, gemini-cli, codex, copilot-cli"
               echo "Cloud: gcloud, docker, colima"
               echo ""
             '';
@@ -347,13 +354,13 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust;
+            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
           };
 
           # Development environments as packages
           dev-node = pkgs.buildEnv {
             name = "dev-node";
-            paths = toolsets.common ++ toolsets.node;
+            paths = toolsets.common ++ toolsets.javascript;
           };
 
           dev-python = pkgs.buildEnv {

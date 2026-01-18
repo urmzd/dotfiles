@@ -6,7 +6,7 @@
 # for this specific project directory.
 #
 # IMPORTANT:
-# - Add .envrc to your project's .gitignore to avoid committing secrets
+# - Add .envrc to your project's .gitignore to avoid committing environment files
 # - Run 'direnv allow' in the project directory after creating/editing
 
 # ============================================================================

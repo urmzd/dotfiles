@@ -1,354 +1,90 @@
 # dotfiles
 
-A modern, reproducible development environment setup featuring Nix for package management and Chezmoi for intelligent dotfiles management.
+Modern dotfiles managed with Chezmoi and Nix, with minimal Homebrew for macOS-only tooling.
 
-> **Architecture:** Nix → Homebrew (minimal) → Chezmoi → Complete Environment
+## Quick Start
 
-## 🏗️ Setup Architecture
-
-**Package Management Strategy:**
-- **Nix**: Primary package manager for all development tools (git, fzf, ripgrep, nvim, etc.)
-- **Homebrew**: Minimal macOS-specific tools only (Docker, colima, pipx)
-- **Chezmoi**: Smart dotfiles management with templating and cross-platform support
-
-**Configuration Management:**
-- **Chezmoi templates** manage all dotfiles (`.zshrc`, `.tmux.conf`, `nvim/`)
-- **Automatic linking** to proper locations (`~/.config/nvim/`, etc.)
-- **Environment-aware** templates adapt to personal/work/system differences
-
-## 🚀 Quick Start
-
-### One-Command Setup (Recommended)
+### One-command setup (macOS recommended)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
-**This automatically:**
-1. ✅ Installs Nix package manager with flakes enabled
-2. ✅ Installs minimal Homebrew packages (Docker, etc.)
-3. ✅ Sets up Chezmoi with this repository
-4. ✅ Links all configurations (zsh, nvim, tmux)
-5. ✅ Enables direnv for automatic environment switching
-6. ✅ Makes core tools (terraform, npm, go, java, python, AI CLIs) available via the Nix dev shells
-
-**What you get:**
-- 🎯 Reproducible development environments with Nix
-- 🔧 Intelligent dotfiles with Chezmoi templating
-- 🔒 Built-in secrets management with age encryption
-- 🚀 Automatic environment switching with direnv
-- 🧰 Core toolchain ready: terraform, npm, go, java, python, plus AI CLIs (claude-code, gemini-cli)
-- 📖 [Full Setup Guide](NIX-CHEZMOI.md)
-
-## 📋 Manual Setup
-
-If you prefer step-by-step setup:
-
+### Manual setup
 ```bash
-# 1. Clone repository
+# Clone
 git clone https://github.com/urmzd/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# 2. Run bootstrap script
+# Bootstrap
 ./bootstrap-nix-chezmoi.sh
-
-# 3. Verify setup
-just --version      # Task runner
-gh --version         # GitHub CLI
-nvim --version       # Neovim
-chezmoi --version    # Dotfiles manager
 ```
 
-## ✅ Post-Setup Verification
-
-After setup, verify everything is working:
-
+If you already have chezmoi installed and want to initialize directly:
 ```bash
-# Check Nix development environments
-nix develop          # Default environment
-nix develop .#node   # Node.js environment
-nix develop .#python # Python environment
-
-# Check dotfiles are linked correctly
-ls -la ~/.zshrc      # Should link to chezmoi
-ls -la ~/.config/nvim # Should exist and contain config
-ls -la ~/.tmux.conf  # Should link to chezmoi
-
-# Check package availability
-which git fzf ripgrep tree jq just gh direnv nvim
-
-# Validate language/infra/AI toolchain (uses full dev shell)
-nix develop .#full --command "terraform --version && npm --version && go version && java -version && python --version && claude --version && gemini --version"
+chezmoi init --apply https://github.com/urmzd/.dotfiles.git
 ```
 
-## 🔧 Package Management
+## Usage
 
-**What's managed by Nix** (`flake.nix`):
-- Development tools: `git`, `fzf`, `ripgrep`, `tree`, `jq`, `yq`, `just`, `gh`
-- Editors: `neovim`, `tmux`
-- Environment: `direnv`, `nix-direnv`, `chezmoi`, `age`
-- Language environments: Node.js, Python, Rust, Go, etc.
-
-**What's managed by Homebrew** (`Brewfile`):
-- macOS-specific: Docker Desktop, `colima`, `docker`
-- Python tools: `pipx`
-- AI tools: `gemini-cli`
-
-## 🛠️ What's Included
-
-### Package Managers
-- **Homebrew** - macOS package manager
-- **Nix** - Reproducible package manager with development shells
-- **pipx** - Install Python applications in isolated environments
-
-### Development Tools
-- **git** - Version control with custom configuration
-- **tree** - Directory structure visualization
-- **fzf** - Fuzzy finder for files and command history
-- **ripgrep** - Fast text search tool
-- **Docker + Colima** - Containerization without Docker Desktop
-
-### Programming Languages & Runtimes
-- **Node.js** 23.9.0
-- **Python** 3.13.5 (+ development tools)
-- **Go** (via Nix dev shell)
-- **Java** (JDK for tooling and Neovim JDTLS)
-- **Rust** (stable)
-- **Lua** 5.4.7
-- **Terraform** 1.12.2
-
-### Terminal Environment
-- **Zsh** with oh-my-zsh framework
-- **Powerlevel10k** theme for beautiful prompts
-- **Neovim** with comprehensive plugin ecosystem
-- **Tmux** with plugin manager and custom keybindings
-- **MesloLGS Nerd Font** for proper icon display
-
-### Zsh Completions
-Homebrew installs many completion scripts (including `just`) into `$HOMEBREW_PREFIX/share/zsh/site-functions`. If you maintain a custom `~/.zshrc`, add that directory to `fpath` before calling `compinit`, for example:
-
-```zsh
-eval "$(brew shellenv)"
-fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
-autoload -U compinit
-compinit
-```
-
-Refer to your shell's documentation for details if you prefer a different shell.
-
-### AI & Productivity Tools
-- **gemini-cli** - Google Gemini CLI interface (installed via Homebrew)
-- **claude-code** - Anthropic Claude Code CLI (installed via official installer)
-- **nox** - Python testing automation
-- **argcomplete** - Command-line auto-completion
-
-## 📁 Repository Structure
-
-```
-~/.dotfiles/
-├── bootstrap-nix-chezmoi.sh    # Modern Nix + Chezmoi setup script
-├── flake.nix                   # Nix dev shells (node/python/go/devops/full)
-├── Brewfile                    # Minimal macOS packages only
-├── justfile                    # Secret scanning helper tasks
-├── requirements-pipx.txt       # Python CLIs installed via pipx
-├── cross-platform-test.sh      # Toolchain and Nix smoke test
-├── security-audit.sh           # Secret scanning and audit wrapper
-├── dot_zshrc.tmpl              # Zsh configuration template
-├── dot_zprofile.tmpl           # Zsh profile template
-├── dot_zshenv.tmpl             # Environment variables template
-├── dot_gitconfig.tmpl          # Git configuration template
-├── dot_envrc.tmpl              # Global direnv hook for Nix toolchain
-├── dot_config/                 # XDG config directory
-│   └── nvim/                   # Neovim configuration (templated)
-├── private_dot_ssh/            # SSH configurations (encrypted where needed)
-└── run_once_before_install-packages.sh.tmpl # Chezmoi hook for package bootstrapping
-```
-
-## 🔐 Encryption & Secrets Management
-
-This dotfiles setup includes **age encryption** for securely storing sensitive configuration files like API keys, SSH configs, and environment variables.
-
-### Age Encryption Setup
-
-**Automatic Setup (Recommended):**
-The bootstrap script automatically configures age encryption if you choose to enable secrets management.
-
-**Manual Setup:**
+### Apply and update dotfiles
 ```bash
-# 1. Generate age key pair
-age-keygen -o ~/.config/age/key.txt
-
-# 2. The public key will be displayed - save it for later
-# Example: age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2
-
-# 3. Update chezmoi config to use the public key
-# Edit ~/.config/chezmoi/chezmoi.toml and ensure:
-encryption = "age"
-[age]
-    suffix = ".age"
-    identity = "~/.config/age/key.txt" 
-    recipient = "age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2"  # pragma: allowlist secret
+chezmoi diff
+chezmoi apply
 ```
 
-### Adding Encrypted Files
-
+### Edit templates safely
 ```bash
-# Add an encrypted file to chezmoi
-chezmoi add --encrypt ~/.ssh/config
-chezmoi add --encrypt ~/.env.personal
-
-# Edit encrypted files (automatically decrypts/re-encrypts)
-chezmoi edit ~/.ssh/config
+chezmoi edit ~/.zshrc
+chezmoi edit ~/.gitconfig
+chezmoi edit ~/.config/nvim/init.lua
 ```
 
-### Template Variables
-
-The setup includes these template variables for conditional configurations:
-- `{{ .is_macos }}` - True on macOS systems
-- `{{ .is_linux }}` - True on Linux systems  
-- `{{ .is_personal }}` - True for personal machines
-- `{{ .is_work }}` - True for work machines
-- `{{ .use_nix }}` - True if Nix is enabled
-- `{{ .has_homebrew }}` - True if Homebrew is installed
-
-**Example usage in templates:**
+### Nix development shells
 ```bash
-{{- if .is_macos }}
-# macOS-specific configuration
-export BROWSER="open"
-{{- else if .is_linux }}
-# Linux-specific configuration
-export BROWSER="firefox"
-{{- end }}
+nix develop          # default shell
+nix develop .#node   # Node.js
+nix develop .#python # Python
+nix develop .#full   # full toolchain
 ```
 
-## 🔧 Configuration Details
-
-### Zsh Configuration
-- **oh-my-zsh** framework with git plugin
-- **Powerlevel10k** theme for enhanced prompts
-- **Nix** integration for reproducible development environments
-- **fzf** integration for fuzzy searching
-- Custom aliases and environment variables
-
-### Git Configuration
-- **Multi-identity support** - Different git identities for work and personal projects
-- Work email used by default across all repositories
-- Personal email automatically used in `~/.local/share/chezmoi` (dotfiles repo)
-- Configured via `includeIf "gitdir:..."` for conditional git configs
-- GPG signing support for commit verification
-
-### Neovim Setup
-- **Lazy.nvim** plugin manager for fast startup
-- **LSP** configuration for multiple languages
-- **Treesitter** for syntax highlighting
-- **Telescope** for fuzzy finding
-- **Git integration** with diffview and blame
-- **Copilot** integration for AI-assisted coding
-
-### Tmux Configuration
-- **Vim-like keybindings** for navigation
-- **Catppuccin theme** for beautiful aesthetics
-- **TPM** (Tmux Plugin Manager) for plugin management
-- **Mouse support** enabled
-- **Prefix key** changed to `Ctrl-a`
-
-## 📋 Manual Setup Steps
-
-After running the installation, you may need to:
-
-1. **Restart your terminal** or run `source ~/.zshrc`
-2. **Configure Powerlevel10k**: Run `p10k configure`
-3. **Install tmux plugins**: Press `prefix + I` in tmux
-4. **Setup SSH keys** for GitHub (if needed):
-   ```bash
-   ssh-keygen -t ed25519 -C "your-email@example.com"
-   cat ~/.ssh/id_ed25519.pub | pbcopy
-   ```
-
-## 🔄 Maintenance
-
-### Update Everything
+### Homebrew packages (macOS)
 ```bash
-cd ~/.dotfiles
-./update.sh
+brew bundle --file Brewfile
 ```
 
-### Backup Existing Configurations
+### Update Nix inputs
 ```bash
-cd ~/.dotfiles
-./backup.sh
+just update
 ```
 
-### Add New Packages
-- **Homebrew**: Edit `Brewfile` and run `brew bundle`
-- **Nix**: Edit `flake.nix` and run `nix develop`
-- **pipx**: Edit `requirements-pipx.txt` and install manually
+## Verification
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Command not found after installation:**
+Quick checks after setup:
 ```bash
-source ~/.zshrc
-# or restart terminal
+chezmoi --version
+nix --version
+nvim --version
 ```
 
-**Nix development shell not working:**
+Optional smoke tests:
 ```bash
-# Enable flakes if not already enabled
-echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-# Enter development environment
-nix develop .#go  # or .#python, .#rust, etc.
+./cross-platform-test.sh
+./security-audit.sh
 ```
 
-**Neovim plugins not loading:**
-```bash
-nvim --headless "+Lazy! sync" +qa
+## Repo layout
+
+```text
+bootstrap-nix-chezmoi.sh        # main installer
+Brewfile                        # macOS-only packages
+flake.nix                       # Nix dev shells
+justfile                        # update/security helpers
+requirements-pipx.txt           # pipx-managed tools
+security-audit.sh               # security audit wrapper
+cross-platform-test.sh          # toolchain smoke test
+run_once_*.sh.tmpl              # chezmoi hooks
+
+dot_config/                     # XDG config templates (nvim, tmux, direnv)
+dot_zshrc.tmpl                  # shell config template
+private_dot_ssh/                # SSH templates (encrypted when needed)
 ```
-
-**tmux plugins not working:**
-- Press `prefix + I` to install plugins
-- Press `prefix + U` to update plugins
-
-**Chezmoi template errors (`map has no entry for key "is_macos"`):**
-```bash
-# This error occurs when age encryption is not properly configured
-# Solution: 
-1. Check if ~/.config/chezmoi/chezmoi.toml exists and contains [data] section
-2. Verify encryption is properly configured:
-   chezmoi data | jq '.is_macos'  # Should return true/false, not null
-3. If age encryption is configured but not working:
-   # Check age key exists
-   ls -la ~/.config/age/key.txt
-   # Regenerate config if needed
-   rm ~/.config/chezmoi/chezmoi.toml && chezmoi init
-```
-
-**Age encryption errors (`no encryption` or `failed to read header`):**
-```bash
-# Remove any placeholder encrypted files that aren't actually encrypted
-find ~/.local/share/chezmoi -name "*.age" -exec file {} \; | grep -v "ASCII"
-# If any files show as plain text, remove them:
-rm ~/.local/share/chezmoi/path/to/plain-text-file.age
-
-# Ensure encryption is properly configured
-chezmoi data | grep -A5 "\[age\]"
-```
-
-### Getting Help
-
-1. Check configuration files in `~/.config/`
-2. Verify PATH includes all necessary directories
-3. Restart terminal session
-4. Re-run installation scripts if needed
-
-## 🤝 Contributing
-
-Feel free to fork this repository and customize it for your own needs. Pull requests for improvements are welcome!
-
-## 📄 License
-
-This project is licensed under the MIT License - see the repository for details.
-
----

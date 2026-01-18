@@ -1,20 +1,4 @@
 repos:
-  # Secret detection
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
-        additional_dependencies: ["pyyaml"]
-        exclude: |
-          (?x)^(
-            .*\.age$|
-            .*\.gpg$|
-            .*\.enc$|
-            .*\.lock$|
-            nvim/lazy-lock\.json$
-          )$
-
   # Basic file validation
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

@@ -131,18 +131,11 @@ test_chezmoi_config() {
         log_warn "Chezmoi template not found"
     fi
 
-    # Test source directory
-    if [[ -d "chezmoi-config" ]]; then
-        log_success "Chezmoi source directory found"
+    # Test templates in repo root
+    local templates
+    templates=$(find . -name "*.tmpl" -not -path "./.git/*" | wc -l)
+    log_info "Found $templates template files"
 
-        local templates=$(find chezmoi-config -name "*.tmpl" | wc -l)
-        log_info "Found $templates template files"
-
-        local encrypted=$(find chezmoi-config -name "*.age" | wc -l)
-        log_info "Found $encrypted encrypted files"
-    else
-        log_warn "Chezmoi source directory not found"
-    fi
 }
 
 # Test cross-platform file paths
@@ -150,10 +143,10 @@ test_file_paths() {
     log_info "Testing cross-platform file paths..."
 
     local expected_files=(
-        "chezmoi-config/dot_gitconfig.tmpl"
-        "chezmoi-config/dot_zshrc.tmpl"
-        "chezmoi-config/dot_tmux.conf.tmpl"
-        "chezmoi-config/private_dot_ssh/config.tmpl"
+        "dot_gitconfig.tmpl"
+        "dot_zshrc.tmpl"
+        "dot_config/tmux/tmux.conf.tmpl"
+        "private_dot_ssh/config.tmpl"
     )
 
     for file in "${expected_files[@]}"; do
@@ -161,42 +154,6 @@ test_file_paths() {
             log_success "Template file exists: $file"
         else
             log_warn "Template file missing: $file"
-        fi
-    done
-}
-
-# Test secrets management
-test_secrets_management() {
-    log_info "Testing secrets management setup..."
-
-    if command -v age &> /dev/null; then
-        log_success "age encryption tool available"
-    else
-        log_warn "age encryption tool not available"
-    fi
-
-    if [[ -f secrets-setup.sh ]]; then
-        log_success "Secrets setup script found"
-        if [[ -x secrets-setup.sh ]]; then
-            log_success "Secrets setup script is executable"
-        else
-            log_warn "Secrets setup script is not executable"
-        fi
-    else
-        log_warn "Secrets setup script not found"
-    fi
-
-    # Check for encrypted examples
-    local encrypted_files=(
-        "chezmoi-config/encrypted_dot_env.work.age"
-        "chezmoi-config/encrypted_dot_env.personal.age"
-    )
-
-    for file in "${encrypted_files[@]}"; do
-        if [[ -f "$file" ]]; then
-            log_success "Example encrypted file: $file"
-        else
-            log_warn "Example encrypted file missing: $file"
         fi
     done
 }
@@ -227,7 +184,7 @@ EOF
     echo
     test_file_paths
     echo
-    test_secrets_management
+    # No secrets tooling checks for this repository
 
     echo
     log_info "Cross-platform test completed!"

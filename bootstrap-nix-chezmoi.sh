@@ -562,8 +562,7 @@ install_claude_code() {
     log_info "Installing Claude Code CLI..."
 
     if command -v claude &> /dev/null; then
-        log_success "Claude Code CLI is already installed"
-        return
+        log_info "Claude Code CLI found, updating to latest..."
     fi
 
     log_info "Downloading and installing Claude Code from official source..."
@@ -577,10 +576,8 @@ install_claude_code() {
 # Install OpenAI Codex CLI (optional, controlled by chezmoi config)
 install_codex_cli() {
     log_info "Installing OpenAI Codex CLI..."
-
     if command -v codex &> /dev/null; then
-        log_success "OpenAI Codex CLI is already installed"
-        return
+        log_info "OpenAI Codex CLI found, updating to latest..."
     fi
 
     # Check if user wants to install codex (from chezmoi config)
@@ -598,7 +595,7 @@ install_codex_cli() {
 
     if command -v npm &> /dev/null; then
         log_info "Installing via npm..."
-        if npm install -g @openai/codex; then
+        if npm install -g @openai/codex@latest; then
             log_success "OpenAI Codex CLI installed successfully"
         else
             log_warn "Failed to install OpenAI Codex CLI"
@@ -650,14 +647,10 @@ ${BLUE}Next Steps:${NC}
 3. ${YELLOW}Add your SSH key to GitHub as a signing key${NC}:
    ${YELLOW}https://github.com/settings/keys${NC} (add under "Signing keys")
 
-4. ${YELLOW}Set up secrets management${NC} (optional):
-   ${YELLOW}cd $(chezmoi source-path) && ./secrets-setup.sh${NC}
-
-5. ${YELLOW}Test a development environment${NC}:
+4. ${YELLOW}Test a development environment${NC}:
    ${YELLOW}cd $(chezmoi source-path) && nix develop .#node${NC}
 
 ${BLUE}Documentation:${NC}
-• Nix environments: ${YELLOW}cat $(chezmoi source-path)/nix-shells.md${NC}
 • Chezmoi usage: ${YELLOW}chezmoi help${NC}
 • direnv usage: ${YELLOW}direnv help${NC}
 
