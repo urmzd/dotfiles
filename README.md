@@ -42,7 +42,7 @@ chezmoi edit ~/.config/nvim/init.lua
 ### Nix development shells
 ```bash
 nix develop          # default shell
-nix develop .#node   # Node.js
+nix develop .#node   # JavaScript/TypeScript
 nix develop .#python # Python
 nix develop .#full   # full toolchain
 ```
@@ -86,5 +86,5 @@ run_once_*.sh.tmpl              # chezmoi hooks
 
 dot_config/                     # XDG config templates (nvim, tmux, direnv)
 dot_zshrc.tmpl                  # shell config template
-private_dot_ssh/                # SSH templates (encrypted when needed)
+private_dot_ssh/                # SSH templates
 ```
