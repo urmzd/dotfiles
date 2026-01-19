@@ -6,14 +6,14 @@ Modern dotfiles managed with Chezmoi and Nix, with minimal Homebrew for macOS-on
 
 ### One-command setup (macOS recommended)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
 ```
 
 ### Manual setup
 ```bash
 # Clone
-git clone https://github.com/urmzd/.dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
+git clone https://github.com/urmzd/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 
 # Bootstrap
 ./bootstrap-nix-chezmoi.sh
@@ -21,7 +21,7 @@ cd ~/.dotfiles
 
 If you already have chezmoi installed and want to initialize directly:
 ```bash
-chezmoi init --apply https://github.com/urmzd/.dotfiles.git
+chezmoi init --apply https://github.com/urmzd/dotfiles.git
 ```
 
 ## Usage
