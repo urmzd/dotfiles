@@ -117,7 +117,7 @@ gcai() {
 
   echo "Generating commit message with Claude..."
 
-  local message=$(echo "$diff" | claude "Generate a concise, professional git commit message following the Conventional Commits format (feat:, fix:, refactor:, docs:, etc.) for these code changes. Return ONLY the commit message on a single line, nothing else:" 2>/dev/null)
+  local message=$(echo "$diff" | claude -p "Generate a concise, professional git commit message following the Conventional Commits format (feat:, fix:, refactor:, docs:, etc.) for these code changes. Return the commit message following the conventional commits spec, nothing else:")
 
   if [ -z "$message" ]; then
     echo "Failed to generate commit message"
