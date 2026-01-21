@@ -109,6 +109,9 @@ vim.keymap.set("i", "jk", "<ESC>")
 vim.keymap.set("i", "kk", "<ESC>")
 vim.keymap.set("i", "kj", "<ESC>")
 
+-- Diagnostics
+vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show line diagnostics" })
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -661,6 +664,23 @@ require("lazy").setup({
 			vim.fn["mkdp#util#install"]()
 		end,
 		ft = "markdown",
+	},
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+		ft = "markdown",
+		opts = {
+			code = {
+				enabled = true,
+				sign = false,
+				style = "full",
+				border = "thin",
+				highlight = "RenderMarkdownCode",
+			},
+		},
 	},
 	{ "j-hui/fidget.nvim", opts = {} },
 	{ "mbbill/undotree" },
