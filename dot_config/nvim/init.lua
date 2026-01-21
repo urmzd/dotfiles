@@ -28,19 +28,50 @@ end
 if not is_subprocess then
 	vim.opt.clipboard = "unnamedplus"
 
-	-- Explicit clipboard provider for reliability (macOS)
-	vim.g.clipboard = {
-		name = "macOS-clipboard",
-		copy = {
-			["+"] = "pbcopy",
-			["*"] = "pbcopy",
-		},
-		paste = {
-			["+"] = "pbpaste",
-			["*"] = "pbpaste",
-		},
-		cache_enabled = 0,
-	}
+	-- Cross-platform clipboard provider
+	if vim.fn.has("mac") == 1 then
+		vim.g.clipboard = {
+			name = "macOS-clipboard",
+			copy = {
+				["+"] = "pbcopy",
+				["*"] = "pbcopy",
+			},
+			paste = {
+				["+"] = "pbpaste",
+				["*"] = "pbpaste",
+			},
+			cache_enabled = 0,
+		}
+	elseif vim.fn.has("unix") == 1 then
+		-- Check for Wayland first, then fall back to X11
+		if vim.env.WAYLAND_DISPLAY then
+			vim.g.clipboard = {
+				name = "wayland-clipboard",
+				copy = {
+					["+"] = "wl-copy",
+					["*"] = "wl-copy",
+				},
+				paste = {
+					["+"] = "wl-paste",
+					["*"] = "wl-paste",
+				},
+				cache_enabled = 0,
+			}
+		else
+			vim.g.clipboard = {
+				name = "xclip-clipboard",
+				copy = {
+					["+"] = "xclip -selection clipboard",
+					["*"] = "xclip -selection primary",
+				},
+				paste = {
+					["+"] = "xclip -selection clipboard -o",
+					["*"] = "xclip -selection primary -o",
+				},
+				cache_enabled = 0,
+			}
+		end
+	end
 else
 	-- Explicitly disable clipboard in subprocess to prevent hangs
 	vim.opt.clipboard = ""
