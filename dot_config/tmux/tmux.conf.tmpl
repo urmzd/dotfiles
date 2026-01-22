@@ -109,8 +109,8 @@ set -g detach-on-destroy off
 # Reduce escape time for better vim experience
 set -sg escape-time 0
 
-# Automatically set window title
-set-window-option -g automatic-rename on
+# Disable automatic rename - we use smart naming via shell hook
+set-window-option -g automatic-rename off
 set-option -g set-titles on
 
 # Activity monitoring
