@@ -53,9 +53,13 @@ bind J resize-pane -D 5
 bind K resize-pane -U 5
 bind L resize-pane -R 5
 
-# Better window splitting
+# Better window splitting (custom bindings)
 bind | split-window -h -c "#{pane_current_path}"
 bind - split-window -v -c "#{pane_current_path}"
+
+# Override default split bindings to use current path
+bind '"' split-window -v -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
 
 # Create new window in current path
 bind c new-window -c "#{pane_current_path}"
