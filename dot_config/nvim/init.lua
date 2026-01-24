@@ -172,6 +172,7 @@ require("lazy").setup({
 				"copilot",
 				"bashls",
 				"tsls",
+				"marksman",
 			}
 
 			for _, server in ipairs(servers) do
@@ -700,23 +701,6 @@ require("lazy").setup({
 			vim.fn["mkdp#util#install"]()
 		end,
 		ft = "markdown",
-	},
-	{
-		"MeanderingProgrammer/render-markdown.nvim",
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-tree/nvim-web-devicons",
-		},
-		ft = "markdown",
-		opts = {
-			code = {
-				enabled = true,
-				sign = false,
-				style = "full",
-				border = "thin",
-				highlight = "RenderMarkdownCode",
-			},
-		},
 	},
 	{ "j-hui/fidget.nvim", opts = {} },
 	{ "mbbill/undotree" },
