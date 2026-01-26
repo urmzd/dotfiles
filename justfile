@@ -32,6 +32,6 @@ status:
     fi
     @echo ""
     @echo "AI tool versions:"
-    @echo -n "  claude-code: "; nix eval nixpkgs#claude-code.version 2>/dev/null || echo "checking..."
-    @echo -n "  gemini-cli: "; nix eval nixpkgs#gemini-cli.version 2>/dev/null || echo "checking..."
-    @echo -n "  codex: "; nix eval nixpkgs#codex.version 2>/dev/null || echo "checking..."
+    @echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed (run: curl -fsSL https://claude.ai/install.sh | bash)"
+    @echo -n "  codex: "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $$2}' || echo "not installed"
+    @echo -n "  gemini: "; npm list -g @google/gemini-cli 2>/dev/null | grep @google/gemini-cli | awk '{print $$2}' || echo "not installed"

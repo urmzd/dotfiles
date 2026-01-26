@@ -39,9 +39,8 @@
           ];
 
           ai = with pkgs; [
-            claude-code
-            gemini-cli
-            codex
+            # claude-code, gemini-cli, and codex now managed via npm/npx
+            # Packages: @anthropic-ai/claude-code, @openai/codex, @google/gemini-cli
             github-copilot-cli
           ];
 
@@ -178,6 +177,41 @@
             fi
           '' else "";
 
+        # Configure npm to use writable user directory for global installs
+        npmConfig = ''
+          # Configure npm to use writable user directory for global installs
+          export NPM_CONFIG_PREFIX="$HOME/.local/npm"
+          export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+        '';
+
+        # Auto-install AI CLI tools if not present
+        ensureAiTools = ''
+          # Auto-install AI CLI tools if not present
+          _ensure_ai_tools() {
+            # Install Claude Code via official installer
+            if ! command -v claude &>/dev/null; then
+              echo "📦 Installing Claude Code..."
+              curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1
+            fi
+
+            # Install npm-based tools
+            local packages=(
+              "@openai/codex"
+              "@google/gemini-cli"
+            )
+
+            for pkg in "''${packages[@]}"; do
+              if ! npm list -g "$pkg" >/dev/null 2>&1; then
+                echo "📦 Installing $pkg..."
+                npm install -g "$pkg" 2>&1 | grep -v "npm WARN"
+              fi
+            done
+          }
+
+          # Run check in background to not block shell startup
+          _ensure_ai_tools &
+        '';
+
         mkDevShell = { name, packages, welcome ? "", extraHook ? "" }:
           pkgs.mkShell {
             inherit name;
@@ -198,7 +232,7 @@
                 echo "Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
-                echo "  AI: claude-code, gemini-cli, codex, copilot-cli"
+                echo "  AI: claude (curl), codex, gemini, copilot-cli"
                 echo "  Cloud: gcloud, colima, docker"
                 echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
@@ -217,12 +251,19 @@
               fi
             '';
             extraHook = ''
+              # npm configuration (must come before AI tools installation)
+              ${npmConfig}
+
               # Go environment
               export GO111MODULE=on
               export GOPATH="$HOME/go"
               export PATH="$GOPATH/bin:$PATH"
+
               # Rust environment
               export RUST_BACKTRACE=1
+
+              # AI tools installation
+              ${ensureAiTools}
             '';
           };
 
@@ -236,7 +277,10 @@
               echo "npm: $(npm --version)"
               echo ""
             '';
-            extraHook = ''export NODE_ENV=development'';
+            extraHook = ''
+              ${npmConfig}
+              export NODE_ENV=development
+            '';
           };
 
           python = mkDevShell {
@@ -339,9 +383,16 @@
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
-              echo "AI Tools: claude-code, gemini-cli, codex, copilot-cli"
+              echo "AI Tools: claude (curl), codex, gemini, copilot-cli"
               echo "Cloud: gcloud, docker, colima"
               echo ""
+            '';
+            extraHook = ''
+              # npm configuration (must come before AI tools installation)
+              ${npmConfig}
+
+              # AI tools installation
+              ${ensureAiTools}
             '';
           };
         };
