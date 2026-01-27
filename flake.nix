@@ -47,6 +47,7 @@
           cloud = with pkgs; [
             colima
             docker
+            docker-buildx
             docker-compose
             google-cloud-sdk
           ];
