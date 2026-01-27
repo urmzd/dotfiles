@@ -1,0 +1,76 @@
+{{- /* Calculate 3/4 of system memory in GiB for macOS */ -}}
+{{- $memBytes := output "sysctl" "-n" "hw.memsize" | trim | int64 -}}
+{{- $memGiB := div $memBytes 1073741824 -}}
+{{- $targetMem := div (mul $memGiB 3) 4 -}}
+# Number of CPUs to be allocated to the virtual machine.
+cpu: 4
+
+# Size of the disk in GiB to be allocated to the virtual machine.
+disk: 60
+
+# Size of the memory in GiB to be allocated to the virtual machine.
+# Calculated as 3/4 of system memory ({{ $memGiB }} GiB total = {{ $targetMem }} GiB)
+memory: {{ $targetMem }}
+
+# Architecture of the virtual machine (aarch64, x86_64).
+arch: aarch64
+
+# Container runtime to be used (docker, containerd).
+runtime: docker
+
+# Kubernetes configuration for the virtual machine.
+kubernetes:
+  enabled: false
+
+# Auto-activate on the Host.
+autoActivate: true
+
+# Network configurations for the virtual machine.
+network:
+  # Assign reachable IP address to the virtual machine.
+  address: false
+  # Custom DNS resolvers for the virtual machine.
+  dns: []
+  # DNS hostnames for the virtual machine.
+  dnsHosts: {}
+  # Network driver to use (slirp, gvproxy, vmnet).
+  driver: gvproxy
+
+# Forward the host's SSH agent to the virtual machine.
+forwardAgent: false
+
+# Docker daemon configuration that maps directly to daemon.json.
+docker: {}
+
+# Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
+mountType: virtiofs
+
+# Propagate inotify file events to the VM.
+mountInotify: false
+
+# The CPU type for the virtual machine (requires vmType `qemu`).
+cpuType: ""
+
+# For a more general purpose virtual machine, Ubuntu container is optionally provided.
+layer: false
+
+# Custom provision scripts for the virtual machine.
+provision: []
+
+# Modify ~/.ssh/config automatically to include a SSH configuration for the virtual machine.
+sshConfig: true
+
+# Configure volume mounts for the virtual machine.
+mounts: []
+
+# Environment variables for the virtual machine.
+env: {}
+
+# Virtual Machine type (qemu, vz)
+vmType: vz
+
+# Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
+rosetta: true
+
+# Nested virtualization.
+nestedVirtualization: false
