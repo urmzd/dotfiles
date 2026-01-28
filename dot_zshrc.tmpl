@@ -35,6 +35,14 @@ fi
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
+# Google Cloud SDK completions (Nix-installed)
+{{ if lookPath "gcloud" -}}
+_gcloud_sdk_root="$(gcloud info --format='value(installation.sdk_root)' 2>/dev/null)"
+[[ -d "${_gcloud_sdk_root%/google-cloud-sdk}/share/zsh/site-functions" ]] && \
+  fpath=("${_gcloud_sdk_root%/google-cloud-sdk}/share/zsh/site-functions" $fpath)
+unset _gcloud_sdk_root
+{{- end }}
+
 # Initialize completions before loading oh-my-zsh
 autoload -U compinit && compinit
 
