@@ -122,7 +122,7 @@
           ];
 
           java = with pkgs; [
-            openjdk17
+            openjdk21
             maven
             gradle
           ];
