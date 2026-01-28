@@ -11,6 +11,12 @@ elif [ -d "/usr/local/bin" ]; then
     export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 fi
 
+# Android SDK configuration
+if [ -d "$HOME/Library/Android/sdk" ]; then
+    export ANDROID_HOME="$HOME/Library/Android/sdk"
+    export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+fi
+
 {{- if .use_nix }}
 # Source Nix for login shells
 if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then

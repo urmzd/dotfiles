@@ -9,6 +9,22 @@ echo "🔧 Installing packages for {{ .chezmoi.os }}/{{ .chezmoi.arch }}..."
 
 {{- if .is_macos }}
 # macOS package installation
+
+# Install Xcode Command Line Tools if not present
+if ! xcode-select -p >/dev/null 2>&1; then
+    echo "🔨 Installing Xcode Command Line Tools..."
+    xcode-select --install
+
+    # Wait for installation to complete
+    echo "⏳ Waiting for Xcode Command Line Tools installation..."
+    until xcode-select -p >/dev/null 2>&1; do
+        sleep 5
+    done
+    echo "✅ Xcode Command Line Tools installed"
+else
+    echo "✅ Xcode Command Line Tools already installed"
+fi
+
 if command -v brew >/dev/null 2>&1; then
     echo "📦 Installing Homebrew packages..."
 

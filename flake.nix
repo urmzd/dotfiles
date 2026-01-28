@@ -112,6 +112,19 @@
             rPackages.ggplot2
           ];
 
+          legacy = with pkgs; [
+            racket
+            guile
+            R
+            perl
+            ghc
+            cabal-install
+            elm
+            ruby
+            rubyPackages.bundler
+            rubyPackages.rails
+          ];
+
           lua = with pkgs; [
             lua5_4
             ninja
@@ -247,6 +260,7 @@
                 echo "  nix develop .#node   - Node.js"
                 echo "  nix develop .#python - Python"
                 echo "  nix develop .#data   - Data science"
+                echo "  nix develop .#legacy - Legacy/fun languages"
                 echo "  nix develop .#lua    - Lua"
                 echo "  nix develop .#full   - Everything"
               fi
@@ -358,6 +372,23 @@
             '';
           };
 
+          legacy = mkDevShell {
+            name = "legacy-fun-shell";
+            packages = toolsets.common ++ toolsets.legacy;
+            welcome = ''
+              echo "🕰️  Legacy/Fun Languages Environment"
+              echo "Racket: $(racket --version | head -1)"
+              echo "Scheme (Guile): $(guile --version | head -1)"
+              echo "R: $(R --version | head -1)"
+              echo "Perl: $(perl -v | head -1)"
+              echo "Haskell (GHC): $(ghc --version)"
+              echo "Elm: $(elm --version)"
+              echo "Ruby: $(ruby --version)"
+              echo "Rails: $(rails --version)"
+              echo ""
+            '';
+          };
+
           lua = mkDevShell {
             name = "lua-dev-shell";
             packages = toolsets.common ++ toolsets.lua;
@@ -371,7 +402,7 @@
 
           full = mkDevShell {
             name = "full-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.data ++ toolsets.legacy ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
@@ -379,6 +410,14 @@
               echo "Languages:"
               echo "  • JavaScript/TypeScript: $(node --version)"
               echo "  • Python: $(python --version)"
+              echo "  • R: $(R --version | head -1)"
+              echo "  • Racket: $(racket --version | head -1)"
+              echo "  • Scheme (Guile): $(guile --version | head -1)"
+              echo "  • Perl: $(perl -v | head -1)"
+              echo "  • Haskell (GHC): $(ghc --version)"
+              echo "  • Elm: $(elm --version)"
+              echo "  • Ruby: $(ruby --version)"
+              echo "  • Rails: $(rails --version)"
               echo "  • Rust: $(rustc --version | cut -d' ' -f2)"
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
@@ -423,6 +462,11 @@
           dev-rust = pkgs.buildEnv {
             name = "dev-rust";
             paths = toolsets.common ++ toolsets.rust;
+          };
+
+          dev-legacy = pkgs.buildEnv {
+            name = "dev-legacy";
+            paths = toolsets.common ++ toolsets.legacy;
           };
         };
 
