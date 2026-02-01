@@ -138,6 +138,7 @@
             openjdk21
             maven
             gradle
+            jdt-language-server
           ];
         };
 
