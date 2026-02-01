@@ -173,6 +173,7 @@ require("lazy").setup({
 				"bashls",
 				"tsls",
 				"marksman",
+				"jdtls",
 			}
 
 			for _, server in ipairs(servers) do
