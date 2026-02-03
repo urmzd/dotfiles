@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Chezmoi run_onchange - Install/update Brewfile packages
+# Triggered by: {{ include "Brewfile" | sha256sum }}
+
+{{- if .is_macos }}
+set -euo pipefail
+
+if command -v brew >/dev/null 2>&1; then
+    BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
+    if [ -f "$BREWFILE" ]; then
+        echo "📦 Installing packages from Brewfile..."
+        brew bundle --file="$BREWFILE"
+        echo "✅ Brewfile packages installed"
+    fi
+fi
+{{- end }}
