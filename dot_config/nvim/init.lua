@@ -158,9 +158,24 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
-		"https://github.com/neovim/nvim-lspconfig",
+		"neovim/nvim-lspconfig",
 		config = function()
-			local servers = {
+			vim.lsp.enable("copilot")
+			vim.lsp.enable("jdtls")
+		end,
+	},
+	{
+		"mason-org/mason.nvim",
+		opts = {},
+	},
+	{
+		"mason-org/mason-lspconfig.nvim",
+		dependencies = {
+			"mason-org/mason.nvim",
+			"neovim/nvim-lspconfig",
+		},
+		opts = {
+			ensure_installed = {
 				"lua_ls",
 				"basedpyright",
 				"rust_analyzer",
@@ -169,21 +184,22 @@ require("lazy").setup({
 				"dockerls",
 				"jsonls",
 				"yamlls",
-				"copilot",
 				"bashls",
 				"tsls",
 				"marksman",
-				"jdtls",
-			}
-
-			for _, server in ipairs(servers) do
-				vim.lsp.enable(server)
-			end
-		end,
+			},
+			automatic_enable = true,
+		},
 	},
 	{
-		"mason-org/mason.nvim",
-		opts = {},
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "mason-org/mason.nvim" },
+		opts = {
+			ensure_installed = {
+				"ruff",
+				"stylua",
+			},
+		},
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
