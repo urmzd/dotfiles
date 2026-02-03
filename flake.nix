@@ -35,7 +35,6 @@
             gnupg
             coreutils
             tree-sitter
-            neovim
           ];
 
           ai = with pkgs; [

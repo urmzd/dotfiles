@@ -213,6 +213,10 @@ require("lazy").setup({
 			require("mason-nvim-dap").setup({
 				ensure_installed = {
 					"python",
+					"java",
+					"golang",
+					"rust",
+					"typescript",
 				},
 				automatic_installation = true,
 			})
