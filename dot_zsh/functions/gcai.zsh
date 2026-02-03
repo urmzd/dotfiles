@@ -74,16 +74,22 @@ Return ONLY the JSON array, no explanation." 2>&1)
   git reset HEAD --quiet
 
   # Process each commit
-  echo "$plan" | jq -c '.[]' | while read -r commit; do
+  local commits=("${(@f)$(echo "$plan" | jq -c '.[]')}")
+  for commit in "${commits[@]}"; do
     local message=$(echo "$commit" | jq -r '.message')
-    local files=$(echo "$commit" | jq -r '.files[]')
+    local files=("${(@f)$(echo "$commit" | jq -r '.files[]')}")
 
-    # Stage files for this commit
-    echo "$files" | while read -r file; do
-      git add "$file" 2>/dev/null
+    for file in "${files[@]}"; do
+      if ! git add "$file"; then
+        echo "Failed to stage file: $file"
+        return 1
+      fi
     done
 
-    git commit -m "$message"
+    if ! git commit -m "$message"; then
+      echo "Commit failed: $message"
+      return 1
+    fi
   done
 
   echo "Done!"
