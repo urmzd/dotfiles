@@ -57,17 +57,10 @@
             nodePackages.yarn
             nodePackages.pnpm
             nodePackages.typescript
-            nodePackages.typescript-language-server
-            nodePackages.vscode-langservers-extracted
           ];
 
           python = with pkgs; [
             python313
-            python313Packages.pip
-            python313Packages.virtualenv
-            uv
-            pipx
-            ruff  # Rust binary, no Python conflicts
           ];
 
           rust = with pkgs; [
@@ -75,7 +68,6 @@
             cargo
             rustfmt
             clippy
-            rust-analyzer
             cargo-watch
             cargo-edit
             cargo-outdated
@@ -83,7 +75,6 @@
 
           go = with pkgs; [
             go
-            gopls
             golangci-lint
             gotools
             go-migrate
@@ -98,38 +89,16 @@
             awscli2
           ];
 
-          data = with pkgs; [
-            python313
-            python313Packages.pandas
-            python313Packages.numpy
-            python313Packages.jupyter
-            python313Packages.matplotlib
-            python313Packages.seaborn
-            python313Packages.scikit-learn
-            R
-            rPackages.tidyverse
-            rPackages.ggplot2
-          ];
-
-          legacy = with pkgs; [
-            racket
-            guile
-            R
-            perl
-            ghc
-            cabal-install
-            elm
-            ruby
-            rubyPackages.bundler
-            rubyPackages.rails
-          ];
+          haskell = with pkgs; [ ghc cabal-install ];
+          ruby = with pkgs; [ ruby bundler rubyPackages.rails ];
+          scheme = with pkgs; [ guile ];
+          perl = with pkgs; [ perl ];
 
           lua = with pkgs; [
             lua5_4
             ninja
             luajitPackages.luacheck
             stylua
-            lua-language-server
             luarocks
           ];
 
@@ -137,7 +106,6 @@
             openjdk21
             maven
             gradle
-            jdt-language-server
           ];
         };
 
@@ -250,17 +218,15 @@
                 echo "  Cloud: gcloud, colima, docker"
                 echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
-                echo "  Go: go, gopls, golangci-lint, air"
+                echo "  Go: go, golangci-lint, air"
                 echo "  Java: java (JDK), mvn, gradle"
                 echo "  Lua: lua, luarocks, stylua"
-                echo "  Rust: rustc, cargo, rust-analyzer, clippy"
+                echo "  Rust: rustc, cargo, clippy"
                 echo "  CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
                 echo "Specialized environments:"
                 echo "  nix develop .#node   - Node.js"
                 echo "  nix develop .#python - Python"
-                echo "  nix develop .#data   - Data science"
-                echo "  nix develop .#legacy - Legacy/fun languages"
                 echo "  nix develop .#lua    - Lua"
                 echo "  nix develop .#full   - Everything"
               fi
@@ -304,10 +270,7 @@
             welcome = ''
               echo "🐍 Python Development Environment"
               echo "Python: $(python --version)"
-              echo "uv: $(uv --version)"
               echo ""
-              echo "Dev tools (black, mypy, pytest) should be installed"
-              echo "per-project via: uv add --dev black mypy pytest"
             '';
             extraHook = ''
               unset PYTHONPATH
@@ -359,32 +322,42 @@
             '';
           };
 
-          data = mkDevShell {
-            name = "data-science-shell";
-            packages = toolsets.common ++ toolsets.data;
+          haskell = mkDevShell {
+            name = "haskell-dev-shell";
+            packages = toolsets.common ++ toolsets.haskell;
             welcome = ''
-              echo "📊 Data Science Environment"
-              echo "Python: $(python --version)"
-              echo "R: $(R --version | head -1)"
+              echo "λ Haskell Development Environment"
+              echo "GHC: $(ghc --version)"
               echo ""
-              echo "Jupyter notebook: jupyter notebook"
-              echo "R console: R"
             '';
           };
 
-          legacy = mkDevShell {
-            name = "legacy-fun-shell";
-            packages = toolsets.common ++ toolsets.legacy;
+          ruby = mkDevShell {
+            name = "ruby-dev-shell";
+            packages = toolsets.common ++ toolsets.ruby;
             welcome = ''
-              echo "🕰️  Legacy/Fun Languages Environment"
-              echo "Racket: $(racket --version | head -1)"
-              echo "Scheme (Guile): $(guile --version | head -1)"
-              echo "R: $(R --version | head -1)"
-              echo "Perl: $(perl -v | head -1)"
-              echo "Haskell (GHC): $(ghc --version)"
-              echo "Elm: $(elm --version)"
+              echo "💎 Ruby Development Environment"
               echo "Ruby: $(ruby --version)"
-              echo "Rails: $(rails --version)"
+              echo ""
+            '';
+          };
+
+          scheme = mkDevShell {
+            name = "scheme-dev-shell";
+            packages = toolsets.common ++ toolsets.scheme;
+            welcome = ''
+              echo "🔧 Scheme Development Environment"
+              echo "Guile: $(guile --version | head -1)"
+              echo ""
+            '';
+          };
+
+          perl = mkDevShell {
+            name = "perl-dev-shell";
+            packages = toolsets.common ++ toolsets.perl;
+            welcome = ''
+              echo "🐪 Perl Development Environment"
+              echo "Perl: $(perl --version | head -2 | tail -1)"
               echo ""
             '';
           };
@@ -402,7 +375,7 @@
 
           full = mkDevShell {
             name = "full-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.data ++ toolsets.legacy ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
@@ -410,14 +383,6 @@
               echo "Languages:"
               echo "  • JavaScript/TypeScript: $(node --version)"
               echo "  • Python: $(python --version)"
-              echo "  • R: $(R --version | head -1)"
-              echo "  • Racket: $(racket --version | head -1)"
-              echo "  • Scheme (Guile): $(guile --version | head -1)"
-              echo "  • Perl: $(perl -v | head -1)"
-              echo "  • Haskell (GHC): $(ghc --version)"
-              echo "  • Elm: $(elm --version)"
-              echo "  • Ruby: $(ruby --version)"
-              echo "  • Rails: $(rails --version)"
               echo "  • Rust: $(rustc --version | cut -d' ' -f2)"
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
@@ -464,10 +429,6 @@
             paths = toolsets.common ++ toolsets.rust;
           };
 
-          dev-legacy = pkgs.buildEnv {
-            name = "dev-legacy";
-            paths = toolsets.common ++ toolsets.legacy;
-          };
         };
 
         # Apps that can be run with 'nix run'
