@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# Chezmoi run_onchange - Pre-generate zsh completions at apply time
+# Triggered by: {{ include "dot_zshrc.tmpl" | sha256sum }}
+# Triggered by: {{ include "flake.lock" | sha256sum }}
+
+set -euo pipefail
+
+COMP_DIR="$HOME/.zsh/completions"
+FPATH_FILE="$HOME/.zsh/nix-fpath.zsh"
+
+mkdir -p "$COMP_DIR"
+mkdir -p "$(dirname "$FPATH_FILE")"
+
+echo "Generating zsh completions..."
+
+# ============================================================================
+# 1. Discover Nix site-functions paths
+# ============================================================================
+{{- if .use_nix }}
+
+: > "$FPATH_FILE"  # truncate
+
+# Find all Nix store paths that contain zsh site-functions
+# This covers packages like gh, kubectl, helm, docker, chezmoi, etc.
+for dir in /nix/store/*/share/zsh/site-functions; do
+    # Only include paths from the current profile (avoid stale store paths)
+    if [[ -d "$dir" ]] && ls "$dir"/_* >/dev/null 2>&1; then
+        echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
+    fi
+done
+
+# Deduplicate: only keep the latest version of each store path
+# nix-store --query gives us the current profile's closure
+if command -v nix >/dev/null 2>&1; then
+    : > "$FPATH_FILE"  # re-truncate for clean output from profile query
+    PROFILE="${HOME}/.nix-profile"
+    if [[ -L "$PROFILE" ]]; then
+        for dir in $(nix-store --query --references "$(readlink -f "$PROFILE")" 2>/dev/null | while read -r dep; do
+            if [[ -d "$dep/share/zsh/site-functions" ]]; then
+                echo "$dep/share/zsh/site-functions"
+            fi
+        done); do
+            echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
+        done
+    fi
+
+    # Also check the default profile
+    DEFAULT_PROFILE="/nix/var/nix/profiles/default"
+    if [[ -L "$DEFAULT_PROFILE" ]]; then
+        for dir in $(nix-store --query --references "$(readlink -f "$DEFAULT_PROFILE")" 2>/dev/null | while read -r dep; do
+            if [[ -d "$dep/share/zsh/site-functions" ]]; then
+                echo "$dep/share/zsh/site-functions"
+            fi
+        done); do
+            echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
+        done
+    fi
+fi
+
+# ============================================================================
+# 2. Google Cloud SDK completion (avoid slow `gcloud info` call)
+# ============================================================================
+{{ if lookPath "gcloud" -}}
+# Find gcloud completion file directly from the Nix store
+GCLOUD_COMP=""
+for p in /nix/store/*/share/google-cloud-sdk/completion.zsh.inc; do
+    [[ -f "$p" ]] && GCLOUD_COMP="$p"
+done
+
+# Also check Homebrew / system paths
+if [[ -z "${GCLOUD_COMP:-}" ]]; then
+    for candidate in \
+        "/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc" \
+        "/usr/share/google-cloud-sdk/completion.zsh.inc" \
+        "/snap/google-cloud-sdk/current/completion.zsh.inc"; do
+        [[ -f "$candidate" ]] && GCLOUD_COMP="$candidate" && break
+    done
+fi
+
+if [[ -n "${GCLOUD_COMP:-}" ]]; then
+    echo "# Google Cloud SDK completions" >> "$FPATH_FILE"
+    echo "source \"$GCLOUD_COMP\"" >> "$FPATH_FILE"
+    echo "  Found gcloud completion: $GCLOUD_COMP"
+fi
+{{- end }}
+{{- end }}
+
+# ============================================================================
+# 3. Generate completions for tools that need eval (no site-functions)
+# ============================================================================
+
+generate_completion() {
+    local tool="$1"
+    local cmd="$2"
+    local target="$COMP_DIR/_$tool"
+
+    if command -v "$tool" >/dev/null 2>&1; then
+        if eval "$cmd" > "$target" 2>/dev/null; then
+            echo "  Generated: _$tool"
+        else
+            rm -f "$target"
+            echo "  Skipped: _$tool (generation failed)"
+        fi
+    fi
+}
+
+# Tools that require `eval` at runtime because they don't install site-functions
+generate_completion "uv"          "uv generate-shell-completion zsh"
+generate_completion "ruff"        "ruff generate-shell-completion zsh"
+generate_completion "npm"         "npm completion"
+generate_completion "rustup"      "rustup completions zsh"
+generate_completion "deno"        "deno completions zsh"
+generate_completion "colima"      "colima completion zsh"
+generate_completion "k9s"         "k9s completion zsh"
+generate_completion "golangci-lint" "golangci-lint completion zsh"
+
+# rustup also provides cargo completions
+if command -v rustup >/dev/null 2>&1; then
+    if rustup completions zsh cargo > "$COMP_DIR/_cargo" 2>/dev/null; then
+        echo "  Generated: _cargo (via rustup)"
+    fi
+fi
+
+# pipx uses argcomplete
+if command -v pipx >/dev/null 2>&1 && command -v register-python-argcomplete >/dev/null 2>&1; then
+    if register-python-argcomplete --shell zsh pipx > "$COMP_DIR/_pipx" 2>/dev/null; then
+        echo "  Generated: _pipx"
+    fi
+fi
+
+# AWS CLI uses bashcompinit-style completion — generate a wrapper
+if command -v aws_completer >/dev/null 2>&1; then
+    AWS_COMP_PATH="$(command -v aws_completer)"
+    cat > "$COMP_DIR/_aws" <<AWSEOF
+# AWS CLI completion (bashcompinit wrapper)
+autoload -Uz bashcompinit && bashcompinit
+complete -C "$AWS_COMP_PATH" aws
+AWSEOF
+    echo "  Generated: _aws"
+fi
+
+# Also generate completions for tools that DO have site-functions in case
+# we're not in a Nix environment (fallback for non-direnv shells)
+generate_completion "gh"          "gh completion -s zsh"
+generate_completion "docker"      "docker completion zsh"
+generate_completion "kubectl"     "kubectl completion zsh"
+generate_completion "helm"        "helm completion zsh"
+generate_completion "chezmoi"     "chezmoi completion zsh"
+generate_completion "just"        "just --completions zsh"
+
+echo "Completions generated successfully."

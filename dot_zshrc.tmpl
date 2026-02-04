@@ -26,25 +26,27 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(git zsh-syntax-highlighting zsh-completions)
 
 # Load Homebrew-installed completion scripts (e.g., just) before compinit
-if command -v brew >/dev/null 2>&1; then
-  HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null)}"
-  if [[ -d "$HOMEBREW_PREFIX/share/zsh/site-functions" ]]; then
-    fpath=("$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
-  fi
-fi
+{{- if and .is_macos (eq .chezmoi.arch "arm64") }}
+[[ -d "/opt/homebrew/share/zsh/site-functions" ]] && \
+  fpath=("/opt/homebrew/share/zsh/site-functions" $fpath)
+{{- else if and .is_macos (eq .chezmoi.arch "amd64") }}
+[[ -d "/usr/local/share/zsh/site-functions" ]] && \
+  fpath=("/usr/local/share/zsh/site-functions" $fpath)
+{{- end }}
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
-# Google Cloud SDK completions (Nix-installed)
-{{ if lookPath "gcloud" -}}
-_gcloud_sdk_root="$(gcloud info --format='value(installation.sdk_root)' 2>/dev/null)"
-[[ -d "${_gcloud_sdk_root%/google-cloud-sdk}/share/zsh/site-functions" ]] && \
-  fpath=("${_gcloud_sdk_root%/google-cloud-sdk}/share/zsh/site-functions" $fpath)
-unset _gcloud_sdk_root
-{{- end }}
+# Pre-generated completions (from chezmoi apply)
+[[ -f "$HOME/.zsh/nix-fpath.zsh" ]] && source "$HOME/.zsh/nix-fpath.zsh"
+[[ -d "$HOME/.zsh/completions" ]] && fpath=("$HOME/.zsh/completions" $fpath)
 
-# Initialize completions before loading oh-my-zsh
-autoload -U compinit && compinit
+# Initialize completions (use cached dump unless stale >24h)
+autoload -Uz compinit
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 
 # Load oh-my-zsh AFTER environment is properly set
 source "$ZSH/oh-my-zsh.sh"
@@ -101,69 +103,7 @@ alias snowsso='snowsql --authenticator externalbrowser -a "$SNOWFLAKE_ACCOUNT" -
 
 # FZF integration
 {{ if lookPath "fzf" -}}
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-# Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
-{{- end }}
-
-# Python pipx completions
-{{ if lookPath "pipx" -}}
-eval "$(register-python-argcomplete --shell zsh pipx)"
-{{- end }}
-
-# ============================================================================
-# CLI Tool Completions (runtime eval with lookPath guards)
-# ============================================================================
-
-# DevOps & Cloud
-{{ if lookPath "gh" -}}
-eval "$(gh completion -s zsh)"
-{{- end }}
-{{ if lookPath "docker" -}}
-eval "$(docker completion zsh)"
-{{- end }}
-{{ if lookPath "kubectl" -}}
-eval "$(kubectl completion zsh)"
-{{- end }}
-{{ if lookPath "helm" -}}
-eval "$(helm completion zsh)"
-{{- end }}
-{{ if lookPath "k9s" -}}
-eval "$(k9s completion zsh)"
-{{- end }}
-{{ if lookPath "colima" -}}
-eval "$(colima completion zsh)"
-{{- end }}
-{{ if lookPath "aws_completer" -}}
-autoload -Uz bashcompinit && bashcompinit
-complete -C "$(which aws_completer)" aws
-{{- end }}
-
-# Development Tools
-{{ if lookPath "chezmoi" -}}
-eval "$(chezmoi completion zsh)"
-{{- end }}
-{{ if lookPath "just" -}}
-eval "$(just --completions zsh)"
-{{- end }}
-{{ if lookPath "uv" -}}
-eval "$(uv generate-shell-completion zsh)"
-{{- end }}
-{{ if lookPath "ruff" -}}
-eval "$(ruff generate-shell-completion zsh)"
-{{- end }}
-{{ if lookPath "deno" -}}
-eval "$(deno completions zsh)"
-{{- end }}
-{{ if lookPath "rustup" -}}
-eval "$(rustup completions zsh)"
-eval "$(rustup completions zsh cargo)"
-{{- end }}
-{{ if lookPath "npm" -}}
-eval "$(npm completion)"
-{{- end }}
-{{ if lookPath "golangci-lint" -}}
-eval "$(golangci-lint completion zsh)"
 {{- end }}
 
 # Load local environment if exists
