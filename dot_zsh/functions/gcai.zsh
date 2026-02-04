@@ -1,6 +1,7 @@
 # AI-powered git commit using Claude
 gcai() {
   local debug=${GCAI_DEBUG:-0}
+  local git_root=$(git rev-parse --show-toplevel)
   local staged_files=$(git diff --cached --name-only)
 
   if [ -z "$staged_files" ]; then
@@ -80,7 +81,7 @@ Return ONLY the JSON array, no explanation." 2>&1)
     local files=("${(@f)$(echo "$commit" | jq -r '.files[]')}")
 
     for file in "${files[@]}"; do
-      if ! git add "$file"; then
+      if ! git add "$git_root/$file"; then
         echo "Failed to stage file: $file"
         return 1
       fi
