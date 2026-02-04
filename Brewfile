@@ -15,5 +15,10 @@ brew "gettext"  # GNU internationalization and localization support
 cask "android-studio"         # Android IDE with SDK manager
 cask "android-commandlinetools"  # Android SDK command-line tools
 
+# Fonts
+cask "font-monaspace-nerd-font"  # MonaspiceNe Nerd Font (Monaspace Neon)
+cask "font-iosevka-nerd-font"    # Iosevka Nerd Font (https://typeof.net/Iosevka/)
+# cask "font-meslo-lg-nerd-font" # MesloLGS Nerd Font (legacy, replaced by MonaspiceNe)
+
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)

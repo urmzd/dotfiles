@@ -2,8 +2,9 @@
 shell-integration = detect
 
 # Font (matches Powerlevel10k setup)
-font-family = MesloLGS Nerd Font
+font-family = MonaspiceNe Nerd Font
 font-size = 13
+adjust-cell-width = 0
 
 # Window
 window-padding-x = 4
@@ -11,5 +12,5 @@ window-padding-y = 4
 
 # Theme (installed by bootstrap from cyberdream.nvim extras/ghostty)
 theme = cyberdream
-background-opacity = 0.90
-background-blur-radius = 20
+background-opacity = 0.87
+background-blur-radius = 17
