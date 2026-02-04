@@ -17,8 +17,14 @@ if ! xcode-select -p >/dev/null 2>&1; then
 
     # Wait for installation to complete
     echo "⏳ Waiting for Xcode Command Line Tools installation..."
+    local retries=0
     until xcode-select -p >/dev/null 2>&1; do
         sleep 5
+        retries=$((retries + 1))
+        if [ "$retries" -ge 60 ]; then
+            echo "❌ Xcode Command Line Tools installation timed out"
+            exit 1
+        fi
     done
     echo "✅ Xcode Command Line Tools installed"
 else
@@ -66,7 +72,7 @@ fi
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "🐚 Installing Oh My Zsh..."
-    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 else
     echo "✅ Oh My Zsh already installed"
 fi
@@ -75,7 +81,9 @@ fi
 P10K_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 if [ ! -d "$P10K_PATH" ]; then
     echo "⚡ Installing Powerlevel10k theme..."
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_PATH"
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_PATH" || {
+        echo "❌ Failed to clone Powerlevel10k"; exit 1
+    }
 else
     echo "✅ Powerlevel10k already installed"
 fi
@@ -84,7 +92,9 @@ fi
 ZSH_COMPLETIONS_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions"
 if [ ! -d "$ZSH_COMPLETIONS_PATH" ]; then
     echo "🧠 Installing zsh-completions plugin..."
-    git clone https://github.com/zsh-users/zsh-completions "$ZSH_COMPLETIONS_PATH"
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_COMPLETIONS_PATH" || {
+        echo "❌ Failed to clone zsh-completions"; exit 1
+    }
 else
     echo "✅ zsh-completions already installed"
 fi
@@ -94,7 +104,9 @@ TPM_PATH="$HOME/.config/tmux/plugins/tpm"
 if [ ! -d "$TPM_PATH" ]; then
     echo "🔌 Installing TPM (Tmux Plugin Manager)..."
     mkdir -p "$(dirname "$TPM_PATH")"
-    git clone https://github.com/tmux-plugins/tpm "$TPM_PATH"
+    git clone https://github.com/tmux-plugins/tpm "$TPM_PATH" || {
+        echo "❌ Failed to clone TPM"; exit 1
+    }
     chmod +x "$TPM_PATH/tpm"
     echo "✅ TPM installed. Run 'tmux' and press 'prefix + I' to install plugins"
 else
@@ -106,7 +118,9 @@ CATPPUCCIN_PATH="$HOME/.config/tmux/plugins/catppuccin"
 if [ ! -d "$CATPPUCCIN_PATH/tmux" ]; then
     echo "🎨 Installing Catppuccin tmux theme..."
     mkdir -p "$CATPPUCCIN_PATH"
-    git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$CATPPUCCIN_PATH/tmux"
+    git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$CATPPUCCIN_PATH/tmux" || {
+        echo "❌ Failed to clone Catppuccin tmux theme"; exit 1
+    }
     echo "✅ Catppuccin tmux theme installed"
 else
     echo "✅ Catppuccin tmux theme already installed"
@@ -124,7 +138,7 @@ if [ ! -f "$CYBERDREAM_THEME" ]; then
         echo "✅ Cyberdream theme copied from nvim plugin"
     else
         # Fallback to curl if nvim plugin not available
-        curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME" || {
+        curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME" || {
             echo "⚠️ Failed to download cyberdream theme, will be installed later"
         }
     fi
@@ -144,7 +158,7 @@ if [ ! -f "$GHOSTTY_CYBERDREAM_THEME" ]; then
         cp "$CYBERDREAM_GHOSTTY_PATH" "$GHOSTTY_CYBERDREAM_THEME"
         echo "✅ Cyberdream Ghostty theme copied from nvim plugin"
     else
-        curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/ghostty/cyberdream -o "$GHOSTTY_CYBERDREAM_THEME" || {
+        curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/ghostty/cyberdream -o "$GHOSTTY_CYBERDREAM_THEME" || {
             echo "⚠️ Failed to download cyberdream Ghostty theme, will be installed later"
         }
     fi
@@ -225,5 +239,11 @@ fi
 {{- end }}
 
 # Note: Using Nix for package management - no fallback version manager needed
+
+# Install uv (Python package manager) if not present
+if ! command -v uv >/dev/null 2>&1; then
+    echo "🐍 Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
 
 echo "✅ Package installation completed!"
