@@ -125,7 +125,17 @@ vim.keymap.set("n", "<leader>o", ":only<CR>", { desc = "Close all other windows"
 vim.keymap.set("n", "<leader>=", "<C-w>=", { desc = "Equalize all window sizes" })
 
 -- Buffer cycling - Tab key (normal mode only, doesn't affect insert/command mode)
-vim.keymap.set("n", "<Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<Tab>", function()
+	local state = vim.b[vim.api.nvim_get_current_buf()].nes_state
+	if state then
+		if not require("copilot-lsp.nes").walk_cursor_start_edit() then
+			require("copilot-lsp.nes").apply_pending_nes()
+			require("copilot-lsp.nes").walk_cursor_end_edit()
+		end
+	else
+		vim.cmd("BufferLineCycleNext")
+	end
+end, { desc = "Copilot NES or next buffer" })
 vim.keymap.set("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 
 -- Additional buffer commands
@@ -135,6 +145,12 @@ vim.keymap.set("n", "<leader>bse", "<cmd>BufferLineSortByExtension<CR>", { desc 
 vim.keymap.set("n", "<leader>bsd", "<cmd>BufferLineSortByDirectory<CR>", { desc = "Sort buffers by directory" })
 
 -- Escape
+vim.keymap.set("n", "<Esc>", function()
+	if not require("copilot-lsp.nes").clear() then
+		vim.cmd("nohlsearch")
+	end
+end, { desc = "Clear Copilot NES or search highlight" })
+
 vim.keymap.set("i", "jj", "<ESC>")
 vim.keymap.set("i", "jk", "<ESC>")
 vim.keymap.set("i", "kk", "<ESC>")
@@ -157,10 +173,15 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+	{ "neovim/nvim-lspconfig" },
 	{
-		"neovim/nvim-lspconfig",
+		"copilotlsp-nvim/copilot-lsp",
+		init = function()
+			vim.g.copilot_nes_debounce = 500
+			vim.lsp.enable("copilot_ls")
+		end,
 		config = function()
-			vim.lsp.enable("copilot")
+			require("copilot-lsp").setup()
 		end,
 	},
 	{
@@ -822,46 +843,66 @@ require("lazy").setup({
 		"saghen/blink.cmp",
 		dependencies = {
 			"rafamadriz/friendly-snippets",
+			"fang2hou/blink-copilot",
 		},
 		version = "1.*",
 		opts = {
-			cmdline = {
-				keymap = {
-					preset = "inherit",
-				},
-			},
+			cmdline = { keymap = { preset = "inherit" } },
 			keymap = {
 				preset = "default",
 				["<CR>"] = { "select_and_accept", "fallback" },
+				["<Tab>"] = {
+					function(cmp)
+						if vim.b[vim.api.nvim_get_current_buf()].nes_state then
+							cmp.hide()
+							require("copilot-lsp.nes").apply_pending_nes()
+							require("copilot-lsp.nes").walk_cursor_end_edit()
+							return true
+						end
+					end,
+					"snippet_forward",
+					"fallback",
+				},
 			},
-			appearance = {
-				nerd_font_variant = "mono",
-			},
+			appearance = { nerd_font_variant = "mono" },
 			completion = {
 				documentation = { auto_show = false },
+				ghost_text = { enabled = true },
 			},
-			snippets = {
-				preset = "luasnip",
-			},
+			snippets = { preset = "luasnip" },
 			sources = {
-				default = {
-					"lsp",
-					"snippets",
-					"buffer",
-					"path",
-					"lazydev",
-				},
+				default = { "copilot", "lsp", "snippets", "buffer", "path", "lazydev" },
 				providers = {
+					copilot = {
+						name = "copilot",
+						module = "blink-copilot",
+						score_offset = 75,
+						async = true,
+						opts = {
+							max_completions = 3,
+							max_attempts = 4,
+						},
+					},
 					lazydev = {
 						name = "LazyDev",
 						module = "lazydev.integrations.blink",
 						score_offset = 100,
 					},
+					lsp = {
+						name = "LSP",
+						module = "blink.cmp.sources.lsp",
+						transform_items = function(_, items)
+							return vim.tbl_filter(function(item)
+								return not (
+									item.client_name
+									and string.find(string.lower(item.client_name), "copilot")
+								)
+							end, items)
+						end,
+					},
 				},
 			},
-			fuzzy = {
-				implementation = "prefer_rust_with_warning",
-			},
+			fuzzy = { implementation = "prefer_rust_with_warning" },
 		},
 	},
 	{
