@@ -1,90 +1,64 @@
 # dotfiles
 
-Modern dotfiles managed with Chezmoi and Nix, with minimal Homebrew for macOS-only tooling.
+Chezmoi + Nix dotfiles for macOS and Linux.
 
-## Quick Start
+## Setup
 
-### One-command setup (macOS recommended)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+# One-command bootstrap
+curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+
+# Or, if chezmoi is already installed
+chezmoi init --apply https://github.com/urmzd/.dotfiles.git
 ```
 
-### Manual setup
-```bash
-# Clone
-git clone https://github.com/urmzd/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+## What's included
 
-# Bootstrap
-./bootstrap-nix-chezmoi.sh
+### Dev environments (Nix flakes)
+
+```bash
+nix develop .#<shell>
 ```
 
-If you already have chezmoi installed and want to initialize directly:
+| Shell    | What's in it                                          |
+| -------- | ----------------------------------------------------- |
+| default  | JS/TS, Go, Rust, Java, Lua, DevOps, Cloud, AI        |
+| node     | Node 22, Deno, npm, yarn, pnpm, tsc                  |
+| python   | Python 3.13                                           |
+| rust     | rustc, cargo, rustfmt, clippy, cargo-watch/edit/outdated |
+| go       | go, golangci-lint, gotools, go-migrate, air           |
+| devops   | terraform, kubectl, helm, k9s, awscli, colima, docker, docker-buildx/compose, gcloud |
+| haskell  | ghc, cabal-install                                    |
+| ruby     | ruby, bundler, rails                                  |
+| scheme   | guile                                                 |
+| perl     | perl                                                  |
+| lua      | lua 5.4, luarocks, stylua, luacheck, ninja            |
+| full     | default + Python                                      |
+
+### Shell & terminal
+
+- Zsh + Oh My Zsh + Powerlevel10k
+- Tmux (`Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme)
+- Ghostty terminal
+
+### Editor
+
+- Neovim (HEAD) with LSP for all included languages
+
+### macOS extras (Brewfile)
+
+- Neovim HEAD, cmake, gettext, cocoapods, Android Studio + CLI tools, fonts (MonaspiceNe, Iosevka)
+
+### Common CLI (in every Nix shell)
+
+git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, wget, tree, tldr, gnupg, tree-sitter
+
+## Day-to-day usage
+
 ```bash
-chezmoi init --apply https://github.com/urmzd/dotfiles.git
-```
+chezmoi diff          # preview pending changes
+chezmoi apply         # apply dotfile changes
 
-## Usage
-
-### Apply and update dotfiles
-```bash
-chezmoi diff
-chezmoi apply
-```
-
-### Edit templates safely
-```bash
-chezmoi edit ~/.zshrc
-chezmoi edit ~/.gitconfig
-chezmoi edit ~/.config/nvim/init.lua
-```
-
-### Nix development shells
-```bash
-nix develop          # default shell
-nix develop .#node   # JavaScript/TypeScript
-nix develop .#python # Python
-nix develop .#full   # full toolchain
-```
-
-### Homebrew packages (macOS)
-```bash
-brew bundle --file Brewfile
-```
-
-### Update Nix inputs
-```bash
-just update
-```
-
-## Verification
-
-Quick checks after setup:
-```bash
-chezmoi --version
-nix --version
-nvim --version
-```
-
-Optional smoke tests:
-```bash
-./cross-platform-test.sh
-./security-audit.sh
-```
-
-## Repo layout
-
-```text
-bootstrap-nix-chezmoi.sh        # main installer
-Brewfile                        # macOS-only packages
-flake.nix                       # Nix dev shells
-justfile                        # update/security helpers
-requirements-pipx.txt           # pipx-managed tools
-security-audit.sh               # security audit wrapper
-cross-platform-test.sh          # toolchain smoke test
-run_once_*.sh.tmpl              # chezmoi hooks
-
-dot_config/                     # XDG config templates (nvim, tmux, direnv)
-dot_zshrc.tmpl                  # shell config template
-private_dot_ssh/                # SSH templates
+just update           # update Nix flake inputs
+just status           # check environment status
 ```
