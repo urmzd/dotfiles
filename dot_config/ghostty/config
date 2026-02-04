@@ -11,3 +11,5 @@ window-padding-y = 4
 
 # Theme (installed by bootstrap from cyberdream.nvim extras/ghostty)
 theme = cyberdream
+background-opacity = 0.90
+background-blur-radius = 20

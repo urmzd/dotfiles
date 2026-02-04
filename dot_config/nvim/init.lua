@@ -185,7 +185,7 @@ require("lazy").setup({
 				"jsonls",
 				"yamlls",
 				"bashls",
-				"tsls",
+				"typescript-language-server",
 				"marksman",
 			},
 			automatic_enable = true,
@@ -270,7 +270,7 @@ require("lazy").setup({
 			local style = "dark" -- light | dark
 
 			require(colorscheme).setup({
-				transparent = false,
+				transparent = true,
 				italic_comments = true,
 				hide_fillchars = true,
 				borderless_telescope = true,
