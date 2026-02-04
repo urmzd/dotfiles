@@ -1,0 +1,13 @@
+# Shell integration (detect = auto-inject for zsh, enabled by default)
+shell-integration = detect
+
+# Font (matches Powerlevel10k setup)
+font-family = MesloLGS Nerd Font
+font-size = 13
+
+# Window
+window-padding-x = 4
+window-padding-y = 4
+
+# Theme (installed by bootstrap from cyberdream.nvim extras/ghostty)
+theme = cyberdream

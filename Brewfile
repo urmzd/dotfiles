@@ -14,3 +14,6 @@ brew "gettext"  # GNU internationalization and localization support
 # Android Development
 cask "android-studio"         # Android IDE with SDK manager
 cask "android-commandlinetools"  # Android SDK command-line tools
+
+# Terminal
+# Terminal: ghostty (installed outside Homebrew)

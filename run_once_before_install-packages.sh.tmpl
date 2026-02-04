@@ -132,6 +132,26 @@ else
     echo "✅ Cyberdream theme already installed"
 fi
 
+# Install Cyberdream theme for Ghostty (copy from nvim plugin if available)
+GHOSTTY_THEMES_DIR="$HOME/.config/ghostty/themes"
+GHOSTTY_CYBERDREAM_THEME="$GHOSTTY_THEMES_DIR/cyberdream"
+if [ ! -f "$GHOSTTY_CYBERDREAM_THEME" ]; then
+    echo "🌊 Installing Cyberdream Ghostty theme..."
+    mkdir -p "$GHOSTTY_THEMES_DIR"
+
+    CYBERDREAM_GHOSTTY_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/ghostty/cyberdream"
+    if [ -f "$CYBERDREAM_GHOSTTY_PATH" ]; then
+        cp "$CYBERDREAM_GHOSTTY_PATH" "$GHOSTTY_CYBERDREAM_THEME"
+        echo "✅ Cyberdream Ghostty theme copied from nvim plugin"
+    else
+        curl -fsSL https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/ghostty/cyberdream -o "$GHOSTTY_CYBERDREAM_THEME" || {
+            echo "⚠️ Failed to download cyberdream Ghostty theme, will be installed later"
+        }
+    fi
+else
+    echo "✅ Cyberdream Ghostty theme already installed"
+fi
+
 {{- else if .is_linux }}
 # Linux package installation
 if command -v apt >/dev/null 2>&1; then
