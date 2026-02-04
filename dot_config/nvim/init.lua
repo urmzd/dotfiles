@@ -161,7 +161,6 @@ require("lazy").setup({
 		"neovim/nvim-lspconfig",
 		config = function()
 			vim.lsp.enable("copilot")
-			vim.lsp.enable("jdtls")
 		end,
 	},
 	{
@@ -185,7 +184,7 @@ require("lazy").setup({
 				"jsonls",
 				"yamlls",
 				"bashls",
-				"typescript-language-server",
+				"ts_ls",
 				"marksman",
 			},
 			automatic_enable = true,
@@ -198,6 +197,11 @@ require("lazy").setup({
 			ensure_installed = {
 				"ruff",
 				"stylua",
+				"prettierd",
+				"goimports",
+				"gofumpt",
+				"shfmt",
+				"google-java-format",
 			},
 		},
 	},
@@ -884,6 +888,21 @@ require("lazy").setup({
 				python = { "ruff_fix", "ruff_format" },
 				lua = { "stylua" },
 				rust = { "rustfmt", lsp_format = "fallback" },
+				go = { "goimports", "gofumpt" },
+				sh = { "shfmt" },
+				bash = { "shfmt" },
+				java = { "google-java-format", lsp_format = "fallback" },
+				javascript = { "prettierd" },
+				typescript = { "prettierd" },
+				javascriptreact = { "prettierd" },
+				typescriptreact = { "prettierd" },
+				json = { "prettierd" },
+				jsonc = { "prettierd" },
+				yaml = { "prettierd" },
+				markdown = { "prettierd" },
+				html = { "prettierd" },
+				css = { "prettierd" },
+				terraform = { lsp_format = "prefer" },
 			},
 			format_on_save = {
 				timeout_ms = 500,
