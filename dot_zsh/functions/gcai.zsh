@@ -1,97 +1,277 @@
-# AI-powered git commit using Claude
-gcai() {
-  local debug=${GCAI_DEBUG:-0}
-  local git_root=$(git rev-parse --show-toplevel)
-  local staged_files=$(git diff --cached --name-only)
+# AI-powered git commit using Claude (unified gcai)
+# Usage: gcai [--staged|-s] [--model|-m MODEL] [--dry-run|-n] [--debug|-d]
 
-  if [ -z "$staged_files" ]; then
-    echo "No staged changes to commit"
-    return 1
-  fi
+# --- Helpers ---
 
-  echo "Analyzing staged changes..."
+_gcai_display_plan() {
+  local plan="$1"
+  local commit_count=$(printf '%s\n' "$plan" | jq '.commits | length')
 
-  if [ "$debug" -eq 1 ]; then
-    echo "[DEBUG] Staged files: $(echo "$staged_files" | tr '\n' ', ' | sed 's/,$//')"
-    echo "[DEBUG] Calling Claude CLI..."
-  fi
+  echo ""
+  echo "═══════════════════════════════════════════════════════"
+  echo "                   COMMIT PLAN"
+  echo "═══════════════════════════════════════════════════════"
 
-  # Get structured commit plan from Claude
-  local raw_response
-  local plan
+  for i in $(seq 0 $((commit_count - 1))); do
+    local order=$(printf '%s\n' "$plan" | jq -r ".commits[$i].order // $((i + 1))")
+    local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
+    local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
+    local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
+    local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
+    local fc=$(printf '%s\n' "$files" | grep -c . 2>/dev/null || echo "0")
 
-  raw_response=$(claude --model haiku --output-format json -p "Analyze the staged git changes (run git diff --cached). Return a JSON array of atomic commits.
+    echo ""
+    echo "  [$order] $msg"
+    [[ -n "$body" ]] && echo "       $body"
+    [[ -n "$footer" ]] && echo "       $footer"
+    echo "       Files ($fc): $(printf '%s\n' "$files" | head -5 | tr '\n' ' ')$([ "$fc" -gt 5 ] && echo "...")"
+  done
 
-Each commit object: {\"message\": \"conventional commit message\", \"files\": [\"file1.txt\", \"file2.txt\"]}
+  echo ""
+  echo "═══════════════════════════════════════════════════════"
+}
 
-Return ONLY the JSON array, no explanation." 2>&1)
+_gcai_execute() {
+  local plan="$1"
+  local commit_count=$(printf '%s\n' "$plan" | jq '.commits | length')
 
-  local claude_exit_code=$?
+  # Unstage everything first
+  git reset HEAD --quiet 2>/dev/null
 
-  if [ "$debug" -eq 1 ]; then
-    echo "[DEBUG] Claude CLI exit code: $claude_exit_code"
-    echo "[DEBUG] Raw response (first 500 chars): ${raw_response:0:500}"
-  fi
+  for i in $(seq 0 $((commit_count - 1))); do
+    local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
+    local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
+    local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
+    local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
 
-  if [ $claude_exit_code -ne 0 ]; then
-    if [ "$debug" -eq 1 ]; then
-      echo "[DEBUG] Claude CLI stderr: $raw_response"
+    echo ""
+    echo "Creating commit $((i + 1))/$commit_count: $msg"
+
+    # Stage files for this commit
+    local staged_count=0
+    while IFS= read -r file; do
+      [[ -z "$file" ]] && continue
+      if [[ -e "$file" ]] || git ls-files --deleted 2>/dev/null | grep -q "^${file}$"; then
+        git add -- "$file" 2>/dev/null && ((staged_count++))
+      else
+        echo "  Warning: file not found: $file"
+      fi
+    done <<< "$files"
+
+    # Build full commit message
+    local full_message="$msg"
+    if [[ -n "$body" ]]; then
+      full_message="${full_message}
+
+${body}"
     fi
+    if [[ -n "$footer" ]]; then
+      full_message="${full_message}
+
+${footer}"
+    fi
+
+    # Create commit
+    if [[ -n "$(git diff --cached --name-only)" ]]; then
+      printf '%s\n' "$full_message" | git commit -F -
+    else
+      echo "  Warning: no files staged for this commit (may already be committed or missing)"
+    fi
+  done
+
+  echo ""
+  echo "Done! Recent commits:"
+  git log --oneline "-${commit_count}"
+}
+
+_gcai_call_claude() {
+  local model="$1"
+  local budget="$2"
+  local staged_only="$3"
+  local debug="$4"
+
+  local schema='{
+    "type": "object",
+    "properties": {
+      "commits": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "order": { "type": "integer" },
+            "message": { "type": "string", "description": "Header: type(scope): subject — imperative, lowercase, no period, max 72 chars" },
+            "body": { "type": "string", "description": "Body: explain WHY the change was made, wrap at 72 chars" },
+            "footer": { "type": "string", "description": "Footer: BREAKING CHANGE notes, Closes/Fixes/Refs #issue, etc." },
+            "files": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["order", "message", "body", "files"]
+        }
+      }
+    },
+    "required": ["commits"]
+  }'
+
+  local system_prompt="You are an expert at analyzing git diffs and creating atomic, well-organized commits following the Angular Conventional Commits standard.
+
+HEADER (\"message\" field):
+- Format: type(scope): subject
+- Valid types: feat, fix, refactor, docs, chore, ci, test, perf, build, style
+- scope is optional but recommended when applicable (e.g. feat(auth): add login endpoint)
+- subject: imperative mood, lowercase first letter, no period at end, max 72 chars
+
+BODY (\"body\" field — required):
+- Explain WHY the change was made, not what changed (the diff shows that)
+- Use imperative tense (\"add\" not \"added\")
+- Wrap at 72 characters
+
+FOOTER (\"footer\" field — optional):
+- BREAKING CHANGE: description of what breaks and migration path
+- Closes #N, Fixes #N, Refs #N for issue references
+- Only include when relevant
+
+COMMIT ORGANIZATION:
+- Each commit must be atomic: one logical change per commit
+- Every changed file must appear in exactly one commit
+- Order: infrastructure/config -> core library -> features -> tests -> docs
+- File paths must be relative to the repository root and match exactly as git reports them"
+
+  local user_prompt
+  if [[ "$staged_only" -eq 1 ]]; then
+    user_prompt="Analyze the staged git changes and group them into atomic commits.
+Use \`git diff --cached\` and \`git diff --cached --stat\` to inspect what's staged."
+  else
+    user_prompt="Analyze all git changes (staged, unstaged, and untracked) and group them into atomic commits.
+Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porcelain\`, and \`git ls-files --others --exclude-standard\` to inspect changes."
+  fi
+
+  [[ "$debug" -eq 1 ]] && echo "[DEBUG] Calling Claude (model=$model, budget=$budget)..." >&2
+
+  local raw_response
+  raw_response=$(claude \
+    --model "$model" \
+    --allowed-tools "Bash(git:*)" \
+    --json-schema "$schema" \
+    --output-format json \
+    --max-budget-usd "$budget" \
+    --system-prompt "$system_prompt" \
+    -p "$user_prompt" 2>&1)
+
+  local exit_code=$?
+
+  if [[ "$debug" -eq 1 ]]; then
+    echo "[DEBUG] Claude exit code: $exit_code" >&2
+    echo "[DEBUG] Raw response (first 500 chars): ${raw_response:0:500}" >&2
+  fi
+
+  if [[ "$exit_code" -ne 0 ]]; then
+    echo "error: Claude CLI failed (exit $exit_code)" >&2
+    [[ "$debug" -eq 1 ]] && echo "[DEBUG] Full response: $raw_response" >&2
+    return 1
+  fi
+
+  # With --json-schema + --output-format json, structured output is in .structured_output
+  local parsed
+  parsed=$(printf '%s\n' "$raw_response" | jq '.structured_output' 2>/dev/null)
+
+  if [[ -z "$parsed" ]] || [[ "$parsed" == "null" ]]; then
+    echo "error: empty structured_output from Claude" >&2
+    [[ "$debug" -eq 1 ]] && echo "[DEBUG] Full response: $raw_response" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$parsed"
+}
+
+# --- Main function ---
+
+gcai() {
+  local staged_only=0
+  local model="${GCAI_MODEL:-haiku}"
+  local budget="${GCAI_BUDGET:-0.50}"
+  local debug="${GCAI_DEBUG:-0}"
+  local dry_run=0
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --staged|-s)  staged_only=1; shift ;;
+      --model|-m)   model="$2"; shift 2 ;;
+      --dry-run|-n) dry_run=1; shift ;;
+      --debug|-d)   debug=1; shift ;;
+      --help|-h)
+        echo "Usage: gcai [--staged|-s] [--model|-m MODEL] [--dry-run|-n] [--debug|-d]"
+        echo ""
+        echo "Options:"
+        echo "  --staged, -s    Only analyze staged changes (default: all changes)"
+        echo "  --model, -m     Claude model to use (default: haiku, env: GCAI_MODEL)"
+        echo "  --dry-run, -n   Display plan without executing"
+        echo "  --debug, -d     Show debug info (env: GCAI_DEBUG=1)"
+        echo ""
+        echo "Environment:"
+        echo "  GCAI_MODEL      Default model (default: haiku)"
+        echo "  GCAI_BUDGET     Max budget in USD (default: 0.50)"
+        echo "  GCAI_DEBUG      Enable debug output (0/1)"
+        return 0
+        ;;
+      *) echo "Unknown option: $1"; return 1 ;;
+    esac
+  done
+
+  # Check we're in a git repo
+  if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "Not in a git repository"
+    return 1
+  fi
+
+  # Check for changes
+  local has_changes=0
+  if [[ "$staged_only" -eq 1 ]]; then
+    [[ -n "$(git diff --cached --name-only)" ]] && has_changes=1
+  else
+    [[ -n "$(git status --porcelain)" ]] && has_changes=1
+  fi
+
+  if [[ "$has_changes" -eq 0 ]]; then
+    echo "No changes to commit"
+    return 1
+  fi
+
+  echo "Analyzing changes with Claude..."
+
+  # Call Claude (it will inspect the repo itself via git tools)
+  local plan
+  plan=$(_gcai_call_claude "$model" "$budget" "$staged_only" "$debug")
+
+  if [[ $? -ne 0 ]] || [[ -z "$plan" ]]; then
     echo "Failed to generate commit plan"
     return 1
   fi
 
-  if [ "$debug" -eq 1 ]; then
-    local extracted=$(printf '%s\n' "$raw_response" | jq -r '.result')
-    echo "[DEBUG] Extracted result before sed:"
-    printf '%s\n' "$extracted" | head -n 20
-    echo "[DEBUG] After sed (removing backticks):"
-    printf '%s\n' "$extracted" | sed '/^```/d' | head -n 20
-  fi
-
-  plan=$(printf '%s\n' "$raw_response" | jq -r '.result' | sed '/^```/d' | jq '.')
-  local jq_exit_code=$?
-
-  if [ "$debug" -eq 1 ]; then
-    echo "[DEBUG] jq exit code: $jq_exit_code"
-    echo "[DEBUG] Plan after parsing (first 500 chars): ${plan:0:500}"
-  fi
-
-  if [ -z "$plan" ] || [ "$plan" = "null" ]; then
-    echo "Failed to generate commit plan"
+  # Validate plan has commits
+  local commit_count
+  commit_count=$(printf '%s\n' "$plan" | jq '.commits | length' 2>/dev/null)
+  if [[ -z "$commit_count" ]] || [[ "$commit_count" -eq 0 ]]; then
+    echo "No commits in plan"
     return 1
   fi
 
-  echo "Commit plan:"
-  echo "$plan" | jq -r '.[] | "- \(.message)\n  Files: \(.files | join(", "))\n"'
+  # Display plan
+  _gcai_display_plan "$plan"
 
-  read "confirm?Proceed with commits? [y/N] "
+  if [[ "$dry_run" -eq 1 ]]; then
+    echo ""
+    echo "(dry run - no commits created)"
+    return 0
+  fi
+
+  # Confirm
+  echo ""
+  read "confirm?Execute this plan? [y/N] "
   if [[ ! "$confirm" =~ ^[yY]$ ]]; then
     echo "Cancelled"
     return 1
   fi
 
-  # Unstage everything first
-  git reset HEAD --quiet
-
-  # Process each commit
-  local commits=("${(@f)$(echo "$plan" | jq -c '.[]')}")
-  for commit in "${commits[@]}"; do
-    local message=$(echo "$commit" | jq -r '.message')
-    local files=("${(@f)$(echo "$commit" | jq -r '.files[]')}")
-
-    for file in "${files[@]}"; do
-      if ! git add "$git_root/$file"; then
-        echo "Failed to stage file: $file"
-        return 1
-      fi
-    done
-
-    if ! git commit -m "$message"; then
-      echo "Commit failed: $message"
-      return 1
-    fi
-  done
-
-  echo "Done!"
+  # Execute
+  _gcai_execute "$plan"
 }
