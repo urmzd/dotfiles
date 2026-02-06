@@ -114,9 +114,11 @@ _gcai_call_claude() {
   local system_prompt="You are an expert at analyzing git diffs and creating atomic, well-organized commits following the Angular Conventional Commits standard.
 
 HEADER (\"message\" field):
+- Must match this regex: (?s)(build|bump|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\\(\\S+\\))?!?: ([^\\n\\r]+)((\\n\\n.*)|(\\s*))?$
 - Format: type(scope): subject
-- Valid types: feat, fix, refactor, docs, chore, ci, test, perf, build, style
-- scope is optional but recommended when applicable (e.g. feat(auth): add login endpoint)
+- Valid types ONLY: build, bump, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+- NEVER invent types. Words like db, auth, api, etc. are scopes, not types. Use the semantically correct type for the change (e.g. feat(db): add user cache migration, fix(auth): resolve token expiry)
+- scope is optional but recommended when applicable
 - subject: imperative mood, lowercase first letter, no period at end, max 72 chars
 
 BODY (\"body\" field — required):
