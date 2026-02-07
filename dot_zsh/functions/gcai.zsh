@@ -34,6 +34,11 @@ _gcai_display_plan() {
 _gcai_execute() {
   local plan="$1"
   local commit_count=$(printf '%s\n' "$plan" | jq '.commits | length')
+  local git_root
+  git_root=$(git rev-parse --show-toplevel)
+
+  # Run from repo root so repo-relative paths resolve correctly
+  pushd "$git_root" >/dev/null
 
   # Unstage everything first
   git reset HEAD --quiet 2>/dev/null
@@ -78,6 +83,8 @@ ${footer}"
       echo "  Warning: no files staged for this commit (may already be committed or missing)"
     fi
   done
+
+  popd >/dev/null
 
   echo ""
   echo "Done! Recent commits:"
