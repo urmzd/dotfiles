@@ -26,6 +26,11 @@ if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
+# Rust toolchain (rustup)
+if [ -d "$HOME/.cargo/bin" ]; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+fi
+
 {{- if .is_personal }}
 # Personal machine environment variables
 # Add any personal-specific environment setup here
