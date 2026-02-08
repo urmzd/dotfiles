@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+
+# Chezmoi run_once script - installs packages based on system detection
+# This runs once before applying dotfiles
+
+set -euo pipefail
+
+echo "🔧 Installing packages for {{ .chezmoi.os }}/{{ .chezmoi.arch }}..."
+
+{{- if .is_macos }}
+# macOS package installation
+
+# Install Xcode Command Line Tools if not present
+if ! xcode-select -p >/dev/null 2>&1; then
+    echo "🔨 Installing Xcode Command Line Tools..."
+    xcode-select --install
+
+    # Wait for installation to complete
+    echo "⏳ Waiting for Xcode Command Line Tools installation..."
+    local retries=0
+    until xcode-select -p >/dev/null 2>&1; do
+        sleep 5
+        retries=$((retries + 1))
+        if [ "$retries" -ge 60 ]; then
+            echo "❌ Xcode Command Line Tools installation timed out"
+            exit 1
+        fi
+    done
+    echo "✅ Xcode Command Line Tools installed"
+else
+    echo "✅ Xcode Command Line Tools already installed"
+fi
+
+if command -v brew >/dev/null 2>&1; then
+    echo "📦 Installing Homebrew packages..."
+
+    # Essential tools (minimal set, most tools managed by Nix)
+    brew_packages=(
+        # Only install Homebrew packages not available or better via Nix
+        # Note: git, fzf, ripgrep, tree, jq, yq, just, gh are in Nix flake
+        "reattach-to-user-namespace"  # Required for tmux clipboard integration on macOS
+    )
+
+    for package in "${brew_packages[@]}"; do
+        if ! brew list "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            brew install "$package"
+        fi
+    done
+
+    # NOTE: Brewfile packages are handled by run_onchange_before_brewfile-install.sh.tmpl
+    # which re-runs automatically whenever the Brewfile content changes.
+
+    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
+    # Uncomment below if you want conditional Nix installation after bootstrap
+    # if ! command -v nix >/dev/null 2>&1; then
+    #     echo "🗄️ Installing Nix package manager..."
+    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+    #
+    #     # Enable flakes
+    #     mkdir -p ~/.config/nix
+    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    # fi
+
+    echo "🗄️ Most development tools are managed by Nix (see flake.nix)"
+    echo "🔄 Essential tools like git, fzf, ripgrep, direnv, just, gh are in the Nix flake"
+
+else
+    echo "⚠️ Homebrew not found. Please install it first."
+fi
+
+# Install Oh My Zsh if not present
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "🐚 Installing Oh My Zsh..."
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo "✅ Oh My Zsh already installed"
+fi
+
+# Install plugins and themes in parallel where possible
+P10K_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+ZSH_COMPLETIONS_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions"
+TPM_PATH="$HOME/.config/tmux/plugins/tpm"
+CATPPUCCIN_PATH="$HOME/.config/tmux/plugins/catppuccin"
+
+_clone_pids=()
+
+# Powerlevel10k
+if [ ! -d "$P10K_PATH" ]; then
+    echo "⚡ Installing Powerlevel10k theme..."
+    (git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_PATH" \
+        && echo "✅ Powerlevel10k installed" \
+        || echo "❌ Failed to clone Powerlevel10k") &
+    _clone_pids+=($!)
+else
+    echo "✅ Powerlevel10k already installed"
+fi
+
+# zsh-completions
+if [ ! -d "$ZSH_COMPLETIONS_PATH" ]; then
+    echo "🧠 Installing zsh-completions plugin..."
+    (git clone https://github.com/zsh-users/zsh-completions "$ZSH_COMPLETIONS_PATH" \
+        && echo "✅ zsh-completions installed" \
+        || echo "❌ Failed to clone zsh-completions") &
+    _clone_pids+=($!)
+else
+    echo "✅ zsh-completions already installed"
+fi
+
+# TPM (Tmux Plugin Manager)
+if [ ! -d "$TPM_PATH" ]; then
+    echo "🔌 Installing TPM (Tmux Plugin Manager)..."
+    mkdir -p "$(dirname "$TPM_PATH")"
+    (git clone https://github.com/tmux-plugins/tpm "$TPM_PATH" \
+        && chmod +x "$TPM_PATH/tpm" \
+        && echo "✅ TPM installed. Run 'tmux' and press 'prefix + I' to install plugins" \
+        || echo "❌ Failed to clone TPM") &
+    _clone_pids+=($!)
+else
+    echo "✅ TPM already installed"
+fi
+
+# Catppuccin tmux theme
+if [ ! -d "$CATPPUCCIN_PATH/tmux" ]; then
+    echo "🎨 Installing Catppuccin tmux theme..."
+    mkdir -p "$CATPPUCCIN_PATH"
+    (git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$CATPPUCCIN_PATH/tmux" \
+        && echo "✅ Catppuccin tmux theme installed" \
+        || echo "❌ Failed to clone Catppuccin tmux theme") &
+    _clone_pids+=($!)
+else
+    echo "✅ Catppuccin tmux theme already installed"
+fi
+
+# Wait for all parallel clones to finish
+_clone_failed=0
+for pid in "${_clone_pids[@]}"; do
+    if ! wait "$pid"; then
+        _clone_failed=1
+    fi
+done
+
+if [ "$_clone_failed" -ne 0 ]; then
+    echo "❌ One or more git clones failed"
+    exit 1
+fi
+
+# Cyberdream themes (depends on catppuccin being cloned)
+CYBERDREAM_THEME="$CATPPUCCIN_PATH/tmux/themes/catppuccin_cyberdream_tmux.conf"
+if [ ! -f "$CYBERDREAM_THEME" ]; then
+    echo "🌊 Installing Cyberdream theme..."
+
+    CYBERDREAM_NVIM_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/tmux/cyberdream.conf"
+    if [ -f "$CYBERDREAM_NVIM_PATH" ]; then
+        cp "$CYBERDREAM_NVIM_PATH" "$CYBERDREAM_THEME"
+        echo "✅ Cyberdream theme copied from nvim plugin"
+    else
+        curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME" || {
+            echo "⚠️ Failed to download cyberdream theme, will be installed later"
+        }
+    fi
+else
+    echo "✅ Cyberdream theme already installed"
+fi
+
+GHOSTTY_THEMES_DIR="$HOME/.config/ghostty/themes"
+GHOSTTY_CYBERDREAM_THEME="$GHOSTTY_THEMES_DIR/cyberdream"
+if [ ! -f "$GHOSTTY_CYBERDREAM_THEME" ]; then
+    echo "🌊 Installing Cyberdream Ghostty theme..."
+    mkdir -p "$GHOSTTY_THEMES_DIR"
+
+    CYBERDREAM_GHOSTTY_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/ghostty/cyberdream"
+    if [ -f "$CYBERDREAM_GHOSTTY_PATH" ]; then
+        cp "$CYBERDREAM_GHOSTTY_PATH" "$GHOSTTY_CYBERDREAM_THEME"
+        echo "✅ Cyberdream Ghostty theme copied from nvim plugin"
+    else
+        curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/ghostty/cyberdream -o "$GHOSTTY_CYBERDREAM_THEME" || {
+            echo "⚠️ Failed to download cyberdream Ghostty theme, will be installed later"
+        }
+    fi
+else
+    echo "✅ Cyberdream Ghostty theme already installed"
+fi
+
+{{- else if .is_linux }}
+# Linux package installation
+if command -v apt >/dev/null 2>&1; then
+    echo "📦 Installing packages with apt..."
+
+    # Update package list
+    sudo apt update
+
+    # Essential tools (minimal set, most tools managed by Nix)
+    apt_packages=(
+        # Only essential system packages, dev tools are in Nix
+        "curl"
+        "wget"
+    )
+
+    for package in "${apt_packages[@]}"; do
+        if ! dpkg -l "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo apt install -y "$package"
+        fi
+    done
+
+    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
+    # Uncomment below if you want conditional Nix installation after bootstrap
+    # if ! command -v nix >/dev/null 2>&1; then
+    #     echo "🗄️ Installing Nix package manager..."
+    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+    #
+    #     # Enable flakes
+    #     mkdir -p ~/.config/nix
+    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+    # fi
+
+elif command -v dnf >/dev/null 2>&1; then
+    echo "📦 Installing packages with dnf..."
+
+    # Fedora/RHEL packages (minimal set, most tools managed by Nix)
+    dnf_packages=(
+        # Only essential system packages, dev tools are in Nix
+        "curl"
+        "wget"
+    )
+
+    for package in "${dnf_packages[@]}"; do
+        if ! rpm -q "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo dnf install -y "$package"
+        fi
+    done
+
+elif command -v pacman >/dev/null 2>&1; then
+    echo "📦 Installing packages with pacman..."
+
+    # Arch packages (minimal set, most tools managed by Nix)
+    pacman_packages=(
+        # Only essential system packages, dev tools are in Nix
+        "curl"
+        "wget"
+    )
+
+    for package in "${pacman_packages[@]}"; do
+        if ! pacman -Q "$package" >/dev/null 2>&1; then
+            echo "Installing $package..."
+            sudo pacman -S --noconfirm "$package"
+        fi
+    done
+
+else
+    echo "⚠️ No supported package manager found"
+fi
+{{- end }}
+
+# Note: Using Nix for package management - no fallback version manager needed
+
+# Install uv (Python package manager) if not present
+if ! command -v uv >/dev/null 2>&1; then
+    echo "🐍 Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# Install rustup (Rust toolchain manager) if not present
+if ! command -v rustup >/dev/null 2>&1; then
+    echo "🦀 Installing rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    . "$HOME/.cargo/env"
+    rustup component add rust-analyzer rust-src
+fi
+
+echo "✅ Package installation completed!"

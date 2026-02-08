@@ -63,14 +63,8 @@
             python313
           ];
 
-          rust = with pkgs; [
-            rustc
-            cargo
-            rustfmt
-            clippy
-            cargo-watch
-            cargo-edit
-            cargo-outdated
+          rust = [
+            # Entire Rust toolchain managed by rustup
           ];
 
           go = with pkgs; [
@@ -222,7 +216,7 @@
                 echo "  Go: go, golangci-lint, air"
                 echo "  Java: java (JDK), mvn, gradle"
                 echo "  Lua: lua, luarocks, stylua"
-                echo "  Rust: rustc, cargo, clippy"
+                echo "  Rust: rustup (toolchain manager)"
                 echo "  CLI: git, gh, fzf, ripgrep, jq, yq, just"
                 echo ""
                 echo "Specialized environments:"
@@ -287,8 +281,9 @@
             packages = toolsets.common ++ toolsets.rust;
             welcome = ''
               echo "🦀 Rust Development Environment"
-              echo "Rust: $(rustc --version)"
-              echo "Cargo: $(cargo --version)"
+              echo "Rust: $(rustc --version 2>/dev/null || echo 'not found - install rustup')"
+              echo "Cargo: $(cargo --version 2>/dev/null || echo 'not found')"
+              echo "Toolchain managed by rustup"
               echo ""
             '';
             extraHook = ''export RUST_BACKTRACE=1'';
@@ -384,7 +379,7 @@
               echo "Languages:"
               echo "  • JavaScript/TypeScript: $(node --version)"
               echo "  • Python: $(python --version)"
-              echo "  • Rust: $(rustc --version | cut -d' ' -f2)"
+              echo "  • Rust: $(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'not found - install rustup')"
               echo "  • Go: $(go version | cut -d' ' -f3)"
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo "  • Java: $(java -version 2>&1 | head -1)"
