@@ -79,6 +79,7 @@
             gotools
             go-migrate
             air
+            goreleaser
           ];
 
           devops = with pkgs; [
