@@ -207,6 +207,8 @@ require("lazy").setup({
 				"bashls",
 				"ts_ls",
 				"marksman",
+				"mdx_analyzer",
+				"astro",
 			},
 			automatic_enable = true,
 		},
@@ -943,6 +945,7 @@ require("lazy").setup({
 				markdown = { "prettierd" },
 				html = { "prettierd" },
 				css = { "prettierd" },
+				astro = { "prettierd" },
 				terraform = { lsp_format = "prefer" },
 			},
 			format_on_save = {
