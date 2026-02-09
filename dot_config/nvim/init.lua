@@ -849,7 +849,7 @@ require("lazy").setup({
 		},
 		version = "1.*",
 		opts = {
-			cmdline = { keymap = { preset = "inherit" } },
+			cmdline = { keymap = { preset = "default" } },
 			keymap = {
 				preset = "default",
 				["<CR>"] = { "select_and_accept", "fallback" },
