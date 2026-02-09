@@ -20,5 +20,9 @@ cask "font-monaspace-nerd-font"  # MonaspiceNe Nerd Font (Monaspace Neon)
 cask "font-iosevka-nerd-font"    # Iosevka Nerd Font (https://typeof.net/Iosevka/)
 # cask "font-meslo-lg-nerd-font" # MesloLGS Nerd Font (legacy, replaced by MonaspiceNe)
 
+# Demo / CLI Recording
+brew "vhs"   # Declarative CLI recordings via .tape files
+brew "ttyd"  # Share terminal over the web
+
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)

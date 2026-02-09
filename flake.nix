@@ -102,6 +102,7 @@
             maven
             gradle
           ];
+
         };
 
         # Adds completions for every package in the shell that exposes zsh functions
