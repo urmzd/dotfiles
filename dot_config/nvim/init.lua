@@ -172,6 +172,16 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+vim.lsp.config("mdx_analyzer", {
+	capabilities = {
+		workspace = {
+			didChangeWatchedFiles = {
+				dynamicRegistration = false,
+			},
+		},
+	},
+})
+
 require("lazy").setup({
 	{ "neovim/nvim-lspconfig" },
 	{
