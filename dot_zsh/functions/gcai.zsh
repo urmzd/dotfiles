@@ -31,6 +31,74 @@ _gcai_display_plan() {
   echo "═══════════════════════════════════════════════════════"
 }
 
+_gcai_validate_plan() {
+  local plan="$1"
+
+  # Extract all files from all commits, find duplicates
+  local dupes
+  dupes=$(printf '%s\n' "$plan" | jq -r '.commits[].files[]' | sort | uniq -d)
+
+  if [[ -z "$dupes" ]]; then
+    # No shared files — plan is clean
+    printf '%s\n' "$plan"
+    return 0
+  fi
+
+  echo "" >&2
+  echo "Notice: shared files detected across commits — merging affected commits." >&2
+  echo "Shared files: $(echo "$dupes" | tr '\n' ' ')" >&2
+
+  # Build a jq filter that partitions commits into tainted/clean, then merges tainted
+  local merged
+  merged=$(printf '%s\n' "$plan" | jq --arg dupes "$dupes" '
+    # Split duplicate file list into an array
+    ($dupes | split("\n") | map(select(. != ""))) as $dup_list |
+
+    # Partition commits
+    .commits | group_by(
+      [.files[] | select(. as $f | $dup_list | any(. == $f))] | length > 0
+    ) |
+
+    # group_by produces [[false-group], [true-group]] sorted by key
+    (map(select(.[0].files as $f |
+      [$f[] | select(. as $ff | $dup_list | any(. == $ff))] | length == 0
+    )) | flatten) as $clean |
+
+    (map(select(.[0].files as $f |
+      [$f[] | select(. as $ff | $dup_list | any(. == $ff))] | length > 0
+    )) | flatten) as $tainted |
+
+    # Merge all tainted commits into one
+    ($tainted | {
+      order: 1,
+      message: (if length == 1 then .[0].message
+                else .[0].message end),
+      body: ([.[] | .body // empty] | join("\n\n")),
+      footer: ([.[] | .footer // empty | select(. != "")] | join("\n")),
+      files: ([.[] | .files[]] | unique)
+    }) as $merged |
+
+    # Re-number: merged first, then clean commits
+    {
+      commits: (
+        [$merged] +
+        [$clean[] | .order = null] |
+        to_entries |
+        map(.value.order = (.key + 1) | .value)
+      )
+    }
+  ')
+
+  if [[ $? -ne 0 ]] || [[ -z "$merged" ]]; then
+    echo "Warning: plan merge failed, using original plan" >&2
+    printf '%s\n' "$plan"
+    return 0
+  fi
+
+  printf '%s\n' "$merged"
+  return 2
+}
+
 _gcai_execute() {
   local plan="$1"
   local commit_count=$(printf '%s\n' "$plan" | jq '.commits | length')
@@ -39,56 +107,57 @@ _gcai_execute() {
 
   # Run from repo root so repo-relative paths resolve correctly
   pushd "$git_root" >/dev/null
+  {
+    # Unstage everything first
+    git reset HEAD --quiet 2>/dev/null
 
-  # Unstage everything first
-  git reset HEAD --quiet 2>/dev/null
+    for i in $(seq 0 $((commit_count - 1))); do
+      local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
+      local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
+      local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
+      local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
 
-  for i in $(seq 0 $((commit_count - 1))); do
-    local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
-    local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
-    local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
-    local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
+      echo ""
+      echo "Creating commit $((i + 1))/$commit_count: $msg"
 
-    echo ""
-    echo "Creating commit $((i + 1))/$commit_count: $msg"
+      # Stage files for this commit
+      local staged_count=0
+      while IFS= read -r file; do
+        [[ -z "$file" ]] && continue
+        if [[ -e "$file" ]] || git ls-files --deleted 2>/dev/null | grep -q "^${file}$"; then
+          git add -- "$file" 2>/dev/null && ((staged_count++))
+        else
+          echo "  Warning: file not found: $file"
+        fi
+      done <<< "$files"
 
-    # Stage files for this commit
-    local staged_count=0
-    while IFS= read -r file; do
-      [[ -z "$file" ]] && continue
-      if [[ -e "$file" ]] || git ls-files --deleted 2>/dev/null | grep -q "^${file}$"; then
-        git add -- "$file" 2>/dev/null && ((staged_count++))
-      else
-        echo "  Warning: file not found: $file"
-      fi
-    done <<< "$files"
-
-    # Build full commit message
-    local full_message="$msg"
-    if [[ -n "$body" ]]; then
-      full_message="${full_message}
+      # Build full commit message
+      local full_message="$msg"
+      if [[ -n "$body" ]]; then
+        full_message="${full_message}
 
 ${body}"
-    fi
-    if [[ -n "$footer" ]]; then
-      full_message="${full_message}
+      fi
+      if [[ -n "$footer" ]]; then
+        full_message="${full_message}
 
 ${footer}"
-    fi
+      fi
 
-    # Create commit
-    if [[ -n "$(git diff --cached --name-only)" ]]; then
-      printf '%s\n' "$full_message" | git commit -F -
-    else
-      echo "  Warning: no files staged for this commit (may already be committed or missing)"
-    fi
-  done
+      # Create commit
+      if [[ -n "$(git diff --cached --name-only)" ]]; then
+        printf '%s\n' "$full_message" | git commit -F -
+      else
+        echo "  Warning: no files staged for this commit (may already be committed or missing)"
+      fi
+    done
 
-  popd >/dev/null
-
-  echo ""
-  echo "Done! Recent commits:"
-  git log --oneline "-${commit_count}"
+    echo ""
+    echo "Done! Recent commits:"
+    git log --oneline "-${commit_count}"
+  } always {
+    popd >/dev/null 2>&1
+  }
 }
 
 _gcai_call_claude() {
@@ -141,6 +210,8 @@ FOOTER (\"footer\" field — optional):
 COMMIT ORGANIZATION:
 - Each commit must be atomic: one logical change per commit
 - Every changed file must appear in exactly one commit
+- CRITICAL: A file must NEVER appear in more than one commit. The execution engine stages entire files, not individual hunks. Splitting one file across commits will fail.
+- If one file contains multiple logical changes, place it in the most fitting commit and note the secondary changes in that commit's body.
 - Order: infrastructure/config -> core library -> features -> tests -> docs
 - File paths must be relative to the repository root and match exactly as git reports them"
 
@@ -263,6 +334,9 @@ gcai() {
     echo "No commits in plan"
     return 1
   fi
+
+  # Validate no shared files across commits; merge if needed
+  plan=$(_gcai_validate_plan "$plan")
 
   # Display plan
   _gcai_display_plan "$plan"
