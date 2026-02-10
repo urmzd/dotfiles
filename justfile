@@ -2,9 +2,6 @@
 default:
     @just --list
 
-security-audit:
-    ./security-audit.sh
-
 # ===========================================
 # Nix management
 # ===========================================
@@ -35,3 +32,4 @@ status:
     @echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed (run: curl -fsSL https://claude.ai/install.sh | bash)"
     @echo -n "  codex: "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $$2}' || echo "not installed"
     @echo -n "  gemini: "; npm list -g @google/gemini-cli 2>/dev/null | grep @google/gemini-cli | awk '{print $$2}' || echo "not installed"
+    @echo -n "  github-copilot: "; npm list -g @github/copilot 2>/dev/null | grep @githubnext/github-copilot-cli | awk '{print $$2}' || echo "not installed"

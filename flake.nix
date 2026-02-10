@@ -37,12 +37,6 @@
             tree-sitter
           ];
 
-          ai = with pkgs; [
-            # claude-code, gemini-cli, and codex now managed via npm/npx
-            # Packages: @anthropic-ai/claude-code, @openai/codex, @google/gemini-cli
-            github-copilot-cli
-          ];
-
           cloud = with pkgs; [
             colima
             docker
@@ -61,10 +55,6 @@
 
           python = with pkgs; [
             python313
-          ];
-
-          rust = [
-            # Entire Rust toolchain managed by rustup
           ];
 
           go = with pkgs; [
@@ -176,6 +166,7 @@
             local packages=(
               "@openai/codex"
               "@google/gemini-cli"
+              "@github/copilot"
             )
 
             for pkg in "''${packages[@]}"; do
@@ -204,13 +195,13 @@
         shells = {
           default = mkDevShell {
             name = "default-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
-                echo "  AI: claude (curl), codex, gemini, copilot-cli"
+                echo "  AI: claude, codex, gemini, github-copilot (all npm)"
                 echo "  Cloud: gcloud, colima, docker"
                 echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
@@ -275,19 +266,6 @@
                 echo "Activated project venv: .venv"
               fi
             '';
-          };
-
-          rust = mkDevShell {
-            name = "rust-dev-shell";
-            packages = toolsets.common ++ toolsets.rust;
-            welcome = ''
-              echo "🦀 Rust Development Environment"
-              echo "Rust: $(rustc --version 2>/dev/null || echo 'not found - install rustup')"
-              echo "Cargo: $(cargo --version 2>/dev/null || echo 'not found')"
-              echo "Toolchain managed by rustup"
-              echo ""
-            '';
-            extraHook = ''export RUST_BACKTRACE=1'';
           };
 
           go = mkDevShell {
@@ -372,7 +350,7 @@
 
           full = mkDevShell {
             name = "full-dev-shell";
-            packages = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.rust ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
@@ -385,7 +363,7 @@
               echo "  • Lua: $(lua -v 2>&1 | head -1)"
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
-              echo "AI Tools: claude (curl), codex, gemini, copilot-cli"
+              echo "AI Tools: claude, codex, gemini, github-copilot (all npm)"
               echo "Cloud: gcloud, docker, colima"
               echo ""
             '';
@@ -407,7 +385,7 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = toolsets.common ++ toolsets.ai ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.rust ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
+            paths = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
           };
 
           # Development environments as packages
@@ -419,11 +397,6 @@
           dev-python = pkgs.buildEnv {
             name = "dev-python";
             paths = toolsets.common ++ toolsets.python;
-          };
-
-          dev-rust = pkgs.buildEnv {
-            name = "dev-rust";
-            paths = toolsets.common ++ toolsets.rust;
           };
 
         };

@@ -138,6 +138,10 @@ vim.keymap.set("n", "<Tab>", function()
 end, { desc = "Copilot NES or next buffer" })
 vim.keymap.set("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 
+-- Buffer cycling - gt prefix (like tab navigation)
+vim.keymap.set("n", "gtn", "<cmd>BufferLineCycleNext<CR>", { desc = "Go to next buffer" })
+vim.keymap.set("n", "gtp", "<cmd>BufferLineCyclePrev<CR>", { desc = "Go to previous buffer" })
+
 -- Additional buffer commands
 vim.keymap.set("n", "<leader>bp", "<cmd>BufferLinePick<CR>", { desc = "Pick buffer" })
 vim.keymap.set("n", "<leader>bc", "<cmd>bdelete<CR>", { desc = "Close buffer" })
@@ -761,6 +765,35 @@ require("lazy").setup({
 		ft = "markdown",
 	},
 	{ "j-hui/fidget.nvim", opts = {} },
+	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		opts = {
+			preset = "helix",
+			delay = 300,
+			icons = {
+				mappings = true,
+				keys = {},
+			},
+			spec = {
+				{ "<leader>b", group = "buffer" },
+				{ "<leader>d", group = "debug" },
+				{ "<leader>f", group = "find" },
+				{ "<leader>t", group = "test" },
+				{ "<leader>v", group = "vimux" },
+				{ "<leader>x", group = "trouble" },
+			},
+		},
+		keys = {
+			{
+				"<leader>?",
+				function()
+					require("which-key").show({ global = false })
+				end,
+				desc = "Buffer Local Keymaps",
+			},
+		},
+	},
 	{ "mbbill/undotree" },
 	{ "Bekaboo/deadcolumn.nvim", opts = {} },
 	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
