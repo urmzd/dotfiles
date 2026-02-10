@@ -1,11 +1,5 @@
 #!/usr/bin/env zsh
 
-# Skip .zshrc if parent is copilot (avoid session ID noise)
-parent=$(ps -h -p $PPID -o comm= 2>/dev/null)
-if [[ "$parent" == copilot* ]]; then
-  return
-fi
-
 {{- if .use_nix }}
 # Nix configuration - Load FIRST before any shell customization
 if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
