@@ -9,26 +9,30 @@ eval "$(echo "$input" | jq -r '
   @sh "duration_ms=\(.cost.total_duration_ms // 0)",
   @sh "lines_added=\(.cost.total_lines_added // 0)",
   @sh "lines_removed=\(.cost.total_lines_removed // 0)",
-  @sh "plan_file=\(.plan_file // "")",
   @sh "project_dir=\(.workspace.project_dir // "")",
+  @sh "transcript_path=\(.transcript_path // "")",
   @sh "vim_mode=\(.vim.mode // "")",
   @sh "agent_name=\(.agent.name // "")"
 ')"
 
 # --- ANSI colors ---
-RST='\033[0m'
-CYAN='\033[36m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-RED='\033[31m'
-DIM='\033[2m'
-MAGENTA='\033[35m'
-BLUE='\033[34m'
-CYAN_UL='\033[36;4m'
+RST=$'\033[0m'
+CYAN=$'\033[36m'
+GREEN=$'\033[32m'
+YELLOW=$'\033[33m'
+RED=$'\033[31m'
+DIM=$'\033[2m'
+MAGENTA=$'\033[35m'
+BLUE=$'\033[34m'
+CYAN_UL=$'\033[36;4m'
+
+# --- OSC 8 hyperlink helpers ---
+LINK_OPEN=$'\033]8;;'
+LINK_CLOSE=$'\033\\'
 
 # --- Fallback ---
 if [ "$window_size" -le 0 ] 2>/dev/null; then
-  printf '%b\n' "[....................] --% | ?"
+  printf '%s\n' "[....................] --% | ?"
   exit 0
 fi
 
@@ -46,18 +50,19 @@ fmt_k() {
 GIT_CACHE="/tmp/claude-statusline-git.cache"
 GIT_TTL=5
 
-cache_is_fresh() {
-  [ -f "$GIT_CACHE" ] || return 1
+file_is_fresh() {
+  local file="$1" ttl="$2"
+  [ -f "$file" ] || return 1
   local now file_mtime age
   now=$(date +%s)
   # macOS stat vs Linux stat
-  if file_mtime=$(stat -f %m "$GIT_CACHE" 2>/dev/null); then
+  if file_mtime=$(stat -f %m "$file" 2>/dev/null); then
     :
   else
-    file_mtime=$(stat -c %Y "$GIT_CACHE" 2>/dev/null) || return 1
+    file_mtime=$(stat -c %Y "$file" 2>/dev/null) || return 1
   fi
   age=$((now - file_mtime))
-  [ "$age" -lt "$GIT_TTL" ]
+  [ "$age" -lt "$ttl" ]
 }
 
 refresh_git_cache() {
@@ -74,7 +79,7 @@ refresh_git_cache() {
   printf '%s\n%s\n%s\n%s\n' "$branch" "$staged" "$modified" "$remote" > "$GIT_CACHE"
 }
 
-if ! cache_is_fresh; then
+if ! file_is_fresh "$GIT_CACHE" "$GIT_TTL"; then
   refresh_git_cache
 fi
 
@@ -84,6 +89,61 @@ fi
   IFS= read -r git_modified
   IFS= read -r git_remote
 } < "$GIT_CACHE"
+
+# --- Usage limit caching ---
+USAGE_CACHE="/tmp/claude-statusline-usage.cache"
+USAGE_TTL=60
+
+refresh_usage_cache() {
+  local creds token response five_hour seven_day
+  creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null) || { echo "0 0" > "$USAGE_CACHE"; return; }
+  token=$(echo "$creds" | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null) || { echo "0 0" > "$USAGE_CACHE"; return; }
+  [ -n "$token" ] || { echo "0 0" > "$USAGE_CACHE"; return; }
+  response=$(curl -s --max-time 3 \
+    -H "Authorization: Bearer $token" \
+    -H "anthropic-beta: oauth-2025-04-20" \
+    "https://api.anthropic.com/api/oauth/usage" 2>/dev/null) || { echo "0 0" > "$USAGE_CACHE"; return; }
+  five_hour=$(echo "$response" | jq -r '.five_hour.utilization // 0' 2>/dev/null) || five_hour=0
+  seven_day=$(echo "$response" | jq -r '.seven_day.utilization // 0' 2>/dev/null) || seven_day=0
+  echo "$five_hour $seven_day" > "$USAGE_CACHE"
+}
+
+if ! file_is_fresh "$USAGE_CACHE" "$USAGE_TTL"; then
+  refresh_usage_cache
+fi
+
+read -r usage_5h usage_7d < "$USAGE_CACHE" 2>/dev/null || { usage_5h=0; usage_7d=0; }
+
+# --- Plan detection caching ---
+PLAN_CACHE="/tmp/claude-statusline-plan.cache"
+PLAN_TTL=10
+
+refresh_plan_cache() {
+  local plan_name=""
+  if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
+    local match
+    match=$(grep -o '\.claude/plans/[^"]*\.md' "$transcript_path" 2>/dev/null | tail -1)
+    if [ -n "$match" ]; then
+      plan_name=$(basename "$match" .md)
+    fi
+  fi
+  echo "$transcript_path $plan_name" > "$PLAN_CACHE"
+}
+
+# Refresh if cache is stale or transcript_path changed
+plan_name=""
+if file_is_fresh "$PLAN_CACHE" "$PLAN_TTL"; then
+  read -r cached_transcript cached_plan < "$PLAN_CACHE" 2>/dev/null
+  if [ "$cached_transcript" = "$transcript_path" ]; then
+    plan_name="$cached_plan"
+  else
+    refresh_plan_cache
+    read -r _ plan_name < "$PLAN_CACHE" 2>/dev/null
+  fi
+else
+  refresh_plan_cache
+  read -r _ plan_name < "$PLAN_CACHE" 2>/dev/null
+fi
 
 # --- Convert SSH remote to HTTPS URL ---
 github_url=""
@@ -125,15 +185,36 @@ fi
 
 # GitHub clickable link (OSC 8)
 if [ -n "$github_url" ]; then
-  line1="${line1} \033]8;;${github_url}\033\\${CYAN_UL}GitHub>${RST}\033]8;;\033\\"
+  line1="${line1} ${LINK_OPEN}${github_url}${LINK_CLOSE}${CYAN_UL}GitHub>${RST}${LINK_OPEN}${LINK_CLOSE}"
 fi
 
 # Plan status
-if [ -n "$plan_file" ]; then
-  plan_name=$(basename "$plan_file")
+if [ -n "$plan_name" ]; then
   line1="${line1} | ${GREEN}plan:${plan_name}${RST}"
 else
   line1="${line1} | ${DIM}No plan${RST}"
+fi
+
+# Usage limits (color-coded)
+color_for_pct() {
+  local pct_int
+  pct_int=$(awk "BEGIN { printf \"%d\", int($1 + 0.5) }")
+  if [ "$pct_int" -ge 90 ]; then
+    printf '%s' "$RED"
+  elif [ "$pct_int" -ge 70 ]; then
+    printf '%s' "$YELLOW"
+  else
+    printf '%s' "$GREEN"
+  fi
+}
+
+five_hr_pct=$(awk "BEGIN { printf \"%d\", int(${usage_5h:-0} + 0.5) }")
+seven_day_pct=$(awk "BEGIN { printf \"%d\", int(${usage_7d:-0} + 0.5) }")
+
+if [ "$five_hr_pct" -gt 0 ] || [ "$seven_day_pct" -gt 0 ]; then
+  c5=$(color_for_pct "${usage_5h:-0}")
+  c7=$(color_for_pct "${usage_7d:-0}")
+  line1="${line1} | ${c5}5h:${five_hr_pct}%${RST} ${c7}7d:${seven_day_pct}%${RST}"
 fi
 
 # --- Line 2: Metrics ---
@@ -153,8 +234,8 @@ else
   bar_color="$RED"
 fi
 
-bar_filled=$(printf '%*s' "$filled" '' | tr ' ' '#')
-bar_empty=$(printf '%*s' "$empty" '' | tr ' ' '-')
+bar_filled=$(printf "%${filled}s" '' | sed 's/ /█/g')
+bar_empty=$(printf "%${empty}s" '' | sed 's/ /░/g')
 bar="${bar_color}${bar_filled}${DIM}${bar_empty}${RST}"
 
 # Cost (color-coded)
@@ -206,4 +287,4 @@ fi
 line2="[${bar}] ${used_pct}% $(fmt_k "$used_tokens")/$(fmt_k "$window_size") | ${cost_fmt} ${duration} ${diff_stat}${tip}${vim_indicator}${agent_indicator}"
 
 # --- Output ---
-printf '%b\n%b\n' "$line1" "$line2"
+printf '%s\n%s\n' "$line1" "$line2"
