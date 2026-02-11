@@ -154,7 +154,7 @@ ${footer}"
 
     echo ""
     echo "Done! Recent commits:"
-    git log --oneline "-${commit_count}"
+    git --no-pager log --oneline "-${commit_count}"
   } always {
     popd >/dev/null 2>&1
   }
@@ -165,6 +165,9 @@ _gcai_call_claude() {
   local budget="$2"
   local staged_only="$3"
   local debug="$4"
+
+  local git_root
+  git_root=$(git rev-parse --show-toplevel)
 
   local schema='{
     "type": "object",
@@ -226,6 +229,7 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
 
   [[ "$debug" -eq 1 ]] && echo "[DEBUG] Calling Claude (model=$model, budget=$budget)..." >&2
 
+  pushd "$git_root" >/dev/null
   local raw_response
   raw_response=$(claude \
     --model "$model" \
@@ -237,6 +241,7 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
     -p "$user_prompt" 2>&1)
 
   local exit_code=$?
+  popd >/dev/null
 
   if [[ "$debug" -eq 1 ]]; then
     echo "[DEBUG] Claude exit code: $exit_code" >&2
@@ -265,6 +270,9 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
 # --- Main function ---
 
 gcai() {
+  # Catch Ctrl-C for clean exit (zsh scopes this trap to the function call)
+  trap 'echo "\nInterrupted"; return 130' INT
+
   local staged_only=0
   local model="${GCAI_MODEL:-haiku}"
   local budget="${GCAI_BUDGET:-0.50}"
