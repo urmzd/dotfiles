@@ -240,7 +240,6 @@ core.*
 
 # Git
 .git/hooks/pre-push.local
-.git/hooks/pre-commit.local
 
 # Other VCS
 .svn/

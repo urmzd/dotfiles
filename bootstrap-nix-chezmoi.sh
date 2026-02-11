@@ -277,70 +277,6 @@ install_tpm() {
     log_success "TPM installed"
 }
 
-# Install and setup pre-commit hooks
-setup_precommit() {
-    log_info "Setting up pre-commit hooks..."
-
-    # Install pre-commit via pipx for isolation
-    if ! command -v pre-commit &> /dev/null; then
-        if command -v pipx &> /dev/null; then
-            pipx install pre-commit
-            log_success "pre-commit installed via pipx"
-        else
-            log_warn "pipx not available, skipping pre-commit installation"
-            return
-        fi
-    else
-        log_success "pre-commit is already installed"
-    fi
-
-    # Install pre-commit hooks in the dotfiles repository
-    local dotfiles_dir=$(chezmoi source-path)
-    if [[ -f "$dotfiles_dir/.pre-commit-config.yaml" ]]; then
-        cd "$dotfiles_dir"
-
-        # Check if hooks are already installed
-        local setup_complete_flag="$dotfiles_dir/.pre-commit-setup-complete"
-        local config_hash
-        config_hash=$(shasum -a 256 ".pre-commit-config.yaml" | cut -d' ' -f1)
-        local needs_setup=true
-
-        if [[ -f "$setup_complete_flag" ]]; then
-            local stored_hash
-            stored_hash=$(cat "$setup_complete_flag" 2>/dev/null || echo "")
-            if [[ "$stored_hash" == "$config_hash" ]] && [[ -f ".git/hooks/pre-commit" ]]; then
-                log_success "pre-commit hooks already installed and up-to-date"
-                needs_setup=false
-            fi
-        fi
-
-        if [[ "$needs_setup" == "true" ]]; then
-            # Install the hooks atomically
-            log_info "Installing pre-commit hooks..."
-            if pre-commit install --install-hooks; then
-                log_success "pre-commit hooks installed"
-
-                # Run hooks on all files for initial validation
-                log_info "Running pre-commit hooks on all files for validation..."
-                if pre-commit run --all-files; then
-                    log_success "All pre-commit hooks passed"
-                    # Mark setup as complete with config hash
-                    echo "$config_hash" > "$setup_complete_flag"
-                else
-                    log_warn "Some pre-commit hooks failed - review output above"
-                    log_info "You can fix issues and run 'pre-commit run --all-files' again"
-                    # Don't mark as complete if hooks failed
-                fi
-            else
-                log_error "Failed to install pre-commit hooks"
-                return 1
-            fi
-        fi
-    else
-        log_warn "No .pre-commit-config.yaml found, skipping hook installation"
-    fi
-}
-
 # Setup dotfiles repository via chezmoi
 setup_dotfiles_repo() {
     log_info "Setting up dotfiles repository via chezmoi..."
@@ -623,7 +559,6 @@ ${BLUE}What was installed:${NC}
 ✓ System tools (reattach-to-user-namespace, etc.)
 ✓ Chezmoi for dotfiles management
 ✓ direnv for automatic environment switching
-✓ pre-commit hooks for code quality and security
 ✓ AI CLI tools (Claude Code, Gemini CLI, and optionally Codex)
 ✓ Your dotfiles repository and configurations
 ✓ Global development environment access
@@ -691,7 +626,6 @@ main() {
     chezmoi apply
 
     setup_global_direnv
-    setup_precommit
     setup_nix_environment
     setup_shell_integration
     install_gui_apps

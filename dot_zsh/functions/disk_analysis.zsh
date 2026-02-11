@@ -63,7 +63,7 @@ disk_cleanup_suggestions() {
     "$HOME/.ollama/models"
     "$HOME/.qdrant-data"
     "$HOME/.npm"
-    "$HOME/.cache/pre-commit"
+
   )
 
   echo "Cache directory sizes:"
