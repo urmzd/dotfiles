@@ -238,9 +238,6 @@ core.*
 # VERSION CONTROL ARTIFACTS
 # =============================================================================
 
-# Git
-.git/hooks/pre-push.local
-
 # Other VCS
 .svn/
 .hg/
