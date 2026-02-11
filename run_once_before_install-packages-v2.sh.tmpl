@@ -17,7 +17,7 @@ if ! xcode-select -p >/dev/null 2>&1; then
 
     # Wait for installation to complete
     echo "⏳ Waiting for Xcode Command Line Tools installation..."
-    local retries=0
+    retries=0
     until xcode-select -p >/dev/null 2>&1; do
         sleep 5
         retries=$((retries + 1))
