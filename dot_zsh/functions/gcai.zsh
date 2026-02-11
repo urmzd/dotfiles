@@ -105,59 +105,54 @@ _gcai_execute() {
   local git_root
   git_root=$(git rev-parse --show-toplevel)
 
-  # Run from repo root so repo-relative paths resolve correctly
-  pushd "$git_root" >/dev/null
-  {
-    # Unstage everything first
-    git reset HEAD --quiet 2>/dev/null
+  # Use git -C to target repo root so repo-relative paths resolve correctly
+  # Unstage everything first
+  git -C "$git_root" reset HEAD --quiet 2>/dev/null
 
-    for i in $(seq 0 $((commit_count - 1))); do
-      local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
-      local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
-      local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
-      local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
-
-      echo ""
-      echo "Creating commit $((i + 1))/$commit_count: $msg"
-
-      # Stage files for this commit
-      local staged_count=0
-      while IFS= read -r file; do
-        [[ -z "$file" ]] && continue
-        if [[ -e "$file" ]] || git ls-files --deleted 2>/dev/null | grep -q "^${file}$"; then
-          git add -- "$file" 2>/dev/null && ((staged_count++))
-        else
-          echo "  Warning: file not found: $file"
-        fi
-      done <<< "$files"
-
-      # Build full commit message
-      local full_message="$msg"
-      if [[ -n "$body" ]]; then
-        full_message="${full_message}
-
-${body}"
-      fi
-      if [[ -n "$footer" ]]; then
-        full_message="${full_message}
-
-${footer}"
-      fi
-
-      # Create commit
-      if [[ -n "$(git diff --cached --name-only)" ]]; then
-        printf '%s\n' "$full_message" | git commit -F -
-      else
-        echo "  Warning: no files staged for this commit (may already be committed or missing)"
-      fi
-    done
+  for i in $(seq 0 $((commit_count - 1))); do
+    local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
+    local body=$(printf '%s\n' "$plan" | jq -r ".commits[$i].body // empty")
+    local footer=$(printf '%s\n' "$plan" | jq -r ".commits[$i].footer // empty")
+    local files=$(printf '%s\n' "$plan" | jq -r ".commits[$i].files[]")
 
     echo ""
-    echo "Done! Recent commits:"
-    git --no-pager log --oneline "-${commit_count}"
-  } always {
-    popd >/dev/null 2>&1
-  }
+    echo "Creating commit $((i + 1))/$commit_count: $msg"
+
+    # Stage files for this commit
+    local staged_count=0
+    while IFS= read -r file; do
+      [[ -z "$file" ]] && continue
+      if [[ -e "$git_root/$file" ]] || git -C "$git_root" ls-files --deleted 2>/dev/null | grep -q "^${file}$"; then
+        git -C "$git_root" add -- "$file" 2>/dev/null && ((staged_count++))
+      else
+        echo "  Warning: file not found: $file"
+      fi
+    done <<< "$files"
+
+    # Build full commit message
+    local full_message="$msg"
+    if [[ -n "$body" ]]; then
+      full_message="${full_message}
+
+${body}"
+    fi
+    if [[ -n "$footer" ]]; then
+      full_message="${full_message}
+
+${footer}"
+    fi
+
+    # Create commit
+    if [[ -n "$(git -C "$git_root" diff --cached --name-only)" ]]; then
+      printf '%s\n' "$full_message" | git -C "$git_root" commit -F -
+    else
+      echo "  Warning: no files staged for this commit (may already be committed or missing)"
+    fi
+  done
+
+  echo ""
+  echo "Done! Recent commits:"
+  git -C "$git_root" --no-pager log --oneline "-${commit_count}"
 }
 
 _gcai_call_claude() {
@@ -229,7 +224,9 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
 
   [[ "$debug" -eq 1 ]] && echo "[DEBUG] Calling Claude (model=$model, budget=$budget)..." >&2
 
-  pushd "$git_root" >/dev/null
+  user_prompt="$user_prompt
+The git repository root is: $git_root"
+
   local raw_response
   raw_response=$(claude \
     --model "$model" \
@@ -241,7 +238,6 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
     -p "$user_prompt" 2>&1)
 
   local exit_code=$?
-  popd >/dev/null
 
   if [[ "$debug" -eq 1 ]]; then
     echo "[DEBUG] Claude exit code: $exit_code" >&2
