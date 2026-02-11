@@ -35,6 +35,8 @@
             gnupg
             coreutils
             tree-sitter
+            python3Packages.grip
+            uv
           ];
 
           cloud = with pkgs; [
