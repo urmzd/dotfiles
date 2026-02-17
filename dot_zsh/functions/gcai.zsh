@@ -1,5 +1,5 @@
 # AI-powered git commit using Claude (unified gcai)
-# Usage: gcai [--staged|-s] [--model|-m MODEL] [--dry-run|-n] [--debug|-d]
+# Usage: gcai [--staged|-s] [--model|-m MODEL] [--message|-M MSG] [--dry-run|-n] [--debug|-d]
 
 # --- Helpers ---
 
@@ -105,9 +105,12 @@ _gcai_execute() {
   local git_root
   git_root=$(git rev-parse --show-toplevel)
 
-  # Use git -C to target repo root so repo-relative paths resolve correctly
-  # Unstage everything first
-  git -C "$git_root" reset HEAD --quiet 2>/dev/null
+  # Unstage everything first (fresh repos have no HEAD, so use rm --cached)
+  if git -C "$git_root" rev-parse HEAD >/dev/null 2>&1; then
+    git -C "$git_root" reset HEAD --quiet
+  else
+    git -C "$git_root" rm --cached -r . --quiet 2>/dev/null
+  fi
 
   for i in $(seq 0 $((commit_count - 1))); do
     local msg=$(printf '%s\n' "$plan" | jq -r ".commits[$i].message")
@@ -160,6 +163,7 @@ _gcai_call_claude() {
   local budget="$2"
   local staged_only="$3"
   local debug="$4"
+  local message="$5"
 
   local git_root
   git_root=$(git rev-parse --show-toplevel)
@@ -227,8 +231,15 @@ Use \`git diff HEAD\`, \`git diff --cached\`, \`git diff\`, \`git status --porce
   user_prompt="$user_prompt
 The git repository root is: $git_root"
 
+  if [[ -n "$message" ]]; then
+    user_prompt="$user_prompt
+
+Additional context from the user:
+$message"
+  fi
+
   local raw_response
-  raw_response=$(claude \
+  raw_response=$(builtin cd -q "$git_root" && claude \
     --model "$model" \
     --allowed-tools "Bash(git:*)" \
     --json-schema "$schema" \
@@ -266,28 +277,32 @@ The git repository root is: $git_root"
 # --- Main function ---
 
 gcai() {
+  local _gcai_orig_dir="$PWD"
   # Catch Ctrl-C for clean exit (zsh scopes this trap to the function call)
-  trap 'echo "\nInterrupted"; return 130' INT
+  trap 'builtin cd -q "$_gcai_orig_dir" 2>/dev/null; echo "\nInterrupted"; return 130' INT
 
   local staged_only=0
   local model="${GCAI_MODEL:-haiku}"
   local budget="${GCAI_BUDGET:-0.50}"
   local debug="${GCAI_DEBUG:-0}"
   local dry_run=0
+  local message=""
 
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --staged|-s)  staged_only=1; shift ;;
       --model|-m)   model="$2"; shift 2 ;;
+      --message|-M) message="$2"; shift 2 ;;
       --dry-run|-n) dry_run=1; shift ;;
       --debug|-d)   debug=1; shift ;;
       --help|-h)
-        echo "Usage: gcai [--staged|-s] [--model|-m MODEL] [--dry-run|-n] [--debug|-d]"
+        echo "Usage: gcai [--staged|-s] [--model|-m MODEL] [--message|-M MSG] [--dry-run|-n] [--debug|-d]"
         echo ""
         echo "Options:"
         echo "  --staged, -s    Only analyze staged changes (default: all changes)"
         echo "  --model, -m     Claude model to use (default: haiku, env: GCAI_MODEL)"
+        echo "  --message, -M   Additional context or instructions for commit generation"
         echo "  --dry-run, -n   Display plan without executing"
         echo "  --debug, -d     Show debug info (env: GCAI_DEBUG=1)"
         echo ""
@@ -324,7 +339,7 @@ gcai() {
 
   # Call Claude (it will inspect the repo itself via git tools)
   local plan
-  plan=$(_gcai_call_claude "$model" "$budget" "$staged_only" "$debug")
+  plan=$(_gcai_call_claude "$model" "$budget" "$staged_only" "$debug" "$message")
 
   if [[ $? -ne 0 ]] || [[ -z "$plan" ]]; then
     echo "Failed to generate commit plan"
@@ -361,4 +376,6 @@ gcai() {
 
   # Execute
   _gcai_execute "$plan"
+
+  builtin cd -q "$_gcai_orig_dir" 2>/dev/null
 }
