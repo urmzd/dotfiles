@@ -223,6 +223,7 @@ require("lazy").setup({
 				"marksman",
 				"mdx_analyzer",
 				"astro",
+				"ltex",
 			},
 			automatic_enable = true,
 		},
