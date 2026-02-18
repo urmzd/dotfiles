@@ -56,7 +56,7 @@
           ];
 
           python = with pkgs; [
-            python313
+            (python313.withPackages (ps: with ps; [ pip ]))
           ];
 
           go = with pkgs; [
@@ -197,7 +197,7 @@
         shells = {
           default = mkDevShell {
             name = "default-dev-shell";
-            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
             welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "Welcome to Urmzd's development environment!"
@@ -207,6 +207,7 @@
                 echo "  Cloud: gcloud, colima, docker"
                 echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
+                echo "  Python: python, pip"
                 echo "  Go: go, golangci-lint, air"
                 echo "  Java: java (JDK), mvn, gradle"
                 echo "  Lua: lua, luarocks, stylua"
@@ -390,7 +391,7 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java;
+            paths = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
           };
 
           # Development environments as packages
