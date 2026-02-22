@@ -17,18 +17,5 @@
     "command": "~/.claude/statusline-command.sh",
     "padding": 2
   },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "ExitPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/update-essence.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
