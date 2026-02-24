@@ -1,0 +1,6 @@
+{
+  "model": "claude-opus-4.6",
+  "theme": "auto",
+  "experimental": true,
+  "include_coauthor": false
+}
