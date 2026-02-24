@@ -37,6 +37,7 @@
             tree-sitter
             python3Packages.grip
             uv
+            bashInteractive
           ];
 
           cloud = with pkgs; [
