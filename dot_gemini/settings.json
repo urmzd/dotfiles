@@ -1,0 +1,29 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "tools": {
+    "allowed": [
+      "run_shell_command(cat)",
+      "run_shell_command(head)",
+      "run_shell_command(tail)",
+      "run_shell_command(ls)",
+      "run_shell_command(find)",
+      "run_shell_command(tree)",
+      "run_shell_command(wc)",
+      "run_shell_command(file)",
+      "run_shell_command(stat)",
+      "run_shell_command(du)",
+      "run_shell_command(diff)",
+      "run_shell_command(which)",
+      "run_shell_command(pwd)",
+      "run_shell_command(env)",
+      "run_shell_command(uname)"
+    ]
+  }
+}
