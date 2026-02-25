@@ -41,11 +41,15 @@
           ];
 
           cloud = with pkgs; [
+            google-cloud-sdk
+            awscli2
+          ];
+
+          containers = with pkgs; [
             colima
             docker
             docker-buildx
             docker-compose
-            google-cloud-sdk
           ];
 
           javascript = with pkgs; [
@@ -69,12 +73,15 @@
             goreleaser
           ];
 
-          devops = with pkgs; [
-            terraform
+          kubernetes = with pkgs; [
             kubectl
             kubernetes-helm
             k9s
-            awscli2
+            minikube
+          ];
+
+          devops = with pkgs; [
+            terraform
           ];
 
           haskell = with pkgs; [ ghc cabal-install ];
@@ -198,15 +205,17 @@
         shells = {
           default = mkDevShell {
             name = "default-dev-shell";
-            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.containers ++ toolsets.kubernetes ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
             welcome = ''
               if [[ -n "$NIX_DEVELOP_EXPLICIT" ]]; then
                 echo "Welcome to Urmzd's development environment!"
                 echo ""
                 echo "Included tools:"
                 echo "  AI: claude, codex, gemini, github-copilot (all npm)"
-                echo "  Cloud: gcloud, colima, docker"
-                echo "  DevOps: terraform, kubectl, helm, k9s, awscli"
+                echo "  Cloud: gcloud, aws"
+                echo "  Containers: colima, docker"
+                echo "  Kubernetes: kubectl, helm, k9s, minikube"
+                echo "  DevOps: terraform"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
                 echo "  Python: python, pip"
                 echo "  Go: go, golangci-lint, air"
@@ -292,14 +301,15 @@
 
           devops = mkDevShell {
             name = "devops-dev-shell";
-            packages = toolsets.common ++ toolsets.cloud ++ toolsets.devops;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.containers ++ toolsets.kubernetes ++ toolsets.devops;
             welcome = ''
               echo "⚙️  DevOps/Infrastructure Environment"
               echo "Terraform: $(terraform version | head -1)"
               echo "Docker: $(docker --version)"
               echo "kubectl: $(kubectl version --client --short 2>/dev/null || echo 'kubectl available')"
-              echo "Cloud: gcloud"
-              echo "Container runtime: colima (for macOS)"
+              echo "minikube: $(minikube version --short 2>/dev/null || echo 'minikube available')"
+              echo "Cloud: gcloud, aws"
+              echo "Containers: colima, docker"
               echo ""
             '';
           };
@@ -357,7 +367,7 @@
 
           full = mkDevShell {
             name = "full-dev-shell";
-            packages = toolsets.common ++ toolsets.cloud ++ toolsets.javascript ++ toolsets.python ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
+            packages = toolsets.common ++ toolsets.cloud ++ toolsets.containers ++ toolsets.kubernetes ++ toolsets.javascript ++ toolsets.python ++ toolsets.go ++ toolsets.devops ++ toolsets.lua ++ toolsets.java;
             welcome = ''
               echo "🌟 Full Development Environment"
               echo "All languages and tools available!"
@@ -371,7 +381,7 @@
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
               echo "AI Tools: claude, codex, gemini, github-copilot (all npm)"
-              echo "Cloud: gcloud, docker, colima"
+              echo "Cloud: gcloud, aws | Containers: colima, docker | Kubernetes: kubectl, helm, k9s, minikube"
               echo ""
             '';
             extraHook = ''
@@ -392,7 +402,7 @@
           # Default package for 'nix shell'
           default = pkgs.buildEnv {
             name = "default-dev-env";
-            paths = toolsets.common ++ toolsets.cloud ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
+            paths = toolsets.common ++ toolsets.cloud ++ toolsets.containers ++ toolsets.kubernetes ++ toolsets.devops ++ toolsets.go ++ toolsets.javascript ++ toolsets.lua ++ toolsets.java ++ toolsets.python;
           };
 
           # Development environments as packages
