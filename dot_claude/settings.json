@@ -17,5 +17,26 @@
     "command": "~/.claude/statusline-command.sh",
     "padding": 2
   },
-  "hooks": {}
+  "hooks": {},
+  "permissions": {
+    "allow": [
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(tree *)",
+      "Bash(wc *)",
+      "Bash(file *)",
+      "Bash(stat *)",
+      "Bash(du *)",
+      "Bash(diff *)",
+      "Bash(which *)",
+      "Bash(type *)",
+      "Bash(pwd)",
+      "Bash(env)",
+      "Bash(printenv *)",
+      "Bash(uname *)"
+    ]
+  }
 }
