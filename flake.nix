@@ -78,6 +78,8 @@
             kubernetes-helm
             k9s
             minikube
+            kind
+            k3d
           ];
 
           devops = with pkgs; [
