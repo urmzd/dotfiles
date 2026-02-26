@@ -98,8 +98,13 @@ alias k8s-down="colima stop"
 # GCP: User and application-default login
 alias gcpsso="gcloud auth login && gcloud auth application-default login"
 
-# Snowflake: Generate JWT for connection authentication
-alias snowsso='snow connection generate-jwt'
+# Snowflake: Generate JWT and export as SNOWFLAKE_TOKEN
+snowsso() {
+  local token
+  token=$(snow connection generate-jwt) || { echo "Failed to generate JWT"; return 1; }
+  export SNOWFLAKE_TOKEN="${token}"
+  echo "SNOWFLAKE_TOKEN exported"
+}
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
