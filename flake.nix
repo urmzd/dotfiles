@@ -77,9 +77,9 @@
             kubectl
             kubernetes-helm
             k9s
-            minikube
-            kind
-            k3d
+            # minikube
+            # kind
+            # k3d
           ];
 
           devops = with pkgs; [
@@ -216,7 +216,7 @@
                 echo "  AI: claude, codex, gemini, github-copilot (all npm)"
                 echo "  Cloud: gcloud, aws"
                 echo "  Containers: colima, docker"
-                echo "  Kubernetes: kubectl, helm, k9s, minikube"
+                echo "  Kubernetes: kubectl, helm, k9s"
                 echo "  DevOps: terraform"
                 echo "  JavaScript/TypeScript: node, npm, yarn, pnpm, deno, tsc"
                 echo "  Python: python, pip"
@@ -309,7 +309,7 @@
               echo "Terraform: $(terraform version | head -1)"
               echo "Docker: $(docker --version)"
               echo "kubectl: $(kubectl version --client --short 2>/dev/null || echo 'kubectl available')"
-              echo "minikube: $(minikube version --short 2>/dev/null || echo 'minikube available')"
+              # echo "minikube: $(minikube version --short 2>/dev/null || echo 'minikube available')"
               echo "Cloud: gcloud, aws"
               echo "Containers: colima, docker"
               echo ""
@@ -383,7 +383,7 @@
               echo "  • Java: $(java -version 2>&1 | head -1)"
               echo ""
               echo "AI Tools: claude, codex, gemini, github-copilot (all npm)"
-              echo "Cloud: gcloud, aws | Containers: colima, docker | Kubernetes: kubectl, helm, k9s, minikube"
+              echo "Cloud: gcloud, aws | Containers: colima, docker | Kubernetes: kubectl, helm, k9s"
               echo ""
             '';
             extraHook = ''
