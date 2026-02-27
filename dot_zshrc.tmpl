@@ -99,7 +99,8 @@ alias k8s-down="colima stop"
 alias gcpsso="gcloud auth login && gcloud auth application-default login"
 
 # Snowflake: Generate JWT and export as SNOWFLAKE_TOKEN
-snowsso() {
+unalias snowsso 2>/dev/null
+function snowsso() {
   local token
   token=$(snow connection generate-jwt) || { echo "Failed to generate JWT"; return 1; }
   export SNOWFLAKE_TOKEN="${token}"
