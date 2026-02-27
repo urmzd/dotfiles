@@ -95,6 +95,8 @@ vim.opt.colorcolumn = "80"
 vim.opt.fileformat = "unix"
 vim.opt.nrformats = "alpha"
 vim.opt.undofile = true
+vim.opt.timeoutlen = 300
+vim.opt.ttimeoutlen = 5
 vim.opt.undodir = vim.fn.stdpath("config") .. "/undo"
 vim.o.hlsearch = not vim.o.hlsearch -- Toggles search highlighting on each config load
 
