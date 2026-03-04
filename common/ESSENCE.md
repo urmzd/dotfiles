@@ -26,7 +26,7 @@ Every shell includes: git, gh, fzf, ripgrep, jq, yq, just, direnv, chezmoi, tmux
 
 ## Commit Style
 
-Angular Conventional Commits enforced via `gcai` (Claude-powered commit generator).
+Angular Conventional Commits enforced via `git-ai commit` (AI-powered commit generator, aliased as `gai`).
 
 ```
 type(scope): lowercase imperative description (max 72 chars)
