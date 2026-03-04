@@ -270,4 +270,10 @@ if ! command -v rustup >/dev/null 2>&1; then
     rustup component add rust-analyzer rust-src
 fi
 
+# Install gitit (AI-powered git commands) if not present
+if ! command -v gitit >/dev/null 2>&1; then
+    echo "🤖 Installing gitit..."
+    curl -fsSL https://raw.githubusercontent.com/urmzd/gitit/main/install.sh | sh
+fi
+
 echo "✅ Package installation completed!"
