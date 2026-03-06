@@ -18,6 +18,16 @@
     "padding": 2
   },
   "hooks": {},
+  "mcpServers": {
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ],
+      "env": {}
+    }
+  },
   "permissions": {
     "allow": [
       "Bash(cat *)",
