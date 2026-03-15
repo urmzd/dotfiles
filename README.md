@@ -48,10 +48,39 @@ nix develop .#<shell>
 ### macOS extras (Brewfile)
 
 - Neovim HEAD, cmake, gettext, cocoapods, Android Studio + CLI tools, fonts (MonaspiceNe, Iosevka)
+- VHS + ttyd for CLI recordings
+- Docker cleanup launchd agent (daily at 3 AM)
+
+### Agent skills
+
+Portable skills distributed via `npx skills` across AI coding agents:
+
+| Skill | Purpose |
+| ----- | ------- |
+| ai-workflows | AI-assisted workflow patterns |
+| ci-cd | CI/CD pipeline conventions |
+| development-practices | Coding standards and practices |
+| nix-shells | Nix development shell guidance |
+| tools | Tooling conventions |
+| visual-identity | Branding and visual standards |
 
 ### Common CLI (in every Nix shell)
 
 git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, wget, tree, tldr, gnupg, tree-sitter
+
+## Automation
+
+Chezmoi runs these scripts automatically on `chezmoi apply`:
+
+| Script | Type | Trigger |
+| ------ | ---- | ------- |
+| `install-packages-v2` | run_once (before) | First apply only |
+| `brewfile-install` | run_onchange (before) | Brewfile changes |
+| `check-flake` | run_onchange (after) | flake.lock changes |
+| `generate-completions` | run_onchange (after) | zshrc or flake.lock changes |
+| `install-skills` | run_onchange (after) | Any SKILL.md changes |
+| `configure-terminal` | run_once (after) | First apply only |
+| `load-docker-cleanup` | run_once (after) | First apply only |
 
 ## Day-to-day usage
 
