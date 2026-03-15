@@ -1,0 +1,35 @@
+# dotfiles
+
+> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with Nix development shells (Node, Python, Rust, Go, DevOps, Haskell, Ruby, and more), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills distributed via npx skills.
+
+## Docs
+
+- [README](https://github.com/urmzd/dotfiles/blob/main/README.md): Setup, dev environments, shell/terminal/editor config, and automation
+- [AGENTS.md](https://github.com/urmzd/dotfiles/blob/main/AGENTS.md): File naming conventions, key directories, and commit guidelines
+
+## API / Key Files
+
+- [flake.nix](https://github.com/urmzd/dotfiles/blob/main/flake.nix): Nix flake with dev shells (default, node, python, rust, go, devops, haskell, ruby, scheme, perl, lua, full)
+- [justfile](https://github.com/urmzd/dotfiles/blob/main/justfile): Task runner (update, status, check)
+- [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages
+- [dot_config/](https://github.com/urmzd/dotfiles/blob/main/dot_config/): Neovim, Ghostty, Tmux, and other tool configs
+- [dot_zshrc.tmpl](https://github.com/urmzd/dotfiles/blob/main/dot_zshrc.tmpl): Zsh configuration template
+- [skills/](https://github.com/urmzd/dotfiles/blob/main/skills/): Portable AI agent skills directory
+
+## Skills
+
+- [skills/ai-workflows/](https://github.com/urmzd/dotfiles/blob/main/skills/ai-workflows/): AI-assisted workflow patterns
+- [skills/ci-cd/](https://github.com/urmzd/dotfiles/blob/main/skills/ci-cd/): CI/CD pipeline conventions
+- [skills/cli-patterns/](https://github.com/urmzd/dotfiles/blob/main/skills/cli-patterns/): CLI design patterns
+- [skills/development-practices/](https://github.com/urmzd/dotfiles/blob/main/skills/development-practices/): Coding standards and practices
+- [skills/llms-txt/](https://github.com/urmzd/dotfiles/blob/main/skills/llms-txt/): LLMs.txt generation guidance
+- [skills/nix-shells/](https://github.com/urmzd/dotfiles/blob/main/skills/nix-shells/): Nix development shell guidance
+- [skills/project-scaffolding/](https://github.com/urmzd/dotfiles/blob/main/skills/project-scaffolding/): Project scaffolding conventions
+- [skills/readme-standards/](https://github.com/urmzd/dotfiles/blob/main/skills/readme-standards/): README standards
+- [skills/release-workflow/](https://github.com/urmzd/dotfiles/blob/main/skills/release-workflow/): Release workflow conventions
+- [skills/tools/](https://github.com/urmzd/dotfiles/blob/main/skills/tools/): Tooling conventions
+- [skills/visual-identity/](https://github.com/urmzd/dotfiles/blob/main/skills/visual-identity/): Branding and visual standards
+
+## Optional
+
+- [CONTRIBUTING](https://github.com/urmzd/dotfiles/blob/main/CONTRIBUTING.md): How to contribute

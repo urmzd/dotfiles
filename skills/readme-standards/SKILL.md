@@ -1,0 +1,99 @@
+---
+name: readme-standards
+description: README structure — centered header, badges, demos, section order, Agent Skill section, and llms.txt. Use when creating or updating any project README.
+user-invocable: true
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+metadata:
+  title: README Standards
+  category: visual
+  order: 1
+---
+
+# README Standards
+
+## Centered Header Template
+
+Every README starts with a centered header block:
+
+```html
+<p align="center">
+  <h1 align="center">{Display Name}</h1>
+  <p align="center">
+    {One-line description}
+    <br /><br />
+    <a href="...releases">Download</a>
+    &middot;
+    <a href="...issues">Report Bug</a>
+    &middot;
+    <a href="{url}">{Third Link}</a>
+  </p>
+</p>
+```
+
+- Link 1: "Install" for libraries (Go `go get`, Python `uv add`), "Download" for binaries
+- Link 2: "Report Bug" (always links to `/issues`)
+- Link 3: contextual — Go Docs, GitHub Action, PyPI, Crates.io, Experiments, etc.
+
+## CI Badges
+
+Centered, immediately below header:
+
+```html
+<p align="center">
+  <a href="...ci.yml"><img src="...badge.svg" alt="CI"></a>
+</p>
+```
+
+## Demo Image
+
+Below badges, 80% width:
+
+```html
+<p align="center">
+  <img src="assets/demo.png" alt="Demo" width="80%">
+</p>
+```
+
+## Output Gallery
+
+For projects with multiple visual outputs (resume-generator pattern — 3-col, 30% width):
+
+```html
+<p align="center">
+  <img src="..." width="30%"> &nbsp; <img src="..." width="30%"> &nbsp; <img src="..." width="30%">
+</p>
+<p align="center"><em>Label 1 &middot; Label 2 &middot; Label 3</em></p>
+```
+
+## Standard Section Order
+
+Features → Install → Quick Start → Usage/CLI Reference → Configuration → API → Agent Skill → Related → License
+
+## Section Naming
+
+Always "Quick Start" (never "Quickstart" or "Getting Started").
+
+## Agent Skill Section
+
+Every repo with a skill includes:
+
+```markdown
+## Agent Skill
+
+\```bash
+npx skills add urmzd/<repo-name>
+\```
+```
+
+## llms.txt
+
+Every repo should have `llms.txt` at root (see `llms-txt` skill for format).
+
+## Documentation Philosophy
+
+- Skills replace conventional `docs/` directories
+- README.md = human-facing documentation
+- AGENTS.md = AI-facing project context
+- `skills/<name>/SKILL.md` = agent instructions
+- `llms.txt` = LLM discovery
+- **No separate docs folder**

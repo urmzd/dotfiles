@@ -1,6 +1,6 @@
 ---
 name: ai-workflows
-description: AI tools, Claude Code configuration, and AI-powered git commits. Use when setting up AI tooling, configuring CLAUDE.md files, or working with gitit/git-ai commits.
+description: AI tools, Claude Code configuration, gitit commits, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
@@ -10,6 +10,12 @@ metadata:
 ---
 
 # AI Workflows
+
+## Documentation-as-Skills Philosophy
+
+- Skills replace conventional `docs/` directories
+- Every repo should have: README.md (humans) + AGENTS.md (AI) + SKILL.md (agent instructions) + llms.txt (LLM discovery)
+- No separate docs folder
 
 ## AI Tools
 
@@ -35,6 +41,30 @@ Claude Code is configured per-project via `CLAUDE.md` files at the repository ro
 - Use separate memory files for detailed topic notes
 - Reference project-specific tools and commands
 - Define verification steps (build, test, lint)
+
+## AGENTS.md Standard
+
+Every repo MUST have `AGENTS.md` at root.
+
+### Template Structure
+
+1. **Identity** — project name, one-line description
+2. **Architecture** — high-level component overview
+3. **File Tables** — key files/directories with descriptions
+4. **Key Interfaces** — important types, traits, functions
+5. **Commands** — build, test, lint, run
+6. **Code Style** — language-specific conventions
+7. **Extension Guide** — how to add features
+
+Reference: `adk/AGENTS.md` as canonical example.
+
+## Skills Standard
+
+Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
+
+- **Frontmatter:** `name`, `description`, `argument-hint` (for CLI tools)
+- **Content:** step-by-step guidance for using or extending the project
+- Skills are installable via `npx skills add urmzd/<repo-name>`
 
 ## AI-Powered Git Commits
 

@@ -1,6 +1,6 @@
 ---
 name: development-practices
-description: Tech stack, coding patterns, and commit conventions. Use when writing code, making commits, or choosing tools/patterns for a project.
+description: Tech stack, coding patterns, commit conventions, interface design, error handling, testing, and junior-friendly philosophy. Use when writing code, making commits, or choosing tools/patterns.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
@@ -11,13 +11,21 @@ metadata:
 
 # Development Practices
 
+## Development Philosophy
+
+- "How easy is this for a junior to understand, develop, and expand on?"
+- Self-documenting code > comments
+- Small, focused interfaces > god objects
+- Convention over configuration
+- Explicit > implicit
+
 ## Tech Stack
 
 | Category | Tools |
 |----------|-------|
 | Languages | Rust, Go, TypeScript/Node 22, Python 3.13, Lua 5.4, Java 21, Haskell |
 | Package Managers | cargo, uv (Python), npm/yarn/pnpm, luarocks |
-| Formatters/Linters | biome (JS/TS), stylua (Lua), clippy (Rust), golangci-lint (Go) |
+| Formatters/Linters | biome (JS/TS), stylua (Lua), clippy (Rust), golangci-lint (Go), ruff (Python) |
 | Editor | Neovim (HEAD) with LSP: basedpyright, ts_ls, lua_ls, gopls, rust_analyzer, jsonls, yamlls, bashls, jdtls |
 | Shell | Zsh + Oh My Zsh + Powerlevel10k |
 | Terminal Multiplexer | tmux (vi-mode, vim-tmux-navigator) |
@@ -40,6 +48,35 @@ type(scope): lowercase imperative description (max 72 chars)
 - One logical change per commit, every file in exactly one commit
 - Order: infrastructure/config → core library → features → tests → docs
 - Footer: `BREAKING CHANGE:`, `Closes #N`, `Fixes #N`, `Refs #N`
+
+## Interface Design (Go SDKs)
+
+- **Sealed interfaces:** unexported marker methods (`isMessage()`, `isDelta()`)
+- **Functional options:** `New(WithX(...), WithY(...))`
+- **Provider pattern:** `Provider` interface → `provider/{name}/` adapters
+- **Channel-based streaming:** `ChatStream() (<-chan Delta, error)`
+
+## Error Handling
+
+| Language | Approach |
+|----------|----------|
+| Rust | `thiserror` (libraries), `anyhow` (CLI/apps), `.context()`, no `unsafe` |
+| Go | structured errors, `errors.Is()`/`errors.As()`, sentinel errors, `IsTransient()` helper |
+| Python | standard exceptions, pytest assertions |
+
+## Testing
+
+| Language | Framework | Pattern | CI Command |
+|----------|-----------|---------|------------|
+| Rust | `cargo test` | `#[cfg(test)]` + `tests/` integration | `cargo test --workspace` |
+| Go | `testing` | `_test.go`, table-driven | `go test ./...` |
+| Python | `pytest` | `tests/test_*.py`, class-based | `uv run pytest` |
+
+## Workspace Organization
+
+- **Rust:** `crates/` with core → impl → cli
+- **Go:** `cmd/` for binaries, root or `internal/` for packages
+- **Python:** `src/` layout with hatchling
 
 ## Coding Patterns
 

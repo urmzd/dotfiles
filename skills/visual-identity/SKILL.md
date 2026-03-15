@@ -1,6 +1,6 @@
 ---
 name: visual-identity
-description: Terminal theme, font choices, and VHS demo recording standards. Use when configuring terminal appearance, recording demos, or maintaining visual consistency.
+description: Terminal theme, font, VHS demos, teasr integration, asset conventions, and branding across README/demos. Use when configuring appearance, recording demos, or maintaining visual consistency.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
@@ -72,3 +72,33 @@ Sleep 3s
 ```
 
 Each demo includes a branded splash card displaying the project name and links to `github.com/urmzd` and `urmzd.com`.
+
+## teasr Demo Capture
+
+teasr automates demo capture with `teasr.toml` config:
+
+- **Scene types:** web (Chrome DevTools), terminal (PTY→SVG→PNG), screen (xcap)
+- **Output formats:** png, gif
+- **Standard output dir:** `assets/`
+- **Naming:** `demo.png`, `demo.gif`, `demo-<feature>.png`
+- **CI integration:** `urmzd/teasr/.github/actions/teasr@main`
+
+## Asset Directory Convention
+
+```
+assets/
+├── demo.png (or .gif)        — hero (80% width in README)
+├── demo-<feature>.png        — feature captures
+└── example_results/           — gallery (30% width each)
+```
+
+## Demo Priority
+
+teasr (automated) > VHS (branded terminal GIF) > manual screenshots
+
+## Branding Consistency
+
+Cyberdream theme + MonaspiceNe font applied consistently across:
+- Terminal demos (VHS/teasr)
+- GitHub Actions branding (`icon` + `color`)
+- github-metrics SVGs
