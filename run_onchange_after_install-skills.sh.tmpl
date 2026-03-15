@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Chezmoi run_onchange - Install agent skills via npx skills
+# Triggered by: {{ include "skills/ai-workflows/SKILL.md" | sha256sum }}
+# {{ include "skills/ci-cd/SKILL.md" | sha256sum }}
+# {{ include "skills/development-practices/SKILL.md" | sha256sum }}
+# {{ include "skills/nix-shells/SKILL.md" | sha256sum }}
+# {{ include "skills/tools/SKILL.md" | sha256sum }}
+# {{ include "skills/visual-identity/SKILL.md" | sha256sum }}
+
+set -euo pipefail
+
+echo "Installing agent skills from chezmoi..."
+
+if command -v npx &>/dev/null; then
+    npx skills add "{{ .chezmoi.sourceDir }}" --all -g -y
+    echo "Agent skills installed successfully."
+else
+    echo "WARNING: npx not found — skipping skills installation."
+    echo "Install Node.js to enable cross-agent skill distribution."
+fi
