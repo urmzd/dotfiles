@@ -1,6 +1,6 @@
 ---
 name: ai-workflows
-description: AI tools, Claude Code configuration, gitit commits, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
+description: AI tools, Claude Code configuration, sr commits, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
@@ -68,12 +68,12 @@ Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
 
 ## AI-Powered Git Commits
 
-Commit messages are generated via `gitit`, which analyzes staged changes and produces Angular Conventional Commit messages automatically.
+Commit messages are generated via `sr commit`, which analyzes staged changes and produces Angular Conventional Commit messages automatically.
 
 ```bash
 # Stage changes, then generate commit
 git add -p
-gitit
+sr commit --staged
 ```
 
 The tool follows the same commit style conventions defined in the development-practices skill.

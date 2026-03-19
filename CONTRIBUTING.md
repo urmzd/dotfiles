@@ -29,7 +29,7 @@ cd dotfiles
 
 ## Commit Convention
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) enforced via [gitit](https://github.com/urmzd/gitit):
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) enforced via [sr](https://github.com/urmzd/sr):
 
 | Prefix | Purpose |
 |--------|---------|

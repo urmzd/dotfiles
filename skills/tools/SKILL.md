@@ -13,8 +13,7 @@ metadata:
 
 ## Release & Versioning
 
-- **sr** (semantic-release) — automated versioning, changelog, GitHub releases
-- **gitit** — AI-powered conventional commit messages
+- **sr** (semantic-release) — AI-powered commits, versioning, changelog, GitHub releases
 
 ## Documentation & Demos
 

@@ -34,7 +34,7 @@ metadata:
 
 ## Commit Style
 
-Angular Conventional Commits, enforced via `gitit`:
+Angular Conventional Commits, enforced via `sr`:
 
 ```
 type(scope): lowercase imperative description (max 72 chars)
