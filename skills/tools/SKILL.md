@@ -37,7 +37,7 @@ metadata:
 
 - **wails** — desktop applications with Go backend and web frontend
 - **golangci-lint** — comprehensive Go linting
-- **go-rod** — browser automation (used by teasr)
+- **go-rod** — browser automation
 
 ## Node
 

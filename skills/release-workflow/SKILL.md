@@ -91,7 +91,7 @@ Static: `CGO_ENABLED=0 go build -trimpath -ldflags "-X main.version=..."`
 - **Cargo.lock sync:** `cargo update --workspace` → commit `[skip ci]`
 - **Asset generation:** VHS demo + screenshots (resume-generator)
 - **File embedding:** embed-src → commit (openapi-generator)
-- **Demo capture:** teasr → commit to `assets/`
+- **Demo capture:** teasr → commit to `showcase/`
 
 ## Publishing
 

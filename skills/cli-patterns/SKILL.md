@@ -45,7 +45,7 @@ A junior developer should be able to understand any CLI tool's behavior from `--
 ## Output Directories
 
 - `outputs/<name>/<YYYYMMDD_HHMMSS>/` — timestamped results (linear-gp)
-- `assets/` — demo captures (teasr)
+- `showcase/` — demo captures (teasr, default: `./teasr-output`)
 - `bin/` — Go builds, `target/` — Rust builds
 
 ## Exit Codes

@@ -82,9 +82,6 @@ Push main → release.yml:
 
 ```yaml
 - uses: urmzd/teasr/.github/actions/teasr@main
-  with:
-    config: "teasr.toml"
-    output: "./assets"
 ```
 
 ## Caching

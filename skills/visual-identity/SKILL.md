@@ -79,14 +79,14 @@ teasr automates demo capture with `teasr.toml` config:
 
 - **Scene types:** web (Chrome DevTools), terminal (PTY→SVG→PNG), screen (xcap)
 - **Output formats:** png, gif
-- **Standard output dir:** `assets/`
+- **Standard output dir:** `showcase/` (default: `./teasr-output`)
 - **Naming:** `demo.png`, `demo.gif`, `demo-<feature>.png`
 - **CI integration:** `urmzd/teasr/.github/actions/teasr@main`
 
 ## Asset Directory Convention
 
 ```
-assets/
+showcase/
 ├── demo.png (or .gif)        — hero (80% width in README)
 ├── demo-<feature>.png        — feature captures
 └── example_results/           — gallery (30% width each)
