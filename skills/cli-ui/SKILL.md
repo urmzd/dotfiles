@@ -18,7 +18,7 @@ The reference implementation lives in `sr/crates/sr-ai/src/ui/mod.rs`. All CLI t
 | Language | Styling | Spinners | CLI Parsing |
 |----------|---------|----------|-------------|
 | Rust | crossterm 0.28 | indicatif 0.17 | clap 4 (derive) |
-| Go | lipgloss / termenv | spinner (charmbracelet) | cobra |
+| Go | lipgloss / termenv | spinner (teasr) | cobra |
 | Python | rich | rich.progress | typer |
 
 ## Color Semantics

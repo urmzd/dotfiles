@@ -32,9 +32,9 @@ The Cyberdream color palette:
 | Cyan | `#5ef1ff` |
 | Selection | `#3c4048` |
 
-## VHS Demo Template
+## teasr Demo Template
 
-Terminal demos are recorded with [VHS](https://github.com/charmbracelet/vhs) using a consistent template. Standard settings:
+Terminal demos are recorded with [teasr](https://github.com/urmzd/teasr) using a consistent template. Standard settings:
 
 - **Resolution**: 1200x700
 - **Padding**: 24px
