@@ -66,14 +66,30 @@ Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
 - **Content:** step-by-step guidance for using or extending the project
 - Skills are installable via `npx skills add urmzd/<repo-name>`
 
-## AI-Powered Git Commits
+## AI-Powered Git Workflows (sr)
 
-Commit messages are generated via `sr commit`, which analyzes staged changes and produces Angular Conventional Commit messages automatically.
+sr provides AI-powered git commands with multi-backend support (`--backend {claude|copilot|gemini}`):
+
+| Command | Purpose |
+|---------|---------|
+| `sr commit` | Generate atomic conventional commits from staged/unstaged changes |
+| `sr rebase` | AI-powered interactive rebase (reword, squash, reorder) |
+| `sr review` | Code review of staged/branch changes with severity feedback |
+| `sr pr` | Generate PR title + body from branch commits |
+| `sr branch` | Suggest conventional branch name |
+| `sr explain` | Explain recent commits |
+| `sr ask` | Freeform Q&A about the repo |
 
 ```bash
 # Stage changes, then generate commit
 git add -p
-sr commit --staged
+sr commit
+
+# Or commit all changes with context
+sr commit -M "refactored auth flow"
+
+# AI-powered rebase of last 5 commits
+sr rebase --last 5
 ```
 
-The tool follows the same commit style conventions defined in the development-practices skill.
+Global flags: `--backend`, `--model`, `--budget` (Claude only, default $0.50), `--debug`.

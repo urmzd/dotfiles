@@ -34,7 +34,7 @@ metadata:
 
 ## Commit Style
 
-Angular Conventional Commits, enforced via `sr`:
+Angular Conventional Commits, enforced via `sr commit` and `sr hook commit-msg`:
 
 ```
 type(scope): lowercase imperative description (max 72 chars)

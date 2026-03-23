@@ -13,7 +13,7 @@ metadata:
 
 ## Release & Versioning
 
-- **sr** (semantic-release) — AI-powered commits, versioning, changelog, GitHub releases
+- **sr** (semantic-release) — automated versioning, changelog, GitHub releases, AI-powered commits/rebase/review/PR generation (multi-backend: Claude, Copilot, Gemini)
 
 ## Documentation & Demos
 

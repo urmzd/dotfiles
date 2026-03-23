@@ -26,7 +26,7 @@ A junior developer should be able to understand any CLI tool's behavior from `--
 | Pattern | When | Reference |
 |---------|------|-----------|
 | Always JSON | Device/data APIs | homai: every command outputs JSON |
-| Format flag | Dual human/machine consumers | sr: `--format json\|human`, oag: `--format json\|yaml` |
+| Format flag | Dual human/machine consumers | sr plan: `--format json\|human`, oag: `--format json\|yaml` |
 | Structured logging | Debug/tracing | linear-gp: `--log-format json\|compact\|pretty` + `--log-file` |
 
 - Rust: `serde_json::to_string_pretty()` to stdout

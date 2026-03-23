@@ -38,17 +38,30 @@ types:
   - { name: test }
   - { name: build }
   - { name: style }
-version_files: [Cargo.toml]  # or pyproject.toml, package.json
+version_files: [Cargo.toml]  # or pyproject.toml, package.json — auto-detected if empty
 changelog: { file: CHANGELOG.md }
 stage_files: [Cargo.lock]    # or uv.lock, package-lock.json
 floating_tags: true
+hooks:
+  commit-msg:
+    - sr hook commit-msg
+# Optional fields:
+# build_command: "cargo build --release"
+# pre_release_command: "just check"
+# post_release_command: "echo released"
+# prerelease: alpha              # → 1.2.0-alpha.1
+# sign_tags: false
+# draft: false
+# release_name_template: "Release {{ version }}"
+# packages: []                   # monorepo support
 ```
 
 Version files by language:
-- Rust: `Cargo.toml`
-- Python: `pyproject.toml`
-- Node: `package.json`
-- Go: tags only (no version file)
+- Rust: `Cargo.toml` (auto-discovers workspace members)
+- Python: `pyproject.toml` (auto-discovers uv workspace members)
+- Node: `package.json` (auto-discovers npm workspace members)
+- Go: `*.go` files with `var Version = "..."` or `const Version string = "..."`
+- Java: `pom.xml`, `build.gradle`, `build.gradle.kts`
 
 ## Release Pipeline
 
@@ -99,12 +112,38 @@ Static: `CGO_ENABLED=0 go build -trimpath -ldflags "-X main.version=..."`
 - **PyPI:** `uv publish` or `twine upload`
 - **npm:** `npm publish`
 
-## Pre-commit Hook
+## Git Hooks
+
+sr manages git hooks natively via `sr.yaml` — no pre-commit framework needed:
 
 ```yaml
-repos:
-  - repo: https://github.com/urmzd/semantic-release
-    rev: v{version}
-    hooks:
-      - id: conventional-commit-msg
+hooks:
+  commit-msg:
+    - sr hook commit-msg          # validates conventional commit format
+  pre-commit:
+    - step: format
+      patterns: ["*.rs"]
+      rules:
+        - "rustfmt --check --edition 2024 {files}"
+    - step: lint
+      patterns: ["*.rs"]
+      rules:
+        - "cargo clippy --workspace -- -D warnings"
 ```
+
+- Hook scripts auto-synced to `.githooks/` by `sr init`
+- Structured steps only run when staged files match glob `patterns`
+- `{files}` in rules is replaced with matched file list
+
+## Monorepo Support
+
+```yaml
+packages:
+  - name: core
+    path: crates/core
+    tag_prefix: "core/v"
+    version_files: [Cargo.toml]
+    changelog: { file: crates/core/CHANGELOG.md }
+```
+
+Independent per-package versioning, tags, and changelogs. Target with `sr release -p core`.

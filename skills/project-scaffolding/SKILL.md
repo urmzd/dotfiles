@@ -54,7 +54,7 @@ Standard sections:
 1. **Prerequisites** — language runtime, just, GH_TOKEN
 2. **Getting Started** — `git clone` + `just init`
 3. **Development** — `just check`, `just test`, `just fmt`
-4. **Commit Convention** — conventional commits via sr
+4. **Commit Convention** — conventional commits via `sr commit`
 5. **Pull Requests** — fork → branch → PR
 6. **Code Style** — brief, language-specific
 
