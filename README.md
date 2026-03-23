@@ -14,42 +14,37 @@ chezmoi init --apply https://github.com/urmzd/.dotfiles.git
 
 ## What's included
 
-### Dev environments (Nix flakes)
+### Dev environment (Nix flake)
+
+A single unified dev shell with everything:
 
 ```bash
-nix develop .#<shell>
+nix develop
 ```
 
-| Shell    | What's in it                                          |
-| -------- | ----------------------------------------------------- |
-| default  | JS/TS, Go, Rust, Java, Lua, DevOps, Cloud, AI        |
-| node     | Node 22, Deno, npm, yarn, pnpm, tsc                  |
-| python   | Python 3.13                                           |
-| rust     | rustc, cargo, rustfmt, clippy, cargo-watch/edit/outdated |
-| go       | go, golangci-lint, gotools, go-migrate, air           |
-| devops   | terraform, kubectl, helm, k9s, awscli, colima, docker, docker-buildx/compose, gcloud |
-| haskell  | ghc, cabal-install                                    |
-| ruby     | ruby, bundler, rails                                  |
-| scheme   | guile                                                 |
-| perl     | perl                                                  |
-| lua      | lua 5.4, luarocks, stylua, luacheck, ninja            |
-| full     | default + Python                                      |
+**Languages & runtimes**: Node 22, Deno, Python 3.13, Go, Rust (via rustup), Java 21, Lua 5.4, Haskell (GHC + Cabal), Ruby + Rails, Guile Scheme, Perl
+
+**DevOps & cloud**: Terraform, kubectl, Helm, k9s, AWS CLI, GCloud SDK, Colima, Docker (+ buildx/compose), GoReleaser
+
+**CLI essentials**: git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, wget, tree, tldr, gnupg, tree-sitter, uv
 
 ### Shell & terminal
 
 - Zsh + Oh My Zsh + Powerlevel10k
 - Tmux (`Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme)
-- Ghostty terminal
+- Ghostty terminal (cyberdream theme, MonaspiceNe Nerd Font)
 
 ### Editor
 
 - Neovim (HEAD) with LSP for all included languages
 
-### macOS extras (Brewfile)
+### AI agent integration
 
-- Neovim HEAD, cmake, gettext, cocoapods, Android Studio + CLI tools, fonts (MonaspiceNe, Iosevka)
-- VHS + ttyd for CLI recordings
-- Docker cleanup launchd agent (daily at 3 AM)
+- Claude Code config + custom statusline (`dot_claude/`)
+- AGENTS.md for AI agent guidance
+- `llms.txt` for LLM-friendly project discovery
+- Gemini, Copilot, and Codex configs
+- `just status` tracks claude, codex, gemini, and copilot versions
 
 ### Agent skills
 
@@ -59,14 +54,22 @@ Portable skills distributed via `npx skills` across AI coding agents:
 | ----- | ------- |
 | ai-workflows | AI-assisted workflow patterns |
 | ci-cd | CI/CD pipeline conventions |
+| cli-patterns | CLI conventions (JSON piping, stdout/stderr, structured logging) |
+| cli-ui | Terminal UI standard (colors, spinners, symbols, layout) |
 | development-practices | Coding standards and practices |
+| llms-txt | LLM-friendly project summary convention |
 | nix-shells | Nix development shell guidance |
-| tools | Tooling conventions |
-| visual-identity | Branding and visual standards |
+| project-scaffolding | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
+| readme-standards | README structure and section order |
+| release-workflow | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
+| tools | Canonical tech stack reference by purpose |
+| visual-identity | Branding, themes, VHS demos, teasr integration |
 
-### Common CLI (in every Nix shell)
+### macOS extras (Brewfile)
 
-git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, wget, tree, tldr, gnupg, tree-sitter
+- Neovim HEAD, cmake, gettext, cocoapods, Android Studio + CLI tools, fonts (MonaspiceNe, Iosevka)
+- VHS + ttyd for CLI recordings
+- Docker cleanup launchd agent (daily at 3 AM)
 
 ## Automation
 
@@ -89,5 +92,5 @@ chezmoi diff          # preview pending changes
 chezmoi apply         # apply dotfile changes
 
 just update           # update Nix flake inputs
-just status           # check environment status
+just status           # check environment status + AI tool versions
 ```
