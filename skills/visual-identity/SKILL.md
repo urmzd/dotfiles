@@ -85,12 +85,7 @@ teasr automates demo capture with `teasr.toml` config:
 
 ## Asset Directory Convention
 
-```
-showcase/
-├── demo.png (or .gif)        — hero (80% width in README)
-├── demo-<feature>.png        — feature captures
-└── example_results/           — gallery (30% width each)
-```
+`showcase/` directory: `demo.png` or `demo.gif` (hero, 80% width), `demo-<feature>.png` (feature captures), `example_results/` (gallery, 30% width each).
 
 ## Demo Priority
 
