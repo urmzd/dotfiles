@@ -1,6 +1,6 @@
 # dotfiles
 
-> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with Nix development shells (Node, Python, Rust, Go, DevOps, Haskell, Ruby, and more), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills distributed via npx skills.
+> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with Nix development shells (Node, Python, Rust, Go, DevOps, Haskell, Ruby, and more), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills in the `skills/` directory.
 
 ## Docs
 
@@ -28,6 +28,7 @@
 - [skills/readme-standards/](https://github.com/urmzd/dotfiles/blob/main/skills/readme-standards/): README standards
 - [skills/release-workflow/](https://github.com/urmzd/dotfiles/blob/main/skills/release-workflow/): Release workflow conventions
 - [skills/tools/](https://github.com/urmzd/dotfiles/blob/main/skills/tools/): Tooling conventions
+- [skills/memory/](https://github.com/urmzd/dotfiles/blob/main/skills/memory/): Persistent learning from user patterns and preferences
 - [skills/visual-identity/](https://github.com/urmzd/dotfiles/blob/main/skills/visual-identity/): Branding and visual standards
 
 ## Optional

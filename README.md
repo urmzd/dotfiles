@@ -29,7 +29,7 @@ This repo treats the development environment as a product. Every tool, config, a
 - Ghostty terminal (cyberdream theme, MonaspiceNe Nerd Font)
 - Neovim (HEAD) with LSP for all included languages
 - AI agent integration (Claude Code, Gemini, Codex, Copilot) with auto-install
-- 13 portable agent skills distributed via `npx skills`
+- 15 portable agent skills in [`skills/`](skills/)
 - Chezmoi automation scripts that trigger on apply
 - macOS extras via Homebrew (fonts, Android tooling, VHS for CLI recordings)
 - Docker cleanup launchd agent (daily at 3 AM)
@@ -98,7 +98,7 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (before) | Brewfile changes |
 | `check-flake` | run_onchange (after) | flake.lock changes |
 | `generate-completions` | run_onchange (after) | zshrc or flake.lock changes |
-| `install-skills` | run_onchange (after) | Any SKILL.md changes |
+| `install-skills` | run_onchange (after) | Any SKILL.md changes (syncs to `~/.claude/skills/`) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
 
@@ -114,13 +114,11 @@ Claude Code config lives in `dot_claude/` — settings, custom statusline, and p
 
 ## Agent Skill
 
-This repo's conventions are available as a portable agent skill:
+This repo's conventions are available as portable agent skills in [`skills/`](skills/), following the [Agent Skills Specification](https://agentskills.io/specification).
 
-```bash
-npx skills add urmzd/dotfiles
-```
+Related standards: [AGENTS.md](https://agents.md/) · [llms.txt](https://llmstxt.org/)
 
-All skills in this repo:
+All skills:
 
 | Skill | Purpose |
 | ----- | ------- |
@@ -131,6 +129,7 @@ All skills in this repo:
 | development-practices | Coding standards and practices |
 | dotfiles | Chezmoi dotfiles conventions and patterns |
 | llms-txt | LLM-friendly project summary convention |
+| memory | Persistent learning from notes, comments, coding style, and questions |
 | nix-shells | Nix development shell guidance |
 | pragmatic-programming | Pragmatic programming principles |
 | project-scaffolding | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
