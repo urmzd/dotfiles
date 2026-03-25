@@ -69,6 +69,10 @@ For projects with multiple visual outputs (resume-generator pattern — 3-col, 3
 
 Features → Install → Quick Start → Usage/CLI Reference → Configuration → API → Agent Skill → Related → License
 
+## No Project Structure
+
+READMEs must NOT include directory trees, file tables, or "Key Directories" sections. Project structure is discoverable via `tree` and `ripgrep`/`ag` — writing it out is duplicative and goes stale. AGENTS.md handles structural context for AI agents.
+
 ## Section Naming
 
 Always "Quick Start" (never "Quickstart" or "Getting Started").

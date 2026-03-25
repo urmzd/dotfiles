@@ -24,12 +24,9 @@ chezmoi edit <file>    # Edit source, then apply
 | `run_once_after_` | Run-once setup script (after apply) |
 | `run_onchange_` | Re-runs when content hash changes |
 
-## Key Directories
+## Discovering Structure
 
-- `dot_config/` → `~/.config/` (nvim, wezterm, starship, etc.)
-- `dot_zsh/` → `~/.zsh/` (shell modules and plugins)
-- `dot_claude/` → `~/.claude/` (Claude Code settings and skills)
-- `private_dot_ssh/` → `~/.ssh/` (SSH config, not keys)
+Use `tree` for directory layout and `ripgrep`/`ag` for finding files and patterns. Do not rely on static file listings — discover the current state from the filesystem.
 
 ## Code Style
 

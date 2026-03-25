@@ -102,15 +102,6 @@ These scripts run automatically on `chezmoi apply`:
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
 
-### Key directories
-
-| Source | Target | Purpose |
-| ------ | ------ | ------- |
-| `dot_config/` | `~/.config/` | App configs (nvim, ghostty, etc.) |
-| `dot_zsh/` | `~/.zsh/` | Zsh modules and plugins |
-| `dot_claude/` | `~/.claude/` | Claude Code settings and skills |
-| `private_dot_ssh/` | `~/.ssh/` | SSH config (not keys) |
-
 ### AI tools
 
 AI coding agents are installed automatically when entering the Nix dev shell. Check versions with:

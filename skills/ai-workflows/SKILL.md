@@ -50,13 +50,11 @@ Every repo MUST have `AGENTS.md` at root.
 
 1. **Identity** — project name, one-line description
 2. **Architecture** — high-level component overview
-3. **File Tables** — key files/directories with descriptions
-4. **Key Interfaces** — important types, traits, functions
-5. **Commands** — build, test, lint, run
-6. **Code Style** — language-specific conventions
-7. **Extension Guide** — how to add features
+3. **Commands** — build, test, lint, run
+4. **Code Style** — language-specific conventions
+5. **Extension Guide** — how to add features
 
-Reference: `adk/AGENTS.md` as canonical example.
+Do NOT include static directory trees or file tables — structure goes stale. Instead, instruct agents to use `tree` and `ripgrep`/`ag` to discover project layout on the fly.
 
 ## Skills Standard
 
