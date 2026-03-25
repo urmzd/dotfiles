@@ -1,0 +1,2 @@
+- [Open Standards](feedback_open_standards.md) — use agentskills.io/agents.md/llmstxt.org specs, not proprietary tools
+- [Memory Location](feedback_memory_location.md) — .ai-memory/ at project root, never tool-specific paths
