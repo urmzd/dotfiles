@@ -1,8 +1,7 @@
 ---
 name: release-workflow
 description: End-to-end release pipeline — sr.yaml config, CI gating, multi-platform builds (GNU+musl), crates.io/PyPI publishing, post-release hooks. Use when setting up or modifying releases.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Release Workflow
   category: development

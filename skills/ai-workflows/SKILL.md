@@ -1,8 +1,7 @@
 ---
 name: ai-workflows
 description: AI tools, Claude Code configuration, sr commits, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: AI Workflows
   category: ai
@@ -10,6 +9,14 @@ metadata:
 ---
 
 # AI Workflows
+
+## Specifications
+
+| Convention | Spec |
+|------------|------|
+| SKILL.md | [Agent Skills Specification](https://agentskills.io/specification) |
+| AGENTS.md | [agents.md Standard](https://agents.md/) |
+| llms.txt | [llms.txt Specification](https://llmstxt.org/) |
 
 ## Documentation-as-Skills Philosophy
 
@@ -62,7 +69,7 @@ Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
 
 - **Frontmatter:** `name`, `description`, `argument-hint` (for CLI tools)
 - **Content:** step-by-step guidance for using or extending the project
-- Skills are installable via `npx skills add urmzd/<repo-name>`
+- Skills live in `skills/<name>/SKILL.md` within each repo
 
 ## AI-Powered Git Workflows (sr)
 

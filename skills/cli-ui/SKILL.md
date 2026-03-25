@@ -1,8 +1,7 @@
 ---
 name: cli-ui
 description: CLI terminal UI standard — colors, spinners, symbols, layout, and output hierarchy. The canonical reference for consistent, world-class CLI output across all tools. Use when building or reviewing CLI output code.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: CLI UI
   category: development

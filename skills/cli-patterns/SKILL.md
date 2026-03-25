@@ -1,8 +1,7 @@
 ---
 name: cli-patterns
 description: CLI conventions — JSON piping, stdout/stderr separation, structured logging, config discovery, install scripts, exit codes, and GitHub Action integration. Use when building or reviewing CLI tools.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: CLI Patterns
   category: development

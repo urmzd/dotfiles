@@ -1,8 +1,7 @@
 ---
 name: visual-identity
 description: Terminal theme, font, VHS demos, teasr integration, asset conventions, and branding across README/demos. Use when configuring appearance, recording demos, or maintaining visual consistency.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Visual Identity
   category: visual

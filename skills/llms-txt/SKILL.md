@@ -1,8 +1,7 @@
 ---
 name: llms-txt
 description: llms.txt convention — provide LLM-friendly project summaries for AI discovery. Use when creating llms.txt files or making projects AI-discoverable.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: llms.txt
   category: ai
@@ -10,6 +9,8 @@ metadata:
 ---
 
 # llms.txt Convention
+
+> Based on the [llms.txt specification](https://llmstxt.org/).
 
 ## What is llms.txt
 

@@ -1,8 +1,7 @@
 ---
 name: development-practices
 description: Tech stack, coding patterns, commit conventions, interface design, error handling, testing, and junior-friendly philosophy. Use when writing code, making commits, or choosing tools/patterns.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Development Practices
   category: development

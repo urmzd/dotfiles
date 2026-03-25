@@ -1,8 +1,7 @@
 ---
 name: readme-standards
 description: README structure — centered header, badges, demos, section order, Agent Skill section, and llms.txt. Use when creating or updating any project README.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: README Standards
   category: visual
@@ -84,20 +83,18 @@ Every repo with a skill includes:
 ```markdown
 ## Agent Skill
 
-\```bash
-npx skills add urmzd/<repo-name>
-\```
+This repo's conventions are available as portable agent skills in [`skills/`](skills/).
 ```
 
 ## llms.txt
 
-Every repo should have `llms.txt` at root (see `llms-txt` skill for format).
+Every repo should have `llms.txt` at root per the [llms.txt specification](https://llmstxt.org/) (see `llms-txt` skill for format).
 
 ## Documentation Philosophy
 
-- Skills replace conventional `docs/` directories
+- Skills replace conventional `docs/` directories — per the [Agent Skills Specification](https://agentskills.io/specification)
 - README.md = human-facing documentation
-- AGENTS.md = AI-facing project context
+- [AGENTS.md](https://agents.md/) = AI-facing project context
 - `skills/<name>/SKILL.md` = agent instructions
-- `llms.txt` = LLM discovery
+- `llms.txt` = LLM discovery ([spec](https://llmstxt.org/))
 - **No separate docs folder**

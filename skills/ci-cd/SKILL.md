@@ -1,8 +1,7 @@
 ---
 name: ci-cd
 description: CI/CD patterns — ci.yml + release.yml naming, Go/Rust/Python/Node pipelines, embed-src/teasr steps, caching, concurrency. Use when setting up GitHub Actions or configuring releases.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: CI/CD Standards
   category: development

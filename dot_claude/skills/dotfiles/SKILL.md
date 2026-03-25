@@ -1,8 +1,7 @@
 ---
 name: dotfiles
 description: Chezmoi dotfiles conventions and patterns. Use when modifying dotfiles, adding new managed files, or working with chezmoi templates.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash
+allowed-tools: Read Grep Glob Bash
 ---
 
 # Chezmoi Dotfiles Conventions
@@ -42,25 +41,10 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 
 ## Managing Skills
 
-Skills are reusable instruction sets stored as `SKILL.md` files in `.claude/skills/<name>/`.
+Skills are reusable instruction sets stored as `SKILL.md` files in `skills/<name>/` at the repo root.
 
-### Adding community skills via npx
+### Adding skills
 
-Use [npx skills](https://github.com/vercel-labs/skills) to discover and install from the open skills ecosystem:
-
-```bash
-npx skills add <owner/repo>                          # Install from a repo (interactive)
-npx skills add <owner/repo> --skill <name>            # Install a specific skill
-npx skills add <owner/repo> --all                     # Install all skills from a repo
-npx skills add <owner/repo> -a claude-code -y         # Non-interactive, target claude-code
-npx skills list                                       # List installed skills
-npx skills find                                       # Search for skills
-npx skills remove                                     # Remove a skill
-npx skills update                                     # Update installed skills
-```
-
-### Creating skills manually
-
-1. Create a directory: `mkdir -p ~/.claude/skills/<skill-name>/`
+1. Create a directory: `mkdir -p skills/<skill-name>/`
 2. Add a `SKILL.md` with YAML frontmatter (`name`, `description`) and markdown instructions
-3. Skills in `~/.claude/skills/` are personal (all projects); `.claude/skills/` are project-scoped
+3. Skills in `~/.claude/skills/` are personal (all projects); `.claude/skills/` are project-scoped; `skills/` at repo root are portable

@@ -1,8 +1,7 @@
 ---
 name: nix-shells
 description: 13 composable Nix development shells for reproducible tooling. Use when setting up dev environments, configuring .envrc files, or adding Nix shells to projects.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Nix Dev Shells
   category: cli

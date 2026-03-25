@@ -1,8 +1,7 @@
 ---
 name: pragmatic-programming
 description: Pragmatic Programmer principles — DRY, orthogonality, tracer bullets, prototyping, estimation, design by contract, and pragmatic paranoia. Use when writing, reviewing, or refactoring code.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Pragmatic Programming
   category: development

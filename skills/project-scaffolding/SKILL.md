@@ -1,8 +1,7 @@
 ---
 name: project-scaffolding
 description: Project structure — Justfile, .envrc, Cargo workspace, Go module, pyproject.toml, sr.yaml, LICENSE, CONTRIBUTING.md, llms.txt, and documentation conventions. Use when creating or standardizing projects.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Project Scaffolding
   category: development
@@ -28,6 +27,7 @@ Every project should be understandable by a junior developer. Self-documenting s
 | `.envrc` | Nix shell activation (`use flake .#<shell>`) |
 | `llms.txt` | LLM-friendly project summary (see `llms-txt`) |
 | `skills/<name>/SKILL.md` | Agent skill (replaces docs/) |
+| `.ai-memory/` | Tool-agnostic AI memory (see `memory` skill) |
 | `.github/workflows/ci.yml` | Quality gate |
 | `.github/workflows/release.yml` | Automated releases |
 

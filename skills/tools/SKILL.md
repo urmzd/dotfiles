@@ -1,8 +1,7 @@
 ---
 name: tools
 description: Canonical tech stack reference organized by purpose — release, docs/demos, codegen, and per-language tools. Use when choosing libraries, setting up projects, or selecting the right tool.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash
+allowed-tools: Read Grep Glob Bash
 metadata:
   title: Tools
   category: development
