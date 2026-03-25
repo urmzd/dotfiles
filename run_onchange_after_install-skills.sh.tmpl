@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Chezmoi run_onchange - Install agent skills via npx skills
+# Chezmoi run_onchange - Sync agent skills to ~/.claude/skills/
 # Triggered by: {{ include "skills/ai-workflows/SKILL.md" | sha256sum }}
 # {{ include "skills/ci-cd/SKILL.md" | sha256sum }}
 # {{ include "skills/cli-patterns/SKILL.md" | sha256sum }}
@@ -13,15 +13,22 @@
 # {{ include "skills/cli-ui/SKILL.md" | sha256sum }}
 # {{ include "skills/visual-identity/SKILL.md" | sha256sum }}
 # {{ include "skills/pragmatic-programming/SKILL.md" | sha256sum }}
+# {{ include "skills/memory/SKILL.md" | sha256sum }}
+# {{ include "skills/security-audit/SKILL.md" | sha256sum }}
 
 set -euo pipefail
 
-echo "Installing agent skills from chezmoi..."
+SOURCE_SKILLS="{{ .chezmoi.sourceDir }}/skills"
+TARGET_SKILLS="${HOME}/.claude/skills"
 
-if command -v npx &>/dev/null; then
-    npx skills add "{{ .chezmoi.sourceDir }}" --all -g -y
-    echo "Agent skills installed successfully."
-else
-    echo "WARNING: npx not found — skipping skills installation."
-    echo "Install Node.js to enable cross-agent skill distribution."
-fi
+echo "Syncing agent skills from ${SOURCE_SKILLS} to ${TARGET_SKILLS}..."
+
+mkdir -p "${TARGET_SKILLS}"
+
+for skill_dir in "${SOURCE_SKILLS}"/*/; do
+    skill_name="$(basename "${skill_dir}")"
+    mkdir -p "${TARGET_SKILLS}/${skill_name}"
+    cp "${skill_dir}SKILL.md" "${TARGET_SKILLS}/${skill_name}/SKILL.md"
+done
+
+echo "Agent skills synced successfully."
