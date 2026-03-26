@@ -11,16 +11,6 @@
   </p>
 </p>
 
-## Philosophy
-
-This repo treats the development environment as a product. Every tool, config, and automation exists to remove friction between thinking and shipping.
-
-- **One shell, everything included** — A single `nix develop` gives you every language, CLI tool, and cloud SDK. No version managers, no manual installs.
-- **Declarative over imperative** — Nix pins exact versions. Chezmoi templates handle platform differences. The environment is reproducible, not documented.
-- **Automate the boring parts** — Chezmoi scripts run on apply: packages install themselves, completions regenerate, skills stay in sync. You never run setup steps manually twice.
-- **AI-native workflow** — Claude Code, Gemini, Codex, and Copilot are first-class citizens. Agent skills encode project conventions as portable instructions so AI tools understand how you work.
-- **Skills replace docs** — Instead of a `docs/` folder, knowledge lives in `SKILL.md` files that both humans and AI agents can consume. README is for humans. AGENTS.md is for AI. Skills bridge both.
-
 ## Features
 
 - Unified Nix dev shell with 15+ languages and 40+ tools
@@ -129,7 +119,7 @@ All skills:
 | development-practices | Coding standards and practices |
 | dotfiles | Chezmoi dotfiles conventions and patterns |
 | llms-txt | LLM-friendly project summary convention |
-| memory | Persistent learning from notes, comments, coding style, and questions |
+| memory | Persistent learning — implements [llmem standard](https://github.com/urmzd/llmem) |
 | nix-shells | Nix development shell guidance |
 | pragmatic-programming | Pragmatic programming principles |
 | project-scaffolding | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
