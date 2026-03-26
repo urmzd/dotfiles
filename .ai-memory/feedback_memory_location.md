@@ -4,8 +4,8 @@ description: AI memory must live at project root in .ai-memory/, not in tool-spe
 type: feedback
 ---
 
-Store all AI memory in `.ai-memory/` at the project root — never in tool-specific paths like `~/.claude/`.
+Store AI memory per the [llmem standard](https://github.com/urmzd/llmem): project-level at `.ai-memory/`, global at `~/.config/ai-memory/`.
 
-**Why:** Memory should be tool-agnostic and project-specific. Any AI agent should be able to read/write it. Consistency across all projects.
+**Why:** Memory should be tool-agnostic. Any AI agent should be able to read/write it. Two levels keep project context separate from user preferences.
 
-**How to apply:** Always use `.ai-memory/` at repo root for memory files. Never use `~/.claude/projects/*/memory/` or similar tool-locked paths.
+**How to apply:** Use `.ai-memory/` at repo root for project memory, `~/.config/ai-memory/` for global. Never use tool-locked paths like `~/.claude/projects/*/memory/`.
