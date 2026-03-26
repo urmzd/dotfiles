@@ -18,18 +18,21 @@
 
 ## Skills
 
-- [skills/ai-workflows/](https://github.com/urmzd/dotfiles/blob/main/skills/ai-workflows/): AI-assisted workflow patterns
-- [skills/ci-cd/](https://github.com/urmzd/dotfiles/blob/main/skills/ci-cd/): CI/CD pipeline conventions
-- [skills/cli-patterns/](https://github.com/urmzd/dotfiles/blob/main/skills/cli-patterns/): CLI design patterns
-- [skills/development-practices/](https://github.com/urmzd/dotfiles/blob/main/skills/development-practices/): Coding standards and practices
-- [skills/llms-txt/](https://github.com/urmzd/dotfiles/blob/main/skills/llms-txt/): LLMs.txt generation guidance
-- [skills/nix-shells/](https://github.com/urmzd/dotfiles/blob/main/skills/nix-shells/): Nix development shell guidance
-- [skills/project-scaffolding/](https://github.com/urmzd/dotfiles/blob/main/skills/project-scaffolding/): Project scaffolding conventions
-- [skills/readme-standards/](https://github.com/urmzd/dotfiles/blob/main/skills/readme-standards/): README standards
-- [skills/release-workflow/](https://github.com/urmzd/dotfiles/blob/main/skills/release-workflow/): Release workflow conventions
-- [skills/tools/](https://github.com/urmzd/dotfiles/blob/main/skills/tools/): Tooling conventions
-- [skills/memory/](https://github.com/urmzd/dotfiles/blob/main/skills/memory/): Persistent learning from user patterns and preferences
-- [skills/visual-identity/](https://github.com/urmzd/dotfiles/blob/main/skills/visual-identity/): Branding and visual standards
+- [ai-workflows](https://github.com/urmzd/dotfiles/blob/main/skills/ai-workflows/SKILL.md): AI-assisted workflow patterns
+- [ci-cd](https://github.com/urmzd/dotfiles/blob/main/skills/ci-cd/SKILL.md): CI/CD pipeline conventions
+- [cli-patterns](https://github.com/urmzd/dotfiles/blob/main/skills/cli-patterns/SKILL.md): CLI design patterns
+- [cli-ui](https://github.com/urmzd/dotfiles/blob/main/skills/cli-ui/SKILL.md): Terminal UI standard (colors, spinners, symbols, layout)
+- [create-oss-skill](https://github.com/urmzd/dotfiles/blob/main/skills/create-oss-skill/SKILL.md): Agent skill scaffolding and authoring
+- [development-practices](https://github.com/urmzd/dotfiles/blob/main/skills/development-practices/SKILL.md): Coding standards and practices
+- [llms-txt](https://github.com/urmzd/dotfiles/blob/main/skills/llms-txt/SKILL.md): LLMs.txt generation guidance
+- [memory](https://github.com/urmzd/dotfiles/blob/main/skills/memory/SKILL.md): Persistent learning from user patterns and preferences
+- [nix-shells](https://github.com/urmzd/dotfiles/blob/main/skills/nix-shells/SKILL.md): Nix development shell guidance
+- [pragmatic-programming](https://github.com/urmzd/dotfiles/blob/main/skills/pragmatic-programming/SKILL.md): Pragmatic programming principles
+- [project-scaffolding](https://github.com/urmzd/dotfiles/blob/main/skills/project-scaffolding/SKILL.md): Project scaffolding conventions
+- [readme-standards](https://github.com/urmzd/dotfiles/blob/main/skills/readme-standards/SKILL.md): README standards
+- [release-workflow](https://github.com/urmzd/dotfiles/blob/main/skills/release-workflow/SKILL.md): Release workflow conventions
+- [tools](https://github.com/urmzd/dotfiles/blob/main/skills/tools/SKILL.md): Canonical tech stack reference
+- [visual-identity](https://github.com/urmzd/dotfiles/blob/main/skills/visual-identity/SKILL.md): Branding and visual standards
 
 ## Optional
 
