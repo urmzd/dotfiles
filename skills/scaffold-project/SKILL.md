@@ -1,6 +1,10 @@
 ---
 name: scaffold-project
-description: Project structure — Justfile, .envrc, Cargo workspace, Go module, pyproject.toml, sr.yaml, LICENSE, CONTRIBUTING.md, llms.txt, and documentation conventions. Use when creating or standardizing projects.
+description: >
+  Project structure — standard files, documentation conventions, and dispatch to
+  language-specific scaffolds. Use when creating or standardizing projects.
+  Delegates to scaffold-rust, scaffold-go, scaffold-python, scaffold-node, or
+  scaffold-terraform for CI/CD, release pipelines, and language-specific config.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Project Scaffolding
@@ -13,6 +17,20 @@ metadata:
 ## Development Philosophy
 
 Every project should be understandable by a junior developer. Self-documenting structure. Skills as documentation. Minimal setup friction.
+
+## Language-Specific Scaffolds
+
+After generating standard files, load the appropriate language skill for CI/CD, release, and tooling:
+
+| Language | Skill | Key Tools |
+|----------|-------|-----------|
+| Rust | `scaffold-rust` | cargo, clippy, rustfmt, cross, crates.io |
+| Go | `scaffold-go` | go, golangci-lint, gofmt |
+| Python | `scaffold-python` | uv, ruff, pytest, mypy |
+| Node/TS | `scaffold-node` | npm, biome, tsc |
+| Terraform | `scaffold-terraform` | terraform, AWS OIDC |
+
+Always generate the standard files below first, then apply the language-specific scaffold.
 
 ## Standard Files (Every Project)
 
