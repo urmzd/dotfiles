@@ -1,6 +1,10 @@
 ---
 name: setup-release
-description: End-to-end release pipeline — sr.yaml config, CI gating, multi-platform builds (GNU+musl), crates.io/PyPI publishing, post-release hooks. Use when setting up or modifying releases.
+description: >
+  Release pipeline conventions — sr.yaml config, sr action usage, git hooks, monorepo
+  support, post-release patterns, and version file mapping. Language-specific build
+  targets and publishing live in scaffold-rust, scaffold-go, scaffold-python, scaffold-node.
+  Use when setting up or modifying release pipelines.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Release Workflow
@@ -10,9 +14,11 @@ metadata:
 
 # Release Workflow
 
+Universal release conventions. For language-specific build matrices, publish steps, and sr.yaml templates, see the corresponding `scaffold-*` skill.
+
 ## Release Philosophy
 
-- Target accessibility: build for GNU (glibc) AND musl (static) Linux targets
+- Target accessibility: build for multiple platforms (Linux, macOS, Windows)
 - Users should be able to install with one command (install.sh)
 - GitHub Actions where applicable (sr, embed-src, teasr expose actions)
 - Every release automatically updates changelog, creates GitHub release, uploads artifacts
@@ -37,9 +43,6 @@ types:
   - { name: test }
   - { name: build }
   - { name: style }
-version_files: [Cargo.toml]  # or pyproject.toml, package.json — auto-detected if empty
-changelog: { file: CHANGELOG.md }
-stage_files: [Cargo.lock]    # or uv.lock, package-lock.json
 floating_tags: true
 hooks:
   commit-msg:
@@ -55,12 +58,16 @@ hooks:
 # packages: []                   # monorepo support
 ```
 
-Version files by language:
-- Rust: `Cargo.toml` (auto-discovers workspace members)
-- Python: `pyproject.toml` (auto-discovers uv workspace members)
-- Node: `package.json` (auto-discovers npm workspace members)
-- Go: `*.go` files with `var Version = "..."` or `const Version string = "..."`
-- Java: `pom.xml`, `build.gradle`, `build.gradle.kts`
+## Version Files by Language
+
+| Language | `version_files` | `stage_files` |
+|----------|----------------|---------------|
+| Rust | `[Cargo.toml]` | `[Cargo.lock]` |
+| Python | `[pyproject.toml]` | `[uv.lock]` |
+| Node | `[package.json]` | `[package-lock.json]` |
+| Go | _(none — tag only)_ | _(none)_ |
+
+sr auto-discovers workspace members for Rust (Cargo), Python (uv), and Node (npm).
 
 ## Release Pipeline
 
@@ -70,46 +77,30 @@ push to main
   → release.yml:
       embed-src (sync code in README) [if markers exist]
       → sr release (bump → changelog → tag → GitHub release)
-      → build matrix (GNU + musl + Darwin + Windows)
-      → publish (crates.io / PyPI / npm) [if applicable]
+      → build matrix (platform-specific — see scaffold-* skills)
+      → publish (registry-specific — see scaffold-* skills)
       → teasr (post-release demo capture) [if teasr.toml exists]
       → lockfile sync commit [skip ci]
 ```
 
-## Build Targets (Accessibility First)
+## sr Action Usage
 
-### Rust (7 targets)
+```yaml
+- uses: urmzd/sr@v2
+  id: sr
+  with:
+    github-token: ${{ steps.app-token.outputs.token }}
+    force: ${{ inputs.force }}
+```
 
-| Target | Notes |
-|--------|-------|
-| `x86_64-unknown-linux-gnu` | glibc, most distros |
-| `x86_64-unknown-linux-musl` | static, Alpine/containers |
-| `aarch64-unknown-linux-gnu` | ARM64 glibc, Raspberry Pi/cloud |
-| `aarch64-unknown-linux-musl` | ARM64 static |
-| `x86_64-apple-darwin` | Intel Mac |
-| `aarch64-apple-darwin` | Apple Silicon |
-| `x86_64-pc-windows-msvc` | Windows |
-
-Cross-compilation: `cross` for ARM targets on Ubuntu runners.
-
-### Go (5 targets)
-
-`linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`, `windows/amd64`
-
-Static: `CGO_ENABLED=0 go build -trimpath -ldflags "-X main.version=..."`
+Outputs: `released` (bool), `tag` (e.g. `v1.2.0`), `version` (e.g. `1.2.0`).
 
 ## Post-Release Patterns
 
-- **Cargo.lock sync:** `cargo update --workspace` → commit `[skip ci]`
-- **Asset generation:** VHS demo + screenshots (resume-generator)
-- **File embedding:** embed-src → commit (openapi-generator)
+- **Lockfile sync:** language-specific lock update → commit `[skip ci]`
+- **Asset generation:** VHS demo + screenshots
+- **File embedding:** embed-src → commit
 - **Demo capture:** teasr → commit to `showcase/`
-
-## Publishing
-
-- **Crates.io:** `rust-lang/crates-io-auth-action@v1`, publish in dependency order, `sleep 30` between crates
-- **PyPI:** `uv publish` or `twine upload`
-- **npm:** `npm publish`
 
 ## Git Hooks
 
@@ -121,7 +112,7 @@ hooks:
     - sr hook commit-msg          # validates conventional commit format
   pre-commit:
     - step: format
-      patterns: ["*.rs"]
+      patterns: ["*.rs"]          # only runs when matching files are staged
       rules:
         - "rustfmt --check --edition 2024 {files}"
     - step: lint

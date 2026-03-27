@@ -1,6 +1,10 @@
 ---
 name: setup-ci
-description: CI/CD patterns — ci.yml + release.yml naming, Go/Rust/Python/Node pipelines, embed-src/teasr steps, caching, concurrency. Use when setting up GitHub Actions or configuring releases.
+description: >
+  CI/CD conventions — ci.yml + release.yml naming, concurrency, bot skip, embed-src/teasr
+  steps, and workflow structure. Language-specific pipelines live in scaffold-rust,
+  scaffold-go, scaffold-python, scaffold-node, scaffold-terraform. Use when setting up
+  GitHub Actions or understanding CI conventions.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: CI/CD Standards
@@ -9,6 +13,8 @@ metadata:
 ---
 
 # CI/CD Standards
+
+Universal conventions that apply across all languages. For language-specific CI jobs, build matrices, and caching, see the corresponding `scaffold-*` skill.
 
 ## Workflow Naming Convention
 
@@ -19,6 +25,7 @@ metadata:
 
 - No `build.yml` or `publish.yml` — build and publish are jobs within `release.yml`
 - Specialized workflows allowed for domain-specific needs (e.g., `experiments.yml`)
+- Exception: Terraform uses a single `terraform.yml` (see `scaffold-terraform`)
 
 ## Pipeline Flow
 
@@ -33,42 +40,71 @@ Push main → release.yml:
 - Canonical filename: `sr.yaml` (not `.urmzd.sr.yml`)
 - `floating_tags: true` in all configs
 - `tag_prefix: "v"` and Angular commit pattern
-- Pass `github-token: ${{ secrets.GITHUB_TOKEN }}` as secret to release workflow
+- See `setup-release` for full sr.yaml reference
 
-## Go CI
+## Concurrency
 
-- `actions/setup-go@v5` with `go-version-file: go.mod` and `cache: true`
-- `CGO_ENABLED=0` for pure-Go projects (e.g., those using `modernc.org/sqlite`)
-- `golangci/golangci-lint-action@v6` for linting
-- No `version_files` in sr config — Go uses git tags only
-- Build matrix: `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`, `windows/amd64`
-- Output binaries to `bin/`
+```yaml
+# CI workflows — cancel stale runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-## Rust CI
+# Release workflows — never cancel mid-release
+concurrency:
+  group: release
+  cancel-in-progress: false
+```
 
-- `dtolnay/rust-toolchain@stable` with `targets: ${{ matrix.target }}`
-- `Swatinem/rust-cache@v2` with `key: ${{ matrix.target }}`
-- `cross` (via `cargo install cross --locked`) for cross-compilation to ARM and musl targets
-- Build matrix (7 targets): both glibc AND musl Linux targets
-  - `x86_64-unknown-linux-gnu`, `x86_64-unknown-linux-musl`
-  - `aarch64-unknown-linux-gnu`, `aarch64-unknown-linux-musl`
-  - `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc`
+## Bot Skip
 
-## Python CI
+Prevent infinite loops from bot commits:
 
-- Setup: `astral-sh/setup-uv@v5`
-- Format: `uv run ruff format --check .`
-- Lint: `uv run ruff check .`
-- Type: `uv run mypy src/`
-- Test: `uv run pytest`
+```yaml
+if: github.actor != 'sr-releaser[bot]'
+```
 
-## Node/TS CI
+## CI Reuse Pattern
 
-- Setup: `actions/setup-node@v4` (node-version: 22)
-- Build: `npm ci && npm run build`
-- Lint: `npx biome check`
+`ci.yml` exposes `workflow_call` so `release.yml` can gate on it:
 
-## embed-src CI Step (Optional)
+```yaml
+# ci.yml
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+# release.yml
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: ci
+```
+
+## App Token Pattern
+
+Release workflows use a GitHub App for bot commits that can trigger further workflows:
+
+```yaml
+- name: Generate app token
+  id: app-token
+  uses: actions/create-github-app-token@v1
+  with:
+    app-id: ${{ secrets.SR_RELEASER_APP_ID }}
+    private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
+    repositories: ${{ github.event.repository.name }}
+
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+    token: ${{ steps.app-token.outputs.token }}
+```
+
+## embed-src Step (Optional)
+
+Sync code snippets into README before release:
 
 ```yaml
 - uses: urmzd/embed-src@v3
@@ -77,29 +113,23 @@ Push main → release.yml:
     commit-message: "chore: sync embedded files [skip ci]"
 ```
 
-## teasr CI Step (Post-Release, Optional)
+## teasr Step (Post-Release, Optional)
+
+Capture terminal demo after release:
 
 ```yaml
 - uses: urmzd/teasr/.github/actions/teasr@main
 ```
 
-## Caching
+## Force Re-release
 
-- Go: `actions/setup-go@v5` built-in
-- Rust: `Swatinem/rust-cache@v2` with `key: ${{ matrix.target }}`
-- Python: `astral-sh/setup-uv@v5`
-
-## Concurrency
+All release workflows support manual dispatch with a `force` flag for partial failures:
 
 ```yaml
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true  # CI
-  # cancel-in-progress: false  # release
-```
-
-## Bot Skip
-
-```yaml
-if: github.actor != 'github-actions[bot]'
+workflow_dispatch:
+  inputs:
+    force:
+      description: "Re-release the current tag (use when a previous release partially failed)"
+      type: boolean
+      default: false
 ```
