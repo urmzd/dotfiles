@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Install agent skills via npx skills CLI
+set -euo pipefail
+
+if ! command -v npx &>/dev/null; then
+    echo "npx not found, skipping skills install"
+    exit 0
+fi
+
+echo "Installing agent skills..."
+
+# Personal skills from local dotfiles repo
+npx skills add "{{ .chezmoi.sourceDir }}" -g --all -y
+
+# Third-party skills
+npx skills add vercel-labs/skills -g --all -y
+npx skills add vercel/ai-elements -g --all -y
+npx skills add vercel/streamdown -g --all -y
+npx skills add google-gemini/gemini-skills -g --all -y
+
+echo "Agent skills installed successfully."

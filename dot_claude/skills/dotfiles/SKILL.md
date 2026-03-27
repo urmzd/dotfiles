@@ -41,10 +41,9 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 
 ## Managing Skills
 
-Skills are reusable instruction sets stored as `SKILL.md` files in `skills/<name>/` at the repo root.
+Skills are managed via `npx skills` (the [agentskills.io](https://agentskills.io) CLI):
 
-### Adding skills
-
-1. Create a directory: `mkdir -p skills/<skill-name>/`
-2. Add a `SKILL.md` with YAML frontmatter (`name`, `description`) and markdown instructions
-3. Skills in `~/.claude/skills/` are personal (all projects); `.claude/skills/` are project-scoped; `skills/` at repo root are portable
+- `npx skills add <repo> -g` — install a skill globally
+- `npx skills list -g` — list globally installed skills
+- `npx skills update` — update all skills
+- `npx skills find` — search for skills interactively
