@@ -24,7 +24,7 @@ nix develop .#<shell>
 |-------|---------|
 | `default` | Base tools only |
 | `node` | Node.js 22, npm/yarn/pnpm |
-| `python` | Python 3.13, uv |
+| `python` | Python 3.12, uv |
 | `rust` | Rust stable, cargo, clippy |
 | `go` | Go, golangci-lint |
 | `devops` | Terraform, kubectl, Helm, k9s, AWS CLI 2 |
