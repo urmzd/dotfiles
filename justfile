@@ -16,6 +16,46 @@ update:
     @echo ""
     @echo "Run 'git add flake.lock && git commit -m \"chore: update flake\"' to persist"
 
+# ===========================================
+# Disk cleanup
+# ===========================================
+
+# Quick cleanup: remove build artifacts and caches (safe, reversible)
+cleanup:
+    @echo "Quick disk cleanup — removing regenerable build artifacts and caches..."
+    @echo ""
+    @echo "Before:"
+    @df -h / | awk 'NR==1 || NR==2'
+    @echo ""
+    @echo "--- Rust target/ directories ---"
+    @find $(HOME)/github -maxdepth 3 -name target -type d -exec rm -rf {} + 2>/dev/null; true
+    @echo "--- node_modules/ directories ---"
+    @find $(HOME)/github -maxdepth 3 -name node_modules -type d -exec rm -rf {} + 2>/dev/null; true
+    @echo "--- Go build cache ---"
+    @go clean -cache 2>/dev/null; true
+    @echo "--- Python caches ---"
+    @pip cache purge 2>/dev/null; true
+    @uv cache clean 2>/dev/null; true
+    @find $(HOME)/github -maxdepth 4 -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null; true
+    @echo "--- Homebrew cache ---"
+    @brew cleanup --prune=all -s 2>/dev/null; true
+    @echo ""
+    @echo "After:"
+    @df -h / | awk 'NR==1 || NR==2'
+
+# Deep cleanup: quick + Docker prune + Nix GC (slower, more aggressive)
+cleanup-deep: cleanup
+    @echo ""
+    @echo "--- Miscellaneous caches ---"
+    @rm -rf $(HOME)/.cache/huggingface $(HOME)/.cache/unstructured $(HOME)/.gradle/caches $(HOME)/.npm/_cacache $(HOME)/.pnpm-store 2>/dev/null; true
+    @echo "--- Docker system prune ---"
+    @docker system prune -af --volumes 2>/dev/null; true
+    @echo "--- Nix garbage collection ---"
+    @nix-collect-garbage -d 2>/dev/null; true
+    @echo ""
+    @echo "Final:"
+    @df -h / | awk 'NR==1 || NR==2'
+
 # Show environment status and flake age
 status:
     @echo "=== Nix Environment Status ==="
