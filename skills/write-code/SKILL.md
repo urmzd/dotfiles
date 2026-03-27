@@ -65,6 +65,8 @@ type(scope): lowercase imperative description (max 72 chars)
 
 ## Testing
 
+For comprehensive testing guidance (test types, fixtures, mocks, CI strategy), see the `test-code` skill.
+
 | Language | Framework | Pattern | CI Command |
 |----------|-----------|---------|------------|
 | Rust | `cargo test` | `#[cfg(test)]` + `tests/` integration | `cargo test --workspace` |

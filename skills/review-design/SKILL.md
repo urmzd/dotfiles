@@ -128,6 +128,8 @@ Build thin, end-to-end slices that work, then iterate.
 
 ## Testing
 
+For per-language conventions, test types, and CI strategy, see the `test-code` skill.
+
 - **Test your software, or your users will**
 - Test state coverage, not code coverage — exercise meaningful paths, not just lines
 - Use **property-based testing** to discover edge cases you didn't think of
