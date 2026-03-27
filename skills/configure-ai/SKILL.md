@@ -18,11 +18,13 @@ metadata:
 | AGENTS.md | [agents.md Standard](https://agents.md/) |
 | llms.txt | [llms.txt Specification](https://llmstxt.org/) |
 
-## Documentation-as-Skills Philosophy
+## Skills vs Docs
 
-- Skills replace conventional `docs/` directories
-- Every repo should have: README.md (humans) + AGENTS.md (AI) + SKILL.md (agent instructions) + llms.txt (LLM discovery)
-- No separate docs folder
+- **Skills** (`skills/<name>/SKILL.md`) = executable agent instructions — *how to do things* (conventions, workflows, tool usage)
+- **Docs** (`docs/`) = project documentation — *what was decided and why* (rfcs/, guides/, plans/, runbooks/, architecture/)
+- Both exist in every project — neither replaces the other
+- Every repo should also have: README.md (humans) + AGENTS.md (AI) + llms.txt (LLM discovery)
+- Root-level standard files (README, CONTRIBUTING, LICENSE, CODEOWNERS) stay at root — everything else goes in `docs/`
 
 ## AI Tools
 

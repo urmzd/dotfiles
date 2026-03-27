@@ -92,9 +92,9 @@ Every repo should have `llms.txt` at root per the [llms.txt specification](https
 
 ## Documentation Philosophy
 
-- Skills replace conventional `docs/` directories — per the [Agent Skills Specification](https://agentskills.io/specification)
-- README.md = human-facing documentation
-- [AGENTS.md](https://agents.md/) = AI-facing project context
+- README.md = human-facing documentation — stays at root
+- [AGENTS.md](https://agents.md/) = AI-facing project context — stays at root
+- CONTRIBUTING.md, LICENSE, CODEOWNERS = standard root files
 - `skills/<name>/SKILL.md` = agent instructions
 - `llms.txt` = LLM discovery ([spec](https://llmstxt.org/))
-- **No separate docs folder**
+- **All other documents belong in `docs/`** — organized into subdirectories: `guides/`, `rfcs/`, `plans/`, `runbooks/`, `architecture/`, etc.
