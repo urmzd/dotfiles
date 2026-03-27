@@ -36,14 +36,14 @@ Always generate the standard files below first, then apply the language-specific
 
 | File | Purpose |
 |------|---------|
-| `README.md` | Human-facing documentation (see `readme-standards`) |
-| `AGENTS.md` | AI-facing project context (see `ai-workflows`) |
+| `README.md` | Human-facing documentation (see `write-readme`) |
+| `AGENTS.md` | AI-facing project context (see `configure-ai`) |
 | `LICENSE` | Apache-2.0 (standard for all repos) |
 | `CONTRIBUTING.md` | How to contribute (see template below) |
 | `sr.yaml` | Semantic release config |
 | `justfile` | Task runner (build, test, lint, fmt) |
 | `.envrc` | Nix shell activation (`use flake .#<shell>`) |
-| `llms.txt` | LLM-friendly project summary (see `llms-txt`) |
+| `llms.txt` | LLM-friendly project summary (see `create-llms-txt`) |
 | `skills/<name>/SKILL.md` | Agent skill instructions |
 | `docs/` | Project documentation (guides/, rfcs/, plans/, runbooks/, etc.) |
 | `.ai-memory/` | Tool-agnostic AI memory (see `memory` skill) |

@@ -113,7 +113,7 @@ Before writing the file, check:
 ## Gotchas
 
 - **No relative links.** LLMs fetch `llms.txt` from a URL — relative paths break. Always use absolute URLs.
-- **Don't link directories.** Link to the actual markdown/source file, not a directory path. `skills/ai-workflows/SKILL.md` not `skills/ai-workflows/`.
+- **Don't link directories.** Link to the actual markdown/source file, not a directory path. `skills/configure-ai/SKILL.md` not `skills/configure-ai/`.
 - **The `## Optional` heading is semantic.** It tells LLMs they can drop these links when context is tight. Put truly skippable content there — not your API docs.
 - **Don't duplicate the README.** The blockquote is a *summary for LLMs*, not a copy of your README's first paragraph. Write it fresh with an LLM audience in mind.
 - **Keep it short.** An llms.txt that's 200 lines defeats the purpose. Aim for 20-50 lines. If you need more, your project needs better docs, not a longer index.

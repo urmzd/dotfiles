@@ -112,21 +112,28 @@ All skills:
 
 | Skill | Purpose |
 | ----- | ------- |
-| ai-workflows | AI-assisted workflow patterns |
-| ci-cd | CI/CD pipeline conventions |
-| cli-patterns | CLI conventions (JSON piping, stdout/stderr, structured logging) |
-| cli-ui | Terminal UI standard (colors, spinners, symbols, layout) |
-| development-practices | Coding standards and practices |
-| dotfiles | Chezmoi dotfiles conventions and patterns |
-| llms-txt | LLM-friendly project summary convention |
-| memory | Persistent learning — implements [llmem standard](https://github.com/urmzd/llmem) |
-| nix-shells | Nix development shell guidance |
-| pragmatic-programming | Pragmatic programming principles |
-| project-scaffolding | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
-| readme-standards | README structure and section order |
-| release-workflow | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
-| tools | Canonical tech stack reference by purpose |
-| visual-identity | Branding, themes, VHS demos, teasr integration |
+| assess-quality | Code quality assessment (readability, consistency, intentional design) |
+| audit-security | Security auditing and threat detection |
+| build-cli | CLI conventions (JSON piping, stdout/stderr, structured logging) |
+| choose-stack | Canonical tech stack reference by purpose |
+| configure-ai | AI-assisted workflow patterns |
+| create-llms-txt | Generate LLM-friendly project summary files |
+| create-oss-skill | Create portable agent skills |
+| extend-oss-skills-to-claude | Extend skills with Claude Code-specific features |
+| review-design | Pragmatic programming principles |
+| scaffold-go | Scaffold Go projects |
+| scaffold-node | Scaffold Node/TypeScript projects |
+| scaffold-project | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
+| scaffold-python | Scaffold Python projects |
+| scaffold-rust | Scaffold Rust projects |
+| scaffold-terraform | Scaffold Terraform projects |
+| setup-ci | CI/CD pipeline conventions |
+| setup-devenv | Nix development shell guidance |
+| setup-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
+| style-brand | Branding, themes, VHS demos, teasr integration |
+| test-code | Testing philosophy and per-language conventions |
+| write-code | Coding standards and practices |
+| write-readme | README structure and section order |
 
 ## License
 

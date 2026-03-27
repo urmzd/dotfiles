@@ -88,7 +88,7 @@ This repo's conventions are available as portable agent skills in [`skills/`](sk
 
 ## llms.txt
 
-Every repo should have `llms.txt` at root per the [llms.txt specification](https://llmstxt.org/) (see `llms-txt` skill for format).
+Every repo should have `llms.txt` at root per the [llms.txt specification](https://llmstxt.org/) (see `create-llms-txt` skill for format).
 
 ## Documentation Philosophy
 

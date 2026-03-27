@@ -18,6 +18,7 @@
 
 ## Skills
 
+- [assess-quality](https://github.com/urmzd/dotfiles/blob/main/skills/assess-quality/SKILL.md): Code quality assessment (readability, consistency, intentional design)
 - [audit-security](https://github.com/urmzd/dotfiles/blob/main/skills/audit-security/SKILL.md): Security auditing and threat detection
 - [build-cli](https://github.com/urmzd/dotfiles/blob/main/skills/build-cli/SKILL.md): CLI conventions and patterns
 - [choose-stack](https://github.com/urmzd/dotfiles/blob/main/skills/choose-stack/SKILL.md): Tech stack selection
@@ -26,12 +27,17 @@
 - [create-oss-skill](https://github.com/urmzd/dotfiles/blob/main/skills/create-oss-skill/SKILL.md): Agent skill scaffolding and authoring
 - [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/skills/extend-oss-skills-to-claude/SKILL.md): Adapt skills for Claude Code
 - [review-design](https://github.com/urmzd/dotfiles/blob/main/skills/review-design/SKILL.md): Pragmatic design review
+- [scaffold-go](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-go/SKILL.md): Scaffold Go projects
+- [scaffold-node](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-node/SKILL.md): Scaffold Node/TypeScript projects
 - [scaffold-project](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-project/SKILL.md): Project scaffolding conventions
+- [scaffold-python](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-python/SKILL.md): Scaffold Python projects
+- [scaffold-rust](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-rust/SKILL.md): Scaffold Rust projects
+- [scaffold-terraform](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-terraform/SKILL.md): Scaffold Terraform projects
 - [setup-ci](https://github.com/urmzd/dotfiles/blob/main/skills/setup-ci/SKILL.md): CI/CD pipeline setup
 - [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/skills/setup-devenv/SKILL.md): Nix development shell guidance
 - [setup-release](https://github.com/urmzd/dotfiles/blob/main/skills/setup-release/SKILL.md): Release pipeline setup
 - [style-brand](https://github.com/urmzd/dotfiles/blob/main/skills/style-brand/SKILL.md): Terminal branding and visual standards
-- [style-cli](https://github.com/urmzd/dotfiles/blob/main/skills/style-cli/SKILL.md): Terminal UI standard
+- [test-code](https://github.com/urmzd/dotfiles/blob/main/skills/test-code/SKILL.md): Testing philosophy and per-language conventions
 - [write-code](https://github.com/urmzd/dotfiles/blob/main/skills/write-code/SKILL.md): Coding standards and practices
 - [write-readme](https://github.com/urmzd/dotfiles/blob/main/skills/write-readme/SKILL.md): README standards
 

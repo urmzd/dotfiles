@@ -24,7 +24,7 @@ metadata:
 - **Docs** (`docs/`) = project documentation — *what was decided and why* (rfcs/, guides/, plans/, runbooks/, architecture/)
 - Both exist in every project — neither replaces the other
 - Every repo should also have: README.md (humans) + AGENTS.md (AI) + llms.txt (LLM discovery)
-- Root-level standard files (README, CONTRIBUTING, LICENSE, CODEOWNERS) stay at root — everything else goes in `docs/`
+- Root-level standard files (README, AGENTS.md, CONTRIBUTING, LICENSE, CODEOWNERS, llms.txt) stay at root — everything else goes in `docs/`
 
 ## AI Tools
 
