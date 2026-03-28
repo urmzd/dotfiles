@@ -43,6 +43,7 @@ metadata:
 - **ncc** — compile Node.js modules into single files
 - **tsdown** — TypeScript bundler (Rolldown-based)
 - **biome** — linting and formatting for JS/TS
+- **turbo** — monorepo build system (task caching, parallel execution)
 
 ## Python
 
@@ -52,3 +53,7 @@ metadata:
 - **pytest** — testing framework
 - **pydantic** — data validation with type annotations
 - **fastapi** — async web framework
+- **logging** (stdlib) — foundation layer; prefer over loguru (`logging.getLogger(__name__)`)
+- **structlog** — structured/JSON logging on top of stdlib; use when services need machine-readable output
+- **loguru** — quick scripts and one-off CLIs only; never in libraries or production services
+- **opentelemetry** — tracing, metrics, and log export (otel-sdk + otel-exporter-otlp); stdlib logging has first-class OTel support, structlog works transitively

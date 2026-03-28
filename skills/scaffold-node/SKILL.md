@@ -295,6 +295,27 @@ Replace npm commands:
 - `npx` → `pnpm exec`
 - `stage_files: [pnpm-lock.yaml]` in sr.yaml
 
+### Monorepo Variant (Turbo)
+
+For multi-package repos, add turbo for cached, parallel task execution:
+
+- `npm install turbo --save-dev` at workspace root
+- Add `turbo.json` with pipeline definitions (`build`, `test`, `lint`, `typecheck`)
+- Replace direct `npm run` calls with `turbo run` in justfile and CI
+- Turbo caches task outputs — subsequent runs skip unchanged packages
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**"] },
+    "test": { "dependsOn": ["build"] },
+    "lint": {},
+    "typecheck": {}
+  }
+}
+```
+
 ## Gotchas
 
 - Use `npm ci` (not `npm install`) in CI for reproducible installs
@@ -304,3 +325,4 @@ Replace npm commands:
 - `cache: npm` in setup-node handles caching automatically
 - For framework-specific type checks (e.g., `astro check`), add a separate `check` job
 - `cancel-in-progress: false` on release workflow to prevent partial releases
+- For monorepos, use `turbo run <task>` instead of running tasks per-package manually
