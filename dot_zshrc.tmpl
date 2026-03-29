@@ -90,6 +90,36 @@ export EDITOR='nvim'
 alias vi="nvim"
 alias vim="nvim"
 
+# Dotfiles management
+alias dotfiles-update='cd ~/.local/share/chezmoi && nix flake update && nix develop --command echo "Environment rebuilt successfully" && cd -'
+function dotfiles-status() {
+  echo "=== Nix Environment Status ==="
+  local lock="$HOME/.local/share/chezmoi/flake.lock"
+  if [[ -f "$lock" ]]; then
+    if [[ "$(uname)" == "Darwin" ]]; then
+      local age=$(( ($(date +%s) - $(/usr/bin/stat -f "%m" "$lock")) / 86400 ))
+    else
+      local age=$(( ($(date +%s) - $(stat -c %Y "$lock")) / 86400 ))
+    fi
+    echo "flake.lock age: ${age} days"
+  fi
+  echo ""
+  echo "AI tool versions:"
+  echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed"
+  echo -n "  codex: "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $2}' || echo "not installed"
+  echo -n "  gemini: "; npm list -g @google/gemini-cli 2>/dev/null | grep @google/gemini-cli | awk '{print $2}' || echo "not installed"
+}
+function dotfiles-cleanup() {
+  echo "Quick disk cleanup — removing regenerable build artifacts and caches..."
+  echo "Before:"; df -h / | awk 'NR==1 || NR==2'; echo ""
+  find "$HOME/github" -maxdepth 3 -name target -type d -exec rm -rf {} + 2>/dev/null
+  find "$HOME/github" -maxdepth 3 -name node_modules -type d -exec rm -rf {} + 2>/dev/null
+  go clean -cache 2>/dev/null; pip cache purge 2>/dev/null; uv cache clean 2>/dev/null
+  find "$HOME/github" -maxdepth 4 -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null
+  brew cleanup --prune=all -s 2>/dev/null
+  echo "After:"; df -h / | awk 'NR==1 || NR==2'
+}
+
 # Kubernetes aliases (Colima with k3s)
 alias k8s-up="colima start --kubernetes"
 alias k8s-down="colima stop"
