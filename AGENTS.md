@@ -32,14 +32,11 @@ Use `tree` for directory layout and `ripgrep`/`ag` for finding files and pattern
 
 - Shell scripts: POSIX-compatible where possible, bash/zsh when needed
 - Templates: Use `{{ .chezmoi.os }}` guards for platform-specific blocks
-- Prefer `justfile` targets over raw shell scripts for common tasks
-
 ## Testing
 
 ```bash
 chezmoi diff                    # Dry-run before applying
 chezmoi verify                  # Verify source state
-just check                      # Run project checks via justfile
 ```
 
 ## Commit Guidelines

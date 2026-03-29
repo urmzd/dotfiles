@@ -50,9 +50,9 @@ chezmoi edit <file>   # Edit source, then apply
 ### Nix environment
 
 ```bash
-nix develop           # Enter the dev shell (or use direnv)
-just update           # Update all Nix flake inputs and rebuild
-just status           # Check flake age + AI tool versions
+nix develop              # Enter the dev shell (or use direnv)
+dotfiles-update          # Update Nix flake inputs and rebuild
+dotfiles-status          # Check flake age + AI tool versions
 ```
 
 ### What's in the shell
@@ -97,7 +97,7 @@ These scripts run automatically on `chezmoi apply`:
 AI coding agents are installed automatically when entering the Nix dev shell. Check versions with:
 
 ```bash
-just status
+dotfiles-status
 ```
 
 Claude Code config lives in `dot_claude/` — settings, custom statusline, and project-scoped skills.
@@ -123,7 +123,7 @@ All skills:
 | review-design | Pragmatic programming principles |
 | scaffold-go | Scaffold Go projects |
 | scaffold-node | Scaffold Node/TypeScript projects |
-| scaffold-project | Project structure (Justfile, .envrc, Cargo workspace, etc.) |
+| scaffold-project | Project structure (.envrc, Cargo workspace, etc.) |
 | scaffold-python | Scaffold Python projects |
 | scaffold-rust | Scaffold Rust projects |
 | scaffold-terraform | Scaffold Terraform projects |

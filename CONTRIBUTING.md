@@ -7,7 +7,6 @@ Thanks for your interest in contributing to **dotfiles**.
 - **macOS or Linux**
 - **[Nix](https://nixos.org/download.html)** with flakes enabled
 - **[chezmoi](https://www.chezmoi.io/install/)**
-- **[just](https://github.com/casey/just)** — command runner
 - **[GH_TOKEN](https://cli.github.com/)** — GitHub CLI authentication
 
 ## Getting Started
@@ -23,9 +22,8 @@ cd dotfiles
 |---------|-------------|
 | `chezmoi diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
-| `just update` | Update Nix flake inputs |
-| `just status` | Check environment status |
-| `just check` | Run project checks |
+| `dotfiles-update` | Update Nix flake inputs |
+| `dotfiles-status` | Check environment status |
 
 ## Commit Convention
 
@@ -54,5 +52,4 @@ Format: `type(scope): description` — scope by tool/area (e.g., `feat(nvim):`, 
 
 - Shell scripts: POSIX-compatible where possible, bash/zsh when needed
 - Templates: Use `{{ .chezmoi.os }}` guards for platform-specific blocks
-- Prefer `justfile` targets over raw shell scripts for common tasks
 - Never commit secrets, API keys, or tokens

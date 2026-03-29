@@ -10,7 +10,6 @@
 ## API / Key Files
 
 - [flake.nix](https://github.com/urmzd/dotfiles/blob/main/flake.nix): Nix flake with dev shells (default, node, python, rust, go, devops, haskell, ruby, scheme, perl, lua, full)
-- [justfile](https://github.com/urmzd/dotfiles/blob/main/justfile): Task runner (update, status, check)
 - [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages
 - [dot_config/](https://github.com/urmzd/dotfiles/blob/main/dot_config/): Neovim, Ghostty, Tmux, and other tool configs
 - [dot_zshrc.tmpl](https://github.com/urmzd/dotfiles/blob/main/dot_zshrc.tmpl): Zsh configuration template
