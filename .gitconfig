@@ -1,5 +1,6 @@
 [pull]
 	rebase = true
+	autostash = true
 [fetch]
 	prune = true
 [diff]
@@ -8,4 +9,4 @@
 	defaultBranch = main
 [user]
 	name = Urmzd Mukhammadnaim
-	email = urmzd.consulting@gmail.com
+	email = hello@urmzd.com

@@ -315,7 +315,7 @@ Key-Length: 4096
 Subkey-Type: RSA
 Subkey-Length: 4096
 Name-Real: Urmzd Mukhammadnaim
-Name-Email: urmzd.consulting@gmail.com
+Name-Email: hello@urmzd.com
 Expire-Date: 1m
 %no-protection
 %commit
@@ -367,7 +367,7 @@ init_chezmoi() {
         chezmoi execute-template \
             --init \
             --promptString "name=Urmzd Mukhammadnaim" \
-            --promptString "email=urmzd.consulting@gmail.com" \
+            --promptString "email=hello@urmzd.com" \
             --promptString "github_username=urmzd" \
             --promptString "ssh_signing_key=${SSH_SIGNING_KEY:-~/.ssh/github.pub}" \
             --promptBool "is_personal=true" \
