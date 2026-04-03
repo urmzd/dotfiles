@@ -19,7 +19,7 @@
 - Ghostty terminal (cyberdream theme, MonaspiceNe Nerd Font)
 - Neovim (HEAD) with LSP for all included languages
 - AI agent integration (Claude Code, Gemini, Codex, Copilot) with auto-install
-- 15 portable agent skills in [`skills/`](skills/)
+- 36 portable agent skills in [`skills/`](skills/)
 - Chezmoi automation scripts that trigger on apply
 - macOS extras via Homebrew (fonts, Android tooling, VHS for CLI recordings)
 - Docker cleanup launchd agent (daily at 3 AM)
@@ -102,25 +102,56 @@ dotfiles-status
 
 Claude Code config lives in `dot_claude/` — settings, custom statusline, and project-scoped skills.
 
-## Agent Skill
+## Agent Skills
 
 This repo's conventions are available as portable agent skills in [`skills/`](skills/), following the [Agent Skills Specification](https://agentskills.io/specification).
 
 Related standards: [AGENTS.md](https://agents.md/) · [llms.txt](https://llmstxt.org/)
 
-All skills:
+### Managing skills
+
+All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses the [`skills` CLI](https://agentskills.io/) to add both local skills from [`skills/`](skills/) and third-party skills globally to all agents:
+
+| Source | Skills |
+| ------ | ------ |
+| This repo (`skills/`) | All local skills |
+| [vercel-labs/skills](https://github.com/vercel-labs/skills) | All |
+| [vercel/ai-elements](https://github.com/vercel/ai-elements) | All |
+| [vercel/streamdown](https://github.com/vercel/streamdown) | All |
+| [google-gemini/gemini-skills](https://github.com/google-gemini/gemini-skills) | All |
+| [better-auth/skills](https://github.com/better-auth/skills) | better-auth-best-practices |
+| [vercel/ai](https://github.com/vercel/ai) | ai-sdk |
+| [fastapi/fastapi](https://github.com/fastapi/fastapi) | fastapi |
+
+To manage skills manually:
+
+```bash
+npx skills ls                                  # List installed skills
+npx skills find                                # Search for skills interactively
+npx skills add owner/repo -g --all -y          # Add all skills from a repo
+npx skills add owner/repo@skill-name -g -y     # Add a single skill
+npx skills remove -g --all -y                  # Remove skills
+npx skills update                              # Update all skills
+npx skills init <name>                         # Create a new skill
+```
+
+### All skills
+
+#### Coding standards
 
 | Skill | Purpose |
 | ----- | ------- |
 | assess-quality | Code quality assessment (readability, consistency, intentional design) |
-| audit-security | Security auditing and threat detection |
 | build-cli | CLI conventions (JSON piping, stdout/stderr, structured logging) |
 | choose-stack | Canonical tech stack reference by purpose |
-| configure-ai | AI-assisted workflow patterns |
-| create-llms-txt | Generate LLM-friendly project summary files |
-| create-oss-skill | Create portable agent skills |
-| extend-oss-skills-to-claude | Extend skills with Claude Code-specific features |
 | review-design | Pragmatic programming principles |
+| test-code | Testing philosophy and per-language conventions |
+| write-code | Coding standards and practices |
+
+#### Scaffolding & setup
+
+| Skill | Purpose |
+| ----- | ------- |
 | scaffold-go | Scaffold Go projects |
 | scaffold-node | Scaffold Node/TypeScript projects |
 | scaffold-project | Project structure (.envrc, Cargo workspace, etc.) |
@@ -130,10 +161,44 @@ All skills:
 | setup-ci | CI/CD pipeline conventions |
 | setup-devenv | Nix development shell guidance |
 | setup-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
+| repo-init | Full repo bootstrap (create, license, scaffold, push) |
+
+#### Workflow automation
+
+| Skill | Purpose |
+| ----- | ------- |
+| ship | Commit, push, and watch CI until pass/fail |
+| pr | Create PRs with auto-generated summary from commits |
+| diagnose-ci | Find failing pipelines, pull logs, identify root cause |
+| fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
+| get-work | Scan repos for GitHub status and branch divergence |
+| release-audit | Audit releases, tags, and assets for health |
+| update-repo-meta | Update GitHub repo topics, description, homepage |
+
+#### AI & documentation
+
+| Skill | Purpose |
+| ----- | ------- |
+| configure-ai | AI-assisted workflow patterns |
+| create-llms-txt | Generate LLM-friendly project summary files |
+| create-oss-skill | Create portable agent skills |
+| extend-oss-skills-to-claude | Extend skills with Claude Code-specific features |
+| audit-security | Security auditing and threat detection |
 | style-brand | Branding, themes, VHS demos, teasr integration |
-| test-code | Testing philosophy and per-language conventions |
-| write-code | Coding standards and practices |
 | write-readme | README structure and section order |
+
+#### Personas
+
+Reasoning frameworks that adopt a specific mindset for different types of work:
+
+| Skill | Purpose |
+| ----- | ------- |
+| persona-architect | Interface-first systems design with verbose, principle-driven reasoning |
+| persona-curator | Prescriptive perfectionist for consistency, polish, and visual hierarchy |
+| persona-debugger | Terse, empirical root-cause analysis |
+| persona-ideator | Expansive, generative creative exploration |
+| persona-strategist | Imperative orchestration across multiple systems and repos |
+| persona-writer | Concise, outcome-focused technical documentation |
 
 ## License
 
