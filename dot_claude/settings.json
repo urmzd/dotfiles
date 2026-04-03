@@ -3,7 +3,6 @@
   "includeCoAuthoredBy": false,
   "model": "opus",
   "enabledPlugins": {
-    "pyright-lsp@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,

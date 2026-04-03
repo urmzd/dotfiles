@@ -213,7 +213,7 @@ require("lazy").setup({
 		opts = {
 			ensure_installed = {
 				"lua_ls",
-				"basedpyright",
+				"ty",
 				"rust_analyzer",
 				"gopls",
 				"clangd",

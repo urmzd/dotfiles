@@ -26,7 +26,7 @@ After generating standard files, load the appropriate language skill for CI/CD, 
 |----------|-------|-----------|
 | Rust | `scaffold-rust` | cargo, clippy, rustfmt, cross, crates.io |
 | Go | `scaffold-go` | go, golangci-lint, gofmt |
-| Python | `scaffold-python` | uv, ruff, pytest, mypy |
+| Python | `scaffold-python` | uv, ruff, pytest, ty |
 | Node/TS | `scaffold-node` | npm, biome, tsc |
 | Terraform | `scaffold-terraform` | terraform, AWS OIDC |
 

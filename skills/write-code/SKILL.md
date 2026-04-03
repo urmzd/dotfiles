@@ -26,7 +26,7 @@ metadata:
 | Package Managers | cargo, uv (Python), npm/yarn/pnpm, luarocks |
 | Formatters/Linters | biome (JS/TS), stylua (Lua), clippy (Rust), golangci-lint (Go), ruff (Python) |
 | Observability | opentelemetry (tracing/metrics/logs), structlog + stdlib logging (Python; loguru for scripts only) |
-| Editor | Neovim (HEAD) with LSP: basedpyright, ts_ls, lua_ls, gopls, rust_analyzer, jsonls, yamlls, bashls, jdtls |
+| Editor | Neovim (HEAD) with LSP: ty, ts_ls, lua_ls, gopls, rust_analyzer, jsonls, yamlls, bashls, jdtls |
 | Shell | Zsh + Oh My Zsh + Powerlevel10k |
 | Terminal Multiplexer | tmux (vi-mode, vim-tmux-navigator) |
 | DevOps | Terraform, kubectl, Helm, k9s, AWS CLI 2 |

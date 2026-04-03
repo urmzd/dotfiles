@@ -207,7 +207,7 @@ dependencies = []
 # <project-name> = "<package>.cli:main"
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy"]
+dev = ["pytest", "ruff", "ty"]
 
 [tool.ruff]
 line-length = 100
@@ -240,7 +240,7 @@ fmt:
     uv run ruff format .
 
 typecheck:
-    uv run mypy src/
+    uv run ty check src/
 
 check: fmt lint test
 
