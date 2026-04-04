@@ -123,15 +123,26 @@ All skills are installed automatically via `chezmoi apply`. The [`install-skills
 | [vercel/ai](https://github.com/vercel/ai) | ai-sdk |
 | [fastapi/fastapi](https://github.com/fastapi/fastapi) | fastapi |
 
-To manage skills manually:
+To manage skills and agents manually:
 
 ```bash
+# Skills
 agentspec skill list                           # List installed skills with tool linkage
 agentspec skill install owner/repo             # Install from GitHub
 agentspec skill link <skill> <tool>            # Symlink skill to a tool
 agentspec skill remove <name>                  # Remove a skill
 agentspec skill create [name]                  # Scaffold a new skill
 agentspec skill validate [path]                # Validate SKILL.md
+
+# Agents (personas, sub-agents)
+agentspec agent list                           # List installed agents with tool linkage
+agentspec agent install owner/repo             # Install from GitHub
+agentspec agent link <agent> <tool>            # Link agent to a tool
+agentspec agent remove <name>                  # Remove an agent
+agentspec agent create [name]                  # Scaffold a new agent
+agentspec agent validate [path]                # Validate agent definition
+
+# Discovery
 agentspec search <query>                       # Search GitHub for skills
 ```
 
