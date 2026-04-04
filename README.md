@@ -110,7 +110,7 @@ Related standards: [AGENTS.md](https://agents.md/) · [llms.txt](https://llmstxt
 
 ### Managing skills
 
-All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses the [`skills` CLI](https://agentskills.io/) to add both local skills from [`skills/`](skills/) and third-party skills globally to all agents:
+All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses [`agentspec`](https://github.com/urmzd/agentspec) to install both local skills from [`skills/`](skills/) and third-party skills globally to all agents:
 
 | Source | Skills |
 | ------ | ------ |
@@ -126,13 +126,13 @@ All skills are installed automatically via `chezmoi apply`. The [`install-skills
 To manage skills manually:
 
 ```bash
-npx skills ls                                  # List installed skills
-npx skills find                                # Search for skills interactively
-npx skills add owner/repo -g --all -y          # Add all skills from a repo
-npx skills add owner/repo@skill-name -g -y     # Add a single skill
-npx skills remove -g --all -y                  # Remove skills
-npx skills update                              # Update all skills
-npx skills init <name>                         # Create a new skill
+agentspec skill list                           # List installed skills with tool linkage
+agentspec skill install owner/repo             # Install from GitHub
+agentspec skill link <skill> <tool>            # Symlink skill to a tool
+agentspec skill remove <name>                  # Remove a skill
+agentspec skill create [name]                  # Scaffold a new skill
+agentspec skill validate [path]                # Validate SKILL.md
+agentspec search <query>                       # Search GitHub for skills
 ```
 
 ### All skills
