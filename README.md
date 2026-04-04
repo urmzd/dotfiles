@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">dotfiles</h1>
   <p align="center">
-    Cross-platform dev environment powered by Chezmoi + Nix — one command to a fully configured machine.
+    Cross-platform dev environment powered by Chezmoi + Nix. One command to a fully configured machine.
     <br /><br />
     <a href="#quick-start">Quick Start</a>
     &middot;
@@ -13,16 +13,16 @@
 
 ## Features
 
-- Unified Nix dev shell with 15+ languages and 40+ tools
-- Zsh + Oh My Zsh + Powerlevel10k with auto-completions for all Nix packages
-- Tmux (`Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme)
-- Ghostty terminal (cyberdream theme, MonaspiceNe Nerd Font)
-- Neovim (HEAD) with LSP for all included languages
-- AI agent integration (Claude Code, Gemini, Codex, Copilot) with auto-install
-- 36 portable agent skills in [`skills/`](skills/)
-- Chezmoi automation scripts that trigger on apply
-- macOS extras via Homebrew (fonts, Android tooling, VHS for CLI recordings)
-- Docker cleanup launchd agent (daily at 3 AM)
+- **Nix dev shell** with 15+ languages and 40+ tools
+- **Zsh** with Oh My Zsh + Powerlevel10k and auto-completions for all Nix packages
+- **Tmux** with `Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme
+- **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
+- **Neovim** (HEAD) with LSP for all included languages
+- **AI agents** (Claude Code, Gemini, Codex, Copilot) with auto-install
+- **36 portable agent skills** in [`skills/`](skills/)
+- **Chezmoi automation** scripts that trigger on apply
+- **macOS extras** via Homebrew (fonts, Android tooling, VHS for CLI recordings)
+- **Docker cleanup** launchd agent running daily at 3 AM
 
 ## Quick Start
 
@@ -66,7 +66,7 @@ dotfiles-status          # Check flake age + AI tool versions
 ### Adding a new tool
 
 1. Add the package to `allPackages` in `flake.nix`
-2. Run `chezmoi apply` — the `check-flake` script rebuilds automatically
+2. Run `chezmoi apply`. The `check-flake` script rebuilds automatically
 3. Completions regenerate if the package exposes zsh site-functions
 
 ### Adding a new dotfile
@@ -100,7 +100,7 @@ AI coding agents are installed automatically when entering the Nix dev shell. Ch
 dotfiles-status
 ```
 
-Claude Code config lives in `dot_claude/` — settings, custom statusline, and project-scoped skills.
+Claude Code config lives in `dot_claude/`. Includes settings, custom statusline, and project-scoped skills.
 
 ## Agent Skills
 
