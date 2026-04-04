@@ -1,6 +1,6 @@
 ---
 name: write-readme
-description: README structure — centered header, badges, demos, section order, Agent Skill section, and llms.txt. Use when creating or updating any project README.
+description: README structure — centered header, badges, demos, section order, install.sh pattern, quickstart, embed-src usage, and llms.txt. Use when creating or updating any project README.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: README Standards
@@ -55,7 +55,7 @@ Below badges, 80% width:
 
 ## Output Gallery
 
-For projects with multiple visual outputs (resume-generator pattern — 3-col, 30% width):
+For projects with multiple visual outputs (3-col, 30% width):
 
 ```html
 <p align="center">
@@ -66,17 +66,73 @@ For projects with multiple visual outputs (resume-generator pattern — 3-col, 3
 
 ## Standard Section Order
 
-Features → Install → Quick Start → Usage/CLI Reference → Configuration → API → Agent Skill → Related → License
+Features → Installation → Quick Start → Usage / CLI Reference → Configuration → API → Architecture → Agent Skill → Related → License
 
-## No Project Structure
+## Sections
 
-READMEs must NOT include directory trees, file tables, or "Key Directories" sections. Project structure is discoverable via `tree` and `ripgrep`/`ag` — writing it out is duplicative and goes stale. AGENTS.md handles structural context for AI agents.
+### Features
 
-## Section Naming
+Bullet list of key capabilities. Keep it scannable — 3-8 items.
 
-Always "Quick Start" (never "Quickstart" or "Getting Started").
+### Installation
 
-## Agent Skill Section
+Every project needs an installation section. For CLI tools and binaries, include an `install.sh` one-liner:
+
+```markdown
+## Installation
+
+### Script (macOS / Linux)
+
+\```sh
+curl -fsSL https://raw.githubusercontent.com/{owner}/{repo}/main/install.sh | sh
+\```
+
+### Manual
+
+Download a pre-built binary from the [releases page](https://github.com/{owner}/{repo}/releases/latest).
+```
+
+For libraries, show the package manager command:
+
+| Language | Install Command |
+|----------|----------------|
+| Rust | `cargo add {crate}` |
+| Go | `go get github.com/{owner}/{repo}` |
+| Python | `uv add {package}` |
+| Node | `npm install {package}` |
+
+### Quick Start
+
+Always "Quick Start" (never "Quickstart" or "Getting Started"). Show the minimal path from install to first result — ideally 3-5 lines of code or commands.
+
+```markdown
+## Quick Start
+
+\```sh
+# install
+curl -fsSL https://raw.githubusercontent.com/{owner}/{repo}/main/install.sh | sh
+
+# run
+{command} --help
+{command} {typical-usage}
+\```
+```
+
+### Architecture
+
+For complex projects, add a brief architecture summary and link to `docs/architecture.md`:
+
+```markdown
+## Architecture
+
+Brief overview of how the system is structured.
+
+See [docs/architecture.md](docs/architecture.md) for the full architecture guide.
+```
+
+Do NOT inline detailed architecture in the README — keep it in `docs/architecture.md`.
+
+### Agent Skill
 
 Every repo with a skill includes:
 
@@ -85,6 +141,86 @@ Every repo with a skill includes:
 
 This repo's conventions are available as portable agent skills in [`skills/`](skills/).
 ```
+
+## No Project Structure
+
+READMEs must NOT include directory trees, file tables, or "Key Directories" sections. Project structure is discoverable via `tree` and `ripgrep`/`ag` — writing it out is duplicative and goes stale. AGENTS.md handles structural context for AI agents.
+
+## embed-src for Code Examples
+
+Use [embed-src](https://github.com/urmzd/embed-src) markers to keep code examples in sync with actual source files. This prevents documentation drift.
+
+```markdown
+<!-- embed-src src="example.yml" fence="auto" -->
+<!-- /embed-src -->
+```
+
+When embed-src runs (locally or in CI), it replaces the content between markers with the referenced file. Use this for:
+
+- Workflow examples (`example.yml`, `ci.yml`)
+- Configuration snippets (`pyproject.toml`, `biome.json`)
+- Code samples that exist as actual files in the repo
+
+Prefer embed-src over copy-pasting code into the README. If the code doesn't exist as a standalone file, create one in an `examples/` directory and embed it.
+
+## install.sh Pattern
+
+For CLI tools with cross-platform release binaries, include an `install.sh` at the repo root:
+
+```sh
+#!/usr/bin/env sh
+set -eu
+
+REPO="{owner}/{repo}"
+INSTALL_DIR="${{INSTALL_DIR:-$HOME/.local/bin}}"
+VERSION="${{VERSION:-}}"
+
+# Detect platform
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+case "$ARCH" in
+  x86_64|amd64) ARCH="amd64" ;;
+  aarch64|arm64) ARCH="arm64" ;;
+  *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+esac
+
+# Resolve version
+if [ -z "$VERSION" ]; then
+  VERSION=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+fi
+
+# Download and install
+BINARY="{binary-name}-${OS}-${ARCH}"
+URL="https://github.com/$REPO/releases/download/$VERSION/$BINARY"
+echo "Installing $BINARY ($VERSION) to $INSTALL_DIR..."
+mkdir -p "$INSTALL_DIR"
+curl -fsSL "$URL" -o "$INSTALL_DIR/{binary-name}"
+chmod +x "$INSTALL_DIR/{binary-name}"
+
+# PATH hint
+case ":$PATH:" in
+  *":$INSTALL_DIR:"*) ;;
+  *) echo "Add $INSTALL_DIR to your PATH: export PATH=\"$INSTALL_DIR:\$PATH\"" ;;
+esac
+
+echo "Installed {binary-name} $VERSION"
+```
+
+Adjust binary naming to match your release artifact convention (see `scaffold-rust` and `scaffold-go` for naming).
+
+## Documentation Links
+
+When a project has docs beyond the README, link to them:
+
+```markdown
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Contributing](CONTRIBUTING.md)
+- [API Reference](docs/api.md)
+```
+
+Only link docs that exist. Do not create placeholder links.
 
 ## llms.txt
 

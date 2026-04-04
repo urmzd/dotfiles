@@ -1,8 +1,8 @@
 ---
 name: scaffold-node
 description: >
-  Scaffold a complete Node/TypeScript project with CI/CD, release pipeline, justfile,
-  sr.yaml, .envrc, and standard files. Uses npm and biome. Use when creating a new
+  Scaffold a complete Node/TypeScript project with CI/CD, release pipeline, sr.yaml,
+  .envrc, and standard files. Uses npm scripts and biome. Use when creating a new
   Node.js app, TypeScript library, or website, or when the user mentions "new Node project",
   "npm init", "TypeScript scaffold", or "Astro site".
 allowed-tools: Read Grep Glob Bash Edit Write
@@ -215,38 +215,26 @@ hooks:
     - sr hook commit-msg
 ```
 
-### `justfile`
+### `package.json` scripts
 
-```just
-default: check
+Add these scripts to `package.json`:
 
-init:
-    git config core.hooksPath .githooks
-    npm ci
-
-build:
-    npm run build
-
-test:
-    npm test
-
-lint:
-    npx biome check
-
-fmt:
-    npx biome check --write
-
-typecheck:
-    npx tsc --noEmit
-
-check: fmt lint typecheck test
-
-run *args="":
-    npm start -- {{args}}
-
-dev:
-    npm run dev
+```json
+{
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "biome check",
+    "fmt": "biome check --write",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run fmt && npm run lint && npm run typecheck && npm test",
+    "dev": "tsc --watch",
+    "prepare": "git config core.hooksPath .githooks"
+  }
+}
 ```
+
+Use `npm run <task>` for all operations. No justfile — npm is the native task runner.
 
 ### `.envrc`
 
@@ -301,7 +289,7 @@ For multi-package repos, add turbo for cached, parallel task execution:
 
 - `npm install turbo --save-dev` at workspace root
 - Add `turbo.json` with pipeline definitions (`build`, `test`, `lint`, `typecheck`)
-- Replace direct `npm run` calls with `turbo run` in justfile and CI
+- Replace direct `npm run` calls with `turbo run` in npm scripts and CI
 - Turbo caches task outputs — subsequent runs skip unchanged packages
 
 ```json

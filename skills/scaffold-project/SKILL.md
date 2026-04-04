@@ -41,7 +41,6 @@ Always generate the standard files below first, then apply the language-specific
 | `LICENSE` | Apache-2.0 (standard for all repos) |
 | `CONTRIBUTING.md` | How to contribute (see template below) |
 | `sr.yaml` | Semantic release config |
-| `justfile` | Task runner (build, test, lint, fmt) |
 | `.envrc` | Nix shell activation (`use flake .#<shell>`) |
 | `llms.txt` | LLM-friendly project summary (see `create-llms-txt`) |
 | `skills/<name>/SKILL.md` | Agent skill instructions |
@@ -50,17 +49,30 @@ Always generate the standard files below first, then apply the language-specific
 | `.github/workflows/ci.yml` | Quality gate |
 | `.github/workflows/release.yml` | Automated releases |
 
-## Justfile Standard Tasks
+## Task Runner Convention
 
-```just
-default: check
-init: # install hooks, download deps
-build: # cargo build / go build / uv build
-test: # cargo test / go test / uv run pytest
-lint: # clippy / golangci-lint / ruff check
-fmt: # cargo fmt / gofmt / ruff format
-check: fmt lint test
-run *args="": # cargo run / go run / uv run
+Prefer native build systems over justfile. Add a justfile only when project complexity demands orchestration beyond what the native tools provide.
+
+| Language | Native Task Runner | When to Add justfile |
+|----------|-------------------|----------------------|
+| Node/TS | `npm` scripts in `package.json` | Monorepo orchestration, multi-step deploys |
+| Rust | `cargo` commands | Multi-crate workspaces, cross-compilation |
+| Go | `Makefile` + `go` commands | Multi-service repos, protobuf codegen |
+| Python | `justfile` + `uv run` | Always (Python lacks a native task runner) |
+| Terraform | `terraform` CLI | Multi-environment workspace management |
+
+### Standard Task Interface
+
+Every project should support these operations, regardless of how they're invoked:
+
+```
+init    — install hooks, download deps
+build   — compile / bundle
+test    — run test suite
+lint    — static analysis
+fmt     — format code
+check   — fmt + lint + test (quality gate)
+run     — execute the project
 ```
 
 ## Python Config (`pyproject.toml`)
@@ -70,9 +82,9 @@ run *args="": # cargo run / go run / uv run
 ## CONTRIBUTING.md Template
 
 Standard sections:
-1. **Prerequisites** — language runtime, just, GH_TOKEN
-2. **Getting Started** — `git clone` + `just init`
-3. **Development** — `just check`, `just test`, `just fmt`
+1. **Prerequisites** — language runtime, build tools, GH_TOKEN
+2. **Getting Started** — `git clone` + language-specific init
+3. **Development** — language-specific check, test, fmt commands
 4. **Commit Convention** — conventional commits via `sr commit`
 5. **Pull Requests** — fork → branch → PR
 6. **Code Style** — brief, language-specific

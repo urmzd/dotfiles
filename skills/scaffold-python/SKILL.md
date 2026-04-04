@@ -2,7 +2,8 @@
 name: scaffold-python
 description: >
   Scaffold a complete Python project with CI/CD, release pipeline, justfile, sr.yaml,
-  pyproject.toml, .envrc, and standard files. Uses uv and ruff. Use when creating a
+  pyproject.toml, .envrc, and standard files. Uses uv, ruff, and justfile (Python lacks
+  a native task runner like npm scripts, so just fills that gap). Use when creating a
   new Python CLI, library, or application, or when the user mentions "new Python project",
   "uv init", or "Python scaffold".
 allowed-tools: Read Grep Glob Bash Edit Write

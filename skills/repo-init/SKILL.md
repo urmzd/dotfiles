@@ -32,7 +32,7 @@ Bootstrap a complete repository from zero to pushed.
    - Set up CI workflow (`.github/workflows/ci.yml`)
    - Set up release workflow (`.github/workflows/release.yml`)
    - Create `sr.yaml` for semantic release
-   - Create `justfile` with common tasks
+   - Set up task runner (native to the language — npm scripts, Makefile, cargo, justfile for Python)
    - Create `.envrc` with appropriate Nix dev shell
    - Create language-specific config (Cargo.toml, go.mod, pyproject.toml, package.json, etc.)
 

@@ -2,9 +2,9 @@
 name: scaffold-terraform
 description: >
   Scaffold a Terraform infrastructure project with CI/CD (plan on PR, apply on push),
-  AWS OIDC auth, justfile, .envrc, and standard files. Use when creating infrastructure
-  repos, or when the user mentions "new Terraform project", "terraform init", "AWS infra",
-  or "infrastructure scaffold".
+  AWS OIDC auth, .envrc, and standard files. Uses terraform CLI as the native tool.
+  Use when creating infrastructure repos, or when the user mentions "new Terraform project",
+  "terraform init", "AWS infra", or "infrastructure scaffold".
 allowed-tools: Read Grep Glob Bash Edit Write
 user-invocable: true
 metadata:
@@ -181,32 +181,20 @@ jobs:
 
 No separate `ci.yml` + `release.yml` — Terraform uses a single `terraform.yml` with plan-on-PR and apply-on-push.
 
-### `justfile`
+### Common Commands
 
-```just
-default:
-    @just --list
+No justfile — terraform CLI is the native tool:
 
-init:
-    terraform init
-
-plan:
-    terraform plan
-
-apply:
-    terraform apply
-
-fmt:
-    terraform fmt -recursive
-
-validate:
-    terraform validate
-
-check: fmt validate plan
-
-output:
-    terraform output
+```sh
+terraform init                # initialize
+terraform fmt -recursive      # format
+terraform validate            # validate
+terraform plan                # plan changes
+terraform apply               # apply changes
+terraform output              # show outputs
 ```
+
+For multi-environment setups (dev/staging/prod workspaces, multiple state files), add a justfile to manage environment switching and orchestration.
 
 ### `.envrc`
 

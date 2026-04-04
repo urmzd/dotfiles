@@ -1,9 +1,10 @@
 ---
 name: scaffold-rust
 description: >
-  Scaffold a complete Rust project with CI/CD, release pipeline, justfile, sr.yaml,
-  .envrc, and standard files. Use when creating a new Rust CLI, library, or workspace,
-  or when the user mentions "new Rust project", "cargo init", or "Rust scaffold".
+  Scaffold a complete Rust project with CI/CD, release pipeline, sr.yaml, .envrc,
+  and standard files. Uses cargo as the native build system. Use when creating a new
+  Rust CLI, library, or workspace, or when the user mentions "new Rust project",
+  "cargo init", or "Rust scaffold".
 allowed-tools: Read Grep Glob Bash Edit Write
 user-invocable: true
 metadata:
@@ -292,32 +293,21 @@ hooks:
 
 For workspaces, list all member `Cargo.toml` files in `version_files`.
 
-### `justfile`
+### Common Commands
 
-```just
-default: check
+No justfile — cargo is the native build system:
 
-init:
-    git config core.hooksPath .githooks
-    cargo fetch
-
-build:
-    cargo build --release
-
-test:
-    cargo test --workspace
-
-lint:
-    cargo clippy --workspace -- -D warnings
-
-fmt:
-    cargo fmt --all
-
-check: fmt lint test
-
-run *args="":
-    cargo run -- {{args}}
+```sh
+cargo fmt --all           # format
+cargo clippy --workspace -- -D warnings  # lint
+cargo test --workspace    # test
+cargo build --release     # build
+cargo run -- <args>       # run
 ```
+
+Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetch`
+
+For complex projects (workspaces with many crates, custom build steps, cross-compilation), add a justfile to orchestrate multi-step workflows that cargo alone can't express.
 
 ### `.envrc`
 
