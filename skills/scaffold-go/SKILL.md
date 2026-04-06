@@ -44,7 +44,6 @@ concurrency:
 
 jobs:
   fmt:
-    if: github.actor != 'github-actions[bot]'
     name: Format
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +61,6 @@ jobs:
           fi
 
   lint:
-    if: github.actor != 'github-actions[bot]'
     name: Lint
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +71,6 @@ jobs:
       - uses: golangci/golangci-lint-action@v7
 
   test:
-    if: github.actor != 'github-actions[bot]'
     name: Test
     runs-on: ubuntu-latest
     steps:
@@ -247,7 +244,7 @@ No `version_files` — Go uses git tags only. No `stage_files` — `go.sum` chan
 ### `Makefile`
 
 ```makefile
-.PHONY: all init build test lint fmt check run install
+.PHONY: all init build test lint fmt check run install record
 
 MOD := $(shell basename $(CURDIR))
 CMD := cmd/$(MOD)
@@ -277,6 +274,9 @@ run: build
 
 install:
 	CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" ./$(CMD)
+
+record:
+	teasr showme
 ```
 
 For complex projects (multi-service repos, code generation, protobuf), add a justfile to handle orchestration that Make handles poorly (dependency ordering, parameterized recipes).

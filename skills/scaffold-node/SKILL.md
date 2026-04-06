@@ -35,6 +35,9 @@ on:
     branches: [main]
   workflow_call:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -228,6 +231,7 @@ Add these scripts to `package.json`:
     "fmt": "biome check --write",
     "typecheck": "tsc --noEmit",
     "check": "npm run fmt && npm run lint && npm run typecheck && npm test",
+    "record": "teasr showme",
     "dev": "tsc --watch",
     "prepare": "git config core.hooksPath .githooks"
   }

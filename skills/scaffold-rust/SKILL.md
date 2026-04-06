@@ -309,6 +309,24 @@ Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetc
 
 For complex projects (workspaces with many crates, custom build steps, cross-compilation), add a justfile to orchestrate multi-step workflows that cargo alone can't express.
 
+## Demo Recording
+
+For projects with a justfile, add a `record` recipe:
+
+```just
+record:
+    teasr showme
+```
+
+For projects recording their own CLI, build first:
+
+```just
+record: build
+    PATH="$(pwd)/target/release:$PATH" teasr showme
+```
+
+Without a justfile, run `teasr showme` directly.
+
 ## Gotchas
 
 - Always use `--workspace` for clippy/test/check in multi-crate repos

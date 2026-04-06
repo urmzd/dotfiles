@@ -247,6 +247,9 @@ check: fmt lint test
 
 run *args="":
     uv run python -m <package_name> {{args}}
+
+record:
+    teasr showme
 ```
 
 Replace `<package_name>` with the actual package name.
