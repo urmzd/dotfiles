@@ -1,8 +1,8 @@
 ---
 name: scaffold-rust
 description: >
-  Scaffold a complete Rust project with CI/CD, release pipeline, sr.yaml, .envrc,
-  and standard files. Uses cargo as the native build system. Use when creating a new
+  Scaffold a complete Rust project with CI/CD, release pipeline, and sr.yaml.
+  Uses cargo as the native build system. Use when creating a new
   Rust CLI, library, or workspace, or when the user mentions "new Rust project",
   "cargo init", or "Rust scaffold".
 allowed-tools: Read Grep Glob Bash Edit Write
@@ -308,12 +308,6 @@ cargo run -- <args>       # run
 Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetch`
 
 For complex projects (workspaces with many crates, custom build steps, cross-compilation), add a justfile to orchestrate multi-step workflows that cargo alone can't express.
-
-### `.envrc`
-
-```sh
-use flake .#rust
-```
 
 ## Gotchas
 
