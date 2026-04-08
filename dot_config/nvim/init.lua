@@ -1006,13 +1006,13 @@ require("lazy").setup({
 			},
 		},
 	},
-	{
-		dir = "~/github/lazyspeak.nvim",
-		build = ":LazySpeakInstall",
-		opts = {
-			agent = { adapter = "claudecode" },
-		},
-	},
+	-- {
+	-- 	dir = "~/github/lazyspeak.nvim",
+	-- 	build = ":LazySpeakInstall",
+	-- 	opts = {
+	-- 		agent = { adapter = "claudecode" },
+	-- 	},
+	-- },
 })
 
 -- Undotree Keymap
