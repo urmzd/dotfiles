@@ -9,11 +9,8 @@ fi
 
 echo "Installing agent resources..."
 
-# Local skills from dotfiles repo
-agentspec manage add "{{ .chezmoi.sourceDir }}" --all-tools
-
-# Local agents from dotfiles repo (dot_agents/ → ~/.agents/)
-agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --kind agent --all-tools
+# Local skills and agents from dotfiles repo (dot_agents/ → ~/.agents/)
+agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --all-tools
 
 # Third-party skills
 agentspec manage add vercel-labs/skills --all-tools
