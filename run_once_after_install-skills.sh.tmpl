@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-# Install agent skills via npx skills CLI
+# Install agent skills and agents via agentspec CLI
 set -euo pipefail
 
-if ! command -v npx &>/dev/null; then
-    echo "npx not found, skipping skills install"
-    exit 0
+if ! command -v agentspec &>/dev/null; then
+    echo "Installing agentspec..."
+    curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/scripts/install.sh | sh
 fi
 
-echo "Installing agent skills..."
+echo "Installing agent resources..."
 
-# Personal skills from local dotfiles repo
-npx skills add "{{ .chezmoi.sourceDir }}" -g --all -y
+# Local skills from dotfiles repo
+agentspec manage add "{{ .chezmoi.sourceDir }}" --all-tools
+
+# Local agents from dotfiles repo (dot_agents/ → ~/.agents/)
+agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --kind agent --all-tools
 
 # Third-party skills
-npx skills add vercel-labs/skills -g --all -y
-npx skills add vercel/ai-elements -g --all -y
-npx skills add vercel/streamdown -g --all -y
-npx skills add google-gemini/gemini-skills -g --all -y
-npx skills add better-auth/skills@better-auth-best-practices -g -y
-npx skills add vercel/ai@ai-sdk -g -y
-npx skills add fastapi/fastapi@fastapi -g -y
+agentspec manage add vercel-labs/skills --all-tools
+agentspec manage add vercel/ai-elements --all-tools
+agentspec manage add vercel/streamdown --all-tools
+agentspec manage add google-gemini/gemini-skills --all-tools
+agentspec manage add better-auth/skills@better-auth-best-practices --all-tools
+agentspec manage add vercel/ai@ai-sdk --all-tools
+agentspec manage add fastapi/fastapi@fastapi --all-tools
 
-echo "Agent skills installed successfully."
+# Sync: discover, link, and verify all resources
+agentspec sync --fast
+
+echo "Agent resources installed successfully."

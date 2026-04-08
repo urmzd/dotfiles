@@ -28,9 +28,18 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 
 - `dot_config/` → `~/.config/` (app configs: nvim, wezterm, etc.)
 - `dot_zsh/` → `~/.zsh/` (zsh modules and plugins)
-- `dot_claude/` → `~/.claude/` (Claude Code settings, skills, agents)
+- `dot_claude/` → `~/.claude/` (Claude Code settings, skills)
+- `dot_agents/` → `~/.agents/` (agent definitions; personas/subagents)
+- `skills/` → skills installed to `~/.agents/skills/` via agentspec
 - `Brewfile` → Homebrew dependencies
 - `flake.nix` → Nix dependencies
+
+## Agents vs Skills
+
+- **Agents** (`dot_agents/agents/*.md`) define HOW to think. Personas and subagents
+- **Skills** (`skills/*/SKILL.md`) define WHAT to do. Capabilities and domain knowledge
+- Agents are chezmoi-managed; agentspec links them to tools (`~/.claude/agents/`, etc.)
+- Skills live in `~/.agents/skills/` and are managed by agentspec
 
 ## Workflow
 
@@ -39,11 +48,12 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 3. Apply changes: `chezmoi apply`
 4. Add existing files: `chezmoi add <file>`
 
-## Managing Skills
+## Managing Resources
 
-Skills are managed via `npx skills` (the [agentskills.io](https://agentskills.io) CLI):
+Resources (skills, agents) are managed via [agentspec](https://github.com/anthropics/agentspec):
 
-- `npx skills add <repo> -g` — install a skill globally
-- `npx skills list -g` — list globally installed skills
-- `npx skills update` — update all skills
-- `npx skills find` — search for skills interactively
+- **`agentspec manage add <source>`** add a skill or agent
+- **`agentspec manage list`** list managed resources
+- **`agentspec manage link <name> <tool>`** link resource to a tool
+- **`agentspec sync --fast`** discover, link, and verify resources
+- **`agentspec status`** show managed vs unmanaged inventory
