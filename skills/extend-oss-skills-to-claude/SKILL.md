@@ -1,8 +1,8 @@
 ---
 name: extend-oss-skills-to-claude
 description: >
-  Extend standard agentskills.io skills with Claude Code-specific features —
-  invocation control, subagent execution, dynamic context injection, string
+  Extend standard agentskills.io skills with Claude Code-specific features.
+  Invocation control, subagent execution, dynamic context injection, string
   substitutions, model/effort overrides, and deployment scoping. Use when
   adapting a portable skill for Claude Code, adding Claude-specific frontmatter,
   setting up subagent delegation, or configuring skill permissions.
@@ -28,14 +28,14 @@ These fields are Claude Code-specific. Other agents ignore them.
 
 | Field | Type | Default | Purpose |
 |-------|------|---------|---------|
-| `argument-hint` | string | — | Autocomplete hint: `[issue-number]`, `[filename] [format]` |
+| `argument-hint` | string | none | Autocomplete hint: `[issue-number]`, `[filename] [format]` |
 | `disable-model-invocation` | bool | `false` | `true` = only the user can trigger via `/name`. Removes from agent context entirely. |
 | `user-invocable` | bool | `true` | `false` = hidden from `/` menu. Agent-only background knowledge. |
 | `model` | string | session | Override model when skill is active. |
 | `effort` | string | session | Override reasoning effort: `low`, `medium`, `high`, `max`. |
-| `context` | string | — | `fork` = run in isolated subagent context. |
+| `context` | string | none | `fork` = run in isolated subagent context. |
 | `agent` | string | `general-purpose` | Subagent type when `context: fork`. Built-in: `Explore`, `Plan`, `general-purpose`. Custom: any `.claude/agents/` definition. |
-| `hooks` | object | — | Lifecycle hooks scoped to this skill. See [hooks docs](https://code.claude.com/docs/en/hooks#hooks-in-skills-and-agents). |
+| `hooks` | object | none | Lifecycle hooks scoped to this skill. See [hooks docs](https://code.claude.com/docs/en/hooks#hooks-in-skills-and-agents). |
 
 ### Differences from Standard
 
@@ -46,7 +46,7 @@ These fields are Claude Code-specific. Other agents ignore them.
 | `allowed-tools` | Space-delimited | Comma-delimited |
 | Extra fields | Ignored | Execution control, subagent delegation |
 
-Keep `name` and `description` required in practice — portability matters.
+Keep `name` and `description` required in practice; portability matters.
 
 ## Invocation Control
 
@@ -118,7 +118,7 @@ agent: Explore
 Summarize this pull request.
 ```
 
-This is preprocessing — the agent sees rendered output, not the commands. Use for fetching live data (git state, API responses, environment info).
+This is preprocessing. The agent sees rendered output, not the commands. Use for fetching live data (git state, API responses, environment info).
 
 ## Subagent Execution
 
@@ -184,9 +184,9 @@ allowed-tools: Read, Grep, Glob, Bash(git *)
 ```
 
 Claude Code also supports pattern-based tool permissions:
-- `Bash(git *)` — allow git commands
-- `Bash(npm test)` — allow specific command
-- `Read, Grep, Glob` — read-only mode
+- **`Bash(git *)`** allow git commands
+- **`Bash(npm test)`** allow specific command
+- **`Read, Grep, Glob`** read-only mode
 
 Users can restrict skill access via permission rules:
 ```
@@ -233,7 +233,7 @@ Include the word "ultrathink" in skill content to enable extended thinking mode 
 When extending a standard skill for Claude Code:
 
 1. Keep standard fields (`name`, `description`, `license`, `compatibility`) intact and valid
-2. Add Claude Code fields alongside — other agents ignore unknown frontmatter
+2. Add Claude Code fields alongside. Other agents ignore unknown frontmatter
 3. Switch `allowed-tools` delimiter from spaces to commas
 4. Test the skill still works as plain markdown instructions (graceful degradation)
 5. Document Claude-specific features in a comment or separate section so contributors understand
@@ -277,10 +277,10 @@ metadata:
 
 | Mistake | Fix |
 |---------|-----|
-| Using `context: fork` for reference/guideline content | Fork needs a concrete task — use inline for guidelines |
+| Using `context: fork` for reference/guideline content | Fork needs a concrete task. Use inline for guidelines |
 | Forgetting `disable-model-invocation` on side-effect skills | Always set for deploy, commit, send, publish |
 | Hardcoding script paths | Use `${CLAUDE_SKILL_DIR}/scripts/` |
 | Space-delimited `allowed-tools` | Claude Code uses commas |
 | Setting `user-invocable: false` expecting it blocks Skill tool | Use `disable-model-invocation: true` to block programmatic invocation |
-| Forking without explicit instructions | Subagent gets guidelines but no task — returns nothing useful |
+| Forking without explicit instructions | Subagent gets guidelines but no task. Returns nothing useful |
 | Overusing model/effort overrides | Session defaults work for most skills |

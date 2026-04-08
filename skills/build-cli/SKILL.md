@@ -1,7 +1,7 @@
 ---
 name: build-cli
 description: >
-  CLI conventions — output modes, TTY detection, JSON piping, stdout/stderr separation,
+  CLI conventions. Output modes, TTY detection, JSON piping, stdout/stderr separation,
   interactivity, signal handling, visual style, and CI integration. Use when building
   or reviewing any CLI tool.
 allowed-tools: Read Grep Glob Bash Edit Write
@@ -38,9 +38,9 @@ stdout.is_terminal() → human output (styled, colored)
 ```
 
 Override flags:
-- `--json` — force JSON regardless of TTY
-- `--no-color` / `NO_COLOR=1` env — strip ANSI escape codes
-- `CI=true` env — treat as non-TTY (no spinners, no prompts, no color)
+- **`--json`** force JSON regardless of TTY
+- **`--no-color`** / `NO_COLOR=1` env. Strip ANSI escape codes
+- **`CI=true`** env. Treat as non-TTY (no spinners, no prompts, no color)
 
 ### JSON Conventions
 
@@ -122,9 +122,9 @@ Trap SIGINT and SIGTERM. On signal: finish current atomic operation, clean up te
 
 ## Output Directories
 
-- `outputs/<name>/<YYYYMMDD_HHMMSS>/` — timestamped results (linear-gp)
-- `showcase/` — demo captures (teasr, default: `./teasr-output`)
-- `bin/` — Go builds, `target/` — Rust builds
+- **`outputs/<name>/<YYYYMMDD_HHMMSS>/`** timestamped results (linear-gp)
+- **`showcase/`** demo captures (teasr, default: `./teasr-output`)
+- **`bin/`** Go builds, **`target/`** Rust builds
 
 ## Visual Style
 
@@ -255,7 +255,7 @@ Dim symbol, dim counts, dim cost. Format: `>=1M` → `1.2M`, `>=1k` → `1.2k`, 
 
 ## The ui Module Pattern
 
-Every CLI project has a `ui` module exporting a consistent API. Do not extract a shared crate/library — the modules are 30-60 lines each; copying is cheaper than cross-repo dependency management.
+Every CLI project has a `ui` module exporting a consistent API. Do not extract a shared crate/library; the modules are 30-60 lines each, and copying is cheaper than cross-repo dependency management.
 
 ### Canonical API
 

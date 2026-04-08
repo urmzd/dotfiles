@@ -295,7 +295,7 @@ For workspaces, list all member `Cargo.toml` files in `version_files`.
 
 ### Common Commands
 
-No justfile — cargo is the native build system:
+No justfile. Cargo is the native build system:
 
 ```sh
 cargo fmt --all           # format

@@ -21,11 +21,11 @@ Generate a high-quality, spec-compliant `llms.txt` that gives LLMs maximum under
 
 The file uses markdown with this exact section order:
 
-1. **H1** (required) — project name
-2. **Blockquote** (optional) — one-paragraph summary with key context
-3. **Prose** (optional) — additional detail, any markdown except headings
-4. **H2 sections** (optional) — lists of `[name](url): description` links
-5. **`## Optional`** (special) — links that can be skipped for shorter context
+1. **H1** (required) project name
+2. **Blockquote** (optional) one-paragraph summary with key context
+3. **Prose** (optional) additional detail, any markdown except headings
+4. **H2 sections** (optional) lists of `[name](url): description` links
+5. **`## Optional`** (special) links that can be skipped for shorter context
 
 No other heading levels allowed. Every list entry must be a markdown hyperlink. Descriptions after `:` are optional.
 
@@ -49,12 +49,12 @@ No other heading levels allowed. Every list entry must be a markdown hyperlink. 
 ### 1. Discover project identity
 
 Read these files (skip missing ones):
-- `README.md` — name, summary, features
-- `AGENTS.md` — architecture, key directories
-- `package.json` / `Cargo.toml` / `pyproject.toml` / `go.mod` — name, description, repo URL
-- `CHANGELOG.md` — exists? link it
-- `CONTRIBUTING.md` — exists? link in Optional
-- `LICENSE` — exists? link in Optional
+- **`README.md`** name, summary, features
+- **`AGENTS.md`** architecture, key directories
+- **`package.json` / `Cargo.toml` / `pyproject.toml` / `go.mod`** name, description, repo URL
+- **`CHANGELOG.md`** exists? link it
+- **`CONTRIBUTING.md`** exists? link in Optional
+- **`LICENSE`** exists? link in Optional
 
 Determine the **repo base URL** from git remote or manifest. All links must be absolute URLs pointing to the main branch (e.g. `https://github.com/{owner}/{repo}/blob/main/{path}`).
 
@@ -112,9 +112,9 @@ Before writing the file, check:
 
 ## Gotchas
 
-- **No relative links.** LLMs fetch `llms.txt` from a URL — relative paths break. Always use absolute URLs.
+- **No relative links.** LLMs fetch `llms.txt` from a URL. Relative paths break. Always use absolute URLs.
 - **Don't link directories.** Link to the actual markdown/source file, not a directory path. `skills/configure-ai/SKILL.md` not `skills/configure-ai/`.
-- **The `## Optional` heading is semantic.** It tells LLMs they can drop these links when context is tight. Put truly skippable content there — not your API docs.
+- **The `## Optional` heading is semantic.** It tells LLMs they can drop these links when context is tight. Put truly skippable content there; not your API docs.
 - **Don't duplicate the README.** The blockquote is a *summary for LLMs*, not a copy of your README's first paragraph. Write it fresh with an LLM audience in mind.
 - **Keep it short.** An llms.txt that's 200 lines defeats the purpose. Aim for 20-50 lines. If you need more, your project needs better docs, not a longer index.
 - **Repo URL detection**: check `git remote get-url origin` and normalize to HTTPS. Strip `.git` suffix. Use `blob/main/` for file links.

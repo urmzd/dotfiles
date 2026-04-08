@@ -82,9 +82,9 @@ For comprehensive testing guidance (test types, fixtures, mocks, CI strategy), s
 
 ## Coding Patterns
 
-- **Convention over configuration** — placeholder comments (`<project>`) over complex templating
-- **Composable toolsets** — Nix flakes combine reusable per-language toolsets
-- **Machine polymorphism** — chezmoi templates adapt to `is_macos`/`is_linux`/`is_personal`/`is_work`
-- **Minimal Homebrew** — Nix for reproducibility, Homebrew only for macOS-specific tools
-- **Subprocess safety** — Neovim detects non-interactive environments and disables clipboard
-- **ZSH caching** — 24-hour compinit cache, auto fpath discovery for completions
+- **Convention over configuration** placeholder comments (`<project>`) over complex templating
+- **Composable toolsets** Nix flakes combine reusable per-language toolsets
+- **Machine polymorphism** chezmoi templates adapt to `is_macos`/`is_linux`/`is_personal`/`is_work`
+- **Minimal Homebrew** Nix for reproducibility, Homebrew only for macOS-specific tools
+- **Subprocess safety** Neovim detects non-interactive environments and disables clipboard
+- **ZSH caching** 24-hour compinit cache, auto fpath discovery for completions

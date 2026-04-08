@@ -20,17 +20,17 @@ metadata:
 
 ## Skills vs Docs
 
-- **Skills** (`skills/<name>/SKILL.md`) = executable agent instructions — *how to do things* (conventions, workflows, tool usage)
-- **Docs** (`docs/`) = project documentation — *what was decided and why* (rfcs/, guides/, plans/, runbooks/, architecture/)
-- Both exist in every project — neither replaces the other
+- **Skills** (`skills/<name>/SKILL.md`) = executable agent instructions. *How to do things* (conventions, workflows, tool usage)
+- **Docs** (`docs/`) = project documentation. *What was decided and why* (rfcs/, guides/, plans/, runbooks/, architecture/)
+- Both exist in every project; neither replaces the other
 - Every repo should also have: README.md (humans) + AGENTS.md (AI) + llms.txt (LLM discovery)
-- Root-level standard files (README, AGENTS.md, CONTRIBUTING, LICENSE, CODEOWNERS, llms.txt) stay at root — everything else goes in `docs/`
+- Root-level standard files (README, AGENTS.md, CONTRIBUTING, LICENSE, CODEOWNERS, llms.txt) stay at root; everything else goes in `docs/`
 
 ## AI Tools
 
 | Tool | Usage |
 |------|-------|
-| Claude Code (opus) | Primary AI coding assistant — architecture, refactoring, multi-file edits |
+| Claude Code (opus) | Primary AI coding assistant. Architecture, refactoring, multi-file edits |
 | OpenAI Codex | Alternative AI assistant for code generation |
 | Google Gemini CLI | Google's AI for research and code tasks |
 | GitHub Copilot | Inline code completion in Neovim |
@@ -39,14 +39,14 @@ metadata:
 
 Claude Code is configured per-project via `CLAUDE.md` files at the repository root. These files define:
 
-- **Project context** — tech stack, directory structure, key patterns
-- **Coding conventions** — naming, formatting, commit style
-- **Behavioral rules** — what to avoid, how to handle edge cases
-- **Memory** — persistent notes stored in `.claude/` directories
+- **Project context** tech stack, directory structure, key patterns
+- **Coding conventions** naming, formatting, commit style
+- **Behavioral rules** what to avoid, how to handle edge cases
+- **Memory** persistent notes stored in `.claude/` directories
 
 ### Best Practices
 
-- Keep `CLAUDE.md` concise — it's loaded into every conversation
+- Keep `CLAUDE.md` concise; it's loaded into every conversation
 - Use separate memory files for detailed topic notes
 - Reference project-specific tools and commands
 - Define verification steps (build, test, lint)
@@ -57,13 +57,13 @@ Every repo MUST have `AGENTS.md` at root.
 
 ### Template Structure
 
-1. **Identity** — project name, one-line description
-2. **Architecture** — high-level component overview
-3. **Commands** — build, test, lint, run
-4. **Code Style** — language-specific conventions
-5. **Extension Guide** — how to add features
+1. **Identity** project name, one-line description
+2. **Architecture** high-level component overview
+3. **Commands** build, test, lint, run
+4. **Code Style** language-specific conventions
+5. **Extension Guide** how to add features
 
-Do NOT include static directory trees or file tables — structure goes stale. Instead, instruct agents to use `tree` and `ripgrep`/`ag` to discover project layout on the fly.
+Do NOT include static directory trees or file tables; structure goes stale. Instead, instruct agents to use `tree` and `ripgrep`/`ag` to discover project layout on the fly.
 
 ## Skills Standard
 

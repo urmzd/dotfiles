@@ -1,7 +1,7 @@
 ---
 name: sync-docs
 description: >
-  Audit and synchronize project documentation — README, AGENTS.md, llms.txt, docs/,
+  Audit and synchronize project documentation. README, AGENTS.md, llms.txt, docs/,
   and embed-src markers. Use after feature changes, refactors, or when docs may be stale.
   Can be run as a scheduled agent or invoked manually.
 allowed-tools: Read Grep Glob Bash Edit Write
@@ -89,18 +89,18 @@ Check docs are current:
 
 Ensure these files agree on:
 
-- **Project name** — README title, AGENTS.md identity, llms.txt title, package.json/Cargo.toml/pyproject.toml name
-- **Description** — README subtitle, AGENTS.md description, llms.txt description, repo description
-- **Commands** — README Quick Start, AGENTS.md commands, CONTRIBUTING.md development section
-- **Installation** — README install, llms.txt install link
+- **Project name** README title, AGENTS.md identity, llms.txt title, package.json/Cargo.toml/pyproject.toml name
+- **Description** README subtitle, AGENTS.md description, llms.txt description, repo description
+- **Commands** README Quick Start, AGENTS.md commands, CONTRIBUTING.md development section
+- **Installation** README install, llms.txt install link
 
 ## Fix Strategy
 
-1. **embed-src drift** — run embed-src to update markers
-2. **Missing sections** — add them following `write-readme` conventions
-3. **Stale commands** — update to match native build system (see `scaffold-*` skills)
-4. **Dead links** — remove or update
-5. **Description mismatch** — use README as source of truth, propagate to other files
+1. **embed-src drift** run embed-src to update markers
+2. **Missing sections** add them following `write-readme` conventions
+3. **Stale commands** update to match native build system (see `scaffold-*` skills)
+4. **Dead links** remove or update
+5. **Description mismatch** use README as source of truth, propagate to other files
 
 ## CI Integration
 

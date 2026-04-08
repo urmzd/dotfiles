@@ -4,7 +4,7 @@ Systematic approach to testing and improving skill descriptions for triggering a
 
 ## How Triggering Works
 
-Agents load only `name` + `description` at startup. The description carries the entire burden of deciding whether to activate. Agents typically only consult skills for tasks requiring knowledge beyond what they handle alone — specialized knowledge, unfamiliar APIs, domain-specific workflows.
+Agents load only `name` + `description` at startup. The description carries the entire burden of deciding whether to activate. Agents typically only consult skills for tasks requiring knowledge beyond what they handle alone; specialized knowledge, unfamiliar APIs, domain-specific workflows.
 
 ## Designing Trigger Eval Queries
 
@@ -29,7 +29,7 @@ Most valuable: queries where the skill would help but the connection isn't obvio
 
 ### Should-Not-Trigger Queries
 
-Use **near-misses** — queries sharing keywords but needing something different.
+Use **near-misses** queries sharing keywords but needing something different.
 
 Weak: "Write a fibonacci function" (obviously irrelevant).
 Strong: "write a python script that reads a csv and uploads rows to postgres" (involves CSV but the task is ETL, not analysis).
@@ -64,7 +64,7 @@ Keep both sets proportional in should/shouldn't-trigger queries. Keep split fixe
 3. **Revise description:**
    - Failing should-trigger → broaden scope or add context
    - False-triggering should-not-trigger → add specificity, clarify boundaries
-   - Don't add specific keywords from failed queries (overfitting) — address the general category
+   - Don't add specific keywords from failed queries (overfitting); address the general category
    - If stuck, try structurally different framing
    - Stay under 1024 chars
 4. **Repeat** until train set passes or improvements plateau

@@ -7,7 +7,7 @@ Thanks for your interest in contributing to **dotfiles**.
 - **macOS or Linux**
 - **[Nix](https://nixos.org/download.html)** with flakes enabled
 - **[chezmoi](https://www.chezmoi.io/install/)**
-- **[GH_TOKEN](https://cli.github.com/)** — GitHub CLI authentication
+- **[GH_TOKEN](https://cli.github.com/)** GitHub CLI authentication
 
 ## Getting Started
 
@@ -38,7 +38,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) e
 | `chore` | Maintenance |
 | `ci` | CI changes |
 
-Format: `type(scope): description` — scope by tool/area (e.g., `feat(nvim):`, `fix(zsh):`, `chore(brew):`)
+Format: `type(scope): description`. Scope by tool/area (e.g., `feat(nvim):`, `fix(zsh):`, `chore(brew):`)
 
 ## Pull Requests
 
@@ -46,7 +46,7 @@ Format: `type(scope): description` — scope by tool/area (e.g., `feat(nvim):`, 
 2. Create a feature branch (`feat/your-feature`)
 3. Test with `chezmoi diff` before applying
 4. Push to your fork and open a Pull Request
-5. Keep PRs focused — one logical change per PR
+5. Keep PRs focused; one logical change per PR
 
 ## Code Style
 

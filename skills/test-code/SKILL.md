@@ -17,11 +17,11 @@ metadata:
 
 Test your software, or your users will.
 
-- **Test against contracts, not implementations** — assert what it should do, not how it does it. Tests that break on every refactor are coupling to internals.
-- **State coverage > line coverage** — exercise meaningful paths and edge cases, not just lines. We intentionally use no coverage tools — percentage targets create false confidence.
-- **Tests are the first users of your API** — if tests are hard to write, the design is wrong. Refactor the interface, not the test.
-- **Property-based testing finds edges you didn't think of** — complement example-based tests with fuzz and property tests where the input space is large.
-- **Tests should be boring** — a test that's hard to read is a test nobody trusts. Inline data, obvious assertions, no clever abstractions.
+- **Test against contracts, not implementations** assert what it should do, not how it does it. Tests that break on every refactor are coupling to internals.
+- **State coverage > line coverage** exercise meaningful paths and edge cases, not just lines. We intentionally use no coverage tools; percentage targets create false confidence.
+- **Tests are the first users of your API** if tests are hard to write, the design is wrong. Refactor the interface, not the test.
+- **Property-based testing finds edges you didn't think of** complement example-based tests with fuzz and property tests where the input space is large.
+- **Tests should be boring** a test that's hard to read is a test nobody trusts. Inline data, obvious assertions, no clever abstractions.
 
 See `review-design` for the underlying Pragmatic Programmer principles (design by contract, pragmatic paranoia).
 
@@ -29,14 +29,14 @@ See `review-design` for the underlying Pragmatic Programmer principles (design b
 
 | Type | What It Verifies | When to Use | Codebase Example |
 |------|-----------------|-------------|------------------|
-| **Unit** | Single function/module in isolation | Always. Every public function. | `sr/crates/sr-core/src/version.rs` — `#[cfg(test)] mod tests` |
-| **Integration** | Multiple modules working together | Cross-layer interactions, real I/O | `sr/crates/sr-git/tests/integration.rs` — TempDir + real git CLI |
-| **Snapshot/Golden** | Output hasn't changed unexpectedly | Templates, code generation, formatters | `incipit/generators/golden_test.go` — `-update` flag to regenerate |
-| **Fuzz** | No panics/crashes on arbitrary input | Parsers, deserializers, sanitizers | `incipit/resume/adapter_fuzz_test.go` — Go native `testing.F` |
+| **Unit** | Single function/module in isolation | Always. Every public function. | `sr/crates/sr-core/src/version.rs`. `#[cfg(test)] mod tests` |
+| **Integration** | Multiple modules working together | Cross-layer interactions, real I/O | `sr/crates/sr-git/tests/integration.rs`. TempDir + real git CLI |
+| **Snapshot/Golden** | Output hasn't changed unexpectedly | Templates, code generation, formatters | `incipit/generators/golden_test.go`. `-update` flag to regenerate |
+| **Fuzz** | No panics/crashes on arbitrary input | Parsers, deserializers, sanitizers | `incipit/resume/adapter_fuzz_test.go`. Go native `testing.F` |
 | **Property-based** | Invariants hold for generated inputs | Mathematical properties, roundtrip encode/decode | Use `proptest` (Rust), `testing/quick` (Go), `hypothesis` (Python) |
-| **Benchmark** | Performance characteristics | Hot paths, algorithms, throughput | `linear-gp/crates/lgp/benches/` — criterion framework |
-| **Smoke** | Basic environment sanity | CI gate, post-deploy check | `linear-gp/crates/lgp/tests/smoke_tests.rs` — 2 generations, no crash |
-| **E2E** | Full system from user perspective | Critical user flows | `teasr` CI — real Chrome + xvfb-run dogfood |
+| **Benchmark** | Performance characteristics | Hot paths, algorithms, throughput | `linear-gp/crates/lgp/benches/`. criterion framework |
+| **Smoke** | Basic environment sanity | CI gate, post-deploy check | `linear-gp/crates/lgp/tests/smoke_tests.rs`. 2 generations, no crash |
+| **E2E** | Full system from user perspective | Critical user flows | `teasr` CI. real Chrome + xvfb-run dogfood |
 
 ### Golden File Pattern (Go)
 
@@ -169,7 +169,7 @@ pythonpath = ["src"]
 | Benchmarks (Rust) | `benches/*.rs` |
 | Fuzz corpus | `testdata/fuzz/` (auto-managed by Go toolchain) |
 
-Test helpers go in the test file, unexported. Do not create shared `testutils/` packages — the duplication cost is lower than the coupling cost.
+Test helpers go in the test file, unexported. Do not create shared `testutils/` packages. The duplication cost is lower than the coupling cost.
 
 ## Fixtures & Mocks
 
@@ -189,7 +189,7 @@ Test helpers go in the test file, unexported. Do not create shared `testutils/` 
 
 - **Prefer real implementations.** Use `TempDir` and real git commands over git mocks. Use real HTTP servers over fetch mocks when practical.
 - **Mock at boundaries.** Only mock external services (APIs, databases) and only at the interface boundary.
-- **Never mock what you own.** If you need to mock your own code, the design needs refactoring — extract an interface.
+- **Never mock what you own.** If you need to mock your own code, the design needs refactoring. Extract an interface.
 - Go: Use interfaces for test doubles. No mocking framework needed.
 - Rust: Use trait objects or generic type parameters for test substitution.
 - TypeScript: `vi.fn()` and `vi.mock()` for external dependencies only.
@@ -205,16 +205,16 @@ Test helpers go in the test file, unexported. Do not create shared `testutils/` 
 | Benchmarks | Manual | Release prep | Varies |
 | E2E / dogfood | `release.yml` | Post-release | Varies |
 
-All test types run with `just check` locally. CI mirrors `just check` exactly — no CI-only test logic.
+All test types run with `just check` locally. CI mirrors `just check` exactly. No CI-only test logic.
 
 ## What NOT to Test
 
-- **Third-party behavior** — don't test that `serde` serializes correctly or that `os.MkdirAll` creates directories
-- **Private implementation details** — if you need to export something just for testing, the boundary is wrong
-- **Generated code** — oag generates TypeScript clients; test the generator, not the output
-- **Trivial accessors** — a getter that returns a field does not need a test
-- **Implementation mirrors** — if your test duplicates the logic it tests, it proves nothing
-- **Exact error messages** — test error *types* or *categories*, not wording (it changes)
+- **Third-party behavior** don't test that `serde` serializes correctly or that `os.MkdirAll` creates directories
+- **Private implementation details** if you need to export something just for testing, the boundary is wrong
+- **Generated code** oag generates TypeScript clients; test the generator, not the output
+- **Trivial accessors** a getter that returns a field does not need a test
+- **Implementation mirrors** if your test duplicates the logic it tests, it proves nothing
+- **Exact error messages** test error *types* or *categories*, not wording (it changes)
 
 ## Gotchas
 
@@ -222,5 +222,5 @@ All test types run with `just check` locally. CI mirrors `just check` exactly �
 - **Go parallel + shared state:** `t.Parallel()` runs subtests concurrently. Shared fixtures must be immutable or use `sync.Mutex`.
 - **Python src/ discovery:** Without `pythonpath = ["src"]` in pytest config, imports fail. Always configure this in `pyproject.toml`.
 - **Rust integration tests:** Each file in `tests/` compiles as a separate binary. Group related tests in one file to reduce compile time.
-- **Go golden file diffs:** Use `go-cmp` for readable diffs instead of `reflect.DeepEqual` — the error messages are vastly better.
+- **Go golden file diffs:** Use `go-cmp` for readable diffs instead of `reflect.DeepEqual`. The error messages are vastly better.
 - **Flaky tests:** If a test fails intermittently, it's a design problem (shared state, timing, network). Fix the root cause; do not retry.

@@ -282,11 +282,11 @@ uv.lock
 
 ## Gotchas
 
-- Use `uv` exclusively — no pip, pipenv, poetry, or conda
+- Use `uv` exclusively. No pip, pipenv, poetry, or conda
 - `uv sync --group dev` installs dev dependencies; `uv sync` for production only
 - `uv run` prefixes all commands to ensure they run in the project venv
-- `ruff` replaces black, isort, flake8, and pyflakes — one tool for format + lint
+- `ruff` replaces black, isort, flake8, and pyflakes. One tool for format + lint
 - Python version comes from `pyproject.toml` `requires-python` field; `uv python install` resolves it
 - `astral-sh/setup-uv@v5` handles caching automatically
-- For PyPI publishing, `uv publish` uses trusted publishers (OIDC) — configure on pypi.org first
+- For PyPI publishing, `uv publish` uses trusted publishers (OIDC). Configure on pypi.org first
 - `stage_files: [uv.lock]` ensures lockfile stays in sync after version bumps

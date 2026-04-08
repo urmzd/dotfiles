@@ -179,11 +179,11 @@ jobs:
           terraform output -no-color >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No outputs defined" >> $GITHUB_STEP_SUMMARY
 ```
 
-No separate `ci.yml` + `release.yml` — Terraform uses a single `terraform.yml` with plan-on-PR and apply-on-push.
+No separate `ci.yml` + `release.yml`. Terraform uses a single `terraform.yml` with plan-on-PR and apply-on-push.
 
 ### Common Commands
 
-No justfile — terraform CLI is the native tool:
+No justfile. Terraform CLI is the native tool:
 
 ```sh
 terraform init                # initialize
@@ -222,11 +222,11 @@ terraform.tfvars  # variable values (NOT committed if secrets)
 
 ## Gotchas
 
-- `cancel-in-progress: false` — never cancel a running Terraform operation
+- `cancel-in-progress: false` never cancel a running Terraform operation
 - `terraform_wrapper: false` in plan job to get raw exit codes (exit code 2 = changes detected)
-- Plan is saved as artifact and downloaded for apply — ensures apply matches what was planned
+- Plan is saved as artifact and downloaded for apply. Ensures apply matches what was planned
 - PR comments truncate at 60k chars to stay within GitHub's limits
-- OIDC auth (`id-token: write` + `aws-actions/configure-aws-credentials`) — no long-lived AWS keys
-- `terraform fmt -check` uses `continue-on-error: true` — warns but doesn't block
-- No sr.yaml or semantic release — infrastructure changes are applied directly, not versioned/tagged
+- OIDC auth (`id-token: write` + `aws-actions/configure-aws-credentials`). No long-lived AWS keys
+- `terraform fmt -check` uses `continue-on-error: true`. Warns but doesn't block
+- No sr.yaml or semantic release. Infrastructure changes are applied directly, not versioned/tagged
 - Single concurrency group prevents concurrent applies that could corrupt state

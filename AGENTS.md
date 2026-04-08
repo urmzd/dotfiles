@@ -26,7 +26,7 @@ chezmoi edit <file>    # Edit source, then apply
 
 ## Discovering Structure
 
-Use `tree` for directory layout and `ripgrep`/`ag` for finding files and patterns. Do not rely on static file listings — discover the current state from the filesystem.
+Use `tree` for directory layout and `ripgrep`/`ag` for finding files and patterns. Do not rely on static file listings; discover the current state from the filesystem.
 
 ## Code Style
 

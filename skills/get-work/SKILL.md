@@ -19,7 +19,7 @@ The user may pass a folder path as an argument. Default to `~/Developer` if none
 
 ## Steps
 
-1. **Discover repos**: Find all directories containing a `.git` folder (one level deep only — do not recurse into nested repos).
+1. **Discover repos**: Find all directories containing a `.git` folder (one level deep only; do not recurse into nested repos).
 
 2. **For each repo**, gather:
    - **Repo name** (directory basename)
@@ -30,7 +30,7 @@ The user may pass a folder path as an argument. Default to `~/Developer` if none
    - **Behind upstream**: commits behind (`git fetch --quiet && git rev-list HEAD..@{u} --count 2>/dev/null`)
    - **Open PRs by me**: `gh pr list --author @me --state open --json number,title,url --limit 5` (skip if `gh` auth fails)
    - **Stashes**: `git stash list | wc -l`
-   - **CI status**: `gh run list --limit 1 --json status,conclusion,name` — show latest workflow run status (passing/failing/in-progress)
+   - **CI status**: `gh run list --limit 1 --json status,conclusion,name`. Show latest workflow run status (passing/failing/in-progress)
 
 3. **Output format**: Print a clean, grouped summary. For each repo use this structure:
 
@@ -53,4 +53,4 @@ The user may pass a folder path as an argument. Default to `~/Developer` if none
 - Run `git fetch --quiet` before checking ahead/behind so counts are current.
 - Run repo checks in parallel where possible (use `&` and `wait` in bash).
 - If a directory isn't a valid git repo or has no remote, note it and move on.
-- Keep output concise — skip sections that have nothing to report (e.g., don't show "Stashes: 0").
+- Keep output concise; skip sections that have nothing to report (e.g., don't show "Stashes: 0").

@@ -45,4 +45,4 @@ Investigate and diagnose CI pipeline failures.
 
 - Always check the current repo's workflows first (`gh run list`).
 - If `gh` is not authenticated or the repo has no remote, report that clearly.
-- Don't blindly re-run failed pipelines — diagnose first.
+- Don't blindly re-run failed pipelines; diagnose first.

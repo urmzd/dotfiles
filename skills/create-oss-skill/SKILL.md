@@ -1,8 +1,8 @@
 ---
 name: create-oss-skill
 description: >
-  Create well-formed Agent Skills following the agentskills.io specification —
-  scaffold directories, write SKILL.md files, bundle scripts, and structure
+  Create well-formed Agent Skills following the agentskills.io specification.
+  Scaffold directories, write SKILL.md files, bundle scripts, and structure
   instructions for progressive disclosure. Use when creating a new skill,
   reviewing skill structure, optimizing a skill description, or setting up
   evals for skill quality.
@@ -48,7 +48,7 @@ Quote YAML values containing colons: `description: "Use when: the user asks"`.
 
 ## Writing Effective Descriptions
 
-The description carries the entire burden of triggering — agents see only `name` + `description` at startup (~50-100 tokens) and decide whether to activate from this alone.
+The description carries the entire burden of triggering; agents see only `name` + `description` at startup (~50-100 tokens) and decide whether to activate from this alone.
 
 **Principles:**
 - **Imperative phrasing**: "Use this skill when..." not "This skill does..."
@@ -94,14 +94,14 @@ The SKILL.md body competes for attention with everything else in the context win
 
 ### Patterns for Instructions
 
-**Gotchas sections** — highest-value content. Concrete corrections to mistakes the agent will make:
+**Gotchas sections** highest-value content. Concrete corrections to mistakes the agent will make:
 ```markdown
 ## Gotchas
 - The `users` table uses soft deletes. Include `WHERE deleted_at IS NULL`.
 - User ID is `user_id` in DB, `uid` in auth, `accountId` in billing.
 ```
 
-**Output templates** — more reliable than prose descriptions:
+**Output templates** more reliable than prose descriptions:
 ```markdown
 ## Report structure
 Use this template:
@@ -111,7 +111,7 @@ Use this template:
 ## Recommendations
 ```
 
-**Checklists** — for multi-step workflows with dependencies:
+**Checklists** for multi-step workflows with dependencies:
 ```markdown
 ## Workflow
 - [ ] Step 1: Analyze (run `scripts/analyze.py`)
@@ -119,7 +119,7 @@ Use this template:
 - [ ] Step 3: Execute (run `scripts/execute.py`)
 ```
 
-**Validation loops** — instruct the agent to verify its own work:
+**Validation loops** instruct the agent to verify its own work:
 ```markdown
 1. Make edits
 2. Run `python scripts/validate.py output/`
@@ -127,7 +127,7 @@ Use this template:
 4. Only proceed when validation passes
 ```
 
-**Plan-validate-execute** — for batch/destructive operations:
+**Plan-validate-execute** for batch/destructive operations:
 ```markdown
 1. Generate plan → `plan.json`
 2. Validate plan against source of truth
@@ -152,7 +152,7 @@ Teach *how to approach* a class of problems, not *what to produce* for a specifi
 
 ### One-off Commands
 
-Reference existing packages directly — no `scripts/` needed:
+Reference existing packages directly; no `scripts/` needed:
 - `uvx ruff@0.8.0 check .` (Python)
 - `npx eslint@9 --fix .` (Node)
 - `go run golang.org/x/tools/cmd/goimports@v0.28.0 .` (Go)
@@ -173,13 +173,13 @@ from bs4 import BeautifulSoup
 
 ### Designing Scripts for Agents
 
-- **No interactive prompts** — agents can't respond to TTY input. Use flags/env vars/stdin.
-- **`--help` output** — primary way agents learn the interface. Include description, flags, examples.
-- **Helpful error messages** — say what went wrong, what was expected, what to try.
-- **Structured output** — JSON/CSV over free-form text. Data to stdout, diagnostics to stderr.
-- **Idempotent** — "create if not exists" over "create and fail on duplicate."
-- **Dry-run support** — `--dry-run` for destructive operations.
-- **Predictable output size** — default to summary/limit, support `--offset` for pagination.
+- **No interactive prompts** agents can't respond to TTY input. Use flags/env vars/stdin.
+- **`--help` output** primary way agents learn the interface. Include description, flags, examples.
+- **Helpful error messages** say what went wrong, what was expected, what to try.
+- **Structured output** JSON/CSV over free-form text. Data to stdout, diagnostics to stderr.
+- **Idempotent** "create if not exists" over "create and fail on duplicate."
+- **Dry-run support** `--dry-run` for destructive operations.
+- **Predictable output size** default to summary/limit, support `--offset` for pagination.
 
 ### When to Bundle
 

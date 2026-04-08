@@ -239,7 +239,7 @@ hooks:
     - sr hook commit-msg
 ```
 
-No `version_files` — Go uses git tags only. No `stage_files` — `go.sum` changes are committed during development, not release.
+No `version_files`. Go uses git tags only. No `stage_files`. `go.sum` changes are committed during development, not release.
 
 ### `Makefile`
 
@@ -301,9 +301,9 @@ go.sum
 ## Gotchas
 
 - Always use `go-version-file: go.mod` instead of hardcoding Go versions
-- `CGO_ENABLED=0` for static binaries — required for pure-Go projects, especially those using `modernc.org/sqlite`
-- Inject version/commit/date via `-ldflags "-X main.version=..."` — declare `var version, commit, date string` in main.go
-- No `version_files` in sr.yaml — Go versioning is tag-only
+- `CGO_ENABLED=0` for static binaries. Required for pure-Go projects, especially those using `modernc.org/sqlite`
+- Inject version/commit/date via `-ldflags "-X main.version=..."`. Declare `var version, commit, date string` in main.go
+- No `version_files` in sr.yaml. Go versioning is tag-only
 - `golangci-lint-action@v7` auto-detects Go version from go.mod
 - Bot skip uses `github.actor != 'github-actions[bot]'` or `'sr-releaser[bot]'` depending on which bot triggers
-- Cross-compilation is native in Go — no `cross` tool needed, just set `GOOS`/`GOARCH`
+- Cross-compilation is native in Go; no `cross` tool needed, just set `GOOS`/`GOARCH`

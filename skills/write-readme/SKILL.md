@@ -1,6 +1,6 @@
 ---
 name: write-readme
-description: README structure — centered header, badges, demos, section order, install.sh pattern, quickstart, embed-src usage, and llms.txt. Use when creating or updating any project README.
+description: README structure. Centered header, badges, demos, section order, install.sh pattern, quickstart, embed-src usage, and llms.txt. Use when creating or updating any project README.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: README Standards
@@ -31,7 +31,7 @@ Every README starts with a centered header block:
 
 - Link 1: "Install" for libraries (Go `go get`, Python `uv add`), "Download" for binaries
 - Link 2: "Report Bug" (always links to `/issues`)
-- Link 3: contextual — Go Docs, GitHub Action, PyPI, Crates.io, Experiments, etc.
+- Link 3: **contextual** Go Docs, GitHub Action, PyPI, Crates.io, Experiments, etc.
 
 ## CI Badges
 
@@ -72,7 +72,7 @@ Features → Installation → Quick Start → Examples → Usage / CLI Reference
 
 ### Features
 
-Bullet list of key capabilities. Keep it scannable — 3-8 items.
+Bullet list of key capabilities. Keep it scannable; 3-8 items.
 
 ### Installation
 
@@ -162,7 +162,7 @@ Brief overview of how the system is structured.
 See [docs/architecture.md](docs/architecture.md) for the full architecture guide.
 ```
 
-Do NOT inline detailed architecture in the README — keep it in `docs/architecture.md`.
+Do NOT inline detailed architecture in the README; keep it in `docs/architecture.md`.
 
 ### Agent Skill
 
@@ -176,7 +176,7 @@ This repo's conventions are available as portable agent skills in [`skills/`](sk
 
 ## No Project Structure
 
-READMEs must NOT include directory trees, file tables, or "Key Directories" sections. Project structure is discoverable via `tree` and `ripgrep`/`ag` — writing it out is duplicative and goes stale. AGENTS.md handles structural context for AI agents.
+READMEs must NOT include directory trees, file tables, or "Key Directories" sections. Project structure is discoverable via `tree` and `ripgrep`/`ag`. Writing it out is duplicative and goes stale. AGENTS.md handles structural context for AI agents.
 
 ## embed-src for Code Examples
 
@@ -260,9 +260,9 @@ Every repo should have `llms.txt` at root per the [llms.txt specification](https
 
 ## Documentation Philosophy
 
-- README.md = human-facing documentation — stays at root
-- [AGENTS.md](https://agents.md/) = AI-facing project context — stays at root
+- **README.md** human-facing documentation; stays at root
+- **[AGENTS.md](https://agents.md/)** AI-facing project context; stays at root
 - CONTRIBUTING.md, LICENSE, CODEOWNERS = standard root files
 - `skills/<name>/SKILL.md` = agent instructions
 - `llms.txt` = LLM discovery ([spec](https://llmstxt.org/))
-- **All other documents belong in `docs/`** — organized into subdirectories: `guides/`, `rfcs/`, `plans/`, `runbooks/`, `architecture/`, etc.
+- **All other documents belong in `docs/`** organized into subdirectories: `guides/`, `rfcs/`, `plans/`, `runbooks/`, `architecture/`, etc.

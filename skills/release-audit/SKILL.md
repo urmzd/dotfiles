@@ -46,6 +46,6 @@ Audit releases, tags, and assets for consistency.
 
 ## Rules
 
-- Don't delete or modify tags/releases — this is read-only audit.
+- Don't delete or modify tags/releases. This is read-only audit.
 - If `gh` isn't authenticated, fall back to git-only checks (tags, sr.yaml).
 - For multi-repo scans, run checks in parallel where possible.

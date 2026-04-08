@@ -40,16 +40,16 @@ nix develop .#<shell>
 
 Every shell includes a common set of CLI tools:
 
-- **git**, **gh** — version control and GitHub CLI
-- **fzf** — fuzzy finder
-- **ripgrep** — fast search
-- **jq**, **yq** — JSON/YAML processing
-- **just** — command runner
-- **direnv** — per-directory environment variables
-- **chezmoi** — dotfile management
-- **tmux** — terminal multiplexer
-- **tree-sitter** — incremental parsing
-- **uv** — Python package manager (available everywhere)
+- **git**, **gh** version control and GitHub CLI
+- **fzf** fuzzy finder
+- **ripgrep** fast search
+- **jq**, **yq** JSON/YAML processing
+- **just** command runner
+- **direnv** per-directory environment variables
+- **chezmoi** dotfile management
+- **tmux** terminal multiplexer
+- **tree-sitter** incremental parsing
+- **uv** Python package manager (available everywhere)
 
 ## Usage with direnv
 

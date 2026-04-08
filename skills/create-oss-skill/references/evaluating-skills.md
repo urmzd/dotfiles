@@ -110,7 +110,7 @@ Evaluate each assertion: **PASS** or **FAIL** with concrete evidence.
 
 **Grading principles:**
 - Require concrete evidence for a PASS
-- Review the assertions themselves — fix ones that are too easy, too hard, or unverifiable
+- Review the assertions themselves; fix ones that are too easy, too hard, or unverifiable
 - For comparing versions: try blind comparison (present both outputs without revealing which is which)
 
 ## Aggregating Results
@@ -134,11 +134,11 @@ Save to `benchmark.json`:
 
 ## Analyzing Patterns
 
-- **Remove assertions that always pass in both configs** — they inflate pass rate without reflecting skill value
-- **Investigate assertions that always fail in both** — assertion may be broken
-- **Study assertions that pass with skill but fail without** — understand *why*
-- **Tighten instructions when results are inconsistent** — add examples or more specific guidance
-- **Check time/token outliers** — read execution transcripts to find bottlenecks
+- **Remove assertions that always pass in both configs** they inflate pass rate without reflecting skill value
+- **Investigate assertions that always fail in both** assertion may be broken
+- **Study assertions that pass with skill but fail without** understand *why*
+- **Tighten instructions when results are inconsistent** add examples or more specific guidance
+- **Check time/token outliers** read execution transcripts to find bottlenecks
 
 ## Human Review
 
@@ -161,9 +161,9 @@ Empty = passed review.
 5. Human review. Repeat.
 
 **Guidelines for revisions:**
-- Generalize from feedback — don't patch for specific test cases
-- Keep the skill lean — fewer, better instructions
-- Explain the *why* — reasoning-based instructions > rigid directives
-- Bundle repeated work — if agents reinvent the same logic, put it in scripts/
+- **Generalize from feedback** don't patch for specific test cases
+- **Keep the skill lean** fewer, better instructions
+- **Explain the *why*** reasoning-based instructions > rigid directives
+- **Bundle repeated work** if agents reinvent the same logic, put it in scripts/
 
 Stop when feedback is consistently empty or improvements plateau.

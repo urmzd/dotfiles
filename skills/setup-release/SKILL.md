@@ -1,7 +1,7 @@
 ---
 name: setup-release
 description: >
-  Release pipeline conventions — sr.yaml config, sr action usage, git hooks, monorepo
+  Release pipeline conventions. sr.yaml config, sr action usage, git hooks, monorepo
   support, post-release patterns, and version file mapping. Language-specific build
   targets and publishing live in scaffold-rust, scaffold-go, scaffold-python, scaffold-node.
   Use when setting up or modifying release pipelines.
@@ -65,7 +65,7 @@ hooks:
 | Rust | `[Cargo.toml]` | `[Cargo.lock]` |
 | Python | `[pyproject.toml]` | `[uv.lock]` |
 | Node | `[package.json]` | `[package-lock.json]` |
-| Go | _(none — tag only)_ | _(none)_ |
+| Go | _(none; tag only)_ | _(none)_ |
 
 sr auto-discovers workspace members for Rust (Cargo), Python (uv), and Node (npm).
 
@@ -104,7 +104,7 @@ Outputs: `released` (bool), `tag` (e.g. `v1.2.0`), `version` (e.g. `1.2.0`).
 
 ## Git Hooks
 
-sr manages git hooks natively via `sr.yaml` — no pre-commit framework needed:
+sr manages git hooks natively via `sr.yaml`. No pre-commit framework needed:
 
 ```yaml
 hooks:

@@ -1,6 +1,6 @@
 ---
 name: repo-init
-description: Full repo bootstrap — create GitHub repo, add license, scaffold CI/release, write README, set metadata, and push. Use when starting a new project from scratch.
+description: Full repo bootstrap. Create GitHub repo, add license, scaffold CI/release, write README, set metadata, and push. Use when starting a new project from scratch.
 allowed-tools: Bash Read Grep Glob Edit Write
 user-invocable: true
 arguments:
@@ -32,7 +32,7 @@ Bootstrap a complete repository from zero to pushed.
    - Set up CI workflow (`.github/workflows/ci.yml`)
    - Set up release workflow (`.github/workflows/release.yml`)
    - Create `sr.yaml` for semantic release
-   - Set up task runner (native to the language — npm scripts, Makefile, cargo, justfile for Python)
+   - Set up task runner (native to the language; npm scripts, Makefile, cargo, justfile for Python)
    - Create `.envrc` with appropriate Nix dev shell
    - Create language-specific config (Cargo.toml, go.mod, pyproject.toml, package.json, etc.)
 

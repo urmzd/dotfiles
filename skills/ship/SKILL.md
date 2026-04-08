@@ -15,7 +15,7 @@ Commit, push, and watch the CI pipeline.
 
 ## Steps
 
-1. **Stage changes**: Run `git status --porcelain`. If there are unstaged/untracked changes, stage them (prefer specific files over `git add -A` — never stage `.env` or credential files).
+1. **Stage changes**: Run `git status --porcelain`. If there are unstaged/untracked changes, stage them (prefer specific files over `git add -A`; never stage `.env` or credential files).
 
 2. **Commit**: If a message argument is provided, use it. Otherwise, generate a conventional commit message from the diff (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`). Use the repo's recent `git log --oneline -10` to match style.
 
