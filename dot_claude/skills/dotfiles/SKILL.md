@@ -30,16 +30,16 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 - `dot_zsh/` → `~/.zsh/` (zsh modules and plugins)
 - `dot_claude/` → `~/.claude/` (Claude Code settings, skills)
 - `dot_agents/` → `~/.agents/` (agent definitions; personas/subagents)
-- `skills/` → skills installed to `~/.agents/skills/` via agentspec
+- `dot_agents/skills/` → `~/.agents/skills/` (agent skills, chezmoi-managed)
 - `Brewfile` → Homebrew dependencies
 - `flake.nix` → Nix dependencies
 
 ## Agents vs Skills
 
 - **Agents** (`dot_agents/agents/*.md`) define HOW to think. Personas and subagents
-- **Skills** (`skills/*/SKILL.md`) define WHAT to do. Capabilities and domain knowledge
-- Agents are chezmoi-managed; agentspec links them to tools (`~/.claude/agents/`, etc.)
-- Skills live in `~/.agents/skills/` and are managed by agentspec
+- **Skills** (`dot_agents/skills/*/SKILL.md`) define WHAT to do. Capabilities and domain knowledge
+- Both agents and skills are chezmoi-managed; agentspec links them to tools (`~/.claude/agents/`, etc.)
+- Skills live in `~/.agents/skills/` after `chezmoi apply`
 
 ## Workflow
 
