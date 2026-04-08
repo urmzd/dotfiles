@@ -17,7 +17,7 @@
 │   ├── strategist.md    # Multi-system orchestration
 │   ├── writer.md        # Technical documentation
 │   └── technical-documentation-architect.md
-└── skills/              # Managed by agentspec (add/remove/link)
+└── skills/              # Chezmoi-managed; agentspec links to tools
 ```
 
 ## Agents vs Skills
@@ -27,7 +27,7 @@
 | Format | `<name>.md` with agent frontmatter | `<name>/SKILL.md` with skill frontmatter |
 | Purpose | Define HOW to think and communicate | Define WHAT to do and WHEN |
 | Usage | Subagent types, persona activation | Tool invocation, domain knowledge |
-| Managed by | chezmoi (source of truth in dotfiles) | agentspec add/remove/link |
+| Managed by | chezmoi (source of truth in dotfiles) | chezmoi (source of truth); agentspec links to tools |
 
 ## Commands
 
@@ -39,13 +39,13 @@ agentspec sync --fast              # Sync and discover resources
 agentspec status                   # Show managed vs unmanaged inventory
 ```
 
-## Adding Agents
+## Adding Agents and Skills
 
-Agent definitions are managed in the chezmoi dotfiles repo at `dot_agents/agents/`. After editing:
+Both agents and skills are managed in the chezmoi dotfiles repo at `dot_agents/`. After editing:
 
 ```bash
 chezmoi apply    # Deploy to ~/.agents/
-agentspec sync   # Re-discover and adopt
+agentspec sync   # Re-discover, adopt, and link
 ```
 
 ## Linking to Tools
