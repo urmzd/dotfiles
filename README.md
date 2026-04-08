@@ -19,7 +19,7 @@
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
 - **Neovim** (HEAD) with LSP for all included languages
 - **AI agents** (Claude Code, Gemini, Codex, Copilot) with auto-install
-- **36 portable agent skills** in [`skills/`](skills/)
+- **36 portable agent skills** in [`dot_agents/skills/`](dot_agents/skills/)
 - **Chezmoi automation** scripts that trigger on apply
 - **macOS extras** via Homebrew (fonts, Android tooling, VHS for CLI recordings)
 - **Docker cleanup** launchd agent running daily at 3 AM
@@ -88,7 +88,7 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (before) | Brewfile changes |
 | `check-flake` | run_onchange (after) | flake.lock changes |
 | `generate-completions` | run_onchange (after) | zshrc or flake.lock changes |
-| `install-skills` | run_onchange (after) | Any SKILL.md changes (syncs to `~/.claude/skills/`) |
+| `install-skills` | run_onchange (after) | Any SKILL.md changes (syncs to `~/.agents/skills/`) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
 
@@ -104,17 +104,17 @@ Claude Code config lives in `dot_claude/`. Includes settings, custom statusline,
 
 ## Agent Skills
 
-This repo's conventions are available as portable agent skills in [`skills/`](skills/), following the [Agent Skills Specification](https://agentskills.io/specification).
+This repo's conventions are available as portable agent skills in [`dot_agents/skills/`](dot_agents/skills/), following the [Agent Skills Specification](https://agentskills.io/specification).
 
 Related standards: [AGENTS.md](https://agents.md/) · [llms.txt](https://llmstxt.org/)
 
 ### Managing skills
 
-All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses [`agentspec`](https://github.com/urmzd/agentspec) to install both local skills from [`skills/`](skills/) and third-party skills globally to all agents:
+All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses [`agentspec`](https://github.com/urmzd/agentspec) to install both local skills from [`dot_agents/skills/`](dot_agents/skills/) and third-party skills globally to all agents:
 
 | Source | Skills |
 | ------ | ------ |
-| This repo (`skills/`) | All local skills |
+| This repo (`dot_agents/skills/`) | All local skills |
 | [vercel-labs/skills](https://github.com/vercel-labs/skills) | All |
 | [vercel/ai-elements](https://github.com/vercel/ai-elements) | All |
 | [vercel/streamdown](https://github.com/vercel/streamdown) | All |
@@ -126,24 +126,14 @@ All skills are installed automatically via `chezmoi apply`. The [`install-skills
 To manage skills and agents manually:
 
 ```bash
-# Skills
-agentspec skill list                           # List installed skills with tool linkage
-agentspec skill install owner/repo             # Install from GitHub
-agentspec skill link <skill> <tool>            # Symlink skill to a tool
-agentspec skill remove <name>                  # Remove a skill
-agentspec skill create [name]                  # Scaffold a new skill
-agentspec skill validate [path]                # Validate SKILL.md
-
-# Agents (personas, sub-agents)
-agentspec agent list                           # List installed agents with tool linkage
-agentspec agent install owner/repo             # Install from GitHub
-agentspec agent link <agent> <tool>            # Link agent to a tool
-agentspec agent remove <name>                  # Remove an agent
-agentspec agent create [name]                  # Scaffold a new agent
-agentspec agent validate [path]                # Validate agent definition
-
-# Discovery
-agentspec search <query>                       # Search GitHub for skills
+agentspec manage list                          # List managed resources with tool linkage
+agentspec manage add <source>                  # Add from local path, GitHub (owner/repo), or name
+agentspec manage link <name> <tool>            # Link resource to a tool (claude-code, codex, etc.)
+agentspec manage remove <name>                 # Remove a managed resource
+agentspec manage create [name]                 # Scaffold a new resource
+agentspec manage validate [path]               # Validate SKILL.md or agent definition
+agentspec status                               # Show managed vs unmanaged inventory
+agentspec sync --fast                          # Discover, adopt, link, and verify all resources
 ```
 
 ### All skills
