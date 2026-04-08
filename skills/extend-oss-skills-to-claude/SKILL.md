@@ -53,7 +53,7 @@ Keep `name` and `description` required in practice; portability matters.
 Two fields control who can trigger a skill:
 
 ```yaml
-# User-only: deploy, commit, send-message — side effects you control
+# User-only: deploy, commit, send-message. Side effects you control
 disable-model-invocation: true
 
 # Agent-only: background context the user shouldn't invoke directly

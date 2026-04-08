@@ -31,7 +31,7 @@ Create a pull request with a well-structured summary.
      - <bullet points derived from commits, grouped by type>
 
      ## Test plan
-     - [ ] <derived from what changed — e.g., "CI passes", "manual test of X">
+     - [ ] <derived from what changed, e.g., "CI passes", "manual test of X">
      ```
 
 4. **Create PR**: Run `gh pr create --title "<title>" --body "<body>"` using a HEREDOC for the body.

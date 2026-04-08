@@ -80,7 +80,7 @@ description: Process CSV files.
 
 # After
 description: >
-  Analyze CSV and tabular data files — compute summary statistics,
+  Analyze CSV and tabular data files. Compute summary statistics,
   add derived columns, generate charts, and clean messy data. Use this
   skill when the user has a CSV, TSV, or Excel file and wants to
   explore, transform, or visualize the data, even if they don't

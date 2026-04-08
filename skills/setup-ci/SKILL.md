@@ -45,12 +45,12 @@ Push main → release.yml:
 ## Concurrency
 
 ```yaml
-# CI workflows — cancel stale runs
+# CI workflows: cancel stale runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Release workflows — never cancel mid-release
+# Release workflows: never cancel mid-release
 concurrency:
   group: release
   cancel-in-progress: false

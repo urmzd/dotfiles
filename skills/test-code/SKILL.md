@@ -69,7 +69,7 @@ func FuzzParseInput(f *testing.F) {
     f.Add([]byte(``))
 
     f.Fuzz(func(t *testing.T, data []byte) {
-        // Should never panic — errors are fine
+        // Should never panic; errors are fine
         _, _ = ParseInput(data)
     })
 }

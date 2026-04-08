@@ -77,8 +77,8 @@ push to main
   → release.yml:
       embed-src (sync code in README) [if markers exist]
       → sr release (bump → changelog → tag → GitHub release)
-      → build matrix (platform-specific — see scaffold-* skills)
-      → publish (registry-specific — see scaffold-* skills)
+      → build matrix (platform-specific; see scaffold-* skills)
+      → publish (registry-specific; see scaffold-* skills)
       → teasr (post-release demo capture) [if teasr.toml exists]
       → lockfile sync commit [skip ci]
 ```

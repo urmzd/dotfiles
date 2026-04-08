@@ -70,14 +70,14 @@ Prefer native build systems over justfile. Add a justfile only when project comp
 Every project should support these operations, regardless of how they're invoked:
 
 ```
-init    — install hooks, download deps
-build   — compile / bundle
-test    — run test suite
-lint    — static analysis
-fmt     — format code
-check   — fmt + lint + test (quality gate)
-run     — execute the project
-record  — capture demo assets with teasr (when teasr.toml exists)
+init    . install hooks, download deps
+build   . compile / bundle
+test    . run test suite
+lint    . static analysis
+fmt     . format code
+check   . fmt + lint + test (quality gate)
+run     . execute the project
+record  . capture demo assets with teasr (when teasr.toml exists)
 ```
 
 ## Examples Convention

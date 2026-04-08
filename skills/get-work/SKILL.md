@@ -41,7 +41,7 @@ The user may pass a folder path as an argument. Default to `~/Developer` if none
 - Behind: 5 commits (needs pull/rebase)
 - Stashes: 1
 - Open PRs:
-  - #42 "Add widget" — https://github.com/...
+  - #42 "Add widget" https://github.com/...
 - CI: ✓ passing | ✗ failing (ci.yml) | ⏳ in progress
 - Action needed: pull, push, commit changes, fix CI
 ```

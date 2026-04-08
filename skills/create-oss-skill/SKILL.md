@@ -59,7 +59,7 @@ The description carries the entire burden of triggering; agents see only `name` 
 Good:
 ```yaml
 description: >
-  Analyze CSV and tabular data files — compute summary statistics,
+  Analyze CSV and tabular data files. Compute summary statistics,
   add derived columns, generate charts, and clean messy data. Use this
   skill when the user has a CSV, TSV, or Excel file and wants to
   explore, transform, or visualize the data, even if they don't
@@ -219,7 +219,7 @@ Before publishing:
 ---
 name: <skill-name>
 description: >
-  <What it does — capabilities>. Use when <trigger conditions>,
+  <What it does. Capabilities>. Use when <trigger conditions>,
   even if the user doesn't explicitly mention <domain keywords>.
 license: Apache-2.0
 ---
