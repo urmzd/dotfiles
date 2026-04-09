@@ -153,6 +153,31 @@ Standard sections:
 
 Apache-2.0 for all repos. Exception: content-heavy sites (urmzd.com) may dual-license with CC BY-NC-ND 4.0 for content.
 
+## Sub-Package Convention
+
+Publishable workspace members (sub-crates, sub-packages) must include their own documentation files for registry compliance (crates.io, npm, PyPI).
+
+| File | Source | When Required |
+|------|--------|---------------|
+| `LICENSE` | Copy of root `LICENSE` | Always (registries require per-package license) |
+| `README.md` | Minimal: crate name, description, link to parent workspace | Always (registries display per-package README) |
+
+### Minimal Sub-Package README Template
+
+```markdown
+# {crate-name}
+
+{description from Cargo.toml / pyproject.toml / package.json}
+
+Part of the [{workspace-name}]({repository-url}) workspace.
+
+## License
+
+[Apache-2.0](../../LICENSE)
+```
+
+Skip `examples/` workspace members — they are not published independently.
+
 ## Documentation Philosophy
 
 ### Skills vs Docs

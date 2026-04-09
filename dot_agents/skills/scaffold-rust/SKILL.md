@@ -335,3 +335,16 @@ Without a justfile, run `teasr showme` directly.
 - Sleep 30s between `cargo publish` calls in workspace publish order (crates.io rate limit)
 - Use `-p <crate-name>` for `cargo build`/`cargo publish` when the workspace has multiple binaries
 - `cancel-in-progress: false` on release workflow to prevent partial releases
+
+## Workspace Member Files
+
+Each publishable workspace member (`crates/<name>/`) must have:
+
+| File | Content |
+|------|---------|
+| `LICENSE` | Copy of root `LICENSE` |
+| `README.md` | Crate name heading, description from `Cargo.toml`, link to workspace repo |
+
+When scaffolding a new workspace member, generate both files. See `scaffold-project` for the README template.
+
+Skip `examples/` members — they are not published to crates.io.

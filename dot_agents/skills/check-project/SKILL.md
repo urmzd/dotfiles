@@ -69,13 +69,25 @@ Report WARN if:
 | embed-src markers | Not stale (content between markers matches referenced files) |
 | Section order | Features before Installation before Quick Start |
 
+## Sub-Package Checks
+
+For workspace projects (Cargo workspace, npm workspaces, etc.), audit each publishable member. Report FAIL if missing:
+
+| Check | Expected |
+|-------|----------|
+| `LICENSE` in each workspace member | Exists; matches root `LICENSE` |
+| `README.md` in each workspace member | Exists; has crate name as heading |
+
+Skip `examples/` workspace members — they are not published independently.
+
 ## How to Run
 
 1. Detect the project language from manifest files (Cargo.toml, go.mod, pyproject.toml, package.json, main.tf)
 2. Run all required file checks
 3. Run CI consistency checks
 4. Run optional directory checks based on detected project type
-5. Run README checks
+5. If workspace detected, run sub-package checks on each publishable member
+6. Run README checks
 6. Report results grouped by severity: FAIL first, then WARN, then PASS
 
 ## Output Format
