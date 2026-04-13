@@ -172,7 +172,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | pr | Create PRs with auto-generated summary from commits |
 | diagnose-ci | Find failing pipelines, pull logs, identify root cause |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
-| get-work | Scan repos for GitHub status and branch divergence |
+| status | Check active repos for recent activity and local state |
 | release-audit | Audit releases, tags, and assets for health |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 

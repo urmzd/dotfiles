@@ -61,7 +61,7 @@ concurrency:
 Prevent infinite loops from bot commits:
 
 ```yaml
-if: github.actor != 'sr-releaser[bot]'
+if: github.actor != 'sr[bot]'
 ```
 
 ## CI Reuse Pattern

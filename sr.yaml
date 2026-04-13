@@ -1,0 +1,86 @@
+# sr configuration
+# Full reference: https://github.com/urmzd/sr#configuration
+
+# How commits are parsed and classified.
+commit:
+  # Regex for parsing conventional commits.
+  # Required named groups: type, description. Optional: scope, breaking.
+  pattern: '^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)'
+
+  # Changelog section headings.
+  breaking_section: Breaking Changes
+  misc_section: Miscellaneous
+
+  # Commit type definitions.
+  types:
+    - name: feat
+      bump: minor
+      section: Features
+    - name: fix
+      bump: patch
+      section: Bug Fixes
+    - name: perf
+      bump: patch
+      section: Performance
+    - name: docs
+      section: Documentation
+    - name: refactor
+      bump: patch
+      section: Refactoring
+    - name: revert
+      section: Reverts
+    - name: chore
+    - name: ci
+    - name: test
+    - name: build
+    - name: style
+
+# How releases are cut.
+release:
+  branches:
+    - main
+  tag_prefix: "v"
+  changelog:
+    file: CHANGELOG.md
+  version_files: []
+  version_files_strict: false
+  artifacts: []
+  floating_tags: true
+  stage_files: []
+  sign_tags: false
+  draft: false
+  # prerelease: alpha
+  # release_name_template: "{{ tag_name }}"
+
+  # Release channels for trunk-based promotion.
+  # channels:
+  #   canary:
+  #     prerelease: canary
+  #   rc:
+  #     prerelease: rc
+  #     draft: true
+  #   stable: {}
+  # default_channel: stable
+
+# Lifecycle hooks — shell commands keyed by event.
+# Available events: pre_commit, post_commit, pre_branch, post_branch,
+#   pre_pr, post_pr, pre_review, post_review, pre_release, post_release.
+# Release hooks receive SR_VERSION and SR_TAG env vars.
+# hooks:
+#   pre_commit:
+#     - "cargo fmt --check"
+#     - "cargo clippy -- -D warnings"
+#   pre_release:
+#     - "cargo test --workspace"
+#   post_release:
+#     - "./scripts/notify-slack.sh"
+
+# Monorepo packages (uncomment and configure if needed).
+# packages:
+#   - name: core
+#     path: crates/core
+#     tag_prefix: "core/v"
+#     version_files:
+#       - crates/core/Cargo.toml
+#     stage_files:
+#       - crates/core/Cargo.lock

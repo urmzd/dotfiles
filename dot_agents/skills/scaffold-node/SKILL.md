@@ -117,7 +117,7 @@ permissions:
 
 jobs:
   ci:
-    if: github.actor != 'sr-releaser[bot]'
+    if: github.actor != 'sr[bot]'
     uses: ./.github/workflows/ci.yml
 
   release:
@@ -137,7 +137,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v2
+      - uses: urmzd/sr@v4
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}

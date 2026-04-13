@@ -105,7 +105,7 @@ permissions:
 
 jobs:
   ci:
-    if: github.actor != 'sr-releaser[bot]'
+    if: github.actor != 'sr[bot]'
     uses: ./.github/workflows/ci.yml
 
   release:
@@ -125,7 +125,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v2
+      - uses: urmzd/sr@v4
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
@@ -305,5 +305,5 @@ go.sum
 - Inject version/commit/date via `-ldflags "-X main.version=..."`. Declare `var version, commit, date string` in main.go
 - No `version_files` in sr.yaml. Go versioning is tag-only
 - `golangci-lint-action@v7` auto-detects Go version from go.mod
-- Bot skip uses `github.actor != 'github-actions[bot]'` or `'sr-releaser[bot]'` depending on which bot triggers
+- Bot skip uses `github.actor != 'github-actions[bot]'` or `'sr[bot]'` depending on which bot triggers
 - Cross-compilation is native in Go; no `cross` tool needed, just set `GOOS`/`GOARCH`

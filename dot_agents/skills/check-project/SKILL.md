@@ -44,7 +44,7 @@ Check workflow files for convention compliance. Report FAIL if violated:
 | ci.yml concurrency | `cancel-in-progress: true` |
 | release.yml concurrency | `cancel-in-progress: false` |
 | release.yml CI gate | `uses: ./.github/workflows/ci.yml` |
-| release.yml bot skip | `github.actor != 'sr-releaser[bot]'` |
+| release.yml bot skip | `github.actor != 'sr[bot]'` |
 | release.yml force dispatch | `workflow_dispatch` with `force` boolean input |
 
 ## Optional Directory Checks

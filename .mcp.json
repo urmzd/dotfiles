@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sr": {
+      "args": [
+        "mcp",
+        "serve"
+      ],
+      "command": "sr"
+    }
+  }
+}

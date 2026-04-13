@@ -44,17 +44,18 @@ types:
   - { name: build }
   - { name: style }
 floating_tags: true
-hooks:
-  commit-msg:
-    - sr hook commit-msg
-# Optional fields:
-# build_command: "cargo build --release"
-# pre_release_command: "just check"
-# post_release_command: "echo released"
+# hooks:
+#   pre_commit:
+#     - "cargo fmt --check"
+#   pre_release:
+#     - "cargo test --workspace"
+#   post_release:
+#     - "./scripts/notify-slack.sh"
 # prerelease: alpha              # → 1.2.0-alpha.1
 # sign_tags: false
 # draft: false
 # release_name_template: "Release {{ version }}"
+# channels: {}                   # trunk-based promotion
 # packages: []                   # monorepo support
 ```
 
@@ -68,6 +69,16 @@ hooks:
 | Go | _(none; tag only)_ | _(none)_ |
 
 sr auto-discovers workspace members for Rust (Cargo), Python (uv), and Node (npm).
+
+## End-to-End Workflow
+
+```
+sr worktree → sr commit → sr pr → sr review → merge → sr status → sr release
+```
+
+**CLI commands** `sr worktree` (create branch + worktree), `sr commit` (AI-powered atomic commits), `sr pr` (AI PR generation), `sr review` (AI code review), `sr status` (version + unreleased commits), `sr release` (bump + changelog + tag + GitHub release), `sr cache` (manage AI commit plan cache).
+
+All AI commands accept `-M "context"` for additional instructions. Multiple backends supported: Claude, GitHub Copilot, Gemini (auto-detected).
 
 ## Release Pipeline
 
@@ -86,14 +97,16 @@ push to main
 ## sr Action Usage
 
 ```yaml
-- uses: urmzd/sr@v2
+- uses: urmzd/sr@v4
   id: sr
   with:
     github-token: ${{ steps.app-token.outputs.token }}
     force: ${{ inputs.force }}
 ```
 
-Outputs: `released` (bool), `tag` (e.g. `v1.2.0`), `version` (e.g. `1.2.0`).
+**Inputs** `command` (default `release`), `dry-run`, `force`, `config`, `github-token` (default `github.token`), `git-user-name` (default `sr[bot]`), `git-user-email`, `artifacts` (glob patterns), `build-command` (runs after version bump with `SR_VERSION`/`SR_TAG` env vars), `sha256` (checksum verification).
+
+**Outputs** `released` (bool), `version`, `previous-version`, `tag`, `bump` (major/minor/patch), `floating-tag`, `commit-count`, `json` (full release metadata).
 
 ## Post-Release Patterns
 
@@ -102,28 +115,25 @@ Outputs: `released` (bool), `tag` (e.g. `v1.2.0`), `version` (e.g. `1.2.0`).
 - **File embedding:** embed-src → commit
 - **Demo capture:** teasr → commit to `showcase/`
 
-## Git Hooks
+## Lifecycle Hooks
 
-sr manages git hooks natively via `sr.yaml`. No pre-commit framework needed:
+sr runs hooks at key points in every workflow command via `sr.yaml`:
 
 ```yaml
 hooks:
-  commit-msg:
-    - sr hook commit-msg          # validates conventional commit format
-  pre-commit:
-    - step: format
-      patterns: ["*.rs"]          # only runs when matching files are staged
-      rules:
-        - "rustfmt --check --edition 2024 {files}"
-    - step: lint
-      patterns: ["*.rs"]
-      rules:
-        - "cargo clippy --workspace -- -D warnings"
+  pre_commit:
+    - "cargo fmt --check"
+    - "cargo clippy --workspace -- -D warnings"
+  pre_release:
+    - "cargo test --workspace"
+  post_release:
+    - "./scripts/notify-slack.sh"
 ```
 
-- Hook scripts auto-synced to `.githooks/` by `sr init`
-- Structured steps only run when staged files match glob `patterns`
-- `{files}` in rules is replaced with matched file list
+**Available events** `pre_commit`, `post_commit`, `pre_branch`, `post_branch`, `pre_pr`, `post_pr`, `pre_review`, `post_review`, `pre_release`, `post_release`.
+
+- Release hooks receive `SR_VERSION` and `SR_TAG` environment variables
+- Use `sr init` to generate a fully-commented `sr.yaml`; `sr init --merge` to add new fields without overwriting
 
 ## Monorepo Support
 
