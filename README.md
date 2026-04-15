@@ -26,11 +26,13 @@
 
 ## Quick Start
 
+One-command bootstrap (installs Nix + Chezmoi, then applies everything)
 ```bash
-# One-command bootstrap (installs Nix + Chezmoi, then applies everything)
 curl -fsSL https://raw.githubusercontent.com/urmzd/.dotfiles/main/bootstrap-nix-chezmoi.sh | bash
+```
 
-# Or, if chezmoi is already installed
+Or, if chezmoi is already installed
+```
 chezmoi init --apply https://github.com/urmzd/.dotfiles.git
 ```
 
