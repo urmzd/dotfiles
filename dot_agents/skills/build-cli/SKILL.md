@@ -26,7 +26,7 @@ A junior developer should understand any CLI tool's behavior from `--help` alone
 | Data/device API (zigbee-rest) | Always JSON on stdout | None needed |
 | Dual human + machine consumers (sr, oag) | `--format json\|human` | Default: human |
 | CLI with optional machine output (llmem) | `--json` flag + TTY auto-detect | Default: human if TTY, JSON if piped |
-| Human-only tool (teasr, embed-src) | Styled stderr only | No JSON mode |
+| Human-only tool (teasr, fsrc) | Styled stderr only | No JSON mode |
 
 ### TTY Auto-Detection
 

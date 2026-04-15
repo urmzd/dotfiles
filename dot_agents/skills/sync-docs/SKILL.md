@@ -2,7 +2,7 @@
 name: sync-docs
 description: >
   Audit and synchronize project documentation. README, AGENTS.md, llms.txt, docs/,
-  and embed-src markers. Use after feature changes, refactors, or when docs may be stale.
+  and fsrc markers. Use after feature changes, refactors, or when docs may be stale.
   Can be run as a scheduled agent or invoked manually.
 allowed-tools: Read Grep Glob Bash Edit Write
 user-invocable: true
@@ -25,19 +25,19 @@ Audit project documentation for consistency, staleness, and completeness. Fix is
 
 ## Audit Checklist
 
-### 1. embed-src Markers
+### 1. fsrc Markers
 
-Run `embed-src --verify` on all files with markers to detect drift:
+Run `fsrc --verify` on all files with markers to detect drift:
 
 ```sh
-# Find all files with embed-src markers
-grep -rl 'embed-src src=' . --include='*.md' | xargs embed-src --verify
+# Find all files with fsrc markers
+grep -rl 'fsrc src=' . --include='*.md' | xargs fsrc --verify
 ```
 
-If any markers are stale, run `embed-src` to update them:
+If any markers are stale, run `fsrc` to update them:
 
 ```sh
-grep -rl 'embed-src src=' . --include='*.md' | xargs embed-src
+grep -rl 'fsrc src=' . --include='*.md' | xargs fsrc
 ```
 
 ### 2. README Completeness
@@ -96,7 +96,7 @@ Ensure these files agree on:
 
 ## Fix Strategy
 
-1. **embed-src drift** run embed-src to update markers
+1. **fsrc drift** run fsrc to update markers
 2. **Missing sections** add them following `write-readme` conventions
 3. **Stale commands** update to match native build system (see `scaffold-*` skills)
 4. **Dead links** remove or update
@@ -104,7 +104,7 @@ Ensure these files agree on:
 
 ## CI Integration
 
-Add embed-src verification to CI to catch drift early:
+Add fsrc verification to CI to catch drift early:
 
 ```yaml
 # In ci.yml, before other jobs
@@ -113,7 +113,7 @@ embed:
   runs-on: ubuntu-latest
   steps:
     - uses: actions/checkout@v4
-    - uses: urmzd/embed-src@v3
+    - uses: urmzd/fsrc@v4
       with:
         commit-dry: "true"
         commit-push: "false"
@@ -126,6 +126,6 @@ embed:
 This skill can be run on a schedule to keep docs fresh. When invoked:
 
 1. Run the full audit checklist above
-2. Fix any embed-src drift automatically
+2. Fix any fsrc drift automatically
 3. Flag sections that need human review (architecture changes, new features without docs)
 4. Report a summary of what was fixed and what needs attention

@@ -2,9 +2,9 @@
 name: scaffold-node
 description: >
   Scaffold a complete Node/TypeScript project with CI/CD, release pipeline, sr.yaml,
-  .envrc, and standard files. Uses npm scripts and biome. Use when creating a new
+  .envrc, and standard files. Uses pnpm and biome. Use when creating a new
   Node.js app, TypeScript library, or website, or when the user mentions "new Node project",
-  "npm init", "TypeScript scaffold", or "Astro site".
+  "pnpm init", "TypeScript scaffold", or "Astro site".
 allowed-tools: Read Grep Glob Bash Edit Write
 user-invocable: true
 metadata:
@@ -48,49 +48,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Check formatting & lint
-        run: npx biome check
+        run: pnpm exec biome check
 
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx tsc --noEmit
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
 
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
 
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
 ```
 
 ### `.github/workflows/release.yml`
@@ -137,7 +141,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v4
+      - uses: urmzd/sr@v7
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
@@ -157,70 +161,44 @@ jobs:
   #     - uses: actions/checkout@v4
   #       with:
   #         ref: ${{ needs.release.outputs.tag }}
+  #     - uses: pnpm/action-setup@v4
   #     - uses: actions/setup-node@v4
   #       with:
   #         node-version: 22
   #         registry-url: https://registry.npmjs.org
-  #     - run: npm ci
-  #     - run: npm publish
+  #     - run: pnpm install --frozen-lockfile
+  #     - run: pnpm publish --no-git-checks
   #       env:
   #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 ### `sr.yaml`
 
+See `sync-release` skill for full sr.yaml reference (v7 format).
+
 ```yaml
-branches:
-  - main
+git:
+  tag_prefix: "v"
+  floating_tag: true
 
-tag_prefix: "v"
-
-commit_pattern: '^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)'
-
-breaking_section: Breaking Changes
-misc_section: Miscellaneous
-
-types:
-  - name: feat
-    bump: minor
-    section: Features
-  - name: fix
-    bump: patch
-    section: Bug Fixes
-  - name: perf
-    bump: patch
-    section: Performance
-  - name: docs
-    section: Documentation
-  - name: refactor
-    section: Refactoring
-  - name: revert
-    section: Reverts
-  - name: chore
-  - name: ci
-  - name: test
-  - name: build
-  - name: style
-
-version_files:
-  - package.json
+commit:
+  types:
+    minor: [feat]
+    patch: [fix, perf, refactor]
+    none: [docs, revert, chore, ci, test, build, style]
 
 changelog:
   file: CHANGELOG.md
 
-stage_files:
-  - package-lock.json
-
-floating_tags: true
-
-hooks:
-  commit-msg:
-    - sr hook commit-msg
+packages:
+  - path: .
+    version_files:
+      - package.json
+    stage_files:
+      - pnpm-lock.yaml
 ```
 
 ### `package.json` scripts
-
-Add these scripts to `package.json`:
 
 ```json
 {
@@ -230,20 +208,19 @@ Add these scripts to `package.json`:
     "lint": "biome check",
     "fmt": "biome check --write",
     "typecheck": "tsc --noEmit",
-    "check": "npm run fmt && npm run lint && npm run typecheck && npm test",
+    "check": "pnpm run fmt && pnpm run lint && pnpm run typecheck && pnpm test",
     "record": "teasr showme",
-    "dev": "tsc --watch",
-    "prepare": "git config core.hooksPath .githooks"
+    "dev": "tsc --watch"
   }
 }
 ```
 
-Use `npm run <task>` for all operations. No justfile. npm is the native task runner.
+Use `pnpm run <task>` for all operations. pnpm is the package manager.
 
 ### `.envrc`
 
 ```sh
-use flake .#node
+use flake .#js
 ```
 
 ### `biome.json`
@@ -275,25 +252,17 @@ use flake .#node
 
 ### Static Sites (Astro, Next.js)
 
-- Replace `npm test` with `npm run check` (framework-specific checks like `astro check`)
+- Replace `pnpm test` with `pnpm run check` (framework-specific checks like `astro check`)
 - Add build artifact upload for deployment workflows
 - Add deploy job if using AWS S3/CloudFront (see `scaffold-terraform` for infra)
-
-### pnpm Projects
-
-Replace npm commands:
-- `actions/setup-node` → add `pnpm/action-setup@v4` before it
-- `npm ci` → `pnpm install --frozen-lockfile`
-- `npx` → `pnpm exec`
-- `stage_files: [pnpm-lock.yaml]` in sr.yaml
 
 ### Monorepo Variant (Turbo)
 
 For multi-package repos, add turbo for cached, parallel task execution:
 
-- `npm install turbo --save-dev` at workspace root
+- `pnpm add turbo --save-dev -w` at workspace root
 - Add `turbo.json` with pipeline definitions (`build`, `test`, `lint`, `typecheck`)
-- Replace direct `npm run` calls with `turbo run` in npm scripts and CI
+- Replace direct `pnpm run` calls with `turbo run` in scripts and CI
 - Turbo caches task outputs; subsequent runs skip unchanged packages
 
 ```json
@@ -310,11 +279,12 @@ For multi-package repos, add turbo for cached, parallel task execution:
 
 ## Gotchas
 
-- Use `npm ci` (not `npm install`) in CI for reproducible installs
+- Use `pnpm install --frozen-lockfile` (not `pnpm install`) in CI for reproducible installs
 - `biome check` handles both formatting and linting in one pass
 - `biome check --write` to auto-fix (replaces `prettier --write` + `eslint --fix`)
 - Node 22 is the current LTS. Use `node-version: 22`
-- `cache: npm` in setup-node handles caching automatically
+- `cache: pnpm` in setup-node handles caching automatically
+- `pnpm/action-setup@v4` must come before `actions/setup-node` in CI
 - For framework-specific type checks (e.g., `astro check`), add a separate `check` job
 - `cancel-in-progress: false` on release workflow to prevent partial releases
 - For monorepos, use `turbo run <task>` instead of running tasks per-package manually

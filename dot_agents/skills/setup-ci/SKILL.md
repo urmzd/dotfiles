@@ -1,7 +1,7 @@
 ---
 name: setup-ci
 description: >
-  CI/CD conventions. ci.yml + release.yml naming, concurrency, bot skip, embed-src/teasr
+  CI/CD conventions. ci.yml + release.yml naming, concurrency, bot skip, fsrc/teasr
   steps, and workflow structure. Language-specific pipelines live in scaffold-rust,
   scaffold-go, scaffold-python, scaffold-node, scaffold-terraform. Use when setting up
   GitHub Actions or understanding CI conventions.
@@ -32,7 +32,7 @@ Universal conventions that apply across all languages. For language-specific CI 
 ```
 PR → ci.yml (fmt → lint → test)
 Push main → release.yml:
-  embed-src → ci → sr release → build → publish → teasr → lock sync
+  fsrc → ci → sr release → build → publish → teasr → lock sync
 ```
 
 ## Release Config
@@ -40,7 +40,7 @@ Push main → release.yml:
 - Canonical filename: `sr.yaml` (not `.urmzd.sr.yml`)
 - `floating_tags: true` in all configs
 - `tag_prefix: "v"` and Angular commit pattern
-- See `setup-release` for full sr.yaml reference
+- See `sync-release` for full sr.yaml reference
 
 ## Concurrency
 
@@ -102,12 +102,12 @@ Release workflows use a GitHub App for bot commits that can trigger further work
     token: ${{ steps.app-token.outputs.token }}
 ```
 
-## embed-src Step (Optional)
+## fsrc Step (Optional)
 
 Sync code snippets into README before release:
 
 ```yaml
-- uses: urmzd/embed-src@v3
+- uses: urmzd/fsrc@v4
   with:
     files: "README.md"
     commit-message: "chore: sync embedded files [skip ci]"

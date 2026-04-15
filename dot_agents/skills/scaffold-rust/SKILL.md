@@ -129,7 +129,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v4
+      - uses: urmzd/sr@v7
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
@@ -242,60 +242,35 @@ jobs:
 
 ### `sr.yaml`
 
+See `sync-release` skill for full sr.yaml reference (v7 format).
+
 ```yaml
-branches:
-  - main
+git:
+  tag_prefix: "v"
+  floating_tag: true
 
-tag_prefix: "v"
-
-commit_pattern: '^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)'
-
-breaking_section: Breaking Changes
-misc_section: Miscellaneous
-
-types:
-  - name: feat
-    bump: minor
-    section: Features
-  - name: fix
-    bump: patch
-    section: Bug Fixes
-  - name: perf
-    bump: patch
-    section: Performance
-  - name: docs
-    section: Documentation
-  - name: refactor
-    section: Refactoring
-  - name: revert
-    section: Reverts
-  - name: chore
-  - name: ci
-  - name: test
-  - name: build
-  - name: style
-
-version_files:
-  - Cargo.toml
+commit:
+  types:
+    minor: [feat]
+    patch: [fix, perf, refactor]
+    none: [docs, revert, chore, ci, test, build, style]
 
 changelog:
   file: CHANGELOG.md
 
-stage_files:
-  - Cargo.lock
-
-floating_tags: true
-
-hooks:
-  commit-msg:
-    - sr hook commit-msg
+packages:
+  - path: .
+    version_files:
+      - Cargo.toml
+    stage_files:
+      - Cargo.lock
 ```
 
-For workspaces, list all member `Cargo.toml` files in `version_files`.
+For workspaces, sr auto-discovers member `Cargo.toml` files from the root.
 
 ### Common Commands
 
-No justfile. Cargo is the native build system:
+Cargo is the native build system:
 
 ```sh
 cargo fmt --all           # format
@@ -306,26 +281,6 @@ cargo run -- <args>       # run
 ```
 
 Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetch`
-
-For complex projects (workspaces with many crates, custom build steps, cross-compilation), add a justfile to orchestrate multi-step workflows that cargo alone can't express.
-
-## Demo Recording
-
-For projects with a justfile, add a `record` recipe:
-
-```just
-record:
-    teasr showme
-```
-
-For projects recording their own CLI, build first:
-
-```just
-record: build
-    PATH="$(pwd)/target/release:$PATH" teasr showme
-```
-
-Without a justfile, run `teasr showme` directly.
 
 ## Gotchas
 
@@ -347,4 +302,4 @@ Each publishable workspace member (`crates/<name>/`) must have:
 
 When scaffolding a new workspace member, generate both files. See `scaffold-project` for the README template.
 
-Skip `examples/` members — they are not published to crates.io.
+Skip `examples/` members -- they are not published to crates.io.

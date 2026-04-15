@@ -88,8 +88,7 @@
           _ensure_ai_tools &
         '';
 
-        allPackages = with pkgs; [
-          # CLI essentials
+        corePackages = with pkgs; [
           tealdeer
           git
           gh
@@ -97,7 +96,6 @@
           ripgrep
           tree
           curl
-          wget
           jq
           yq-go
           just
@@ -106,98 +104,82 @@
           chezmoi
           tmux
           gnupg
-          coreutils
           tree-sitter
           uv
-          bashInteractive
+        ];
 
-          # Cloud
+        cloudPackages = with pkgs; [
           google-cloud-sdk
           awscli2
-
-          # Containers
+          terraform
           colima
           docker
           docker-buildx
           docker-compose
-
-          # Kubernetes
           kubectl
           kubernetes-helm
           k9s
+        ];
 
-          # DevOps
-          terraform
-
-          # JavaScript / TypeScript
-          nodejs_22
+        jsPackages = with pkgs; [
+          fnm
           deno
-          nodePackages.yarn
-          nodePackages.pnpm
-          nodePackages.typescript
+        ];
 
-          # Python
-          (python313.withPackages (ps: with ps; [ pip ]))
-
-          # Go
+        goPackages = with pkgs; [
           go
           golangci-lint
           gotools
-          go-migrate
-          air
-          goreleaser
+        ];
 
-          # Lua
+        luaPackages = with pkgs; [
           lua5_4
-          ninja
           luajitPackages.luacheck
           stylua
           luarocks
-
-          # Java
-          openjdk21
-          maven
-          gradle
-
-          # Haskell
-          ghc
-          cabal-install
-
-          # Ruby
-          ruby
-          bundler
-          rubyPackages.rails
-
-          # Scheme
-          guile
-
-          # Perl
-          perl
         ];
 
-      in {
-        devShells.default = pkgs.mkShell {
-          name = "dev";
-          buildInputs = allPackages;
+        allPackages = corePackages ++ cloudPackages ++ jsPackages ++ goPackages;
+
+        mkDevShell = name: packages: extra: pkgs.mkShell {
+          inherit name;
+          buildInputs = corePackages ++ packages;
           shellHook = ''
-            # Nix Python packages (awscli, grip, etc.) inject PYTHONPATH
-            # which conflicts with venvs. Their wrapper scripts bake in
-            # their own paths, so unsetting this doesn't break them.
             unset PYTHONPATH
-
-            ${completionHook allPackages}
-
+            ${completionHook (corePackages ++ packages)}
             ${npmConfig}
-
-            export GO111MODULE=on
-            export GOPATH="$HOME/go"
-            export PATH="$GOPATH/bin:$PATH"
-
             export RUST_BACKTRACE=1
             if [ -d "$HOME/.cargo/bin" ]; then
               export PATH="$HOME/.cargo/bin:$PATH"
             fi
+            ${extra}
+          '';
+        };
 
+        fnmHook = ''
+          eval "$(fnm env --use-on-cd --corepack-enabled)"
+        '';
+
+        goHook = ''
+          export GO111MODULE=on
+          export GOPATH="$HOME/go"
+          export PATH="$GOPATH/bin:$PATH"
+        '';
+
+      in {
+        devShells = {
+          default = mkDevShell "dev" (cloudPackages ++ jsPackages ++ goPackages) ''
+            ${fnmHook}
+            ${goHook}
+            ${ensureAiTools}
+          '';
+          js = mkDevShell "js" jsPackages fnmHook;
+          go = mkDevShell "go" goPackages goHook;
+          lua = mkDevShell "lua" luaPackages "";
+          cloud = mkDevShell "cloud" cloudPackages "";
+          full = mkDevShell "full" (cloudPackages ++ jsPackages ++ goPackages ++ luaPackages) ''
+            ${fnmHook}
+            ${goHook}
             ${ensureAiTools}
           '';
         };

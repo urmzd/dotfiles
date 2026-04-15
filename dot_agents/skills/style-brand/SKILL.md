@@ -1,6 +1,6 @@
 ---
 name: style-brand
-description: Terminal theme, font, VHS demos, teasr integration, asset conventions, and branding across README/demos. Use when configuring appearance, recording demos, or maintaining visual consistency.
+description: Terminal theme, font, teasr demo capture, asset conventions, and branding across README/demos. Use when configuring appearance, recording demos, or maintaining visual consistency.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Visual Identity
@@ -33,44 +33,50 @@ The Cyberdream color palette:
 
 ## teasr Demo Template
 
-Terminal demos are recorded with [teasr](https://github.com/urmzd/teasr) using a consistent template. Standard settings:
+Terminal demos are recorded with [teasr](https://github.com/urmzd/teasr) using a consistent template:
 
-- **Resolution**: 1200x700
-- **Padding**: 24px
-- **Typing speed**: 50ms
-- **Window bar**: Rings style
-- **Cursor blink**: Disabled
+```toml
+[output]
+dir = "./showcase"
+formats = [{ output_type = "gif" }, { output_type = "png" }]
 
-### Template Structure
+[[scenes]]
+type = "terminal"
+name = "demo"
+theme = "dracula"
+cols = 100
+rows = 24
+frame_duration = 80
 
-```tape
-Output <output-path>
+[[scenes.interactions]]
+type = "type"
+text = "export PS1='> '"
+hidden = true
 
-Set Shell "zsh"
-Set FontFamily "MonaspiceNe Nerd Font"
-Set FontSize 16
-Set Width 1200
-Set Height 700
-Set Padding 24
-Set Theme { "name": "Cyberdream", ... }
-Set WindowBar "Rings"
-Set TypingSpeed 50ms
-Set CursorBlink false
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+hidden = true
 
-# Setup (hidden from recording)
-Hide
-# Project-specific setup: PATH, env vars, build
-Type "export PS1='> '"
-Enter
-Show
-
-# Splash pause
-Sleep 3s
+[[scenes.interactions]]
+type = "wait"
+duration = 500
+hidden = true
 
 # Demo commands go here
-```
+[[scenes.interactions]]
+type = "type"
+text = "<command>"
+speed = 50
 
-Each demo includes a branded splash card displaying the project name and links to `github.com/urmzd` and `urmzd.com`.
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+
+[[scenes.interactions]]
+type = "wait"
+duration = 2000
+```
 
 ## teasr Demo Capture
 
@@ -88,11 +94,11 @@ teasr automates demo capture with `teasr.toml` config:
 
 ## Demo Priority
 
-teasr (automated) > VHS (branded terminal GIF) > manual screenshots
+teasr (automated) > manual screenshots
 
 ## Branding Consistency
 
 Cyberdream theme + MonaspiceNe font applied consistently across:
-- Terminal demos (VHS/teasr)
+- Terminal demos (teasr)
 - GitHub Actions branding (`icon` + `color`)
 - github-metrics SVGs

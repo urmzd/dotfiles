@@ -64,9 +64,9 @@ Commands::Update => {
 ### Go — GitHub Releases HTTP fetch
 
 Implement `internal/updater/updater.go` with:
-1. Fetch latest tag from `https://api.github.com/repos/urmzd/REPO/releases/latest`
+1. Fetch latest tag via `gh api repos/urmzd/REPO/releases/latest` (works with github.com and GHES)
 2. Compare against current version (injected via `-ldflags`)
-3. Construct asset URL: `https://github.com/urmzd/REPO/releases/download/TAG/BINARY-OS-ARCH`
+3. Construct asset URL from the response's `assets[].browser_download_url` matching `BINARY-OS-ARCH`
 4. Download to a temp file, `chmod +x`, then `os.Rename()` over `os.Executable()`
 5. Wire as `cobra.Command` on root: `rootCmd.AddCommand(newUpdateCmd(version))`
 
@@ -177,7 +177,7 @@ Platform targets (Rust musl): `x86_64-unknown-linux-musl`, `aarch64-unknown-linu
   - `--version` flag (auto-provided by clap/cobra/commander)
   - `version` subcommand that prints `<name> v<version>` to stdout
   - `update` subcommand for self-update (see above; use `self-update` only if `update` is taken at top level for content management)
-- **embed-src exception**: uses `run <files>` subcommand to preserve positional-arg UX while still having `update` and `version` as peers
+- **fsrc exception**: uses `run <files>` subcommand to preserve positional-arg UX while still having `update` and `version` as peers
 
 ## Exit Codes
 

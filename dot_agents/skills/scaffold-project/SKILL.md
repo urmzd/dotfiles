@@ -101,7 +101,7 @@ Projects that expose a library, SDK, or configurable tool include an `examples/`
 
 Each example must:
 1. Work with minimal dependencies and zero configuration
-2. Be referenced from the README Quick Start via embed-src (see `write-readme`)
+2. Be referenced from the README Quick Start via fsrc (see `write-readme`)
 3. Include a doc comment at the top explaining prerequisites and how to run it
 
 ## Showcase & Demo Convention

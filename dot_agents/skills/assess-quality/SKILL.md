@@ -153,7 +153,7 @@ No global state. No service locators. No magic. Follow the constructor to see ev
 | File organization | `crates/` (Rust), `cmd/`+`internal/` (Go), `src/` (Python) | `scaffold-*` skills |
 | README | Centered header, badges, demo, sections | `write-readme` skill |
 | Testing | Contract-based, state coverage, per-language idioms | `test-code` skill |
-| Release | `sr.yaml`, semantic versioning, multi-platform builds | `setup-release` skill |
+| Release | `sr.yaml`, semantic versioning, multi-platform builds | `sync-release` skill |
 
 A contributor who knows one project should feel at home in any other. The skill system is itself an example; every skill has the same frontmatter format, the same section structure, the same trigger phrasing. Different authors, same format.
 

@@ -17,8 +17,7 @@ metadata:
 ## Documentation & Demos
 
 - **teasr** automated screenshot/GIF capture (web, terminal, screen)
-- **embed-src** sync source code into markdown files
-- **vhs** terminal GIF recording with Cyberdream branding
+- **fsrc** sync source code into markdown files
 
 ## Code Generation
 

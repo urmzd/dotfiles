@@ -66,7 +66,7 @@ Report WARN if:
 |-------|----------|
 | Demo image path | References `showcase/` (not `assets/`) |
 | Quick Start section | Exists with "Quick Start" heading |
-| embed-src markers | Not stale (content between markers matches referenced files) |
+| fsrc markers | Not stale (content between markers matches referenced files) |
 | Section order | Features before Installation before Quick Start |
 
 ## Sub-Package Checks
