@@ -1,44 +1,67 @@
 # dotfiles
 
-> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with Nix development shells (Node, Python, Rust, Go, DevOps, Haskell, Ruby, and more), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills in the `skills/` directory.
+> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with composable Nix development shells (default, js, go, lua, cloud, full), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills and subagents in the `dot_agents/` directory.
 
 ## Docs
 
 - [README](https://github.com/urmzd/dotfiles/blob/main/README.md): Setup, dev environments, shell/terminal/editor config, and automation
-- [AGENTS.md](https://github.com/urmzd/dotfiles/blob/main/AGENTS.md): File naming conventions, key directories, and commit guidelines
+- [AGENTS.md](https://github.com/urmzd/dotfiles/blob/main/AGENTS.md): File naming conventions, subagents, skill catalog, and commit guidelines
 
 ## API / Key Files
 
-- [flake.nix](https://github.com/urmzd/dotfiles/blob/main/flake.nix): Nix flake with dev shells (default, node, python, rust, go, devops, haskell, ruby, scheme, perl, lua, full)
+- [flake.nix](https://github.com/urmzd/dotfiles/blob/main/flake.nix): Nix flake with composable dev shells (default, js, go, lua, cloud, full)
 - [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages
 - [dot_config/](https://github.com/urmzd/dotfiles/blob/main/dot_config/): Neovim, Ghostty, Tmux, and other tool configs
 - [dot_zshrc.tmpl](https://github.com/urmzd/dotfiles/blob/main/dot_zshrc.tmpl): Zsh configuration template
-- [skills/](https://github.com/urmzd/dotfiles/blob/main/skills/): Portable AI agent skills directory
+- [dot_agents/skills/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/): Portable AI agent skills directory
+- [dot_agents/agents/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/): Subagent definitions
+
+## Agents
+
+- [architect](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/architect.md): Interface-first systems design with verbose, principle-driven reasoning
+- [curator](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/curator.md): Prescriptive perfectionist focused on consistency, polish, and visual hierarchy
+- [debugger](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/debugger.md): Terse, empirical root-cause analysis with evidence before conclusions
+- [ideator](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/ideator.md): Expansive, generative creative exploration before constraints
+- [strategist](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/strategist.md): Imperative orchestration across multiple systems with batch operations
+- [technical-documentation-architect](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/technical-documentation-architect.md): Elite documentation specialist with validation-first structure
+- [writer](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/writer.md): Concise, outcome-focused technical documentation for human + AI audiences
 
 ## Skills
 
-- [assess-quality](https://github.com/urmzd/dotfiles/blob/main/skills/assess-quality/SKILL.md): Code quality assessment (readability, consistency, intentional design)
-- [audit-security](https://github.com/urmzd/dotfiles/blob/main/skills/audit-security/SKILL.md): Security auditing and threat detection
-- [build-cli](https://github.com/urmzd/dotfiles/blob/main/skills/build-cli/SKILL.md): CLI conventions and patterns
-- [choose-stack](https://github.com/urmzd/dotfiles/blob/main/skills/choose-stack/SKILL.md): Tech stack selection
-- [configure-ai](https://github.com/urmzd/dotfiles/blob/main/skills/configure-ai/SKILL.md): AI tooling configuration
-- [create-llms-txt](https://github.com/urmzd/dotfiles/blob/main/skills/create-llms-txt/SKILL.md): Generate llms.txt files
-- [create-oss-skill](https://github.com/urmzd/dotfiles/blob/main/skills/create-oss-skill/SKILL.md): Agent skill scaffolding and authoring
-- [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/skills/extend-oss-skills-to-claude/SKILL.md): Adapt skills for Claude Code
-- [review-design](https://github.com/urmzd/dotfiles/blob/main/skills/review-design/SKILL.md): Pragmatic design review
-- [scaffold-go](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-go/SKILL.md): Scaffold Go projects
-- [scaffold-node](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-node/SKILL.md): Scaffold Node/TypeScript projects
-- [scaffold-project](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-project/SKILL.md): Project scaffolding conventions
-- [scaffold-python](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-python/SKILL.md): Scaffold Python projects
-- [scaffold-rust](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-rust/SKILL.md): Scaffold Rust projects
-- [scaffold-terraform](https://github.com/urmzd/dotfiles/blob/main/skills/scaffold-terraform/SKILL.md): Scaffold Terraform projects
-- [setup-ci](https://github.com/urmzd/dotfiles/blob/main/skills/setup-ci/SKILL.md): CI/CD pipeline setup
-- [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/skills/setup-devenv/SKILL.md): Nix development shell guidance
-- [setup-release](https://github.com/urmzd/dotfiles/blob/main/skills/setup-release/SKILL.md): Release pipeline setup
-- [style-brand](https://github.com/urmzd/dotfiles/blob/main/skills/style-brand/SKILL.md): Terminal branding and visual standards
-- [test-code](https://github.com/urmzd/dotfiles/blob/main/skills/test-code/SKILL.md): Testing philosophy and per-language conventions
-- [write-code](https://github.com/urmzd/dotfiles/blob/main/skills/write-code/SKILL.md): Coding standards and practices
-- [write-readme](https://github.com/urmzd/dotfiles/blob/main/skills/write-readme/SKILL.md): README standards
+- [assess-quality](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/assess-quality/SKILL.md): Code quality assessment (readability, consistency, intentional design)
+- [audit-security](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/audit-security/SKILL.md): Security auditing and threat detection
+- [build-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-cli/SKILL.md): CLI conventions, output modes, TTY detection, visual style
+- [check-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/check-project/SKILL.md): Validate project structure against scaffold conventions
+- [choose-stack](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/choose-stack/SKILL.md): Tech stack selection by purpose
+- [cli-standards](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/cli-standards/SKILL.md): Mandatory CLI conventions for portfolio tools
+- [configure-ai](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/configure-ai/SKILL.md): AI tooling configuration, AGENTS.md, skills standard
+- [create-llms-txt](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/create-llms-txt/SKILL.md): Generate llms.txt files
+- [create-oss-skill](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/create-oss-skill/SKILL.md): Agent skill scaffolding and authoring
+- [diagnose-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-ci/SKILL.md): Find failing pipelines, pull logs, identify root cause
+- [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/extend-oss-skills-to-claude/SKILL.md): Adapt skills for Claude Code
+- [fix-and-retry](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/fix-and-retry/SKILL.md): Diagnose CI failure, apply fix, commit, push, re-run
+- [pr](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/pr/SKILL.md): Create PRs with auto-generated summary
+- [release-audit](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/release-audit/SKILL.md): Audit releases, tags, and assets for health
+- [repo-init](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/repo-init/SKILL.md): Full repo bootstrap (create, license, scaffold, push)
+- [review-design](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/review-design/SKILL.md): Pragmatic Programmer design review
+- [scaffold-go](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-go/SKILL.md): Scaffold Go projects with CI/CD and release pipeline
+- [scaffold-node](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-node/SKILL.md): Scaffold Node/TypeScript projects with CI/CD
+- [scaffold-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-project/SKILL.md): Project scaffolding conventions and standard files
+- [scaffold-python](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-python/SKILL.md): Scaffold Python projects with CI/CD
+- [scaffold-rust](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-rust/SKILL.md): Scaffold Rust projects with CI/CD and sr.yaml
+- [scaffold-terraform](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-terraform/SKILL.md): Scaffold Terraform infrastructure with CI/CD
+- [setup-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-ci/SKILL.md): CI/CD pipeline setup and workflow conventions
+- [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Composable Nix development shells
+- [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Commit, push, and watch CI until pass/fail
+- [status](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/status/SKILL.md): Check active repos for recent activity and local state
+- [style-brand](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/style-brand/SKILL.md): Terminal branding with teasr demos and Cyberdream theme
+- [sync-docs](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-docs/SKILL.md): Audit and synchronize project documentation
+- [sync-ecosystem](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-ecosystem/SKILL.md): Sync project ecosystem consistency
+- [sync-release](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-release/SKILL.md): Release pipeline setup (sr.yaml v7)
+- [test-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/test-code/SKILL.md): Testing philosophy and per-language conventions
+- [update-repo-meta](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/update-repo-meta/SKILL.md): Update GitHub repo topics, description, homepage
+- [write-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/write-code/SKILL.md): Coding standards and practices
+- [write-readme](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/write-readme/SKILL.md): README standards
 
 ## Optional
 

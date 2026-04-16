@@ -19,7 +19,7 @@
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
 - **Neovim** (HEAD) with LSP for all included languages
 - **AI agents** (Claude Code, Gemini, Codex, Copilot) with auto-install
-- **36 portable agent skills** in [`dot_agents/skills/`](dot_agents/skills/)
+- **34 portable agent skills** in [`dot_agents/skills/`](dot_agents/skills/) + **7 subagents** in [`dot_agents/agents/`](dot_agents/agents/)
 - **Chezmoi automation** scripts that trigger on apply
 - **macOS extras** via Homebrew (fonts, Android tooling, VHS for CLI recordings)
 - **Docker cleanup** launchd agent running daily at 3 AM
@@ -101,7 +101,7 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (before) | Brewfile changes |
 | `check-flake` | run_onchange (after) | flake.lock changes |
 | `generate-completions` | run_onchange (after) | zshrc or flake.lock changes |
-| `install-skills` | run_onchange (after) | Any SKILL.md changes (syncs to `~/.agents/skills/`) |
+| `install-skills` | run_once (after) | First apply only (syncs skills to `~/.agents/skills/`) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
 
@@ -157,7 +157,9 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | ----- | ------- |
 | assess-quality | Code quality assessment (readability, consistency, intentional design) |
 | build-cli | CLI conventions (JSON piping, stdout/stderr, structured logging) |
+| check-project | Validate project structure against scaffold conventions |
 | choose-stack | Canonical tech stack reference by purpose |
+| cli-standards | CLI patterns and conventions reference |
 | review-design | Pragmatic programming principles |
 | test-code | Testing philosophy and per-language conventions |
 | write-code | Coding standards and practices |
@@ -174,7 +176,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | scaffold-terraform | Scaffold Terraform projects |
 | setup-ci | CI/CD pipeline conventions |
 | setup-devenv | Nix development shell guidance |
-| setup-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
+| sync-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
 | repo-init | Full repo bootstrap (create, license, scaffold, push) |
 
 #### Workflow automation
@@ -187,6 +189,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
 | status | Check active repos for recent activity and local state |
 | release-audit | Audit releases, tags, and assets for health |
+| sync-ecosystem | Sync project ecosystem (deps, configs, cross-repo consistency) |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 
 #### AI & documentation
@@ -199,20 +202,22 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | extend-oss-skills-to-claude | Extend skills with Claude Code-specific features |
 | audit-security | Security auditing and threat detection |
 | style-brand | Branding, themes, VHS demos, teasr integration |
+| sync-docs | Audit and synchronize project documentation |
 | write-readme | README structure and section order |
 
-#### Personas
+#### Subagents
 
-Reasoning frameworks that adopt a specific mindset for different types of work:
+Delegation targets in [`dot_agents/agents/`](dot_agents/agents/) that adopt a specific reasoning mode:
 
-| Skill | Purpose |
+| Agent | Purpose |
 | ----- | ------- |
-| persona-architect | Interface-first systems design with verbose, principle-driven reasoning |
-| persona-curator | Prescriptive perfectionist for consistency, polish, and visual hierarchy |
-| persona-debugger | Terse, empirical root-cause analysis |
-| persona-ideator | Expansive, generative creative exploration |
-| persona-strategist | Imperative orchestration across multiple systems and repos |
-| persona-writer | Concise, outcome-focused technical documentation |
+| architect | Interface-first systems design with verbose, principle-driven reasoning |
+| curator | Prescriptive perfectionist for consistency, polish, and visual hierarchy |
+| debugger | Terse, empirical root-cause analysis |
+| ideator | Expansive, generative creative exploration |
+| strategist | Imperative orchestration across multiple systems and repos |
+| technical-documentation-architect | Structured technical documentation and architecture docs |
+| writer | Concise, outcome-focused technical documentation |
 
 ## License
 

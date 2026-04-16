@@ -24,6 +24,15 @@ chezmoi edit <file>    # Edit source, then apply
 | `run_once_after_` | Run-once setup script (after apply) |
 | `run_onchange_` | Re-runs when content hash changes |
 
+## Key Directories
+
+| Directory | Contents |
+|-----------|----------|
+| `dot_agents/skills/` | 34 portable agent skills (following [Agent Skills Spec](https://agentskills.io/specification)) |
+| `dot_agents/agents/` | 7 subagent definitions |
+| `dot_config/` | Tool configs (Neovim, Ghostty, Tmux, direnv) |
+| `dot_zsh/` | Zsh functions and customizations |
+
 ## Discovering Structure
 
 Use `tree` for directory layout and `ripgrep`/`ag` for finding files and patterns. Do not rely on static file listings; discover the current state from the filesystem.
