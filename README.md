@@ -53,21 +53,32 @@ chezmoi edit <file>   # Edit source, then apply
 
 ```bash
 nix develop              # Enter the dev shell (or use direnv)
-dotfiles-update          # Update Nix flake inputs and rebuild
-dotfiles-status          # Check flake age + AI tool versions
+dotfiles update          # Update Nix flake inputs and rebuild
+dotfiles status          # Check flake age + AI tool versions
 ```
 
 ### What's in the shell
 
-**Languages & runtimes**: Node 22, Deno, Python 3.13, Go, Rust (via rustup), Java 21, Lua 5.4, Haskell (GHC + Cabal), Ruby + Rails, Guile Scheme, Perl
+Composable dev shells (`use flake .#<shell>`):
 
-**DevOps & cloud**: Terraform, kubectl, Helm, k9s, AWS CLI, GCloud SDK, Colima, Docker (+ buildx/compose), GoReleaser
+| Shell | Contents |
+|-------|----------|
+| `default` | core + cloud + JS + Go + AI tools |
+| `js` | core + fnm + Deno |
+| `go` | core + Go + golangci-lint |
+| `lua` | core + Lua + stylua + luarocks |
+| `cloud` | core + AWS/GCP/Terraform/Docker/K8s |
+| `full` | everything above |
 
-**CLI essentials**: git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, wget, tree, tldr, gnupg, tree-sitter, uv
+**Version managers** (not pinned runtimes): fnm (Node), uv (Python), rustup (Rust)
+
+**CLI essentials**: git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, curl, tree, tldr, gnupg, tree-sitter, uv
+
+**AI tools**: Claude Code, Codex, Gemini CLI, GitHub Copilot (installed once via sentinel, update with `dotfiles update-ai`)
 
 ### Adding a new tool
 
-1. Add the package to `allPackages` in `flake.nix`
+1. Add the package to the appropriate group in `flake.nix`
 2. Run `chezmoi apply`. The `check-flake` script rebuilds automatically
 3. Completions regenerate if the package exposes zsh site-functions
 
@@ -99,7 +110,7 @@ These scripts run automatically on `chezmoi apply`:
 AI coding agents are installed automatically when entering the Nix dev shell. Check versions with:
 
 ```bash
-dotfiles-status
+dotfiles status
 ```
 
 Claude Code config lives in `dot_claude/`. Includes settings, custom statusline, and project-scoped skills.

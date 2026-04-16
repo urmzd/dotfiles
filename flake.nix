@@ -64,25 +64,36 @@
           export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
         '';
 
+        # Pinned AI tool versions -- update with `dotfiles update-ai`
         ensureAiTools = ''
           _ensure_ai_tools() {
+            local sentinel="$HOME/.local/state/ai-tools-installed"
+            if [[ -f "$sentinel" ]]; then
+              return 0
+            fi
+
+            mkdir -p "$(dirname "$sentinel")"
+
             if ! command -v claude &>/dev/null; then
               echo "Installing Claude Code..."
               curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1
             fi
 
             local packages=(
-              "@openai/codex"
-              "@google/gemini-cli"
-              "@github/copilot"
+              "@openai/codex@0.121.0"
+              "@google/gemini-cli@0.38.1"
+              "@github/copilot@1.0.27"
             )
 
             for pkg in "''${packages[@]}"; do
-              if ! npm list -g "$pkg" >/dev/null 2>&1; then
+              local name="''${pkg%@*}"
+              if ! npm list -g "$name" >/dev/null 2>&1; then
                 echo "Installing $pkg..."
                 npm install -g "$pkg" 2>&1 | grep -v "npm WARN"
               fi
             done
+
+            date -Iseconds > "$sentinel"
           }
 
           _ensure_ai_tools &

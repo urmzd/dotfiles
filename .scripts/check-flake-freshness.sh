@@ -14,7 +14,7 @@ else
 fi
 
 if [[ $AGE -gt 7 ]]; then
-    echo "flake.lock is $AGE days old. Run: dotfiles-update"
+    echo "flake.lock is $AGE days old. Run: dotfiles update"
 fi
 
 exit 0

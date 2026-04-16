@@ -22,8 +22,8 @@ cd dotfiles
 |---------|-------------|
 | `chezmoi diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
-| `dotfiles-update` | Update Nix flake inputs |
-| `dotfiles-status` | Check environment status |
+| `dotfiles update` | Update Nix flake inputs |
+| `dotfiles status` | Check environment status |
 
 ## Commit Convention
 
