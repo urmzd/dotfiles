@@ -169,6 +169,10 @@
 
         fnmHook = ''
           eval "$(fnm env --use-on-cd --corepack-enabled)"
+          if ! fnm list | grep -q default; then
+            fnm install --lts
+            fnm default lts-latest
+          fi
         '';
 
         goHook = ''
