@@ -82,15 +82,23 @@ packages:
 
 sr auto-discovers workspace members for Rust (Cargo), Python (uv), and Node (pnpm/npm).
 
-## End-to-End Workflow
+## CLI Commands (v7)
 
 ```
-sr worktree → sr commit → sr pr → sr review → merge → sr status → sr release
+sr init         Create sr.yaml (use --merge to add new fields non-destructively)
+sr status       Show unreleased commits, next version, changelog preview, open PRs
+sr config       Validate and display resolved configuration
+sr release      Bump → changelog → tag → GitHub release (trunk flow)
+sr migrate      Show the full version-by-version migration guide
+sr completions  Generate shell completions
+sr update       Update sr to the latest version
 ```
 
-**CLI commands** `sr worktree` (create branch + worktree), `sr commit` (AI-powered atomic commits), `sr pr` (AI PR generation), `sr review` (AI code review), `sr status` (version + unreleased commits), `sr release` (bump + changelog + tag + GitHub release), `sr cache` (manage AI commit plan cache).
+AI-assisted commit, PR, and review authoring live in dedicated agent skills (`ship`, `pr`, `review`). The sr CLI is release-engineering only as of v7.
 
-All AI commands accept `-M "context"` for additional instructions. Multiple backends supported: Claude, GitHub Copilot, Gemini (auto-detected).
+### Upgrading sr
+
+Run `sr migrate` to view the full breaking-change guide for every version transition (3.x → 7.x). v7 redesigned `sr.yaml` into 6 top-level sections (`git`, `commit`, `changelog`, `channels`, `vcs`, `packages`), removed the MCP server, and removed all AI CLI commands.
 
 ## Release Pipeline
 

@@ -199,47 +199,40 @@ jobs:
 
 ### `sr.yaml`
 
+Generate with `sr init`. Go uses git tags only, so packages need no `version_files` or `stage_files`:
+
 ```yaml
-branches:
-  - main
+git:
+  tag_prefix: "v"
+  floating_tag: true
+  v0_protection: true
 
-tag_prefix: "v"
+commit:
+  types:
+    minor: [feat]
+    patch: [fix, perf, refactor]
+    none:  [docs, revert, chore, ci, test, build, style]
 
-commit_pattern: '^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)'
+changelog:
+  file: CHANGELOG.md
+  groups:
+    - { name: breaking, content: [breaking] }
+    - { name: features, content: [feat] }
+    - { name: bug-fixes, content: [fix] }
+    - { name: performance, content: [perf] }
+    - { name: misc, content: [chore, ci, test, build, style] }
 
-breaking_section: Breaking Changes
-misc_section: Miscellaneous
+channels:
+  default: stable
+  branch: main
+  content:
+    - name: stable
 
-types:
-  - name: feat
-    bump: minor
-    section: Features
-  - name: fix
-    bump: patch
-    section: Bug Fixes
-  - name: perf
-    bump: patch
-    section: Performance
-  - name: docs
-    section: Documentation
-  - name: refactor
-    section: Refactoring
-  - name: revert
-    section: Reverts
-  - name: chore
-  - name: ci
-  - name: test
-  - name: build
-  - name: style
-
-floating_tags: true
-
-hooks:
-  commit-msg:
-    - sr hook commit-msg
+packages:
+  - path: .
 ```
 
-No `version_files`. Go uses git tags only. No `stage_files`. `go.sum` changes are committed during development, not release.
+See `sync-release` for the full v7 schema and `sr migrate` for upgrading from older versions.
 
 ### `Makefile`
 

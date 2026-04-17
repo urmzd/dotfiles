@@ -145,7 +145,7 @@ Standard sections:
 1. **Prerequisites** language runtime, build tools, GH_TOKEN
 2. **Getting Started** `git clone` + language-specific init
 3. **Development** language-specific check, test, fmt commands
-4. **Commit Convention** conventional commits via `sr commit`
+4. **Commit Convention** conventional commits (Angular); see `ship` skill for AI-assisted authoring
 5. **Pull Requests** fork, branch, PR
 6. **Code Style** brief, language-specific
 

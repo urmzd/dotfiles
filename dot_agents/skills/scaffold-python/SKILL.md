@@ -143,54 +143,42 @@ jobs:
 
 ### `sr.yaml`
 
+Generate with `sr init`:
+
 ```yaml
-branches:
-  - main
+git:
+  tag_prefix: "v"
+  floating_tag: true
+  v0_protection: true
 
-tag_prefix: "v"
-
-commit_pattern: '^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)'
-
-breaking_section: Breaking Changes
-misc_section: Miscellaneous
-
-types:
-  - name: feat
-    bump: minor
-    section: Features
-  - name: fix
-    bump: patch
-    section: Bug Fixes
-  - name: perf
-    bump: patch
-    section: Performance
-  - name: docs
-    section: Documentation
-  - name: refactor
-    section: Refactoring
-  - name: revert
-    section: Reverts
-  - name: chore
-  - name: ci
-  - name: test
-  - name: build
-  - name: style
-
-version_files:
-  - pyproject.toml
+commit:
+  types:
+    minor: [feat]
+    patch: [fix, perf, refactor]
+    none:  [docs, revert, chore, ci, test, build, style]
 
 changelog:
   file: CHANGELOG.md
+  groups:
+    - { name: breaking, content: [breaking] }
+    - { name: features, content: [feat] }
+    - { name: bug-fixes, content: [fix] }
+    - { name: performance, content: [perf] }
+    - { name: misc, content: [chore, ci, test, build, style] }
 
-stage_files:
-  - uv.lock
+channels:
+  default: stable
+  branch: main
+  content:
+    - name: stable
 
-floating_tags: true
-
-hooks:
-  commit-msg:
-    - sr hook commit-msg
+packages:
+  - path: .
+    version_files: [pyproject.toml]
+    stage_files:   [uv.lock]
 ```
+
+See `sync-release` for the full v7 schema and `sr migrate` for upgrading from older versions.
 
 ### `pyproject.toml`
 

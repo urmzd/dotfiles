@@ -1,6 +1,6 @@
 ---
 name: configure-ai
-description: AI tools, Claude Code configuration, sr commits, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
+description: AI tools, Claude Code configuration, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: AI Workflows
@@ -73,30 +73,6 @@ Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
 - **Content:** step-by-step guidance for using or extending the project
 - Skills live in `skills/<name>/SKILL.md` within each repo
 
-## AI-Powered Git Workflows (sr)
+## Git Workflows
 
-sr provides AI-powered git commands with multi-backend support (`--backend {claude|copilot|gemini}`):
-
-| Command | Purpose |
-|---------|---------|
-| `sr commit` | Generate atomic conventional commits from staged/unstaged changes |
-| `sr rebase` | AI-powered interactive rebase (reword, squash, reorder) |
-| `sr review` | Code review of staged/branch changes with severity feedback |
-| `sr pr` | Generate PR title + body from branch commits |
-| `sr branch` | Suggest conventional branch name |
-| `sr explain` | Explain recent commits |
-| `sr ask` | Freeform Q&A about the repo |
-
-```bash
-# Stage changes, then generate commit
-git add -p
-sr commit
-
-# Or commit all changes with context
-sr commit -M "refactored auth flow"
-
-# AI-powered rebase of last 5 commits
-sr rebase --last 5
-```
-
-Global flags: `--backend`, `--model`, `--budget` (Claude only, default $0.50), `--debug`.
+AI-assisted commit, review, and PR authoring live in dedicated agent skills (`ship`, `pr`, `review`), not in the release tool. The release tool (`sr`) is release-engineering only as of v7: `release`, `status`, `config`, `init`, `migrate`, `completions`, `update`. See `sync-release` for release conventions and `sr migrate` for the upgrade guide from older versions.

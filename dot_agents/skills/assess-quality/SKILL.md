@@ -146,7 +146,7 @@ No global state. No service locators. No magic. Follow the constructor to see ev
 
 | Dimension | Convention | Enforced By |
 |-----------|-----------|-------------|
-| Commits | Angular Conventional (`type(scope): description`) | `sr hook commit-msg` |
+| Commits | Angular Conventional (`type(scope): description`) | `ship` skill + CI lint |
 | CI | `ci.yml` + `release.yml` | `setup-ci` skill |
 | CLI output | Color semantics, symbols, 2-space indent | `build-cli` skill |
 | Error handling | `thiserror`/`anyhow` (Rust), `fmt.Errorf` (Go), `typer.Exit` (Python) | `write-code` skill |

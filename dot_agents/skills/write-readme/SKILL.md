@@ -64,6 +64,15 @@ For projects with multiple visual outputs (3-col, 30% width):
 <p align="center"><em>Label 1 &middot; Label 2 &middot; Label 3</em></p>
 ```
 
+## Prose Style
+
+- **No em-dashes** (` — ` or `—`). Use a period, a colon, or **bold indexing** (`**Term**`) instead. Em-dashes read as AI-generated and break the visual rhythm of terse documentation.
+- **No emojis** unless the user explicitly requests them. This includes section headers, bullet prefixes, and callouts.
+- **Imperative voice** in instructions (`Run the build` not `You can run the build`).
+- **No trailing summaries** ("In summary..." / "This means..."). If the point needs a summary, the prose above is too long.
+
+Apply this rule to READMEs, AGENTS.md, CHANGELOG entries, and any markdown a subagent generates from this skill.
+
 ## Standard Section Order
 
 Features → Installation → Quick Start → Examples → Usage / CLI Reference → Configuration → API → Architecture → Agent Skill → Related → License
