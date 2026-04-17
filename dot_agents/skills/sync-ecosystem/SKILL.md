@@ -1,11 +1,10 @@
 ---
 name: sync-ecosystem
 description: >
-  Audit a repository for ecosystem consistency: AGENTS.md coverage, llms.txt presence,
-  skill exposure, semver discipline, and cross-repo naming coherence. Sync findings back
-  to chezmoi skills in the dotfiles repo. Use when onboarding a new repo, after a naming
-  refactor, when terminology has drifted, or to ensure chezmoi skills stay current with
-  a project's capabilities. Accepts a repo path as argument.
+  Audit a single repository against ecosystem conventions and sync findings back to
+  chezmoi skills in the dotfiles repo. Use when onboarding a new repo, after a naming
+  refactor, when terminology has drifted, or to ensure chezmoi skills stay current
+  with a project's capabilities. Accepts a repo path as argument.
 allowed-tools: Read Grep Glob Bash Edit Write Agent
 user-invocable: true
 license: Apache-2.0
@@ -17,105 +16,81 @@ metadata:
 
 # Ecosystem Sync
 
-Audit a single repository for ecosystem consistency and synchronize findings into chezmoi skills.
+Audit one repository for consistency with the rest of the ecosystem, then sync any drift back into chezmoi-managed skills.
 
 **Usage:** `/sync-ecosystem <repo-path>`
 
-If no path is given, ask the user which repo to audit before proceeding.
+If no path is given, ask which repo to audit before proceeding.
 
-## Ecosystem Conventions
+## Principle
 
-These rules apply to every repo in the ecosystem:
+Ecosystem conventions evolve. This skill does not enumerate them inline — that list rots. Instead, it runs an **audit loop** that pulls the current rules from the skills that own each convention, then reports drift between the target repo and those rules.
 
-| Convention | Standard |
-|------------|----------|
-| AGENTS.md | Required for any repo that exposes tools, skills, or a public API |
-| llms.txt | Required for every published package or CLI tool |
-| Semver | Go and Python CLI tools must have git tags (`v0.x.x`); Rust uses Cargo.toml version |
-| Terminology | "provider" = LLM/embedding backend; "adapter" = tool integration layer; "skill" = agentskills.io portable capability; "tool" = MCP executable function |
-| Skills dir | Repos with AGENTS.md and user-facing skills should have a `skills/` directory |
+## Audit Loop
 
-## Audit Workflow
+### 1. Establish repo context
 
-### Step 1 — Establish repo context
+Read whatever identity and manifest files the repo has (README, AGENTS.md, llms.txt, language manifest). From these infer:
 
-Read the following files if they exist:
-- `README.md` — name, description, type (library / CLI / website / framework)
-- `AGENTS.md` — current commands, architecture, skill links
-- `llms.txt` — links and descriptions
-- `Cargo.toml` / `go.mod` / `pyproject.toml` / `package.json` — package name, version, declared deps
+- **Name and description** the identity the rest of the ecosystem should agree with
+- **Repo type** library, CLI, service, website, or something else — dictates which conventions apply
+- **Language and build system** dictates which `scaffold-<lang>` skill to consult
 
-Determine the repo type. Libraries (`gymnasia`, `streamsafe`, protocol specs) do not need a `skills/` directory but still need `llms.txt`.
+Don't assume any specific file is present. Absence of a file is itself a finding.
 
-### Step 2 — Required file checklist
+### 2. Pull current conventions
 
-| File | Required for | Check |
-|------|-------------|-------|
-| `AGENTS.md` | All repos with tools, APIs, or skills | Present and current |
-| `llms.txt` | Published packages and CLI tools | Present; links valid |
-| `skills/` | Repos with user-facing agent capabilities | Present if applicable |
+For each convention category, consult the owning skill rather than enumerating rules here:
 
-### Step 3 — Terminology scan
+| Category | Owning skill |
+|----------|--------------|
+| Required project layout, community health files | `check-project` |
+| README structure | `write-readme` |
+| AGENTS.md structure | `configure-ai` |
+| llms.txt structure | `create-llms-txt` |
+| CI/release workflow | `setup-ci`, `sync-release` |
+| Language-specific scaffold | `scaffold-<lang>` |
+| CLI conventions | `cli-standards`, `build-cli` |
 
-Check for naming violations:
+### 3. Check drift
 
-```sh
-# "adapter" vs "provider" — flag if integration layer is called "provider"
-grep -rn "provider" <repo>/src/ --include="*.rs" --include="*.go" --include="*.ts"
-```
+Run generic drift checks against what you discovered:
 
-Flag any usage where:
-- "provider" is used to describe a tool/host integration (should be "adapter")
-- "skill", "tool", "agent", or "memory" is used in a non-standard way
+- **File presence** does the repo have every artifact the owning skills require for this repo type?
+- **Content currency** do listed commands, dependencies, and examples match the current manifest and code?
+- **Cross-reference agreement** do name, description, install command, and version agree across docs and manifest?
+- **Version discipline** does the latest git tag match the manifest version (or match the tagging scheme declared by `sync-release`)?
+- **Terminology** does usage in the repo match the terms used in this ecosystem's other published skills and docs? Flag divergences; do not auto-rewrite.
 
-### Step 4 — Semver / version discipline
+### 4. Chezmoi coverage
 
-```sh
-# Check latest git tag
-git -C <repo> describe --tags --abbrev=0 2>/dev/null || echo "no tags"
-
-# Check declared version in manifest
-grep -m1 '"version"\|^version' <repo>/package.json <repo>/Cargo.toml <repo>/pyproject.toml 2>/dev/null
-```
-
-Flag if: no tags exist for a CLI/library, or tag doesn't match manifest version.
-
-### Step 5 — Chezmoi skills coverage
-
-Find the chezmoi dotfiles repo:
+Find the chezmoi source:
 
 ```sh
 chezmoi source-path
 ```
 
-Compare what the repo exposes in `skills/` against what exists under `<chezmoi-source>/dot_agents/skills/`.
+For each skill the target repo exposes under `skills/` (if any), verify:
 
-For each skill in `<repo>/skills/`:
-- Does a counterpart exist in chezmoi?
-- If yes, is it up to date with the repo's skill content?
+- A counterpart exists in `<chezmoi-source>/dot_agents/skills/`
+- The counterpart's body matches the repo's current state (commands, file paths, feature list)
+- Frontmatter is valid **name matches directory, description is specific and imperative, `allowed-tools` lists only what the skill uses, body is under ~500 lines**
 
-### Step 6 — Validate existing chezmoi skill (if present)
+Flag any skill present in the repo but missing or stale in chezmoi.
 
-Read `<chezmoi-source>/dot_agents/skills/<skill-name>/SKILL.md` and verify:
-
-1. `name` matches directory name exactly (lowercase, hyphens only)
-2. `description` is imperative, includes trigger keywords, under 1024 chars
-3. `allowed-tools` lists only tools the skill actually uses
-4. Body is under 500 lines
-5. Any commands referenced still exist in the codebase
-
-## Report Format
+### 5. Report
 
 ```
 ## Ecosystem Audit — <repo-name>
 
-### Required Files
-- AGENTS.md: ✓ / ✗ (reason)
-- llms.txt: ✓ / ✗ (reason)
-- skills/: ✓ / ✗ / N/A
+### Repo Type
+<library | CLI | service | website | other>
 
-### Terminology Issues
-- <file>:<line> — description of violation
+### Required Artifacts
+- <artifact>: ✓ / ✗ (reason, with owning-skill reference)
+
+### Drift
+- <file>:<line> — <description of drift, with owning-skill reference>
 
 ### Version Discipline
 - Latest tag: <tag or "none">
@@ -133,11 +108,10 @@ X checks run. Y issues found.
 
 | Issue | Action |
 |-------|--------|
-| Missing AGENTS.md | Run `create-agentsmd` skill on the repo |
-| Missing llms.txt | Run `create-llms-txt` skill on the repo |
-| Terminology drift | Edit offending files; update dependents |
-| Skill in repo but not chezmoi | Copy skill dir into `<chezmoi-source>/dot_agents/skills/` |
-| Stale chezmoi skill | Fix frontmatter or body in chezmoi source |
+| Missing artifact | Run the owning skill (`configure-ai`, `create-llms-txt`, etc.) against the repo |
+| Content drift | Edit the offending file to match current state; propagate to dependents |
+| Skill in repo but not in chezmoi | Copy skill dir into `<chezmoi-source>/dot_agents/skills/` |
+| Stale chezmoi skill | Fix frontmatter or body in the chezmoi source |
 
 After editing any chezmoi skill:
 
@@ -148,7 +122,7 @@ agentspec sync --fast
 
 ## Gotchas
 
-- Edit skills in the chezmoi **source** directory, not the deployed `~/.agents/skills/`. Changes to the deployed copy will be overwritten on next `chezmoi apply`.
-- Pure libraries and protocol specs don't need a `skills/` dir — only repos with user-facing agent capabilities do.
-- Don't auto-execute consolidation plans found in planning docs — flag them for user decision.
-- Version tags and manifest versions must match. If they differ, report the mismatch but don't bump versions automatically.
+- Edit skills in the chezmoi **source** directory. The deployed copy under `~/.agents/skills/` is overwritten on the next `chezmoi apply`.
+- Only repos with user-facing agent capabilities need a `skills/` directory. Libraries and protocol specs do not.
+- Don't auto-execute consolidation plans found in planning docs **flag them for user decision**.
+- Report version/tag mismatches but do not bump versions automatically.

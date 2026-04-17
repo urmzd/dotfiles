@@ -71,16 +71,9 @@ packages:
     #     - "./scripts/notify-slack.sh"
 ```
 
-## Version Files by Language
+## Version Files
 
-| Language | `version_files` | `stage_files` |
-|----------|----------------|---------------|
-| Rust | `[Cargo.toml]` | `[Cargo.lock]` |
-| Python | `[pyproject.toml]` | `[uv.lock]` |
-| Node | `[package.json]` | `[pnpm-lock.yaml]` |
-| Go | _(none; tag only)_ | _(none)_ |
-
-sr auto-discovers workspace members for Rust (Cargo), Python (uv), and Node (pnpm/npm).
+`version_files` (bumped by sr) and `stage_files` (committed alongside the bump, e.g. lockfiles) are language-specific. See the relevant `scaffold-<lang>` skill for the canonical values for that ecosystem. sr auto-discovers workspace members where the ecosystem supports it (Cargo, uv, pnpm/npm).
 
 ## CLI Commands (v7)
 
@@ -106,12 +99,11 @@ Run `sr migrate` to view the full breaking-change guide for every version transi
 push to main
   → ci.yml (fmt → lint → test)
   → release.yml:
-      fsrc (sync code in README) [if markers exist]
+      fsrc (sync embedded sources) [if markers exist]
       → sr release (bump → changelog → tag → GitHub release)
-      → build matrix (platform-specific; see scaffold-* skills)
-      → publish (registry-specific; see scaffold-* skills)
+      → build / publish [language and registry specific; see scaffold-* skills]
       → teasr (post-release demo capture) [if teasr.toml exists]
-      → lockfile sync commit [skip ci]
+      → lockfile sync commit [skip ci; if the ecosystem has a lockfile]
 ```
 
 ## sr Action Usage
@@ -130,9 +122,11 @@ push to main
 
 ## Post-Release Patterns
 
-- **Lockfile sync:** language-specific lock update → commit `[skip ci]`
-- **Demo capture:** teasr → commit to `showcase/`
-- **File embedding:** fsrc → commit
+- **Lockfile sync** language-specific lock update then commit `[skip ci]`
+- **Demo capture** teasr then commit generated assets
+- **File embedding** fsrc then commit
+
+Apply only what the repo declares.
 
 ## Lifecycle Hooks
 
