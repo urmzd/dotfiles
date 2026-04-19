@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Install urmzd/* stack CLIs (sr, teasr, oag) via their upstream installers.
+set -euo pipefail
+
+install_if_missing() {
+    local name="$1"
+    local url="$2"
+
+    if command -v "$name" &>/dev/null; then
+        echo "✅ $name already installed ($(command -v "$name"))"
+        return 0
+    fi
+
+    echo "📦 Installing $name..."
+    curl -fsSL "$url" | sh
+}
+
+install_if_missing sr    https://raw.githubusercontent.com/urmzd/sr/main/install.sh
+install_if_missing teasr https://raw.githubusercontent.com/urmzd/teasr/main/install.sh
+install_if_missing oag   https://raw.githubusercontent.com/urmzd/oag/main/install.sh
+
+echo "Stack CLIs installed."

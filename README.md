@@ -101,7 +101,8 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (before) | Brewfile changes |
 | `check-flake` | run_onchange (after) | flake.lock changes |
 | `generate-completions` | run_onchange (after) | zshrc or flake.lock changes |
-| `install-skills` | run_once (after) | First apply only (syncs skills to `~/.agents/skills/`) |
+| `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
+| `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag` CLIs) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
 
