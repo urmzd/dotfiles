@@ -44,7 +44,8 @@ For each convention category, consult the owning skill rather than enumerating r
 
 | Category | Owning skill |
 |----------|--------------|
-| Required project layout, community health files | `check-project` |
+| Required project layout | `check-project` |
+| Community-health files (CODE_OF_CONDUCT, SECURITY, issue forms, PR template) | `community-health` |
 | README structure | `write-readme` |
 | AGENTS.md structure | `configure-ai` |
 | llms.txt structure | `create-llms-txt` |
