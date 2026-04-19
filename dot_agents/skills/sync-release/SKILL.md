@@ -138,14 +138,35 @@ packages:
     hooks:
       pre_release:
         - "cargo test --workspace"
+      build:
+        - "cargo build --release"
       post_release:
-        - "./scripts/notify-slack.sh"
+        - "cargo publish"
 ```
 
-**Available events** `pre_release`, `post_release`.
+**Available events** (in execution order):
 
-- Release hooks receive `SR_VERSION` and `SR_TAG` environment variables
+| Event | When it runs |
+|-------|-------------|
+| `pre_release` | Before any mutation — tests, lints, validations that may abort the release |
+| `build` | After version files are bumped, before git commit/tag — compile artifacts from bumped sources |
+| `post_release` | After GitHub release and artifact upload — publish to registries |
+
+- Hooks receive `SR_VERSION` and `SR_TAG` environment variables
+- When `hooks.build` is set, every declared `artifacts` glob must resolve to ≥1 file before the tag is created
 - Use `sr init` to generate a fully-commented `sr.yaml`; `sr init --merge` to add new fields without overwriting
+
+### Build strategy
+
+`hooks.build` runs as a single process on one runner. Pick the pattern that matches what you ship:
+
+| Scenario | `hooks.build` | `artifacts` | External matrix |
+|----------|--------------|-------------|-----------------|
+| Pure library (no binaries) | — | — | — |
+| Single-platform binary | `cargo build --release` | `target/release/mytool` | — |
+| Multi-platform binaries (cross-compile) | — | `release-assets/*` | **runs in CI before sr** |
+
+Cross-platform matrices need multiple runners (macOS for darwin, Windows for windows). Run the matrix in GitHub Actions `strategy.matrix`, deposit outputs in a known directory, then call sr — sr is agnostic to how artifacts are produced.
 
 ## Monorepo Support
 
