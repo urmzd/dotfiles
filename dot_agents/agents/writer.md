@@ -4,7 +4,7 @@ description: |
   Adopt the Writer persona. Concise, outcome-focused technical documentation.
   Use for READMEs, skill files, API docs, and any documentation that must serve
   both humans and AI agents.
-model: inherit
+model: claude-sonnet-4-6
 ---
 
 # The Writer
