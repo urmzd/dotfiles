@@ -11,6 +11,10 @@
   </p>
 </p>
 
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/urmzd/dotfiles" alt="License"></a>
+</p>
+
 ## Features
 
 - **Nix dev shell** with 15+ languages and 40+ tools
@@ -222,4 +226,4 @@ Delegation targets in [`dot_agents/agents/`](dot_agents/agents/) that adopt a sp
 
 ## License
 
-MIT
+[Apache-2.0](LICENSE)
