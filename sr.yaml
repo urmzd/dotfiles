@@ -1,4 +1,4 @@
-# sr configuration (v7)
+# sr configuration
 # Full reference: https://github.com/urmzd/sr#configuration
 # Run `sr migrate` for the full version-by-version migration guide.
 
@@ -67,10 +67,6 @@ packages:
     version_files: []
     stage_files: []
     artifacts: []
-    # hooks:
-    #   pre_release:
-    #     - "cargo test --workspace"
-    #   build:
-    #     - "cargo build --release"
-    #   post_release:
-    #     - "./scripts/notify-slack.sh"
+    # publish:
+    #   type: cargo       # or npm, pypi, docker, go, custom
+    #   workspace: true   # iterate workspace members

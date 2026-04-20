@@ -90,11 +90,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Re-release the current tag (use when a previous release partially failed)"
-        type: boolean
-        default: false
 
 concurrency:
   group: release
@@ -125,11 +120,10 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v7
+      - uses: urmzd/sr@v8
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          force: ${{ inputs.force }}
 
     outputs:
       released: ${{ steps.sr.outputs.released }}
@@ -230,9 +224,11 @@ channels:
 
 packages:
   - path: .
+    publish:
+      type: go          # no-op; Go modules publish via the git tag sr already cuts
 ```
 
-See `sync-release` for the full v7 schema and `sr migrate` for upgrading from older versions.
+See `sync-release` for the full schema and `sr migrate` for upgrading from older versions.
 
 ### `Makefile`
 

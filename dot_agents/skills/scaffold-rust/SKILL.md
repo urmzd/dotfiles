@@ -95,11 +95,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Re-release the current tag (use when a previous release partially failed)"
-        type: boolean
-        default: false
 
 concurrency:
   group: release
@@ -129,11 +124,10 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v7
+      - uses: urmzd/sr@v8
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          force: ${{ inputs.force }}
 
     outputs:
       released: ${{ steps.sr.outputs.released }}
@@ -242,7 +236,7 @@ jobs:
 
 ### `sr.yaml`
 
-See `sync-release` skill for full sr.yaml reference (v7 format).
+See `sync-release` skill for full sr.yaml reference.
 
 ```yaml
 git:
@@ -264,9 +258,12 @@ packages:
       - Cargo.toml
     stage_files:
       - Cargo.lock
+    publish:
+      type: cargo
+      workspace: true    # iterate [workspace].members in declaration order
 ```
 
-For workspaces, sr auto-discovers member `Cargo.toml` files from the root.
+For workspaces, sr auto-discovers member `Cargo.toml` files from the root. List `[workspace].members` in dependency order (leaf crates first) so `cargo publish` reaches crates.io in the right order.
 
 ### Common Commands
 
@@ -287,8 +284,8 @@ Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetc
 - Always use `--workspace` for clippy/test/check in multi-crate repos
 - `cross` is only needed for ARM targets (`aarch64-*`); x86 musl just needs `musl-tools`
 - `macos-15-intel` for x86_64 Darwin, `macos-15` for aarch64 Darwin
-- Sleep 30s between `cargo publish` calls in workspace publish order (crates.io rate limit)
-- Use `-p <crate-name>` for `cargo build`/`cargo publish` when the workspace has multiple binaries
+- List `[workspace].members` in dependency order (leaf crates first) — the cargo publisher iterates in that order, and crates.io index propagation (~30-60s) is handled via retry inside sr
+- Use `-p <crate-name>` for `cargo build` when the workspace has multiple binaries (publish is handled by the typed publisher)
 - `cancel-in-progress: false` on release workflow to prevent partial releases
 
 ## Workspace Member Files

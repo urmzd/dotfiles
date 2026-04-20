@@ -106,11 +106,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Re-release the current tag (use when a previous release partially failed)"
-        type: boolean
-        default: false
 
 concurrency:
   group: release
@@ -141,40 +136,25 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v7
+      - uses: urmzd/sr@v8
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          force: ${{ inputs.force }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}       # needed only if sr.yaml declares publish: { type: npm }
 
     outputs:
       released: ${{ steps.sr.outputs.released }}
       tag: ${{ steps.sr.outputs.tag }}
       version: ${{ steps.sr.outputs.version }}
 
-  # Uncomment for npm publishing:
-  # publish:
-  #   needs: release
-  #   if: needs.release.outputs.released == 'true'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ needs.release.outputs.tag }}
-  #     - uses: pnpm/action-setup@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22
-  #         registry-url: https://registry.npmjs.org
-  #     - run: pnpm install --frozen-lockfile
-  #     - run: pnpm publish --no-git-checks
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
+
+To enable npm publishing, add `publish: { type: npm, workspace: true, access: public }` to `sr.yaml` (below). The sr npm publisher auto-detects pnpm/npm/yarn from the lockfile.
 
 ### `sr.yaml`
 
-See `sync-release` skill for full sr.yaml reference (v7 format).
+See `sync-release` skill for full sr.yaml reference.
 
 ```yaml
 git:
@@ -196,6 +176,12 @@ packages:
       - package.json
     stage_files:
       - pnpm-lock.yaml
+    # Uncomment to publish to npm (the npm publisher auto-detects pnpm/yarn
+    # from the lockfile and runs the tool's native recursive publish):
+    # publish:
+    #   type: npm
+    #   workspace: true     # pnpm publish -r / npm publish --workspaces
+    #   access: public      # needed for scoped @org/pkg on first publish
 ```
 
 ### `package.json` scripts

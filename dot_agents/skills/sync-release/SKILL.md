@@ -1,7 +1,7 @@
 ---
 name: sync-release
 description: >
-  Release pipeline conventions. sr.yaml config (v7), sr action usage, lifecycle hooks,
+  Release pipeline conventions. sr.yaml config, sr action usage, typed publishers,
   monorepo support, post-release patterns, and version file mapping. Language-specific
   build targets and publishing live in scaffold-rust, scaffold-go, scaffold-python,
   scaffold-node. Use when setting up or modifying release pipelines.
@@ -23,7 +23,7 @@ Universal release conventions. For language-specific build matrices, publish ste
 - GitHub Actions where applicable (sr, fsrc, teasr expose actions)
 - Every release automatically updates changelog, creates GitHub release, uploads artifacts
 
-## sr.yaml Standard Config (v7)
+## sr.yaml Standard Config
 
 Canonical filename: `sr.yaml` (not `.urmzd.sr.yml`). Use `sr init` to generate a fully-commented config.
 
@@ -64,34 +64,35 @@ packages:
   - path: .
     version_files: []
     stage_files: []
-    # hooks:
-    #   pre_release:
-    #     - "cargo test --workspace"
-    #   post_release:
-    #     - "./scripts/notify-slack.sh"
+    # publish:
+    #   type: cargo       # or npm, pypi, docker, go, custom
+    #   workspace: true   # iterate workspace members
 ```
 
 ## Version Files
 
 `version_files` (bumped by sr) and `stage_files` (committed alongside the bump, e.g. lockfiles) are language-specific. See the relevant `scaffold-<lang>` skill for the canonical values for that ecosystem. sr auto-discovers workspace members where the ecosystem supports it (Cargo, uv, pnpm/npm).
 
-## CLI Commands (v7)
+## CLI Commands
+
+Three verbs form the release pipeline — `plan` previews, `prepare` writes bumped files to disk, `release` reconciles everything.
 
 ```
 sr init         Create sr.yaml (use --merge to add new fields non-destructively)
-sr status       Show unreleased commits, next version, changelog preview, open PRs
+sr plan         Terraform-style diff: planned version, tag, artifacts, publish targets
+sr prepare      Bump version files + write changelog (no commit/tag/push — for CI build steps between plan and release)
+sr release      Reconcile: commit, tag, push, GitHub release, upload artifacts, publish
 sr config       Validate and display resolved configuration
-sr release      Bump → changelog → tag → GitHub release (trunk flow)
 sr migrate      Show the full version-by-version migration guide
 sr completions  Generate shell completions
 sr update       Update sr to the latest version
 ```
 
-AI-assisted commit, PR, and review authoring live in dedicated agent skills (`ship`, `pr`, `review`). The sr CLI is release-engineering only as of v7.
+AI-assisted commit, PR, and review authoring live in dedicated agent skills (`ship`, `pr`, `review`). The sr CLI is release-engineering only.
 
 ### Upgrading sr
 
-Run `sr migrate` to view the full breaking-change guide for every version transition (3.x → 7.x). v7 redesigned `sr.yaml` into 6 top-level sections (`git`, `commit`, `changelog`, `channels`, `vcs`, `packages`), removed the MCP server, and removed all AI CLI commands.
+Run `sr migrate` for the full breaking-change guide. v8 turned sr into a release-state reconciler: shell hooks removed (builds live in CI), typed publishers (`cargo`/`npm`/`docker`/`pypi`/`go`/`custom`) replace `hooks.post_release`, literal paths replace globs in `artifacts`/`stage_files`, and monorepos collapse to one global version (no more `-p <pkg>`).
 
 ## Release Pipeline
 
@@ -109,14 +110,13 @@ push to main
 ## sr Action Usage
 
 ```yaml
-- uses: urmzd/sr@v7
+- uses: urmzd/sr@v8
   id: sr
   with:
     github-token: ${{ steps.app-token.outputs.token }}
-    force: ${{ inputs.force }}
 ```
 
-**Inputs** `dry-run`, `force`, `github-token` (default `github.token`), `git-user-name` (default `sr[bot]`), `git-user-email`, `artifacts` (glob patterns), `package` (monorepo target), `channel` (release channel), `prerelease` (pre-release identifier), `stage-files` (extra files to stage), `sign-tags`, `draft`, `sha256` (checksum verification).
+**Inputs** `mode` (`plan`/`prepare`/`release`, default `release`), `dry-run` (deprecated alias for `mode: plan`), `github-token` (default `github.token`), `git-user-name` (default `sr-releaser[bot]`), `git-user-email`, `artifacts` (literal paths, space-separated), `channel`, `prerelease`, `stage-files` (literal paths), `sign-tags`, `draft`, `sha256` (checksum verification).
 
 **Outputs** `released` (bool), `version`, `previous-version`, `tag`, `bump` (major/minor/patch), `floating-tag`, `commit-count`, `json` (full release metadata).
 
@@ -128,53 +128,43 @@ push to main
 
 Apply only what the repo declares.
 
-## Lifecycle Hooks
+## Typed Publishers
 
-sr runs per-package hooks at key points in the release lifecycle via `sr.yaml`:
+sr runs registry uploads via `publish:` on each package — no shell hooks. Each publisher queries its registry to skip already-published versions, so re-runs are idempotent.
 
 ```yaml
 packages:
   - path: .
-    hooks:
-      pre_release:
-        - "cargo test --workspace"
-      build:
-        - "cargo build --release"
-      post_release:
-        - "cargo publish"
+    publish:
+      type: cargo        # or npm, pypi, docker, go, custom
+      workspace: true    # iterate workspace members in declaration order
 ```
 
-**Available events** (in execution order):
+| Type | Command | Notes |
+|------|---------|-------|
+| `cargo` | `cargo publish` (per workspace member when `workspace: true`) | Reads `[workspace].members` |
+| `npm` | `npm publish` / `pnpm publish -r` / `yarn workspaces foreach` | Auto-detects tool by lockfile; set `access: public` for scoped packages |
+| `pypi` | `uv publish` | `workspace: true` iterates `[tool.uv.workspace].members` |
+| `docker` | `docker buildx build --push` | Configure `image`, `platforms`, `dockerfile` |
+| `go` | No-op (Go modules publish via git tag) | sr already cuts the tag |
+| `custom` | Your `command`; optional `check` to skip when already published | Receives `SR_VERSION` / `SR_TAG` env |
 
-| Event | When it runs |
-|-------|-------------|
-| `pre_release` | Before any mutation — tests, lints, validations that may abort the release |
-| `build` | After version files are bumped, before git commit/tag — compile artifacts from bumped sources |
-| `post_release` | After GitHub release and artifact upload — publish to registries |
+### Pre-release validation
 
-- Hooks receive `SR_VERSION` and `SR_TAG` environment variables
-- When `hooks.build` is set, every declared `artifacts` glob must resolve to ≥1 file before the tag is created
-- Use `sr init` to generate a fully-commented `sr.yaml`; `sr init --merge` to add new fields without overwriting
+Run tests, lints, and pre-flight scripts as ordinary CI steps before `sr release`. Fail the job there, not inside sr.
 
 ### Build strategy
 
-`hooks.build` runs as a single process on one runner. Pick the pattern that matches what you ship:
+`sr release` does not compile. Pick the shape that matches what you ship:
 
-| Scenario | `hooks.build` | `artifacts` | External matrix |
-|----------|--------------|-------------|-----------------|
-| Pure library (no binaries) | — | — | — |
-| Single-platform binary | `cargo build --release` | `target/release/mytool` | — |
-| Multi-platform binaries (cross-compile) | — | `release-assets/*` | **runs in CI before sr** |
+| Scenario | CI shape | `artifacts` in sr.yaml |
+|----------|----------|------------------------|
+| Pure library (no binaries) | single job: `sr release` | — |
+| Single-platform binary | build then `sr release` in one job | literal path(s) to the built binary |
+| Multi-platform binaries | `sr prepare` → build matrix → `sr release` (three jobs, artifacts flow via `actions/upload-artifact`) | literal paths for every target |
 
-Cross-platform matrices need multiple runners (macOS for darwin, Windows for windows). Run the matrix in GitHub Actions `strategy.matrix`, deposit outputs in a known directory, then call sr — sr is agnostic to how artifacts are produced.
+Multi-platform: `sr prepare` bumps version files so matrix builds embed the right version; the final `release` job downloads all matrix artifacts, commits, tags, uploads, and publishes.
 
 ## Monorepo Support
 
-```yaml
-packages:
-  - path: crates/core
-    tag_prefix: "core/v"
-    version_files: [Cargo.toml]
-```
-
-Independent per-package versioning, tags, and changelogs. Target with `sr release -p core`.
+One global version across all packages — sr auto-discovers workspace members from `[workspace].members` (Cargo), `[tool.uv.workspace].members` (uv), or `pnpm-workspace.yaml` / `package.json` `workspaces`. Independent per-package versioning is no longer supported; use separate repos if packages must diverge.

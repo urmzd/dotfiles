@@ -78,11 +78,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Re-release the current tag (use when a previous release partially failed)"
-        type: boolean
-        default: false
 
 concurrency:
   group: release
@@ -113,33 +108,19 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v7
+      - uses: urmzd/sr@v8
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          force: ${{ inputs.force }}
 
     outputs:
       released: ${{ steps.sr.outputs.released }}
       tag: ${{ steps.sr.outputs.tag }}
       version: ${{ steps.sr.outputs.version }}
 
-  # Uncomment for PyPI publishing:
-  # publish:
-  #   needs: release
-  #   if: needs.release.outputs.released == 'true'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ needs.release.outputs.tag }}
-  #     - uses: astral-sh/setup-uv@v5
-  #     - run: uv python install
-  #     - run: uv build
-  #     - run: uv publish
 ```
+
+For PyPI publishing, use the `pypi` typed publisher in `sr.yaml` (below) and split into `sr prepare` → `uv build` → `sr release` jobs so wheels embed the bumped version. See `sync-release` for the multi-job pattern.
 
 ### `sr.yaml`
 
@@ -176,9 +157,14 @@ packages:
   - path: .
     version_files: [pyproject.toml]
     stage_files:   [uv.lock]
+    # Uncomment to publish to PyPI (requires wheels to be built in CI between
+    # `sr prepare` and `sr release` so they embed the bumped version):
+    # publish:
+    #   type: pypi
+    #   workspace: true    # iterate [tool.uv.workspace].members
 ```
 
-See `sync-release` for the full v7 schema and `sr migrate` for upgrading from older versions.
+See `sync-release` for the full schema and `sr migrate` for upgrading from older versions.
 
 ### `pyproject.toml`
 
