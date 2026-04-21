@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# Install gcloud and aws CLI v2 pinned to specific upstream versions.
+# Bump the pins below and `chezmoi apply` to upgrade.
+#
+# Why not Nix? These CLIs update often with security/auth fixes and we want
+# to track upstream releases directly rather than waiting for nixpkgs.
+#
+set -euo pipefail
+
+# Version pins — bump these to upgrade. Chezmoi re-runs this script whenever
+# its content hash changes, so editing either value triggers a re-install.
+GCLOUD_VERSION="565.0.0"
+AWS_CLI_VERSION="2.33.2"
+
+GCLOUD_HOME="$HOME/.local/share/google-cloud-sdk"
+AWS_HOME="$HOME/.local/aws-cli"
+LOCAL_BIN="$HOME/.local/bin"
+
+mkdir -p "$LOCAL_BIN"
+
+WORKDIR="$(mktemp -d)"
+trap 'rm -rf "$WORKDIR"' EXIT
+
+# ---------------------------------------------------------------------------
+# Google Cloud CLI
+# ---------------------------------------------------------------------------
+{{- if .is_macos }}
+  {{- if eq .chezmoi.arch "arm64" }}
+GCLOUD_ARCHIVE="google-cloud-cli-${GCLOUD_VERSION}-darwin-arm.tar.gz"
+  {{- else }}
+GCLOUD_ARCHIVE="google-cloud-cli-${GCLOUD_VERSION}-darwin-x86_64.tar.gz"
+  {{- end }}
+{{- else if .is_linux }}
+  {{- if eq .chezmoi.arch "arm64" }}
+GCLOUD_ARCHIVE="google-cloud-cli-${GCLOUD_VERSION}-linux-arm.tar.gz"
+  {{- else }}
+GCLOUD_ARCHIVE="google-cloud-cli-${GCLOUD_VERSION}-linux-x86_64.tar.gz"
+  {{- end }}
+{{- end }}
+
+GCLOUD_URL="https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/${GCLOUD_ARCHIVE}"
+
+installed_gcloud=""
+if [[ -x "${GCLOUD_HOME}/bin/gcloud" ]]; then
+    installed_gcloud="$("${GCLOUD_HOME}/bin/gcloud" --version 2>/dev/null | awk '/Google Cloud SDK/ {print $NF}')"
+fi
+
+if [[ "${installed_gcloud}" == "${GCLOUD_VERSION}" ]]; then
+    echo "[OK] gcloud ${GCLOUD_VERSION} already installed at ${GCLOUD_HOME}"
+else
+    echo "[..] Installing gcloud ${GCLOUD_VERSION} (was: ${installed_gcloud:-none})"
+    gcloud_tmp="$WORKDIR/gcloud"
+    mkdir -p "$gcloud_tmp"
+    curl -fsSL "$GCLOUD_URL" -o "$gcloud_tmp/$GCLOUD_ARCHIVE"
+    tar -xf "$gcloud_tmp/$GCLOUD_ARCHIVE" -C "$gcloud_tmp"
+
+    rm -rf "$GCLOUD_HOME"
+    mkdir -p "$(dirname "$GCLOUD_HOME")"
+    mv "$gcloud_tmp/google-cloud-sdk" "$GCLOUD_HOME"
+
+    # Run installer without touching rc files — the dotfiles own PATH/completion wiring.
+    "${GCLOUD_HOME}/install.sh" \
+        --quiet \
+        --usage-reporting=false \
+        --path-update=false \
+        --command-completion=false \
+        --install-python=false \
+        >/dev/null
+    echo "[OK] Installed gcloud ${GCLOUD_VERSION}"
+fi
+
+# ---------------------------------------------------------------------------
+# AWS CLI v2
+# ---------------------------------------------------------------------------
+installed_aws=""
+if [[ -x "${AWS_HOME}/aws" ]]; then
+    installed_aws="$("${AWS_HOME}/aws" --version 2>/dev/null | awk -F'[ /]' '{print $2}')"
+fi
+
+if [[ "${installed_aws}" == "${AWS_CLI_VERSION}" ]]; then
+    echo "[OK] aws-cli ${AWS_CLI_VERSION} already installed at ${AWS_HOME}"
+else
+    echo "[..] Installing aws-cli ${AWS_CLI_VERSION} (was: ${installed_aws:-none})"
+    aws_tmp="$WORKDIR/aws"
+    mkdir -p "$aws_tmp"
+
+{{- if .is_macos }}
+    # macOS: pkg installer routed to a user-writable location via choices.xml.
+    pkg_url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_CLI_VERSION}.pkg"
+    curl -fsSL "$pkg_url" -o "$aws_tmp/AWSCLIV2.pkg"
+    cat > "$aws_tmp/choices.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <array>
+    <dict>
+      <key>choiceAttribute</key>
+      <string>customLocation</string>
+      <key>attributeSetting</key>
+      <string>${HOME}/.local</string>
+      <key>choiceIdentifier</key>
+      <string>default</string>
+    </dict>
+  </array>
+</plist>
+EOF
+    rm -rf "$AWS_HOME"
+    installer \
+        -pkg "$aws_tmp/AWSCLIV2.pkg" \
+        -target CurrentUserHomeDirectory \
+        -applyChoiceChangesXML "$aws_tmp/choices.xml" \
+        >/dev/null
+{{- else if .is_linux }}
+    # Linux: official zip with -i/-b for user-scoped install.
+    case "{{ .chezmoi.arch }}" in
+        arm64|aarch64) arch_tag="aarch64" ;;
+        *) arch_tag="x86_64" ;;
+    esac
+    zip_url="https://awscli.amazonaws.com/awscli-exe-linux-${arch_tag}-${AWS_CLI_VERSION}.zip"
+    curl -fsSL "$zip_url" -o "$aws_tmp/awscliv2.zip"
+    (cd "$aws_tmp" && unzip -q awscliv2.zip)
+    if [[ -x "${AWS_HOME}/aws" ]]; then
+        "$aws_tmp/aws/install" --update -i "$AWS_HOME" -b "$LOCAL_BIN" >/dev/null
+    else
+        "$aws_tmp/aws/install" -i "$AWS_HOME" -b "$LOCAL_BIN" >/dev/null
+    fi
+{{- end }}
+
+{{- if .is_macos }}
+    ln -sf "${AWS_HOME}/aws" "${LOCAL_BIN}/aws"
+    ln -sf "${AWS_HOME}/aws_completer" "${LOCAL_BIN}/aws_completer"
+{{- end }}
+    echo "[OK] Installed aws-cli ${AWS_CLI_VERSION}"
+fi

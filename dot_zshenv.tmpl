@@ -31,6 +31,11 @@ if [ -d "$HOME/.cargo/bin" ]; then
     export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
+# Google Cloud CLI (installed by run_onchange_after_install-cloud-clis.sh)
+if [ -f "$HOME/.local/share/google-cloud-sdk/path.zsh.inc" ]; then
+    . "$HOME/.local/share/google-cloud-sdk/path.zsh.inc"
+fi
+
 {{- if .is_personal }}
 # Personal machine environment variables
 # Add any personal-specific environment setup here

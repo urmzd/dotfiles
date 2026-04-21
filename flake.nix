@@ -22,12 +22,6 @@
               (pkg: ''fpath=("${pkg}/share/zsh/site-functions" ''${fpath[@]})'')
               siteFunctionPkgs);
 
-            gcloudCompletion = if pkgs.lib.elem pkgs.google-cloud-sdk packages then ''
-              if [ -f "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc" ]; then
-                source "${pkgs.google-cloud-sdk}/share/google-cloud-sdk/completion.zsh.inc"
-              fi
-            '' else "";
-
             fzfCompletion = if pkgs.lib.elem pkgs.fzf packages then ''
               if [ -f "${pkgs.fzf}/share/fzf/key-bindings.zsh" ]; then
                 source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
@@ -48,7 +42,6 @@
 
             zshOnly = pkgs.lib.concatStringsSep "\n" (pkgs.lib.filter (s: s != "") [
               addSiteFunctions
-              gcloudCompletion
               fzfCompletion
               terraformCompletion
               direnvHook
@@ -119,9 +112,9 @@
           uv
         ];
 
+        # gcloud and awscli2 are installed via run_onchange_after_install-cloud-clis.sh.tmpl
+        # so they can be pinned to specific upstream versions instead of tracking nixpkgs.
         cloudPackages = with pkgs; [
-          google-cloud-sdk
-          awscli2
           terraform
           colima
           docker
