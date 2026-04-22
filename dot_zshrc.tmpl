@@ -158,6 +158,11 @@ function snowsso() {
 source <(fzf --zsh)
 {{- end }}
 
+# fnm (Fast Node Manager) — adds node/npm shims to PATH, auto-switches on cd.
+{{ if lookPath "fnm" -}}
+eval "$(fnm env --use-on-cd --shell zsh)"
+{{- end }}
+
 # Load local environment if exists
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
