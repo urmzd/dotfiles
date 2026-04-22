@@ -31,43 +31,19 @@ else
     echo "✅ Xcode Command Line Tools already installed"
 fi
 
-if command -v brew >/dev/null 2>&1; then
-    echo "📦 Installing Homebrew packages..."
-
-    # Essential tools (minimal set, most tools managed by Nix)
-    brew_packages=(
-        # Only install Homebrew packages not available or better via Nix
-        # Note: git, fzf, ripgrep, tree, jq, yq, just, gh are in Nix flake
-        "reattach-to-user-namespace"  # Required for tmux clipboard integration on macOS
-    )
-
-    for package in "${brew_packages[@]}"; do
-        if ! brew list "$package" >/dev/null 2>&1; then
-            echo "Installing $package..."
-            brew install "$package"
-        fi
-    done
-
-    # NOTE: Brewfile packages are handled by run_onchange_before_brewfile-install.sh.tmpl
-    # which re-runs automatically whenever the Brewfile content changes.
-
-    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
-    # Uncomment below if you want conditional Nix installation after bootstrap
-    # if ! command -v nix >/dev/null 2>&1; then
-    #     echo "🗄️ Installing Nix package manager..."
-    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-    #
-    #     # Enable flakes
-    #     mkdir -p ~/.config/nix
-    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-    # fi
-
-    echo "🗄️ Most development tools are managed by Nix (see flake.nix)"
-    echo "🔄 Essential tools like git, fzf, ripgrep, direnv, just, gh are in the Nix flake"
-
-else
-    echo "⚠️ Homebrew not found. Please install it first."
+if ! command -v brew >/dev/null 2>&1; then
+    echo "🍺 Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Make brew available in this shell for any subsequent steps.
+    if [ -x /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -x /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
 fi
+
+# Brewfile packages are installed by run_onchange_before_brewfile-install.sh.tmpl
+# which re-runs whenever the Brewfile hash changes.
 
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -183,78 +159,66 @@ else
 fi
 
 {{- else if .is_linux }}
-# Linux package installation
+# Linux package installation — primary source of truth for dev tooling.
+# Per-language runtime managers (fnm, uv, rustup) install below via curl.
+# gcloud / aws-cli / cortex install via run_onchange scripts with pinned versions.
+
 if command -v apt >/dev/null 2>&1; then
     echo "📦 Installing packages with apt..."
-
-    # Update package list
     sudo apt update
-
-    # Essential tools (minimal set, most tools managed by Nix)
     apt_packages=(
-        # Only essential system packages, dev tools are in Nix
-        "curl"
-        "wget"
+        curl wget
+        git gh fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
+        build-essential coreutils tealdeer
+        terraform docker.io docker-compose-plugin kubectl helm k9s
+        golang-go golangci-lint
+        lua5.4 luarocks lua-check stylua
     )
-
     for package in "${apt_packages[@]}"; do
         if ! dpkg -l "$package" >/dev/null 2>&1; then
             echo "Installing $package..."
-            sudo apt install -y "$package"
+            sudo apt install -y "$package" || echo "⚠️ Failed to install $package (may not be in this Ubuntu/Debian release)"
         fi
     done
 
-    # NOTE: Nix installation is handled by bootstrap-nix-chezmoi.sh
-    # Uncomment below if you want conditional Nix installation after bootstrap
-    # if ! command -v nix >/dev/null 2>&1; then
-    #     echo "🗄️ Installing Nix package manager..."
-    #     sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-    #
-    #     # Enable flakes
-    #     mkdir -p ~/.config/nix
-    #     echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
-    # fi
-
 elif command -v dnf >/dev/null 2>&1; then
     echo "📦 Installing packages with dnf..."
-
-    # Fedora/RHEL packages (minimal set, most tools managed by Nix)
     dnf_packages=(
-        # Only essential system packages, dev tools are in Nix
-        "curl"
-        "wget"
+        curl wget
+        git gh fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
+        coreutils tealdeer
+        terraform docker-compose-plugin kubectl helm k9s
+        golang golangci-lint
+        lua luarocks luacheck stylua
     )
-
     for package in "${dnf_packages[@]}"; do
         if ! rpm -q "$package" >/dev/null 2>&1; then
             echo "Installing $package..."
-            sudo dnf install -y "$package"
+            sudo dnf install -y "$package" || echo "⚠️ Failed to install $package"
         fi
     done
 
 elif command -v pacman >/dev/null 2>&1; then
     echo "📦 Installing packages with pacman..."
-
-    # Arch packages (minimal set, most tools managed by Nix)
     pacman_packages=(
-        # Only essential system packages, dev tools are in Nix
-        "curl"
-        "wget"
+        curl wget
+        git github-cli fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
+        coreutils tealdeer
+        terraform docker docker-compose kubectl helm k9s
+        go golangci-lint
+        lua luarocks luacheck stylua
     )
-
     for package in "${pacman_packages[@]}"; do
         if ! pacman -Q "$package" >/dev/null 2>&1; then
             echo "Installing $package..."
-            sudo pacman -S --noconfirm "$package"
+            sudo pacman -S --noconfirm "$package" || echo "⚠️ Failed to install $package"
         fi
     done
 
 else
-    echo "⚠️ No supported package manager found"
+    echo "⚠️ No supported package manager found (apt, dnf, pacman)"
 fi
 {{- end }}
-
-# Note: Using Nix for package management - no fallback version manager needed
 
 # Install uv (Python package manager) if not present
 if ! command -v uv >/dev/null 2>&1; then

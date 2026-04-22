@@ -27,8 +27,8 @@ elif [[ -f "$root/pyproject.toml" ]] || [[ -f "$root/setup.py" ]]; then
     prefix="py"
 elif [[ -f "$root/go.mod" ]]; then
     prefix="go"
-elif [[ -f "$root/flake.nix" ]] || [[ -f "$root/shell.nix" ]]; then
-    prefix="nix"
+elif [[ -f "$root/Brewfile" ]] || [[ -f "$root/Makefile" ]] || [[ -f "$root/justfile" ]]; then
+    prefix="dev"
 fi
 
 if [[ -n "$prefix" ]]; then

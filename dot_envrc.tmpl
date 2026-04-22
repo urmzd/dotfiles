@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
-# Global .envrc - Provides access to Nix development tools globally
-# Managed by Chezmoi - adapts to different systems
+# Global ~/.envrc — managed by chezmoi.
+#
+# Global tools (git, gh, fzf, jq, terraform, kubectl, ...) come from
+# Homebrew (macOS) or apt/dnf/pacman (Linux), so this file does NOT need
+# to load anything dev-tool-related — they're already on $PATH from .zshenv.
+#
+# Per-project .envrc files inherit nothing from here automatically; use
+# direnv's `source_up` if you want to chain (see dot_envrc.project.example).
 
-{{- if .use_nix }}
-# Use the Nix flake from chezmoi directory for global development tools
-# nix-direnv is loaded centrally from ~/.config/direnv/direnvrc
-use flake ~/.local/share/chezmoi
-
-# Project-specific environment variables
-export PROJECT_NAME="global-dev-env"
-export NIX_SHELL_PRESERVE_PROMPT=1
-
-# Source local overrides if they exist (not managed by chezmoi)
-# Create ~/.envrc.local for machine-specific values
+# Source machine-specific overrides if present (not managed by chezmoi).
+# Create ~/.envrc.local for personal env vars (API tokens, default warehouse, etc.)
 [[ -f ~/.envrc.local ]] && source_env ~/.envrc.local
-{{- else }}
-# Nix integration disabled - using system tools
-echo "⚠️  Nix integration disabled. Enable with 'use_nix = true' in chezmoi config"
-{{- end }}

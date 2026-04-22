@@ -31,8 +31,9 @@ Templates use Go `text/template` with chezmoi data from `~/.config/chezmoi/chezm
 - `dot_claude/` → `~/.claude/` (Claude Code settings, skills)
 - `dot_agents/` → `~/.agents/` (agent definitions; personas/subagents)
 - `dot_agents/skills/` → `~/.agents/skills/` (agent skills, chezmoi-managed)
-- `Brewfile` → Homebrew dependencies
-- `flake.nix` → Nix dependencies
+- `Brewfile` → Homebrew packages (macOS source of truth for CLIs)
+- `run_onchange_after_install-*.sh.tmpl` → Pinned upstream installers (gcloud, aws, cortex)
+- `run_once_after_install-ai-clis.sh.tmpl` → AI tools (Claude/Codex/Gemini/Copilot)
 
 ## Agents vs Skills
 

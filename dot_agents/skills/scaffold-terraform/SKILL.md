@@ -199,7 +199,8 @@ For multi-environment setups (dev/staging/prod workspaces, multiple state files)
 ### `.envrc`
 
 ```sh
-use flake .#devops
+# terraform/kubectl/helm come from Homebrew/apt. Use this file for AWS/GCP env vars.
+dotenv
 ```
 
 ### Project Layout

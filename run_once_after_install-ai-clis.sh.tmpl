@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Install AI tooling CLIs (Claude Code, Codex, Gemini, Copilot) at chezmoi apply time.
+# Sentinel-gated: re-runs do nothing once `~/.local/state/ai-tools-installed` exists.
+# Bump versions below + delete the sentinel (`dotfiles update-ai`) to upgrade.
+
+set -euo pipefail
+
+SENTINEL="$HOME/.local/state/ai-tools-installed"
+mkdir -p "$(dirname "$SENTINEL")"
+
+if [[ -f "$SENTINEL" ]]; then
+    exit 0
+fi
+
+# Pinned npm package versions
+NPM_PACKAGES=(
+    "@openai/codex@0.121.0"
+    "@google/gemini-cli@0.38.1"
+    "@github/copilot@1.0.27"
+)
+
+# Make fnm-managed Node available if installed (fnm comes from Brewfile/apt).
+# Without this, npm won't be on PATH in non-interactive chezmoi-apply context.
+if command -v fnm >/dev/null 2>&1; then
+    export PATH="$HOME/.local/npm/bin:$PATH"
+    export NPM_CONFIG_PREFIX="$HOME/.local/npm"
+    eval "$(fnm env --use-on-cd --corepack-enabled 2>/dev/null)" || true
+    if ! fnm list 2>/dev/null | grep -q default; then
+        echo "📦 Installing latest LTS Node via fnm..."
+        fnm install --lts >/dev/null
+        fnm default lts-latest >/dev/null
+    fi
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+    echo "🤖 Installing Claude Code..."
+    curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1 || echo "⚠️ Claude Code install failed"
+fi
+
+if command -v npm >/dev/null 2>&1; then
+    for pkg in "${NPM_PACKAGES[@]}"; do
+        name="${pkg%@*}"
+        if ! npm list -g "$name" >/dev/null 2>&1; then
+            echo "🤖 Installing $pkg..."
+            npm install -g "$pkg" 2>&1 | grep -v "npm WARN" || echo "⚠️ Failed to install $pkg"
+        fi
+    done
+else
+    echo "⚠️ npm not on PATH — skipping codex/gemini/copilot install. Re-run after fnm installs Node."
+fi
+
+date -Iseconds > "$SENTINEL"
+echo "✅ AI tools installed (sentinel: $SENTINEL)"

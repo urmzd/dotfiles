@@ -33,7 +33,7 @@ Every project must have these. Report FAIL if missing:
 | `.github/ISSUE_TEMPLATE/feature_request.yml` | Exists; YAML issue form (see `community-health`) |
 | `.github/ISSUE_TEMPLATE/config.yml` | Exists; `blank_issues_enabled: false`; contact links for security + discussions (see `community-health`) |
 | `sr.yaml` | Exists; has `git.tag_prefix: "v"` and `git.floating_tag: true` |
-| `.envrc` | Exists; contains `use flake` |
+| `.envrc` | Exists (direnv config: `layout`, `dotenv`, env vars, etc.) |
 | `llms.txt` | Exists |
 | `skills/*/SKILL.md` | At least one skill exists |
 | `.github/workflows/ci.yml` | Exists (or `terraform.yml` for Terraform projects) |

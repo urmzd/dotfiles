@@ -64,7 +64,7 @@ Scan for files that help an LLM understand the project:
 
 - Entry points (`main.go`, `src/lib.rs`, `src/index.ts`, `app.py`, etc.)
 - Public API surface (exported modules, route definitions, CLI entry)
-- Config files that define behavior (`flake.nix`, `Justfile`, `Makefile`, `docker-compose.yml`)
+- Config files that define behavior (`Justfile`, `Makefile`, `docker-compose.yml`, `pyproject.toml`)
 - Schema definitions (OpenAPI, GraphQL, DB migrations)
 - Skills (`skills/*/SKILL.md`)
 

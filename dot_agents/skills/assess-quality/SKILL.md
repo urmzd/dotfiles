@@ -104,9 +104,9 @@ just run     # execute
 ```
 
 **Environment setup is automated:**
-- `direnv allow` activates the Nix shell (via `.envrc` → `use flake .#<shell>`)
-- All dependencies are declared in `flake.nix`
-- No "install X globally" instructions; Nix provides everything
+- `direnv allow` activates per-project env (via `.envrc` → `layout python`, `use fnm`, `dotenv`, etc.)
+- System CLIs come from Homebrew (macOS) or apt/dnf/pacman (Linux)
+- Per-language runtime versions come from fnm/uv/rustup with the project's pin file
 
 **Documentation hierarchy:**
 - **`README.md`** human-facing: what, install, usage, examples
@@ -170,7 +170,7 @@ Every decision's "why" should be recoverable. If you can't explain why a choice 
 | `docs/` with organized subdirectories | Documentation is well-structured (guides/, rfcs/, plans/, runbooks/). Skills complement with executable agent context |
 | `sr` for releases, not semantic-release npm | Rust-native, faster, custom commit parsing, single binary |
 | Apache-2.0 license | Permissive, patent grant, corporate-friendly |
-| Nix over Docker for dev environments | Composable shells, no container overhead, reproducible on bare metal |
+| Homebrew/apt + per-language version managers over Docker for dev environments | Native performance, no container overhead, system tools age well |
 
 When reviewing code, ask: "Why this approach?" If the answer is "it's how we've always done it" without a reason, it's a broken window. Fix it or document the real reason.
 

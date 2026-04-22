@@ -1,6 +1,6 @@
 # dotfiles
 
-> Cross-platform dotfiles managed by Chezmoi + Nix for macOS and Linux. Provides one-command environment bootstrap with composable Nix development shells (default, js, go, lua, cloud, full), Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, Homebrew extras for macOS, and a suite of portable AI agent skills and subagents in the `dot_agents/` directory.
+> Cross-platform dotfiles managed by Chezmoi for macOS and Linux. Homebrew/apt is the source of truth for CLIs, with pinned upstream installers for tools that need it (gcloud, aws-cli, Snowflake Cortex). Per-language version managers handle runtimes (fnm, uv, rustup). Includes Zsh + Oh My Zsh + Powerlevel10k, Tmux with Catppuccin theme, Neovim with full LSP support, and a suite of portable AI agent skills and subagents in the `dot_agents/` directory.
 
 ## Docs
 
@@ -9,8 +9,9 @@
 
 ## API / Key Files
 
-- [flake.nix](https://github.com/urmzd/dotfiles/blob/main/flake.nix): Nix flake with composable dev shells (default, js, go, lua, cloud, full)
-- [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages
+- [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages (source of truth for CLIs)
+- [run_onchange_after_install-cortex.sh.tmpl](https://github.com/urmzd/dotfiles/blob/main/run_onchange_after_install-cortex.sh.tmpl): Snowflake Cortex Code CLI installer (pinned upstream)
+- [run_onchange_after_install-cloud-clis.sh.tmpl](https://github.com/urmzd/dotfiles/blob/main/run_onchange_after_install-cloud-clis.sh.tmpl): gcloud + aws-cli installers (pinned upstream)
 - [dot_config/](https://github.com/urmzd/dotfiles/blob/main/dot_config/): Neovim, Ghostty, Tmux, and other tool configs
 - [dot_zshrc.tmpl](https://github.com/urmzd/dotfiles/blob/main/dot_zshrc.tmpl): Zsh configuration template
 - [dot_agents/skills/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/): Portable AI agent skills directory
@@ -51,7 +52,7 @@
 - [scaffold-rust](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-rust/SKILL.md): Scaffold Rust projects with CI/CD and sr.yaml
 - [scaffold-terraform](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-terraform/SKILL.md): Scaffold Terraform infrastructure with CI/CD
 - [setup-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-ci/SKILL.md): CI/CD pipeline setup and workflow conventions
-- [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Composable Nix development shells
+- [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Per-language toolchain + direnv guidance
 - [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Commit, push, and watch CI until pass/fail
 - [status](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/status/SKILL.md): Check active repos for recent activity and local state
 - [style-brand](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/style-brand/SKILL.md): Terminal branding with teasr demos and Cyberdream theme

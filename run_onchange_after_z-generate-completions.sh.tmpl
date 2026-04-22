@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Chezmoi run_onchange - Pre-generate zsh completions at apply time
 # Triggered by: {{ include "dot_zshrc.tmpl" | sha256sum }}
-# Triggered by: {{ include "flake.lock" | sha256sum }}
+# Triggered by: {{ include "Brewfile" | sha256sum }}
 # Triggered by: {{ include "run_onchange_after_install-cloud-clis.sh.tmpl" | sha256sum }}
 
 set -euo pipefail
 
 COMP_DIR="$HOME/.zsh/completions"
-FPATH_FILE="$HOME/.zsh/nix-fpath.zsh"
+FPATH_FILE="$HOME/.zsh/brew-fpath.zsh"
 
 mkdir -p "$COMP_DIR"
 mkdir -p "$(dirname "$FPATH_FILE")"
@@ -17,48 +17,17 @@ mkdir -p "$(dirname "$FPATH_FILE")"
 echo "Generating zsh completions..."
 
 # ============================================================================
-# 1. Discover Nix site-functions paths
+# 1. Discover Homebrew site-functions on macOS.
+#    Linux distros drop completions into /usr/share/zsh/{site-functions,
+#    vendor-completions} which zsh already has in fpath by default.
 # ============================================================================
-{{- if .use_nix }}
-
-# Find all Nix store paths that contain zsh site-functions
-# This covers packages like gh, kubectl, helm, docker, chezmoi, etc.
-for dir in /nix/store/*/share/zsh/site-functions; do
-    # Only include paths from the current profile (avoid stale store paths)
-    if [[ -d "$dir" ]] && ls "$dir"/_* >/dev/null 2>&1; then
-        echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
-    fi
-done
-
-# Deduplicate: only keep the latest version of each store path
-# nix-store --query gives us the current profile's closure
-if command -v nix >/dev/null 2>&1; then
-    : > "$FPATH_FILE"  # re-truncate for clean output from profile query
-    PROFILE="${HOME}/.nix-profile"
-    if [[ -L "$PROFILE" ]]; then
-        for dir in $(nix-store --query --references "$(readlink -f "$PROFILE")" 2>/dev/null | while read -r dep; do
-            if [[ -d "$dep/share/zsh/site-functions" ]]; then
-                echo "$dep/share/zsh/site-functions"
-            fi
-        done); do
-            echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
-        done
-    fi
-
-    # Also check the default profile
-    DEFAULT_PROFILE="/nix/var/nix/profiles/default"
-    if [[ -L "$DEFAULT_PROFILE" ]]; then
-        for dir in $(nix-store --query --references "$(readlink -f "$DEFAULT_PROFILE")" 2>/dev/null | while read -r dep; do
-            if [[ -d "$dep/share/zsh/site-functions" ]]; then
-                echo "$dep/share/zsh/site-functions"
-            fi
-        done); do
-            echo "fpath=(\"$dir\" \$fpath)" >> "$FPATH_FILE"
-        done
+if command -v brew >/dev/null 2>&1; then
+    brew_prefix="$(brew --prefix 2>/dev/null)"
+    if [[ -d "${brew_prefix}/share/zsh/site-functions" ]]; then
+        echo "fpath=(\"${brew_prefix}/share/zsh/site-functions\" \$fpath)" >> "$FPATH_FILE"
+        echo "  Found brew site-functions: ${brew_prefix}/share/zsh/site-functions"
     fi
 fi
-
-{{- end }}
 
 # ============================================================================
 # 2. Google Cloud SDK completion (installed to ~/.local/share/google-cloud-sdk)

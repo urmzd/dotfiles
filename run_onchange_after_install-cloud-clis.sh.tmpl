@@ -2,8 +2,8 @@
 # Install gcloud and aws CLI v2 pinned to specific upstream versions.
 # Bump the pins below and `chezmoi apply` to upgrade.
 #
-# Why not Nix? These CLIs update often with security/auth fixes and we want
-# to track upstream releases directly rather than waiting for nixpkgs.
+# Why pin upstream? These CLIs ship security/auth fixes faster than distro
+# repos package them. Same approach as run_onchange_after_install-cortex.sh.tmpl.
 #
 set -euo pipefail
 

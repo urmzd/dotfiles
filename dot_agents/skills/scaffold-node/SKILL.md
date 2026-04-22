@@ -206,7 +206,8 @@ Use `pnpm run <task>` for all operations. pnpm is the package manager.
 ### `.envrc`
 
 ```sh
-use flake .#js
+use fnm  # Loads the version pinned in .nvmrc
+PATH_add node_modules/.bin
 ```
 
 ### `biome.json`

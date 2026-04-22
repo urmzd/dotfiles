@@ -231,7 +231,7 @@ Replace `<package_name>` with the actual package name.
 ### `.envrc`
 
 ```sh
-use flake .#python
+layout python  # Auto-creates and activates .venv
 ```
 
 ### `.python-version`

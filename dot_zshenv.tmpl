@@ -11,16 +11,6 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-{{- if .use_nix }}
-# Nix configuration
-export NIX_PATH="$HOME/.nix-defexpr/channels${NIX_PATH:+:$NIX_PATH}"
-
-# Add user's nix profile to PATH if it exists
-if [ -d "$HOME/.nix-profile/bin" ]; then
-    export PATH="$HOME/.nix-profile/bin:$PATH"
-fi
-{{- end }}
-
 # Ensure local bin is in PATH
 if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"

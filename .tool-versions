@@ -1,2 +1,0 @@
-# This file is deprecated - using nix flake.nix for package management
-# See nix-shells.md for available development environments

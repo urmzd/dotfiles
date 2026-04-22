@@ -5,7 +5,7 @@ Thanks for your interest in contributing to **dotfiles**.
 ## Prerequisites
 
 - **macOS or Linux**
-- **[Nix](https://nixos.org/download.html)** with flakes enabled
+- **[Homebrew](https://brew.sh)** (macOS) or apt/dnf/pacman (Linux)
 - **[chezmoi](https://www.chezmoi.io/install/)**
 - **[GH_TOKEN](https://cli.github.com/)** GitHub CLI authentication
 
@@ -22,8 +22,8 @@ cd dotfiles
 |---------|-------------|
 | `chezmoi diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
-| `dotfiles update` | Update Nix flake inputs |
-| `dotfiles status` | Check environment status |
+| `dotfiles update` | `brew upgrade` + `chezmoi apply` |
+| `dotfiles status` | Show installed AI tool versions |
 
 ## Commit Convention
 

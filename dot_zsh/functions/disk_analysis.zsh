@@ -74,14 +74,6 @@ disk_cleanup_suggestions() {
   done
   echo
 
-  # Nix store
-  if [[ -d "/nix/store" ]]; then
-    echo "Nix store size:"
-    du -sh /nix/store 2>/dev/null
-    echo "  Cleanup: nix-collect-garbage -d"
-    echo
-  fi
-
   # Colima
   if [[ -d "$HOME/.colima" ]]; then
     echo "Colima VM size:"

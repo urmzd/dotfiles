@@ -8,7 +8,7 @@
 -- local workspace_dir = home .. "/.workspace/" .. project_name
 -- local lombok_jar = path.concat({ jdtls_path, "lombok.jar" })
 --
--- local java_path = home .. "/.nix-profile/bin/java"
+-- local java_path = "/opt/homebrew/opt/openjdk@21/bin/java"
 --
 -- local cmd = {
 -- 	java_path,
@@ -42,7 +42,7 @@
 -- 				runtimes = {
 -- 					{
 -- 						name = "JavaSE-21",
--- 						path = "~/.nix-profile/bin/java",
+-- 						path = "/opt/homebrew/opt/openjdk@21/bin/java",
 -- 						default = true,
 -- 					},
 -- 				},

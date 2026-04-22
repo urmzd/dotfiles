@@ -1,22 +1,14 @@
 #!/usr/bin/env zsh
 
-{{- if .use_nix }}
-# Nix configuration - Load FIRST before any shell customization
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-
-# Enable direnv for Nix integration - Load BEFORE oh-my-zsh
+# Enable direnv hook BEFORE oh-my-zsh so per-directory env vars apply.
 {{ if lookPath "direnv" -}}
-# Silence direnv output to prevent environment variable spam
 export DIRENV_LOG_FORMAT=""
-eval "$(direnv hook $(basename "$SHELL"))"
-{{- end }}
+eval "$(direnv hook zsh)"
 {{- end }}
 
-# Enable Powerlevel10k instant prompt AFTER environment is set
-# Disable instant prompt completely when using direnv or tmux to prevent conflicts
-if [[ -z "$TMUX" && -z "$DIRENV_DIR" && -z "$IN_NIX_SHELL" && -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+# Enable Powerlevel10k instant prompt AFTER environment is set.
+# Disable when using direnv or tmux to prevent conflicts.
+if [[ -z "$TMUX" && -z "$DIRENV_DIR" && -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
@@ -37,7 +29,7 @@ plugins=(git zsh-syntax-highlighting zsh-completions)
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
 # Pre-generated completions (from chezmoi apply)
-[[ -f "$HOME/.zsh/nix-fpath.zsh" ]] && source "$HOME/.zsh/nix-fpath.zsh"
+[[ -f "$HOME/.zsh/brew-fpath.zsh" ]] && source "$HOME/.zsh/brew-fpath.zsh"
 [[ -d "$HOME/.zsh/completions" ]] && fpath=("$HOME/.zsh/completions" $fpath)
 
 # Initialize completions (use cached dump unless stale >24h)
@@ -54,7 +46,7 @@ source "$ZSH/oh-my-zsh.sh"
 # Enable colors for ls - Cyberdream theme
 # Load AFTER oh-my-zsh to prevent it from being overridden
 {{- if .is_macos }}
-# macOS: use BSD ls with -G for colors, or GNU ls if available from Nix
+# macOS: prefer GNU coreutils (gls/gdircolors from Homebrew), fall back to BSD ls.
 # Cyberdream colors: blue (#5ea1ff), green (#5eff6c), cyan (#5ef1ff), magenta (#bd5eff)
 if command -v gdircolors >/dev/null 2>&1; then
   eval "$(gdircolors -b)"
@@ -63,7 +55,7 @@ if command -v gdircolors >/dev/null 2>&1; then
   export LS_COLORS="di=38;5;75:ex=38;5;83:ln=38;5;87:or=38;5;141:mi=38;5;203:*.archive=38;5;141:*.tar=38;5;141:*.tgz=38;5;141:*.arc=38;5;141:*.arj=38;5;141:*.taz=38;5;141:*.lha=38;5;141:*.lz4=38;5;141:*.lzh=38;5;141:*.lzma=38;5;141:*.tlz=38;5;141:*.txz=38;5;141:*.tzo=38;5;141:*.t7z=38;5;141:*.zip=38;5;141:*.z=38;5;141:*.dz=38;5;141:*.gz=38;5;141:*.lrz=38;5;141:*.lz=38;5;141:*.lzop=38;5;141:*.xz=38;5;141:*.zst=38;5;141:*.zstd=38;5;141:*.bz2=38;5;141:*.bz=38;5;141:*.tbz=38;5;141:*.tbz2=38;5;141:*.tz=38;5;141:*.deb=38;5;141:*.rpm=38;5;141:*.jar=38;5;141:*.war=38;5;141:*.ear=38;5;141:*.rar=38;5;141:*.aces=38;5;141:*.7z=38;5;141:*.ace=38;5;141:*.apk=38;5;141:*.cpio=38;5;141:*.iso=38;5;141:*.cab=38;5;141:*.img=38;5;141:*.msi=38;5;141"
   alias ls='gls --color=auto'
 elif ls --color=auto &>/dev/null 2>&1; then
-  # GNU ls available (from Nix)
+  # GNU ls available
   if command -v dircolors >/dev/null 2>&1; then
     eval "$(dircolors -b)"
   fi
@@ -94,28 +86,18 @@ alias vim="nvim"
 function dotfiles() {
   case "${1:-help}" in
     update)
-      cd ~/.local/share/chezmoi && nix flake update && nix develop --command echo "Environment rebuilt successfully" && cd -
+      brew update && brew upgrade && chezmoi apply
       ;;
     update-ai)
       rm -f "$HOME/.local/state/ai-tools-installed"
-      echo "AI tools sentinel cleared. Re-enter your shell to reinstall."
+      chezmoi apply
       ;;
     status)
-      echo "=== Nix Environment Status ==="
-      local lock="$HOME/.local/share/chezmoi/flake.lock"
-      if [[ -f "$lock" ]]; then
-        if [[ "$(uname)" == "Darwin" ]]; then
-          local age=$(( ($(date +%s) - $(/usr/bin/stat -f "%m" "$lock")) / 86400 ))
-        else
-          local age=$(( ($(date +%s) - $(stat -c %Y "$lock")) / 86400 ))
-        fi
-        echo "flake.lock age: ${age} days"
-      fi
-      echo ""
-      echo "AI tool versions:"
+      echo "=== AI tool versions ==="
       echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed"
-      echo -n "  codex: "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $2}' || echo "not installed"
+      echo -n "  codex:  "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $2}' || echo "not installed"
       echo -n "  gemini: "; npm list -g @google/gemini-cli 2>/dev/null | grep @google/gemini-cli | awk '{print $2}' || echo "not installed"
+      echo -n "  cortex: "; cortex --version 2>/dev/null || echo "not installed"
       ;;
     cleanup)
       echo "Quick disk cleanup -- removing regenerable build artifacts and caches..."
@@ -140,13 +122,13 @@ function dotfiles() {
       echo "Usage: dotfiles <command>"
       echo ""
       echo "Commands:"
-      echo "  status      Show flake.lock age and AI tool versions"
-      echo "  update      Update flake inputs and rebuild environment"
-      echo "  update-ai   Clear AI tools sentinel and reinstall on next shell"
-      echo "  cleanup     Remove regenerable build artifacts and caches"
-      echo "  edit        Open dotfiles source in editor"
-      echo "  apply    Apply dotfiles with chezmoi"
-      echo "  diff     Preview pending chezmoi changes"
+      echo "  status     Show installed AI tool versions"
+      echo "  update     brew upgrade + chezmoi apply"
+      echo "  update-ai  Clear AI tools sentinel and reinstall (chezmoi apply)"
+      echo "  cleanup    Remove regenerable build artifacts and caches"
+      echo "  edit       Open dotfiles source in editor"
+      echo "  apply      Apply dotfiles with chezmoi"
+      echo "  diff       Preview pending chezmoi changes"
       ;;
   esac
 }

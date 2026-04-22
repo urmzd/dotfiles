@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Install Snowflake Cortex Code CLI pinned to a specific upstream version.
+# Bump CORTEX_VERSION below and `chezmoi apply` to upgrade.
+#
+# Why not the upstream `curl ... | sh` installer?
+#   1. It always tracks moving channel head — no `--version` argument.
+#   2. It writes PATH lines into ~/.zshrc / ~/.bashrc / fish config, which
+#      collides with the dotfiles owning shell wiring.
+# Same shape as run_onchange_after_install-cloud-clis.sh.tmpl.
+#
+# Gated on the install_cortex chezmoi feature flag — no-op if false or unset.
+{{- if hasKey . "install_cortex" -}}
+{{ if .install_cortex -}}
+set -euo pipefail
+
+# Version pin — bump to upgrade. Find current channel heads at:
+#   https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/stable_version.txt
+CORTEX_VERSION="1.0.61+210740.729320cf3330"
+
+CORTEX_HOME="$HOME/.local/share/cortex/${CORTEX_VERSION}"
+LOCAL_BIN="$HOME/.local/bin"
+S3_BASE="https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278"
+
+mkdir -p "$LOCAL_BIN"
+
+{{- if .is_macos }}
+  {{- if eq .chezmoi.arch "arm64" }}
+CORTEX_OS="darwin"; CORTEX_ARCH="arm64"
+  {{- else }}
+CORTEX_OS="darwin"; CORTEX_ARCH="amd64"
+  {{- end }}
+{{- else if .is_linux }}
+  {{- if eq .chezmoi.arch "arm64" }}
+CORTEX_OS="linux"; CORTEX_ARCH="arm64"
+  {{- else }}
+CORTEX_OS="linux"; CORTEX_ARCH="amd64"
+  {{- end }}
+{{- end }}
+
+installed_cortex=""
+if [[ -x "${LOCAL_BIN}/cortex" && -d "${CORTEX_HOME}" ]]; then
+    installed_cortex="${CORTEX_VERSION}"
+fi
+
+if [[ "${installed_cortex}" == "${CORTEX_VERSION}" ]]; then
+    echo "[OK] cortex ${CORTEX_VERSION} already installed at ${CORTEX_HOME}"
+    exit 0
+fi
+
+echo "[..] Installing cortex ${CORTEX_VERSION} (${CORTEX_OS}-${CORTEX_ARCH})"
+
+WORKDIR="$(mktemp -d)"
+trap 'rm -rf "$WORKDIR"' EXIT
+
+# URL-encode '+' (S3 keys treat it literally). Mirrors url_encode() in the
+# upstream installer.
+encoded_version="${CORTEX_VERSION//+/%2B}"
+version_dir="${S3_BASE}/${encoded_version}"
+
+# Fetch manifest to get the exact tarball name + sha256 for this platform.
+# This avoids encoding every platform's checksum into the script.
+manifest="$WORKDIR/manifest.json"
+curl -fsSL "${version_dir}/manifest.json" -o "$manifest"
+
+tar_name="$(jq -r ".packages.${CORTEX_OS}.${CORTEX_ARCH}.name" "$manifest")"
+expected_sha="$(jq -r ".packages.${CORTEX_OS}.${CORTEX_ARCH}.checksum" "$manifest")"
+
+if [[ -z "$tar_name" || "$tar_name" == "null" ]]; then
+    echo "[ERR] Cortex ${CORTEX_VERSION} not available for ${CORTEX_OS}-${CORTEX_ARCH}" >&2
+    exit 1
+fi
+
+encoded_tar="${tar_name//+/%2B}"
+tar_path="$WORKDIR/${tar_name}"
+
+curl -fsSL "${version_dir}/${encoded_tar}" -o "$tar_path"
+
+# Verify checksum (shasum on macOS, sha256sum on Linux).
+if command -v shasum >/dev/null 2>&1; then
+    actual_sha="$(shasum -a 256 "$tar_path" | awk '{print $1}')"
+else
+    actual_sha="$(sha256sum "$tar_path" | awk '{print $1}')"
+fi
+
+if [[ "$actual_sha" != "$expected_sha" ]]; then
+    echo "[ERR] Checksum mismatch for ${tar_name}: expected ${expected_sha}, got ${actual_sha}" >&2
+    exit 1
+fi
+
+# Extract; tarball contains a single top-level dir we move into place.
+tar -xzf "$tar_path" -C "$WORKDIR"
+extracted="$(find "$WORKDIR" -maxdepth 1 -type d -name 'coco-*' | head -n1)"
+if [[ -z "$extracted" || ! -x "$extracted/cortex" ]]; then
+    echo "[ERR] cortex binary not found in extracted archive" >&2
+    exit 1
+fi
+
+rm -rf "$CORTEX_HOME"
+mkdir -p "$(dirname "$CORTEX_HOME")"
+mv "$extracted" "$CORTEX_HOME"
+
+# The cortex binary depends on sibling files (bundled_*, node_modules, rg, ...)
+# so we symlink instead of copying.
+ln -sf "${CORTEX_HOME}/cortex" "${LOCAL_BIN}/cortex"
+
+echo "[OK] Installed cortex ${CORTEX_VERSION}"
+{{- end }}
+{{- end }}

@@ -45,7 +45,7 @@ Always generate the standard files below first, then apply the language-specific
 | `.github/pull_request_template.md` | Standard PR template (see `community-health`) |
 | `.github/ISSUE_TEMPLATE/` | Bug report + feature request forms + config (see `community-health`) |
 | `sr.yaml` | Semantic release config |
-| `.envrc` | Nix shell activation (`use flake .#<shell>`) |
+| `.envrc` | direnv config (per-language `layout`, env vars, `dotenv`) |
 | `llms.txt` | LLM-friendly project summary (see `create-llms-txt`) |
 | `skills/<name>/SKILL.md` | Agent skill instructions |
 | `docs/` | Project documentation (guides/, rfcs/, plans/, runbooks/, etc.) |

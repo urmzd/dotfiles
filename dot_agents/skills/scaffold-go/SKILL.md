@@ -273,7 +273,8 @@ For complex projects (multi-service repos, code generation, protobuf), add a jus
 ### `.envrc`
 
 ```sh
-use flake .#go
+# go.mod is the version pin; toolchain is system-installed via brew/apt.
+PATH_add bin
 ```
 
 ### Project Layout
