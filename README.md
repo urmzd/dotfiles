@@ -31,15 +31,20 @@
 
 ## Quick Start
 
+One-liner (installs Homebrew + chezmoi, then runs `chezmoi init --apply`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/install.sh | bash
+```
+
+Or step by step:
+
 ```bash
 # 1. Install Homebrew (macOS) or your distro's package manager (Linux)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 2. Install chezmoi
-sh -c "$(curl -fsSL get.chezmoi.io)"
-
-# 3. Apply this repo
-chezmoi init --apply urmzd
+# 2. Install chezmoi and apply this repo in one shot
+sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 ```
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
