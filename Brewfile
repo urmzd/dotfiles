@@ -26,6 +26,9 @@ brew "tealdeer"
 brew "coreutils"  # Provides gls/gdircolors used in dot_zshrc.tmpl color setup
 brew "reattach-to-user-namespace"  # tmux clipboard integration on macOS
 
+# Secrets
+cask "1password-cli"  # `op` CLI; pairs with manage-secrets skill (1Password desktop app needed for biometric unlock)
+
 # Cloud / infra
 brew "terraform"
 brew "colima"
