@@ -1,6 +1,9 @@
 ---
 name: write-code
-description: Tech stack, coding patterns, commit conventions, interface design, error handling, testing, and junior-friendly philosophy. Use when writing code, making commits, or choosing tools/patterns.
+description: >
+  Operational tech-stack picks and coding patterns: error handling, testing strategy,
+  commit conventions, interface design, junior-friendly bias. Use when writing or
+  reviewing implementation code. (Personal Nix / chezmoi setup lives in write-code-portfolio.)
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Development Practices
@@ -9,6 +12,8 @@ metadata:
 ---
 
 # Development Practices
+
+> **Layering:** Operational picks that satisfy `review-design` (principles) and `assess-quality` (foundational framework). Use this skill when you need a concrete answer for "what tool/pattern/idiom"; use `review-design` when reasoning about tradeoffs; use `assess-quality` for the underlying "why."
 
 ## Development Philosophy
 
@@ -30,7 +35,7 @@ metadata:
 | Shell | Zsh + Oh My Zsh + Powerlevel10k |
 | Terminal Multiplexer | tmux (vi-mode, vim-tmux-navigator) |
 | DevOps | Terraform, kubectl, Helm, k9s, AWS CLI 2 |
-| Dev Environment | Nix Flakes (13 composable shells), direnv, chezmoi |
+| Dev Environment | Per-language version manager + direnv + a dotfile manager (my setup: Nix Flakes + chezmoi -- see write-code-portfolio) |
 
 ## Commit Style
 
@@ -83,8 +88,12 @@ For comprehensive testing guidance (test types, fixtures, mocks, CI strategy), s
 ## Coding Patterns
 
 - **Convention over configuration** placeholder comments (`<project>`) over complex templating
-- **Composable toolsets** Nix flakes combine reusable per-language toolsets
-- **Machine polymorphism** chezmoi templates adapt to `is_macos`/`is_linux`/`is_personal`/`is_work`
-- **Minimal Homebrew** Nix for reproducibility, Homebrew only for macOS-specific tools
-- **Subprocess safety** Neovim detects non-interactive environments and disables clipboard
-- **ZSH caching** 24-hour compinit cache, auto fpath discovery for completions
+- **Composable toolsets** combine reusable per-language toolsets (e.g. Nix flakes, devcontainers)
+- **Machine polymorphism** dotfile templates branch on host attributes (OS, role). See write-code-portfolio for the chezmoi-specific implementation.
+- **Minimal package-manager footprint** prefer reproducible/pinned installs; reach for OS package managers (Homebrew, apt) only for OS-specific tools
+- **Subprocess safety** editors and TUIs should detect non-interactive environments and disable host integrations (e.g. clipboard)
+- **Shell cold-start hygiene** cache expensive completion setup; auto-discover fpath/plugins
+
+## My setup
+
+For my personal portfolio specifics (Nix Flakes shells, chezmoi machine polymorphism, Powerlevel10k, Neovim), see the **write-code-portfolio** skill.

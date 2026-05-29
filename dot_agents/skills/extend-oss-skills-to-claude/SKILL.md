@@ -16,6 +16,8 @@ metadata:
 
 # Extend OSS Skills to Claude Code
 
+> **Prerequisite:** read `create-oss-skill` first. That skill owns the base agentskills.io format and shared reference material (description optimization, eval workflow). This skill contains only the Claude Code-specific deltas (invocation control, subagent execution, dynamic context injection, model/effort overrides, deployment scoping).
+
 Take a standard [agentskills.io](https://agentskills.io/specification) skill and layer on Claude Code execution features. The base spec defines a portable file format; Claude Code turns it into an execution framework.
 
 ## What the Standard Covers

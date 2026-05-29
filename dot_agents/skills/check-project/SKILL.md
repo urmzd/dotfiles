@@ -27,7 +27,7 @@ Every project must have these. Report FAIL if missing:
 | `LICENSE` | Exists; contains "Apache" |
 | `CONTRIBUTING.md` | Exists |
 | `CODE_OF_CONDUCT.md` | Exists; Contributor Covenant 2.1 (see `community-health`) |
-| `SECURITY.md` | Exists; has vulnerability reporting instructions; no unrendered `{REPO}` or `{CURRENT_MAJOR}` placeholders; contact is `hello@urmzd.com` |
+| `SECURITY.md` | Exists; has vulnerability reporting instructions; no unrendered `{REPO}` or `{CURRENT_MAJOR}` placeholders; contact matches `$PROJECT_CONTACT` or `git config user.email` |
 | `.github/pull_request_template.md` | Exists; has Summary, Changes, Verification sections; no unrendered `{CHECK_COMMAND}` placeholder (see `community-health`) |
 | `.github/ISSUE_TEMPLATE/bug_report.yml` | Exists; YAML issue form (see `community-health`) |
 | `.github/ISSUE_TEMPLATE/feature_request.yml` | Exists; YAML issue form (see `community-health`) |

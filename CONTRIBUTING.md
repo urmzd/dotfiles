@@ -2,21 +2,16 @@
 
 Thanks for your interest in contributing to **dotfiles**.
 
-## Prerequisites
+## Environment Setup
 
-- **macOS or Linux**
-- **[Homebrew](https://brew.sh)** (macOS) or apt/dnf/pacman (Linux)
-- **[chezmoi](https://www.chezmoi.io/install/)**
-- **[GH_TOKEN](https://cli.github.com/)** GitHub CLI authentication
+See [Quick Start](README.md#quick-start) for environment setup (Homebrew/apt, chezmoi, `gh` auth). This document focuses on git workflow, commit conventions, and contributing skills/subagents.
 
-## Getting Started
+## Development
 
 ```sh
 git clone https://github.com/urmzd/dotfiles.git
 cd dotfiles
 ```
-
-## Development
 
 | Command | What it does |
 |---------|-------------|
@@ -24,6 +19,8 @@ cd dotfiles
 | `chezmoi apply` | Apply dotfile changes |
 | `dotfiles update` | `brew upgrade` + `chezmoi apply` |
 | `dotfiles status` | Show installed AI tool versions |
+
+For chezmoi file naming conventions (`dot_`, `private_`, `.tmpl`, `run_once_*`, `run_onchange_*`), see [AGENTS.md, File Naming Conventions](AGENTS.md#file-naming-conventions).
 
 ## Commit Convention
 
@@ -38,7 +35,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) e
 | `chore` | Maintenance |
 | `ci` | CI changes |
 
-Format: `type(scope): description`. Scope by tool/area (e.g., `feat(nvim):`, `fix(zsh):`, `chore(brew):`)
+Format: `type(scope): description`. Scope by tool/area (e.g., `feat(nvim):`, `fix(zsh):`, `chore(brew):`).
 
 ## Pull Requests
 
@@ -47,6 +44,41 @@ Format: `type(scope): description`. Scope by tool/area (e.g., `feat(nvim):`, `fi
 3. Test with `chezmoi diff` before applying
 4. Push to your fork and open a Pull Request
 5. Keep PRs focused; one logical change per PR
+
+## Contributing Skills and Subagents
+
+Skills and subagents live in `dot_agents/skills/<name>/SKILL.md` and `dot_agents/agents/<name>.md` respectively. They are deployed to `~/.agents/skills/` and `~/.agents/agents/` on `chezmoi apply` and become available to every tool linked via [`agentspec`](https://github.com/urmzd/agentspec).
+
+**Scaffolding**
+
+```bash
+agentspec manage create <name>     # Scaffold a new skill or subagent
+```
+
+**Frontmatter rules** (see [create-oss-skill](dot_agents/skills/create-oss-skill/SKILL.md) for the full spec):
+
+- YAML between `---` markers
+- Fields: `name`, `description` (one-line, ends with "Use when..."), optional `model`, optional `allowed-tools`
+- Imperative mood ("Use when..." not "Can be used when...")
+
+**Validation**
+
+```bash
+agentspec manage validate dot_agents/skills/<name>/SKILL.md
+agentspec manage validate dot_agents/agents/<name>.md
+```
+
+**Testing**
+
+1. `chezmoi apply` to deploy
+2. `agentspec sync --fast` to link
+3. Invoke from your tool of choice (e.g., `/<name>` in Claude Code) and confirm the description triggers correctly
+
+**Style**
+
+- No em dashes. Use bold indexing (**A**, **B**) or commas instead
+- Tables over prose for matrices
+- Cross-project: never hard-code paths into `~/.local/share/chezmoi`. Reference deployed locations (`~/.agents/skills/<name>/`) or `$AGENTSPEC_HOME`
 
 ## Code Style
 

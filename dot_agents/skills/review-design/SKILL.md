@@ -1,6 +1,10 @@
 ---
 name: review-design
-description: Pragmatic Programmer principles. DRY, orthogonality, tracer bullets, prototyping, estimation, design by contract, and pragmatic paranoia. Use when writing, reviewing, or refactoring code.
+description: >
+  Pragmatic Programmer principles: DRY, orthogonality, tracer bullets, design by
+  contract, pragmatic paranoia. The 'why' layer between assess-quality (framework)
+  and write-code (operational). Use when reasoning about design tradeoffs, not
+  when picking specific tools.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Pragmatic Programming
@@ -9,6 +13,8 @@ metadata:
 ---
 
 # Pragmatic Programming
+
+> **Layering:** Principles layer above `assess-quality` (foundational framework) and are operationalized by `write-code` (tool/pattern picks). Use this skill when reasoning about *why* a design tradeoff matters; use `assess-quality` for the underlying quality framework; use `write-code` for concrete picks.
 
 Principles from *The Pragmatic Programmer* (Hunt & Thomas) distilled into actionable rules for everyday development.
 

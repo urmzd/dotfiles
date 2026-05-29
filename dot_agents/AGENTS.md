@@ -2,7 +2,9 @@
 
 ## Overview
 
-`~/.agents/` is the user-level resource registry managed by [agentspec](https://github.com/anthropics/agentspec). It separates **agents** (personas/subagents that define thinking style) from **skills** (capabilities that define what to do).
+`~/.agents/` is the user-level resource registry managed by [agentspec](https://github.com/urmzd/agentspec). It separates **agents** (personas/subagents that define thinking style) from **skills** (capabilities that define what to do).
+
+The registry is **cross-project**. Once deployed, agents and skills are usable from any project, by any tool (claude-code, codex, gemini, copilot), via `agentspec manage link <name> <tool>`. They are not specific to the dotfiles repo.
 
 ## Structure
 
@@ -13,11 +15,12 @@
 │   ├── architect.md     # Interface-first systems design
 │   ├── curator.md       # Consistency and polish
 │   ├── debugger.md      # Root-cause analysis
+│   ├── guardian.md      # Supervises orchestrated agent fleets (pairs with orchestrate-agents)
 │   ├── ideator.md       # Creative exploration
 │   ├── strategist.md    # Multi-system orchestration
 │   ├── writer.md        # Technical documentation
 │   └── technical-documentation-architect.md
-└── skills/              # Chezmoi-managed; agentspec links to tools
+└── skills/              # Capabilities; agentspec links to tools
 ```
 
 ## Agents vs Skills
@@ -27,7 +30,7 @@
 | Format | `<name>.md` with agent frontmatter | `<name>/SKILL.md` with skill frontmatter |
 | Purpose | Define HOW to think and communicate | Define WHAT to do and WHEN |
 | Usage | Subagent types, persona activation | Tool invocation, domain knowledge |
-| Managed by | chezmoi (source of truth in dotfiles) | chezmoi (source of truth); agentspec links to tools |
+| Managed by | agentspec (source typically tracked in a dotfile manager) | agentspec |
 
 ## Commands
 
@@ -39,14 +42,30 @@ agentspec sync --fast              # Sync and discover resources
 agentspec status                   # Show managed vs unmanaged inventory
 ```
 
-## Adding Agents and Skills
+## Editing Agents and Skills
 
-Both agents and skills are managed in the chezmoi dotfiles repo at `dot_agents/`. After editing:
+For users of this repo, the **source** for agents and skills lives in chezmoi at `~/.local/share/chezmoi/dot_agents/`. Edit there, then:
 
 ```bash
 chezmoi apply    # Deploy to ~/.agents/
 agentspec sync   # Re-discover, adopt, and link
 ```
+
+If you maintain agents/skills outside chezmoi (different dotfile manager, no manager at all, or another git repo), `~/.agents/` is still the canonical deployed location. Point your own sync mechanism at it, then run `agentspec sync`.
+
+## Using Agents in Other Projects
+
+After `chezmoi apply` (or however you populate `~/.agents/`), the agents and skills are available globally. From inside any other project:
+
+```bash
+# Inside ~/work/some-other-project
+agentspec manage link architect claude-code
+agentspec manage link guardian codex
+agentspec manage link orchestrate-agents claude-code
+agentspec sync --fast
+```
+
+This creates the tool-specific symlinks (e.g., `~/.claude/agents/architect.md`, `~/.codex/agents/guardian.md`) so the tool sees the resource. Nothing about this is dotfiles-repo-specific.
 
 ## Linking to Tools
 
@@ -55,6 +74,7 @@ After agents are deployed, link them to specific AI tools:
 ```bash
 agentspec manage link architect claude-code
 agentspec manage link debugger claude-code
+agentspec manage link guardian codex      # guardian also ships as a Codex profile
 ```
 
 This creates the appropriate symlinks (e.g., `~/.claude/agents/architect.md`).

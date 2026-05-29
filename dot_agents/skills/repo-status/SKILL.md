@@ -1,11 +1,14 @@
 ---
-name: status
-description: Check active repos for recent activity and local state. Scans a folder for git repos with commits in the last 5-7 days and reports their status including uncommitted changes.
+name: repo-status
+description: >
+  Scan a folder of git repos and report recent activity, branch divergence, and
+  uncommitted state. Defaults to the folder argument or your repo root. Use when
+  checking what is live across many repos at once.
 allowed-tools: Bash
 user-invocable: true
 arguments:
   - name: folder
-    description: Folder to scan for git repos (defaults to ~/github)
+    description: Folder to scan for git repos (defaults to $REPO_ROOT or ~/github if unset)
     required: false
 ---
 
@@ -15,7 +18,7 @@ Scan a directory for git repositories with recent activity and report their stat
 
 ## Invocation
 
-The user may pass a folder path as an argument. Default to `~/github` if none provided.
+The user may pass a folder path as an argument. Default to `$REPO_ROOT`, falling back to `~/github` if unset.
 
 ## Steps
 

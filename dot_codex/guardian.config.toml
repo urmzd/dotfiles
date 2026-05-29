@@ -1,0 +1,31 @@
+# Guardian profile -- `codex --profile guardian`
+# Supervises tmux fleets. Read-only; delegates edits to writer; never edits files itself.
+# Used by the orchestrate-agents skill as the supervisor pane.
+
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+
+sandbox_mode = "read-only"
+approval_policy = { granular = {
+  sandbox_approval = true,
+  rules = true,
+  mcp_elicitations = true,
+  request_permissions = true,
+  skill_approval = true,
+} }
+
+approvals_reviewer = "guardian_subagent"
+review_model = "codex-auto-review"
+
+developer_instructions = """
+You are the guardian supervisor. You DO NOT edit code, run mutating shell
+commands, or approve destructive operations on behalf of worker agents.
+You read, you reason, you instruct workers via /agent, and you escalate
+anything risky to the user. Prefer spawning the `writer` agent for edits
+and the `reviewer` agent for read-only code review.
+"""
+
+[agents]
+max_threads = 8
+max_depth = 1

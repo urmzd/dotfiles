@@ -1,13 +1,9 @@
 ---
 name: manage-secrets
 description: >-
-  Manage project secrets with 1Password as the source of truth. Store values via
-  the `op` CLI, commit `op://vault/item/field` references instead of plaintext,
-  and run commands with `op run --env-file=.env --` (or `op inject` for config
-  files). Use when adding a new secret, finding plaintext credentials in `.env`
-  or config files, migrating a project off committed secrets, wiring secrets
-  into CI, or whenever the user mentions 1Password, `op`, `op://`, `op run`, or
-  `op inject`.
+  1Password-based secret storage workflow: vault layout, 1p:// references in
+  .envrc, op run for local execution. Use when storing or rotating credentials
+  with 1Password. (Other backends not covered.)
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Secrets with 1Password

@@ -1,3 +1,82 @@
+# ---------------------------------------------------------------------------
+# Codex base config (~/.codex/config.toml via chezmoi dot_ prefix).
+# Loaded for every `codex` session unless overridden by `codex --profile <name>`.
+#
+# Defaults: gpt-5.5 at xhigh reasoning, read-only sandbox. Safe by default;
+# escalate to a write-capable profile (writer) when actually shipping code.
+#
+# Codex approval_reviewer enum (per schema):
+#   "user"              human in the loop on every escalation
+#   "auto_review"       canonical name for the guardian-subagent reviewer
+#   "guardian_subagent" legacy alias of "auto_review" (still accepted)
+#
+# Companion profile overlays (separate files; legacy [profiles.X] nesting
+# was deprecated in v0.134.0):
+#   ~/.codex/guardian.config.toml  -- `codex --profile guardian`
+#   ~/.codex/writer.config.toml    -- `codex --profile writer`
+#   ~/.codex/reviewer.config.toml  -- `codex --profile reviewer`
+#   ~/.codex/plan.config.toml      -- `codex --profile plan`
+#
+# Companion subagent definitions (invoked inside a session via /agent <name>):
+#   ~/.codex/agents/guardian.toml  (supervisor; read-only; delegates edits)
+#   ~/.codex/agents/writer.toml    (execution worker; workspace-write)
+#   ~/.codex/agents/reviewer.toml  (read-only review pass)
+#
+# Shared Guardian persona lives at ~/.agents/agents/guardian.md and is consumed
+# by the `orchestrate-agents` skill when supervising a tmux fleet.
+# ---------------------------------------------------------------------------
+
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
+model_reasoning_summary = "auto"
+
 sandbox_mode = "read-only"
+approval_policy = "on-request"
+
+# ---- Guardian auto-reviewer (always armed) ---------------------------------
+# Routes every approval-eligible action through the guardian subagent BEFORE
+# escalating to the user. Inherits the active sandbox boundary.
+approvals_reviewer = "guardian_subagent"
+review_model = "codex-auto-review"
+
+[auto_review]
+policy = """
+Guardian persona: ~/.agents/agents/guardian.md. Apply that voice and rules here.
+
+APPROVE: read-only inspection, scoped workspace writes, well-known package
+managers (pnpm, uv, cargo, go), git read/status/log/diff, sr/teasr/fsrc.
+DENY: destructive shell (rm -rf /, dd, mkfs), force-push to main/master,
+credential exfiltration, network egress to non-allowlisted hosts, any edit
+to .env / *.key / *.pem, history rewrites without explicit user mention.
+ESCALATE: anything ambiguous, sandbox escalation requests, MCP tool calls
+that touch external systems (Gmail, Calendar, Drive, GitHub writes).
+
+Always report the decision in one line:
+GUARDIAN[<scope>]: <approve|deny|escalate> - <reason>
+"""
+
+# ---- Multi-agent / subagent global ceilings --------------------------------
+# Used by the orchestrate-agents skill when guardian spawns worker/reviewer
+# threads via /agent. max_depth=1 keeps fan-out flat (workers cannot
+# themselves spawn agents), matching Claude Code's Agent-tool model.
+[agents]
+max_threads = 6
+max_depth = 1
+job_max_runtime_seconds = 1800
+
+# ---- Sandbox / workspace tuning --------------------------------------------
+[sandbox_workspace_write]
+network_access = false
+exclude_slash_tmp = false
+exclude_tmpdir_env_var = false
+
+# ---- Feature flags ---------------------------------------------------------
+[features]
+multi_agent = true        # required for /agent and spawned subagent threads
+hooks = true              # SubagentStart / SubagentStop visibility
+memories = false          # opt-out; AGENTS.md is the source of truth
+
+# ---- Shell environment hygiene ---------------------------------------------
+[shell_environment_policy]
+inherit = "core"
+exclude = ["AWS_*", "AZURE_*", "GCP_*", "*_TOKEN", "*_SECRET", "*_KEY"]

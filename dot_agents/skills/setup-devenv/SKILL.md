@@ -1,6 +1,9 @@
 ---
 name: setup-devenv
-description: Per-language toolchain + direnv guidance. Use when setting up a project's dev environment, configuring .envrc files, or choosing between version managers.
+description: >
+  Per-language version manager + direnv pattern for project dev environments.
+  Use when bootstrapping a project's local toolchain. For chezmoi-managed pinned
+  installers, see setup-devenv-with-chezmoi.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Per-Language Dev Environments
@@ -45,11 +48,11 @@ dotenv
 source_up
 ```
 
-See `~/.local/share/chezmoi/dot_envrc.project.example` for a working template.
+See `${CLAUDE_SKILL_DIR:-$HOME/.agents/skills}/setup-devenv/assets/envrc.project.example` for a working template. (Chezmoi users: the same file is tracked at `~/.local/share/chezmoi/dot_envrc.project.example`; see setup-devenv-with-chezmoi.)
 
 ## When to add an upstream installer
 
-Adopt a chezmoi `run_onchange_after_install-<tool>.sh.tmpl` script with a pinned version when:
+Adopt a one-shot installer script (e.g. a chezmoi `run_onchange_after_install-<tool>.sh.tmpl`, a Brewfile entry, or a Nix derivation) with a pinned version when:
 
 - The tool ships security/auth fixes faster than distro repos can package them (gcloud, aws-cli)
 - The vendor distributes only via their own installer with no version-arg support (Snowflake Cortex)

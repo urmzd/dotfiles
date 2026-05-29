@@ -1,11 +1,9 @@
 ---
 name: assess-quality
 description: >
-  Code quality assessment. Readability, onboarding ease, scalability without bloat,
-  brand coherence across projects, and intentional design for developers and AI agents.
-  The foundational "why" behind all conventions. Use when reviewing code quality,
-  assessing project health, onboarding to a new project, or making architectural
-  decisions about structure and consistency.
+  Foundational quality framework -- the five questions every other dev skill is
+  judged against. Use when onboarding to a project, defining a quality bar, or
+  arbitrating between review-design and write-code. Not for day-to-day code review.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Code Quality
@@ -14,6 +12,8 @@ metadata:
 ---
 
 # Code Quality
+
+> **Layering:** Foundational why; `review-design` and `write-code` build on this. Use this skill when defining the quality bar or arbitrating between principles (`review-design`) and operational picks (`write-code`).
 
 ## The Workshop Principle
 

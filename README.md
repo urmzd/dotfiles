@@ -7,7 +7,7 @@
     &middot;
     <a href="https://github.com/urmzd/dotfiles/issues">Report Bug</a>
     &middot;
-    <a href="#agent-skill">Agent Skill</a>
+    <a href="#agent-skills">Agent Skills</a>
   </p>
 </p>
 
@@ -25,7 +25,7 @@
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
 - **Neovim** (HEAD) with LSP for all included languages
 - **AI agents** (Claude Code, Gemini, Codex, Copilot) auto-installed via chezmoi
-- **34 portable agent skills** in [`dot_agents/skills/`](dot_agents/skills/) + **7 subagents** in [`dot_agents/agents/`](dot_agents/agents/)
+- **A portable agent skills catalog** in [`dot_agents/skills/`](dot_agents/skills/) and subagents in [`dot_agents/agents/`](dot_agents/agents/), installable into any tool via [`agentspec`](https://github.com/urmzd/agentspec). See [Agent Skills](#agent-skills) for the full list.
 - **Chezmoi automation** scripts that trigger on apply
 - **Docker cleanup** launchd agent running daily at 3 AM
 
@@ -76,10 +76,10 @@ dotfiles cleanup         # Prune build artifacts and caches
 **Version managers** (per-language, best-in-class): fnm (Node), uv (Python), rustup (Rust).
 
 **Upstream-pinned installers** (security/auth fixes ship faster than distro repos):
-- gcloud + aws-cli — [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
-- Snowflake Cortex Code — [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
+- gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
+- Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex, Gemini CLI, GitHub Copilot. Update with `dotfiles update-ai`.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (with a `guardian` profile for orchestrated fleets), Gemini CLI, GitHub Copilot. Update with `dotfiles update-ai`.
 
 ### Adding a new tool
 
@@ -121,13 +121,13 @@ AI coding agents are installed by `chezmoi apply` (sentinel-gated, no shell-star
 dotfiles status
 ```
 
-Claude Code config lives in `dot_claude/`. Includes settings, custom statusline, and project-scoped skills.
+Claude Code config lives in `dot_claude/`. Includes settings, custom statusline, and project-scoped skills. Codex ships with a `guardian` profile used by the `orchestrate-agents` skill to supervise multi-agent fleets.
 
 ## Agent Skills
 
-This repo's conventions are available as portable agent skills in [`dot_agents/skills/`](dot_agents/skills/), following the [Agent Skills Specification](https://agentskills.io/specification).
+Skills and subagents in this repo are **cross-project**: once installed via [`agentspec`](https://github.com/urmzd/agentspec), they are available to any tool (claude-code, codex, gemini, copilot) from any project. The source-of-truth lives in [`dot_agents/skills/`](dot_agents/skills/) and [`dot_agents/agents/`](dot_agents/agents/), following the [Agent Skills Specification](https://agentskills.io/specification).
 
-Related standards: [AGENTS.md](https://agents.md/) · [llms.txt](https://llmstxt.org/)
+Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstxt.org/)
 
 ### Managing skills
 
@@ -159,33 +159,37 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 
 ### All skills
 
-#### Coding standards
+#### Quality & design (framework -> principles -> operational)
 
 | Skill | Purpose |
 | ----- | ------- |
-| assess-quality | Code quality assessment (readability, consistency, intentional design) |
-| build-cli | CLI conventions (JSON piping, stdout/stderr, structured logging) |
+| assess-quality | Foundational quality framework. The "why" layer above review-design and write-code |
+| review-design | Pragmatic Programmer principles (DRY, orthogonality, design by contract) |
+| write-code | Operational picks: error handling, testing strategy, commit conventions, interface design |
+| write-code-portfolio | Personal portfolio specifics (Nix Flakes, chezmoi machine polymorphism, Powerlevel10k, Neovim) |
+| test-code | Testing philosophy and per-language conventions |
+| build-cli | Design and audit CLI tools end-to-end (output modes, TTY, JSON piping, install.sh, portfolio self-update / `--format` requirements) |
 | check-project | Validate project structure against scaffold conventions |
 | choose-stack | Canonical tech stack reference by purpose |
-| cli-standards | CLI patterns and conventions reference |
-| review-design | Pragmatic programming principles |
-| test-code | Testing philosophy and per-language conventions |
-| write-code | Coding standards and practices |
 
 #### Scaffolding & setup
 
+`scaffold-project` is the canonical source for standard files; each `scaffold-<lang>` adds only language-specific deltas.
+
 | Skill | Purpose |
 | ----- | ------- |
-| scaffold-go | Scaffold Go projects |
-| scaffold-node | Scaffold Node/TypeScript projects |
-| scaffold-project | Project structure (.envrc, Cargo workspace, etc.) |
-| scaffold-python | Scaffold Python projects |
-| scaffold-rust | Scaffold Rust projects |
-| scaffold-terraform | Scaffold Terraform projects |
+| scaffold-project | Project structure and standard files (canonical) |
+| scaffold-go | Go-specific deltas (toolchain, CI matrix, release publisher) |
+| scaffold-node | Node/TypeScript deltas |
+| scaffold-python | Python deltas |
+| scaffold-rust | Rust deltas |
+| scaffold-terraform | Terraform infra deltas |
 | setup-ci | CI/CD pipeline conventions |
-| setup-devenv | Per-language toolchain + direnv guidance |
+| setup-devenv | Per-language version manager + direnv pattern (portable) |
+| setup-devenv-with-chezmoi | Chezmoi-specific helpers for pinned installers and tracked `.envrc` |
 | sync-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
 | repo-init | Full repo bootstrap (create, license, scaffold, push) |
+| community-health | GitHub Community Standards (CODE_OF_CONDUCT, SECURITY, ISSUE_TEMPLATE) with `$COMMUNITY_HEALTH_CONTACT` |
 
 #### Workflow automation
 
@@ -195,33 +199,39 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | pr | Create PRs with auto-generated summary from commits |
 | diagnose-ci | Find failing pipelines, pull logs, identify root cause |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
-| status | Check active repos for recent activity and local state |
+| repo-status | Scan a folder of git repos and report recent activity, branch divergence, and uncommitted state (renamed from `status`) |
 | release-audit | Audit releases, tags, and assets for health |
-| sync-ecosystem | Sync project ecosystem (deps, configs, cross-repo consistency) |
+| sync-ecosystem | Audit one repository against ecosystem conventions and emit a drift report |
+| sync-ecosystem-to-chezmoi | Apply a sync-ecosystem drift report back into the chezmoi source tree |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
+| manage-secrets | 1Password-based secret workflow (vault layout, `1p://` references, `op run`) |
+| orchestrate-agents | Drive multiple agent CLIs (Claude, Codex, Gemini) over tmux with a shared fleet store |
 
 #### AI & documentation
 
+`create-oss-skill` owns the base spec; `extend-oss-skills-to-claude` is a sequel covering only the Claude-specific deltas.
+
 | Skill | Purpose |
 | ----- | ------- |
-| configure-ai | AI-assisted workflow patterns |
-| create-llms-txt | Generate LLM-friendly project summary files |
-| create-oss-skill | Create portable agent skills |
-| extend-oss-skills-to-claude | Extend skills with Claude Code-specific features |
+| configure-ai | AI tooling configuration, AGENTS.md, skills standard |
+| create-llms-txt | Generate llms.txt files |
+| create-oss-skill | Create portable agent skills (canonical spec) |
+| extend-oss-skills-to-claude | Claude-specific skill deltas (invocation control, subagent execution, model overrides) |
 | audit-security | Security auditing and threat detection |
-| style-brand | Branding, themes, teasr demo capture, asset conventions |
-| sync-docs | Audit and synchronize project documentation |
+| style-brand | Frame and document a project's visual identity. Ships Cyberdream + MonaspiceNe + teasr as a template, not a mandate |
+| sync-docs | Audit and synchronize project documentation (canonical doc-drift skill) |
 | write-readme | README structure and section order |
 
 #### Subagents
 
-Delegation targets in [`dot_agents/agents/`](dot_agents/agents/) that adopt a specific reasoning mode:
+Delegation targets in [`dot_agents/agents/`](dot_agents/agents/) that adopt a specific reasoning mode. Installable into any tool via `agentspec manage link <name> <tool>`.
 
 | Agent | Purpose |
 | ----- | ------- |
 | architect | Interface-first systems design with verbose, principle-driven reasoning |
 | curator | Prescriptive perfectionist for consistency, polish, and visual hierarchy |
 | debugger | Terse, empirical root-cause analysis |
+| guardian | Supervises orchestrated agent fleets driven by the `orchestrate-agents` skill (also installed as a Codex profile) |
 | ideator | Expansive, generative creative exploration |
 | strategist | Imperative orchestration across multiple systems and repos |
 | technical-documentation-architect | Structured technical documentation and architecture docs |

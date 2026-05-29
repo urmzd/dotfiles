@@ -1,10 +1,9 @@
 ---
 name: sync-ecosystem
 description: >
-  Audit a single repository against ecosystem conventions and sync findings back to
-  chezmoi skills in the dotfiles repo. Use when onboarding a new repo, after a naming
-  refactor, when terminology has drifted, or to ensure chezmoi skills stay current
-  with a project's capabilities. Accepts a repo path as argument.
+  Audit one repository against ecosystem conventions (naming, capabilities, terminology,
+  doc coverage) and emit a drift report. Use when onboarding a repo or after a refactor.
+  For pushing fixes back into the canonical skill store, chain with sync-ecosystem-to-chezmoi.
 allowed-tools: Read Grep Glob Bash Edit Write Agent
 user-invocable: true
 license: Apache-2.0
@@ -16,7 +15,7 @@ metadata:
 
 # Ecosystem Sync
 
-Audit one repository for consistency with the rest of the ecosystem, then sync any drift back into chezmoi-managed skills.
+Audit one repository for consistency with the rest of the ecosystem and emit a drift report. To push the report back into the canonical skill store, chain with sync-ecosystem-to-chezmoi (or your equivalent).
 
 **Usage:** `/sync-ecosystem <repo-path>`
 
@@ -24,7 +23,7 @@ If no path is given, ask which repo to audit before proceeding.
 
 ## Principle
 
-Ecosystem conventions evolve. This skill does not enumerate them inline — that list rots. Instead, it runs an **audit loop** that pulls the current rules from the skills that own each convention, then reports drift between the target repo and those rules.
+Ecosystem conventions evolve. This skill does not enumerate them inline -- that list rots. Instead, it runs an **audit loop** that pulls the current rules from the skills that own each convention, then reports drift between the target repo and those rules.
 
 ## Audit Loop
 
@@ -33,7 +32,7 @@ Ecosystem conventions evolve. This skill does not enumerate them inline — that
 Read whatever identity and manifest files the repo has (README, AGENTS.md, llms.txt, language manifest). From these infer:
 
 - **Name and description** the identity the rest of the ecosystem should agree with
-- **Repo type** library, CLI, service, website, or something else — dictates which conventions apply
+- **Repo type** library, CLI, service, website, or something else -- dictates which conventions apply
 - **Language and build system** dictates which `scaffold-<lang>` skill to consult
 
 Don't assume any specific file is present. Absence of a file is itself a finding.
@@ -51,7 +50,8 @@ For each convention category, consult the owning skill rather than enumerating r
 | llms.txt structure | `create-llms-txt` |
 | CI/release workflow | `setup-ci`, `sync-release` |
 | Language-specific scaffold | `scaffold-<lang>` |
-| CLI conventions | `cli-standards`, `build-cli` |
+| CLI conventions | `build-cli` |
+| Doc-drift (fsrc, command renames, dead links) | `sync-docs` (delegate, do not re-implement) |
 
 ### 3. Check drift
 
@@ -62,10 +62,11 @@ Run generic drift checks against what you discovered:
 - **Cross-reference agreement** do name, description, install command, and version agree across docs and manifest?
 - **Version discipline** does the latest git tag match the manifest version (or match the tagging scheme declared by `sync-release`)?
 - **Terminology** does usage in the repo match the terms used in this ecosystem's other published skills and docs? Flag divergences; do not auto-rewrite.
+- **Doc subset** for the documentation-specific portion of the audit (fsrc drift, dead internal links, stale commands), invoke `sync-docs` instead of re-implementing the checks.
 
-### 4. Chezmoi coverage
+### 4. Canonical skill coverage
 
-Find the chezmoi source:
+Locate the canonical skill source (chezmoi users: `chezmoi source-path`; others: `${CLAUDE_SKILL_DIR:-$HOME/.agents/skills}`):
 
 ```sh
 chezmoi source-path
@@ -73,16 +74,16 @@ chezmoi source-path
 
 For each skill the target repo exposes under `skills/` (if any), verify:
 
-- A counterpart exists in `<chezmoi-source>/dot_agents/skills/`
+- A counterpart exists in the canonical skill source (`<source>/dot_agents/skills/` for chezmoi, or `${CLAUDE_SKILL_DIR:-$HOME/.agents/skills}/`)
 - The counterpart's body matches the repo's current state (commands, file paths, feature list)
 - Frontmatter is valid **name matches directory, description is specific and imperative, `allowed-tools` lists only what the skill uses, body is under ~500 lines**
 
-Flag any skill present in the repo but missing or stale in chezmoi.
+Flag any skill present in the repo but missing or stale in the canonical store.
 
 ### 5. Report
 
 ```
-## Ecosystem Audit — <repo-name>
+## Ecosystem Audit -- <repo-name>
 
 ### Repo Type
 <library | CLI | service | website | other>
@@ -91,15 +92,15 @@ Flag any skill present in the repo but missing or stale in chezmoi.
 - <artifact>: ✓ / ✗ (reason, with owning-skill reference)
 
 ### Drift
-- <file>:<line> — <description of drift, with owning-skill reference>
+- <file>:<line> -- <description of drift, with owning-skill reference>
 
 ### Version Discipline
 - Latest tag: <tag or "none">
 - Manifest version: <version>
 - Status: ✓ aligned / ✗ mismatch
 
-### Chezmoi Skill Coverage
-- <skill-name>: in repo ✓, in chezmoi ✓/✗, up to date ✓/✗
+### Canonical Skill Coverage
+- <skill-name>: in repo ✓, in canonical store ✓/✗, up to date ✓/✗
 
 ### Summary
 X checks run. Y issues found.
@@ -111,10 +112,11 @@ X checks run. Y issues found.
 |-------|--------|
 | Missing artifact | Run the owning skill (`configure-ai`, `create-llms-txt`, etc.) against the repo |
 | Content drift | Edit the offending file to match current state; propagate to dependents |
-| Skill in repo but not in chezmoi | Copy skill dir into `<chezmoi-source>/dot_agents/skills/` |
-| Stale chezmoi skill | Fix frontmatter or body in the chezmoi source |
+| Skill in repo but not in canonical store | Copy skill dir into the canonical source (`<chezmoi-source>/dot_agents/skills/` or equivalent) |
+| Stale canonical skill | Fix frontmatter or body in the canonical source (not the deployed copy) |
+| Drift report needs to push back to chezmoi | Hand off to `sync-ecosystem-to-chezmoi` |
 
-After editing any chezmoi skill:
+After editing any canonical skill (chezmoi users only):
 
 ```sh
 chezmoi apply
@@ -123,7 +125,8 @@ agentspec sync --fast
 
 ## Gotchas
 
-- Edit skills in the chezmoi **source** directory. The deployed copy under `~/.agents/skills/` is overwritten on the next `chezmoi apply`.
+- Edit skills in the **canonical source** (for chezmoi users, the chezmoi source dir). Deployed copies under `${CLAUDE_SKILL_DIR:-$HOME/.agents/skills}/` are overwritten on the next sync.
 - Only repos with user-facing agent capabilities need a `skills/` directory. Libraries and protocol specs do not.
-- Don't auto-execute consolidation plans found in planning docs **flag them for user decision**.
+- Don't auto-execute consolidation plans found in planning docs -- **flag them for user decision**.
 - Report version/tag mismatches but do not bump versions automatically.
+- For the doc-specific drift checks (fsrc verification, command renames, dead internal links), defer to `sync-docs` rather than duplicating logic here.

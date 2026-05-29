@@ -1,0 +1,9 @@
+# Plan profile -- `codex --profile plan`
+# Hardest reasoning, zero write capability, used before fleet dispatch.
+
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+
+sandbox_mode = "read-only"
+approval_policy = "untrusted"

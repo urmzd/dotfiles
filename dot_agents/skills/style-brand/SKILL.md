@@ -1,6 +1,10 @@
 ---
 name: style-brand
-description: Terminal theme, font, teasr demo capture, asset conventions, and branding across README/demos. Use when configuring appearance, recording demos, or maintaining visual consistency.
+description: >
+  Frame and document a project's visual identity: terminal theme, font, demo
+  capture pipeline, asset conventions. Use when establishing or maintaining brand
+  consistency. Ships an example brand (Cyberdream + MonaspiceNe + teasr) as a
+  template, not a mandate.
 allowed-tools: Read Grep Glob Bash Edit Write
 metadata:
   title: Visual Identity
@@ -14,10 +18,10 @@ metadata:
 
 | Element | Choice |
 |---------|--------|
-| Theme | Cyberdream (256-color) |
-| Font | MonaspiceNe Nerd Font (16pt) |
+| Theme | $BRAND_THEME (example: Cyberdream, 256-color) |
+| Font | $BRAND_FONT (example: MonaspiceNe Nerd Font, 16pt) |
 
-The Cyberdream color palette:
+Example palette (Cyberdream -- substitute your own):
 
 | Color | Hex |
 |-------|-----|
@@ -33,7 +37,7 @@ The Cyberdream color palette:
 
 ## teasr Demo Template
 
-Terminal demos are recorded with [teasr](https://github.com/urmzd/teasr) using a consistent template:
+Terminal demos are recorded with a consistent template using whatever recorder you prefer (this portfolio uses [teasr](https://github.com/urmzd/teasr)):
 
 ```toml
 [output]
@@ -86,7 +90,7 @@ teasr automates demo capture with `teasr.toml` config:
 - **Output formats:** png, gif
 - **Standard output dir:** `showcase/` (default: `./teasr-output`)
 - **Naming:** `demo.png`, `demo.gif`, `demo-<feature>.png`
-- **CI integration:** `urmzd/teasr/.github/actions/teasr@main`
+- **CI integration:** invoke your recorder via a reusable action (this portfolio uses `urmzd/teasr/.github/actions/teasr@main`)
 
 ## Asset Directory Convention
 
@@ -98,7 +102,7 @@ teasr (automated) > manual screenshots
 
 ## Branding Consistency
 
-Cyberdream theme + MonaspiceNe font applied consistently across:
+Your chosen theme + font applied consistently across (example: Cyberdream + MonaspiceNe):
 - Terminal demos (teasr)
 - GitHub Actions branding (`icon` + `color`)
 - github-metrics SVGs
