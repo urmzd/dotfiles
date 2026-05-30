@@ -1,7 +1,7 @@
 ---
 name: audit-security
-description: Security auditing, threat detection, sensitive data leak prevention, and system diagnostics via Activity Monitor. Use when checking for security issues, investigating suspicious processes, preventing credential leaks, or hardening configurations.
-allowed-tools: Read Grep Glob Bash
+description: Scans a repo and host for leaked keys and secrets (gitleaks, trufflehog), audits SSH/GPG/.env file permissions, checks git hygiene, investigates suspicious processes and listeners, and hardens config (FileVault, firewall, SIP, SSH). Use when auditing for leaked credentials or secrets, checking for security issues before a commit, investigating an unknown process or open port, or hardening a machine. Do NOT use for storing, injecting, or rotating secrets at rest (1Password, op read, vaults) -> use manage-secrets; this skill only detects and reports exposure.
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(gitleaks *), Bash(trufflehog *), Bash(lsof *), Bash(ps *), Bash(stat *), Bash(chmod *), Bash(codesign *), Bash(spctl *), Bash(csrutil *), Bash(fdesetup *), Bash(launchctl *), Bash(last *)
 metadata:
   title: Security Audit
   category: security
@@ -67,8 +67,8 @@ When the user asks to diagnose system issues:
 
 | Task | Command |
 |------|---------|
-| Top CPU consumers | `ps aux --sort=-%cpu \| head -20` |
-| Top memory consumers | `ps aux --sort=-%mem \| head -20` |
+| Top CPU consumers | `ps -Ao pid,pcpu,comm -r \| head -20` |
+| Top memory consumers | `ps -Ao pid,pmem,comm -m \| head -20` |
 | Listening ports | `lsof -i -P -n \| grep LISTEN` |
 | Network connections | `lsof -i -n` |
 | Open files by process | `lsof -p <PID>` |
@@ -111,7 +111,7 @@ Verify and recommend:
 
 ## Output Format
 
-```
+```text
 ## Security Audit Report
 
 ### CRITICAL

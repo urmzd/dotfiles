@@ -1,7 +1,13 @@
 ---
 name: repo-init
-description: Full repo bootstrap. Create GitHub repo, add license, scaffold CI/release, write README, set metadata, and push. Use when starting a new project from scratch.
-allowed-tools: Bash Read Grep Glob Edit Write
+description: >
+  End-to-end repo bootstrap: creates the GitHub repo (gh repo create), adds an
+  Apache-2.0 LICENSE, dispatches to scaffold-project for CI/release/config, invokes
+  community-health, writes a README, sets topics/description, and makes the initial
+  commit and push. Use when starting a brand-new project from zero and you need the
+  GitHub repo, metadata, and first push handled, not just local files. Do NOT use to
+  scaffold files inside an existing repo; invoke scaffold-project directly for that.
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(gh *), Edit, Write
 user-invocable: true
 arguments:
   - name: name
@@ -28,15 +34,14 @@ Bootstrap a complete repository from zero to pushed.
 
 2. **Add LICENSE**: Create an Apache-2.0 LICENSE file in the repo root.
 
-3. **Scaffold**: If a language is specified, invoke the appropriate scaffold skill pattern:
-   - Set up CI workflow (`.github/workflows/ci.yml`)
-   - Set up release workflow (`.github/workflows/release.yml`)
-   - Create `sr.yaml` for semantic release
-   - Set up task runner (native to the language; npm scripts, Makefile, cargo, justfile for Python)
-   - Create `.envrc` with appropriate Nix dev shell
-   - Create language-specific config (Cargo.toml, go.mod, pyproject.toml, package.json, etc.)
+3. **Scaffold**: If a language is specified, invoke `scaffold-project` (which dispatches to `scaffold-<lang>`) to produce:
+   - CI workflow (`.github/workflows/ci.yml`) and release workflow (`.github/workflows/release.yml`); see `setup-ci`.
+   - `sr.yaml` for semantic release; see `sync-release`.
+   - Task runner native to the language (npm scripts, Makefile, cargo, justfile for Python).
+   - `.envrc` via the `setup-devenv` direnv pattern (vanilla direnv + per-language version manager, not a Nix dev shell).
+   - Language-specific config (Cargo.toml, go.mod, pyproject.toml, package.json, etc.).
 
-4. **Community health**: Invoke `community-health` to add `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/pull_request_template.md`, and `.github/ISSUE_TEMPLATE/` (bug report, feature request, config). Substitute `{REPO}`, `{CURRENT_MAJOR}`, and `{CHECK_COMMAND}` placeholders. For a brand-new pre-1.0 project, set `{CURRENT_MAJOR}` to `0` and rewrite the SECURITY.md supported-versions table to `0.x Yes / < 0.x No`.
+4. **Community health**: Invoke `community-health` to add `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/pull_request_template.md`, and `.github/ISSUE_TEMPLATE/` (bug report, feature request, config). Substitute `{OWNER}`, `{REPO}`, `{CURRENT_MAJOR}`, and `{CHECK_COMMAND}` placeholders. For a brand-new pre-1.0 project, set `{CURRENT_MAJOR}` to `0` and rewrite the SECURITY.md supported-versions table to `0.x Yes / < 0.x No`.
 
 5. **README**: Generate a README with the repo name, description, and standard badge layout.
 

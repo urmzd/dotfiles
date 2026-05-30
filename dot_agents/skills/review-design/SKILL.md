@@ -1,11 +1,13 @@
 ---
 name: review-design
 description: >
-  Pragmatic Programmer principles: DRY, orthogonality, tracer bullets, design by
-  contract, pragmatic paranoia. The 'why' layer between assess-quality (framework)
-  and write-code (operational). Use when reasoning about design tradeoffs, not
-  when picking specific tools.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Pragmatic Programmer principles: DRY, orthogonality, ETC, reversibility, tracer
+  bullets, design by contract, decoupling/Law of Demeter, pragmatic paranoia. The
+  'why' layer between assess-quality (framework) and write-code (operational). Use
+  when reasoning about design tradeoffs, coupling, or whether a decision is
+  reversible. Do NOT use for the underlying quality framework (use assess-quality)
+  or for concrete tool/idiom/library picks (use write-code).
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Pragmatic Programming
   category: development

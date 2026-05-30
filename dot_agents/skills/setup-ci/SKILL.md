@@ -1,11 +1,14 @@
 ---
 name: setup-ci
 description: >
-  CI/CD conventions. ci.yml + release.yml naming, concurrency, bot skip, fsrc/teasr
-  steps, and workflow structure. Language-specific pipelines live in scaffold-rust,
-  scaffold-go, scaffold-python, scaffold-node, scaffold-terraform. Use when setting up
-  GitHub Actions or understanding CI conventions.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Defines GitHub Actions workflow structure: ci.yml + release.yml naming, concurrency
+  groups, bot-commit skip, workflow_call reuse, App-token checkout, and optional
+  fsrc/teasr steps. Language-specific pipelines live in scaffold-rust, scaffold-go,
+  scaffold-python, scaffold-node, scaffold-terraform. Use when setting up GitHub Actions,
+  wiring ci.yml/release.yml, configuring concurrency or workflow_call, or adding fsrc/teasr
+  steps. Do NOT use for sr.yaml schema, typed publishers, or the sr CLI/action; use
+  sync-release for those.
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(gh *), Edit, Write
 metadata:
   title: CI/CD Standards
   category: development
@@ -29,10 +32,10 @@ Universal conventions that apply across all languages. For language-specific CI 
 
 ## Pipeline Flow
 
-```
-PR → ci.yml (fmt → lint → test)
-Push main → release.yml:
-  fsrc → ci → sr release → build → publish → teasr → lock sync
+```text
+PR -> ci.yml (fmt -> lint -> test)
+Push main -> release.yml:
+  fsrc -> ci -> sr release -> build -> publish -> teasr -> lock sync
 ```
 
 ## Release Config

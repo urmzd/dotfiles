@@ -1,10 +1,15 @@
 ---
 name: repo-status
 description: >
-  Scan a folder of git repos and report recent activity, branch divergence, and
-  uncommitted state. Defaults to the folder argument or your repo root. Use when
-  checking what is live across many repos at once.
-allowed-tools: Bash
+  Scan a folder of git repos and report each repo's local dirty/clean state,
+  ahead/behind divergence from upstream, recent activity, and latest CI run status.
+  Read-only: never commits, pushes, or edits. Defaults to the folder argument or
+  your repo root. Use when checking "what's live", "which repos are dirty", or
+  "repo status across my projects". Sibling skills overlap on folder scanning:
+  do NOT use for "what should I work on next" prioritization (use get-work); do
+  NOT use for a recent-activity-only overview without dirty/CI detail (use status).
+  repo-status is the local dirty/ahead/behind + CI-state report.
+allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob
 user-invocable: true
 arguments:
   - name: folder
@@ -12,7 +17,7 @@ arguments:
     required: false
 ---
 
-# Status
+# Repo Status
 
 Scan a directory for git repositories with recent activity and report their status.
 
@@ -36,7 +41,7 @@ The user may pass a folder path as an argument. Default to `$REPO_ROOT`, falling
 
 4. **Output format**: Print a clean, grouped summary. For each repo use this structure:
 
-```
+```text
 ## repo-name [branch: feature/xyz -> main]
 - Status: 3 modified, 1 untracked
 - Ahead: 2 commits unpushed

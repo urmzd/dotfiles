@@ -5,7 +5,7 @@ description: >
   capture pipeline, asset conventions. Use when establishing or maintaining brand
   consistency. Ships an example brand (Cyberdream + MonaspiceNe + teasr) as a
   template, not a mandate.
-allowed-tools: Read Grep Glob Bash Edit Write
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Visual Identity
   category: visual
@@ -18,8 +18,8 @@ metadata:
 
 | Element | Choice |
 |---------|--------|
-| Theme | $BRAND_THEME (example: Cyberdream, 256-color) |
-| Font | $BRAND_FONT (example: MonaspiceNe Nerd Font, 16pt) |
+| Theme | <your theme> (example: Cyberdream, 256-color) |
+| Font | <your font> (example: MonaspiceNe Nerd Font, 16pt) |
 
 Example palette (Cyberdream -- substitute your own):
 

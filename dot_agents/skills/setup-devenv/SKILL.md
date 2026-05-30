@@ -1,10 +1,12 @@
 ---
 name: setup-devenv
 description: >
-  Per-language version manager + direnv pattern for project dev environments.
-  Use when bootstrapping a project's local toolchain. For chezmoi-managed pinned
-  installers, see setup-devenv-with-chezmoi.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Per-language runtime version managers (fnm, uv, rustup) plus the vanilla-direnv
+  .envrc pattern (layout python, use fnm, PATH_add, dotenv, source_up) for project
+  dev environments. Use when bootstrapping a project's local toolchain, choosing a
+  version manager, or writing a project .envrc. For chezmoi-managed pinned installer
+  scripts and the tracked dot_envrc.project.example template, use setup-devenv-with-chezmoi.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Per-Language Dev Environments
   category: cli
@@ -48,7 +50,7 @@ dotenv
 source_up
 ```
 
-See `${CLAUDE_SKILL_DIR:-$HOME/.agents/skills}/setup-devenv/assets/envrc.project.example` for a working template. (Chezmoi users: the same file is tracked at `~/.local/share/chezmoi/dot_envrc.project.example`; see setup-devenv-with-chezmoi.)
+For a working template, see the chezmoi-tracked `~/.local/share/chezmoi/dot_envrc.project.example` (renders to `~/.envrc.project.example`); see setup-devenv-with-chezmoi for the chezmoi plumbing. If you are not on chezmoi, copy the idioms above directly into your project `.envrc`.
 
 ## When to add an upstream installer
 

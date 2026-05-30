@@ -3,9 +3,11 @@ name: scaffold-go
 description: >
   Scaffold a complete Go project with CI/CD, release pipeline, Makefile, sr.yaml,
   .envrc, and standard files. Uses go toolchain and make as the native build system.
-  Use when creating a new Go CLI, service, or module, or when the user mentions
-  "new Go project", "go mod init", or "Go scaffold".
-allowed-tools: Read Grep Glob Bash Edit Write
+  Loads on top of scaffold-project (run that first for cross-language standard
+  files). Use when creating a new Go CLI, service, or module, or when the user
+  mentions "new Go project", "go mod init", or "Go scaffold". Do NOT use for Rust,
+  Python, Node, or Terraform projects; use the matching scaffold-<lang> skill.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(go *), Bash(gofmt *), Bash(golangci-lint *), Bash(git *)
 user-invocable: true
 metadata:
   title: Scaffold Go Project
@@ -279,7 +281,7 @@ PATH_add bin
 
 ### Project Layout
 
-```
+```text
 cmd/<project-name>/    # main package (entry point)
   main.go
 internal/              # private packages

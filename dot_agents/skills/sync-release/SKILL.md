@@ -1,11 +1,15 @@
 ---
 name: sync-release
 description: >
-  Release pipeline conventions. sr.yaml config, sr action usage, typed publishers,
-  monorepo support, post-release patterns, and version file mapping. Language-specific
-  build targets and publishing live in scaffold-rust, scaffold-go, scaffold-python,
-  scaffold-node. Use when setting up or modifying release pipelines.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Owns release-pipeline conventions: sr.yaml schema, the sr CLI verbs (init/plan/prepare/
+  release) and urmzd/sr action, typed publishers (cargo/npm/pypi/docker/go/custom),
+  monorepo workspace discovery, version_files/stage_files mapping, and post-release
+  patterns. Language-specific build targets live in scaffold-rust, scaffold-go,
+  scaffold-python, scaffold-node. Use when writing or editing sr.yaml, choosing a
+  publisher, or wiring the sr action. Do NOT use for GitHub Actions workflow file
+  structure, ci.yml/release.yml naming, concurrency, workflow_call, or the App-token
+  checkout; use setup-ci for those.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Release Workflow
   category: development
@@ -75,12 +79,12 @@ packages:
 
 ## CLI Commands
 
-Three verbs form the release pipeline — `plan` previews, `prepare` writes bumped files to disk, `release` reconciles everything.
+Three verbs form the release pipeline: `plan` previews, `prepare` writes bumped files to disk, `release` reconciles everything.
 
-```
+```text
 sr init         Create sr.yaml (use --merge to add new fields non-destructively)
 sr plan         Terraform-style diff: planned version, tag, artifacts, publish targets
-sr prepare      Bump version files + write changelog (no commit/tag/push — for CI build steps between plan and release)
+sr prepare      Bump version files + write changelog (no commit/tag/push -- for CI build steps between plan and release)
 sr release      Reconcile: commit, tag, push, GitHub release, upload artifacts, publish
 sr config       Validate and display resolved configuration
 sr migrate      Show the full version-by-version migration guide
@@ -96,7 +100,7 @@ Run `sr migrate` for the full breaking-change guide. v8 turned sr into a release
 
 ## Release Pipeline
 
-```
+```text
 push to main
   → ci.yml (fmt → lint → test)
   → release.yml:
@@ -130,7 +134,7 @@ Apply only what the repo declares.
 
 ## Typed Publishers
 
-sr runs registry uploads via `publish:` on each package — no shell hooks. Each publisher queries its registry to skip already-published versions, so re-runs are idempotent.
+sr runs registry uploads via `publish:` on each package, no shell hooks. Each publisher queries its registry to skip already-published versions, so re-runs are idempotent.
 
 ```yaml
 packages:
@@ -159,7 +163,7 @@ Run tests, lints, and pre-flight scripts as ordinary CI steps before `sr release
 
 | Scenario | CI shape | `artifacts` in sr.yaml |
 |----------|----------|------------------------|
-| Pure library (no binaries) | single job: `sr release` | — |
+| Pure library (no binaries) | single job: `sr release` | n/a |
 | Single-platform binary | build then `sr release` in one job | literal path(s) to the built binary |
 | Multi-platform binaries | `sr prepare` → build matrix → `sr release` (three jobs, artifacts flow via `actions/upload-artifact`) | literal paths for every target |
 
@@ -167,4 +171,4 @@ Multi-platform: `sr prepare` bumps version files so matrix builds embed the righ
 
 ## Monorepo Support
 
-One global version across all packages — sr auto-discovers workspace members from `[workspace].members` (Cargo), `[tool.uv.workspace].members` (uv), or `pnpm-workspace.yaml` / `package.json` `workspaces`. Independent per-package versioning is no longer supported; use separate repos if packages must diverge.
+One global version across all packages: sr auto-discovers workspace members from `[workspace].members` (Cargo), `[tool.uv.workspace].members` (uv), or `pnpm-workspace.yaml` / `package.json` `workspaces`. Independent per-package versioning is no longer supported; use separate repos if packages must diverge.

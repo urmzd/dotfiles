@@ -5,8 +5,8 @@ description: >
   codebase, docs, and public URLs. Use when creating an llms.txt, making a
   project LLM-discoverable, or when the user mentions "llms.txt" in the
   context of generating or scaffolding one.
+allowed-tools: Read, Grep, Glob, Bash(git *), Edit, Write, WebFetch
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent, WebFetch
 metadata:
   title: Create llms.txt
   category: ai

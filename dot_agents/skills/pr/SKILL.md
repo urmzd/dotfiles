@@ -1,7 +1,13 @@
 ---
 name: pr
-description: Create a pull request with auto-generated summary from commits, following conventional commit conventions. Use when creating PRs.
-allowed-tools: Bash
+description: >
+  Open a pull request via gh pr create with an auto-generated title and summary
+  derived from the commits on the branch, grouped by conventional-commit type.
+  Use when the user says "create a pull request", "open a PR", "gh pr create",
+  "raise a PR", or "make a PR for this branch". Assumes commits already exist and
+  only opens the PR. Do NOT commit changes or watch CI (use ship); do NOT
+  diagnose or fix a failing pipeline (use fix-and-retry / diagnose-ci).
+allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob
 user-invocable: true
 arguments:
   - name: title
@@ -26,7 +32,7 @@ Create a pull request with a well-structured summary.
 3. **Generate PR content**:
    - **Title** (if not provided): Derive from commits. If single commit, use its message. If multiple, summarize the theme (under 70 chars).
    - **Body**: Use this format:
-     ```
+     ```text
      ## Summary
      - <bullet points derived from commits, grouped by type>
 
@@ -44,3 +50,8 @@ Create a pull request with a well-structured summary.
 - If a PR already exists for this branch, show its URL instead of creating a duplicate.
 - Keep the title under 70 characters.
 - Group commits by type (feat, fix, chore, etc.) in the summary.
+
+## Gotchas
+
+- Refuse when `HEAD` is the default branch: a PR needs a non-default source branch. Detect the default with `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`, compare to `git branch --show-current`, and if they match, stop and tell the user to create a feature branch first.
+- For a fork-based PR, the head ref must be qualified as `owner:branch`. Pass it with `gh pr create --head <owner>:<branch>` (the owner is the fork's GitHub login), so the PR targets the upstream repo from your fork.

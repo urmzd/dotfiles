@@ -1,7 +1,7 @@
 ---
 name: configure-ai
-description: AI tools, Claude Code configuration, AGENTS.md standard, skills-as-docs philosophy, and llms.txt. Use when setting up AI tooling, configuring projects for AI, or working with agent skills.
-allowed-tools: Read Grep Glob Bash Edit Write
+description: Authors AGENTS.md and defines the skills-vs-docs boundary for a repo. Configures AI coding tools (Claude Code, Codex, Gemini CLI, Copilot) and the skills-as-docs philosophy. Use when creating or auditing AGENTS.md, setting up AI tooling for a project, or deciding what belongs in a skill versus docs/. Do NOT use for README structure -> use write-readme; for llms.txt generation -> use create-llms-txt; for Claude-specific skill features (invocation control, subagents, model overrides) -> use extend-oss-skills-to-claude.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: AI Workflows
   category: ai
@@ -31,9 +31,9 @@ metadata:
 | Tool | Usage |
 |------|-------|
 | Claude Code (opus) | Primary AI coding assistant. Architecture, refactoring, multi-file edits |
-| OpenAI Codex | Alternative AI assistant for code generation |
-| Google Gemini CLI | Google's AI for research and code tasks |
-| GitHub Copilot | Inline code completion in Neovim |
+| OpenAI Codex | `workspace-write` "Auto" base config with a guardian auto-reviewer; ships writer, reviewer, plan, and guardian profiles/agents |
+| Google Gemini CLI | `auto_edit` approval mode with a read-only shell allowlist for unattended edits |
+| GitHub Copilot | Inline completion plus `settings.json` (model, reasoning effort, theme) |
 
 ## Claude Code Configuration
 

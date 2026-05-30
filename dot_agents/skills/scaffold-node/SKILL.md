@@ -2,10 +2,12 @@
 name: scaffold-node
 description: >
   Scaffold a complete Node/TypeScript project with CI/CD, release pipeline, sr.yaml,
-  .envrc, and standard files. Uses pnpm and biome. Use when creating a new
+  .envrc, and standard files. Uses pnpm and biome. Loads on top of scaffold-project
+  (run that first for cross-language standard files). Use when creating a new
   Node.js app, TypeScript library, or website, or when the user mentions "new Node project",
-  "pnpm init", "TypeScript scaffold", or "Astro site".
-allowed-tools: Read Grep Glob Bash Edit Write
+  "pnpm init", "TypeScript scaffold", or "Astro site". Do NOT use for Go, Rust,
+  Python, or Terraform projects; use the matching scaffold-<lang> skill.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(pnpm *), Bash(npx *), Bash(git *)
 user-invocable: true
 metadata:
   title: Scaffold Node/TypeScript Project

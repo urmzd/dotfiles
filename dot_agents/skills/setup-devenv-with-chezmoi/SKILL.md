@@ -1,12 +1,13 @@
 ---
 name: setup-devenv-with-chezmoi
 description: >
-  Chezmoi-specific dev environment helpers: pinned-version installer scripts
-  (run_onchange_after_install-<tool>.sh.tmpl) and the dot_envrc.project.example
-  template tracked in the chezmoi source. Use when wiring a new pinned installer
-  for the portfolio or scaffolding a chezmoi-tracked project envrc. Portable
-  per-language patterns live in setup-devenv.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Chezmoi-specific dev environment helpers: writing pinned-version installer scripts
+  (run_onchange_after_install-<tool>.sh.tmpl), maintaining the dot_envrc.project.example
+  template, and the chezmoi diff/apply loop. Use when wiring a new pinned vendor installer
+  (gcloud, aws-cli, Cortex) for the portfolio or scaffolding a chezmoi-tracked project
+  envrc. Do NOT use for portable per-language version-manager or vanilla-direnv patterns;
+  those live in setup-devenv.
+allowed-tools: Read, Grep, Glob, Bash(chezmoi *), Edit, Write
 user-invocable: false
 metadata:
   title: Dev Env with Chezmoi
@@ -28,29 +29,32 @@ If you're not on chezmoi, use `setup-devenv` directly. Substitute Brewfile / Nix
 
 ## Pinned Installer Pattern
 
-```
+```text
 ~/.local/share/chezmoi/run_onchange_after_install-<tool>.sh.tmpl
 ```
 
 Skeleton:
 
-```sh
+```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
 <TOOL>_VERSION="<pin>"
 INSTALL_DIR="$HOME/.local/share/<tool>/${<TOOL>_VERSION}"
+BIN_PATH="${INSTALL_DIR}/<tool>"
 BIN_LINK="$HOME/.local/bin/<tool>"
 
-if [ -x "${INSTALL_DIR}/bin/<tool>" ]; then
+# Guard must test the actual install path, not a bin/ subdir, or the script
+# re-downloads on every `chezmoi apply`.
+if [ -x "${BIN_PATH}" ]; then
   exit 0
 fi
 
 mkdir -p "${INSTALL_DIR}"
-curl -fsSL "<download-url>" -o "${INSTALL_DIR}/<tool>"
-chmod +x "${INSTALL_DIR}/<tool>"
+curl -fsSL "<download-url>" -o "${BIN_PATH}"
+chmod +x "${BIN_PATH}"
 
-ln -sf "${INSTALL_DIR}/<tool>" "${BIN_LINK}"
+ln -sf "${BIN_PATH}" "${BIN_LINK}"
 ```
 
 Conventions:
@@ -64,7 +68,7 @@ Conventions:
 
 The canonical project envrc lives at:
 
-```
+```text
 ~/.local/share/chezmoi/dot_envrc.project.example
 ```
 
@@ -74,7 +78,7 @@ When a new project needs `.envrc`, copy this file into the project root, strip t
 
 After editing any of the above:
 
-```sh
+```bash
 chezmoi diff
 chezmoi apply
 ```

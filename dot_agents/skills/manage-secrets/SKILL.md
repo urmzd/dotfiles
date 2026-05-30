@@ -4,7 +4,7 @@ description: >-
   1Password-based secret storage workflow: vault layout, 1p:// references in
   .envrc, op run for local execution. Use when storing or rotating credentials
   with 1Password. (Other backends not covered.)
-allowed-tools: Read Grep Glob Bash Edit Write
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(op *), Bash(git *)
 metadata:
   title: Secrets with 1Password
   category: cli

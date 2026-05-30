@@ -2,9 +2,12 @@
 name: sync-ecosystem
 description: >
   Audit one repository against ecosystem conventions (naming, capabilities, terminology,
-  doc coverage) and emit a drift report. Use when onboarding a repo or after a refactor.
-  For pushing fixes back into the canonical skill store, chain with sync-ecosystem-to-chezmoi.
-allowed-tools: Read Grep Glob Bash Edit Write Agent
+  doc coverage, version discipline, canonical skill coverage) and emit a read-only drift
+  report. Use when onboarding a repo, auditing convention drift, or checking ecosystem
+  consistency after a refactor. This skill only reports; it never edits the target repo or
+  the skill store. Do NOT use for applying fixes back into the chezmoi-managed canonical
+  store; use sync-ecosystem-to-chezmoi for that.
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(chezmoi *)
 user-invocable: true
 license: Apache-2.0
 metadata:
@@ -82,7 +85,7 @@ Flag any skill present in the repo but missing or stale in the canonical store.
 
 ### 5. Report
 
-```
+```text
 ## Ecosystem Audit -- <repo-name>
 
 ### Repo Type

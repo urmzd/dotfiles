@@ -1,0 +1,86 @@
+{
+  "skill": "review-diff",
+  "description": "Routing evals: does the query trigger a working-tree diff review against the rubric? Near-misses route to assess-quality (set the quality bar), review-design (design tradeoffs), diagnose-ci (red pipeline), and ship/pr (commit + push).",
+  "queries": [
+    {
+      "query": "review my changes before I commit",
+      "should_trigger": true,
+      "note": "Core ask: review staged + unstaged + untracked against the rubric."
+    },
+    {
+      "query": "review the diff and tell me what's wrong",
+      "should_trigger": true,
+      "note": "Direct diff review with prioritized findings."
+    },
+    {
+      "query": "look over my staged changes and flag anything risky",
+      "should_trigger": true,
+      "note": "Staged-only scope; security + correctness dimensions lead."
+    },
+    {
+      "query": "do a code review of what I have locally before I open the PR",
+      "should_trigger": true,
+      "note": "Pre-PR working-tree review, not a remote PR review."
+    },
+    {
+      "query": "are there any bugs or security issues in my current changes",
+      "should_trigger": true,
+      "note": "Correctness + security dimensions of the rubric on the local diff."
+    },
+    {
+      "query": "check whether my diff has any scope creep or unrelated edits",
+      "should_trigger": true,
+      "note": "Scope-creep dimension explicitly."
+    },
+    {
+      "query": "did I forget to add tests for the new branch I just wrote",
+      "should_trigger": true,
+      "note": "Tests dimension on uncommitted work."
+    },
+    {
+      "query": "review my uncommitted work against main and prioritize the findings",
+      "should_trigger": true,
+      "note": "Base-ref scope plus prioritized findings list."
+    },
+    {
+      "query": "go over these untracked files I just created and see if they're sound",
+      "should_trigger": true,
+      "note": "Untracked files are in scope; read them in full."
+    },
+    {
+      "query": "set the quality bar for this project and define what good looks like",
+      "should_trigger": false,
+      "note": "Framework / quality-bar definition -- assess-quality, not a single-diff review."
+    },
+    {
+      "query": "what are the five questions every change should be judged against",
+      "should_trigger": false,
+      "note": "The quality framework itself lives in assess-quality."
+    },
+    {
+      "query": "help me reason about whether this design decision is reversible and DRY",
+      "should_trigger": false,
+      "note": "Design tradeoffs / the 'why' layer -- review-design."
+    },
+    {
+      "query": "why did the CI pipeline fail on this branch",
+      "should_trigger": false,
+      "note": "Red remote pipeline -- diagnose-ci."
+    },
+    {
+      "query": "commit these changes and push them",
+      "should_trigger": false,
+      "note": "Commit + push is ship, not review."
+    },
+    {
+      "query": "open a pull request with a summary of my commits",
+      "should_trigger": false,
+      "note": "PR creation -- the pr skill, not a working-tree review."
+    },
+    {
+      "query": "review pull request #42 on GitHub and leave comments",
+      "should_trigger": false,
+      "note": "Remote PR review with inline comments is out of scope; this reviews the local working tree."
+    }
+  ]
+}

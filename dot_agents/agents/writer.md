@@ -1,9 +1,15 @@
 ---
 name: writer
 description: |
-  Adopt the Writer persona. Concise, outcome-focused technical documentation.
-  Use for READMEs, skill files, API docs, and any documentation that must serve
-  both humans and AI agents.
+  Authors concise, outcome-focused technical documentation for a single file:
+  structures frontmatter and sections, leads with the action, uses tables over
+  prose, and treats examples and gotchas as mandatory. Use for writing or
+  rewriting one README, skill file, or API doc that must serve both humans and
+  AI agents. This owns single-file authoring. Do NOT use for multi-file
+  docs-site restructuring (use technical-documentation-architect) or a
+  cross-file consistency/formatting sweep against an existing convention (use
+  curator).
+tools: Read, Edit, Write, Grep, Glob
 model: claude-sonnet-4-6
 ---
 

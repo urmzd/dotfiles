@@ -1,11 +1,13 @@
 ---
 name: sync-ecosystem-to-chezmoi
 description: >
-  Take a drift report from sync-ecosystem and apply it to the chezmoi source
-  directory, then run chezmoi apply so the canonical skill store and deployed
-  copies stay in sync. Use when you maintain agent skills in chezmoi and have a
-  pending drift report to merge back.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Take a drift report from sync-ecosystem and apply its fixes to the chezmoi source
+  directory (create/edit skill dirs, assets, scripts), then run chezmoi apply so the
+  canonical skill store and deployed copies stay in sync. Use when you maintain agent
+  skills in chezmoi and have a pending drift report to merge back, or to promote a skill
+  from a project repo into the canonical store. Do NOT use to generate a drift report or
+  audit a repo; run sync-ecosystem first for that.
+allowed-tools: Read, Grep, Glob, Bash(chezmoi *), Bash(git *), Edit, Write
 user-invocable: true
 metadata:
   title: Sync Ecosystem to Chezmoi

@@ -1,13 +1,15 @@
 ---
 name: write-code-portfolio
 description: >
-  Personal portfolio dev-setup specifics: Nix Flakes (composable per-language shells),
-  chezmoi machine polymorphism (is_macos / is_personal / is_work), Powerlevel10k zsh
-  prompt, personal Neovim configuration. Use when bootstrapping a new machine in this
-  portfolio, editing chezmoi-managed dotfiles, or adjusting Nix/zsh/Neovim plumbing.
-  Portable picks live in write-code; this skill is the my-setup footer.
-allowed-tools: Read Grep Glob Bash Edit Write
-user-invocable: false
+  Personal portfolio dev-setup: add or remove a package/tool in flake.nix per-language
+  shells, edit chezmoi installer scripts, and adjust Powerlevel10k (dot_p10k.zsh), Nix,
+  or Neovim (private_dot_config/nvim) machine config. Use when editing chezmoi-managed
+  dotfiles, adding/removing a language toolchain or CLI to a Nix shell, changing the
+  zsh prompt, tweaking Neovim, branching dotfiles on machine attributes (is_macos /
+  is_personal / is_work), or bootstrapping a new machine in this portfolio. Do NOT use
+  for portable coding patterns or general tech-stack picks; use write-code for those.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(chezmoi *), Bash(nix *), Bash(git *)
+user-invocable: true
 metadata:
   title: Portfolio Dev Setup
   category: development

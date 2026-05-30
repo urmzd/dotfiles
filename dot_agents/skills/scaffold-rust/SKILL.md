@@ -2,10 +2,12 @@
 name: scaffold-rust
 description: >
   Scaffold a complete Rust project with CI/CD, release pipeline, and sr.yaml.
-  Uses cargo as the native build system. Use when creating a new
+  Uses cargo as the native build system. Loads on top of scaffold-project (run
+  that first for cross-language standard files). Use when creating a new
   Rust CLI, library, or workspace, or when the user mentions "new Rust project",
-  "cargo init", or "Rust scaffold".
-allowed-tools: Read Grep Glob Bash Edit Write
+  "cargo init", or "Rust scaffold". Do NOT use for Go, Python, Node, or Terraform
+  projects; use the matching scaffold-<lang> skill.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(cargo *), Bash(cross *), Bash(git *)
 user-invocable: true
 metadata:
   title: Scaffold Rust Project
@@ -284,7 +286,7 @@ Set up git hooks during init: `git config core.hooksPath .githooks && cargo fetc
 - Always use `--workspace` for clippy/test/check in multi-crate repos
 - `cross` is only needed for ARM targets (`aarch64-*`); x86 musl just needs `musl-tools`
 - `macos-15-intel` for x86_64 Darwin, `macos-15` for aarch64 Darwin
-- List `[workspace].members` in dependency order (leaf crates first) — the cargo publisher iterates in that order, and crates.io index propagation (~30-60s) is handled via retry inside sr
+- List `[workspace].members` in dependency order (leaf crates first) -- the cargo publisher iterates in that order, and crates.io index propagation (~30-60s) is handled via retry inside sr
 - Use `-p <crate-name>` for `cargo build` when the workspace has multiple binaries (publish is handled by the typed publisher)
 - `cancel-in-progress: false` on release workflow to prevent partial releases
 

@@ -5,7 +5,7 @@ description: >
   cross-references consistent across whatever docs the project has. Delegates file-specific
   rules to the skills that own them. Use after feature changes, refactors, or when docs
   may be stale. Can be run as a scheduled agent or invoked manually.
-allowed-tools: Read Grep Glob Bash Edit Write
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(fsrc *), Edit, Write
 user-invocable: true
 metadata:
   title: Documentation Sync

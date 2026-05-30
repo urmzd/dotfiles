@@ -1,10 +1,13 @@
 ---
 name: test-code
 description: >
-  Testing philosophy, test types, per-language conventions, file organization,
-  fixtures/mocks, CI strategy, and what NOT to test. Use when writing tests,
-  reviewing test coverage, setting up test infrastructure, or deciding what to test.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Testing philosophy, test types (unit, integration, golden, fuzz, property,
+  benchmark, smoke, E2E), per-language conventions (Rust, Go, Python, TypeScript),
+  file organization, fixtures/mocks, CI strategy, and what NOT to test. Use when
+  writing tests, reviewing test coverage, setting up test infrastructure, or deciding
+  what to test. Do NOT use for general implementation patterns or error handling (use
+  write-code) or design-by-contract reasoning (use review-design).
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Testing Practices
   category: development

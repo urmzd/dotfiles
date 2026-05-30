@@ -11,6 +11,11 @@ user-invocable: true
 
 # Orchestrate Agents
 
+> **Requires** tmux and at least one agent CLI (claude, codex, copilot, or gemini).
+> **Optional:** agentspec (session transcripts), osascript (macOS notifications) or
+> notify-send (Linux notifications). Run `"$fleet" doctor` to see which are present;
+> a missing CLI just drops out of the preference order.
+
 Run several interactive agent CLIs at once inside one tmux session, supervise
 them, and alert the user the moment one is blocked, errored, idle, or done. You
 are the orchestrator: careful, never silently let an agent stall.

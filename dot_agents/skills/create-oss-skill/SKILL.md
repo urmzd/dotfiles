@@ -6,8 +6,8 @@ description: >
   instructions for progressive disclosure. Use when creating a new skill,
   reviewing skill structure, optimizing a skill description, or setting up
   evals for skill quality.
+allowed-tools: Read, Grep, Glob, Bash(git *), Edit, Write
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
   title: Create OSS Skill
   category: ai
@@ -18,9 +18,13 @@ metadata:
 
 Create Agent Skills that comply with the [agentskills.io spec](https://agentskills.io/specification) and follow authoring best practices.
 
+## Definition of World-Class
+
+DEFINITION OF WORLD-CLASS (the bar): (1) discoverable+disambiguated by description alone (third-person, real keywords, explicit "Do NOT use for X; use <sibling>" boundary, co-load relationships stated); (2) least-privilege tools derived from the body (read-only for advice/report skills; scoped Bash globs; report-only skills carry no Write); (3) orthogonal + single-owner (one job; every fact has one owning skill; portable core fenced from portfolio/host specifics); (4) eval-backed (evals/ with should-trigger/should-not-trigger near-misses + output evals on risky paths) -- evals are deferred this pass but state the intent.
+
 ## Directory Structure
 
-```
+```text
 skill-name/
 ├── SKILL.md          # Required: metadata + instructions
 ├── scripts/          # Optional: executable code

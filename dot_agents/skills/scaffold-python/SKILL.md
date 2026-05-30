@@ -3,10 +3,12 @@ name: scaffold-python
 description: >
   Scaffold a complete Python project with CI/CD, release pipeline, justfile, sr.yaml,
   pyproject.toml, .envrc, and standard files. Uses uv, ruff, and justfile (Python lacks
-  a native task runner like npm scripts, so just fills that gap). Use when creating a
+  a native task runner like pnpm scripts, so just fills that gap). Loads on top of
+  scaffold-project (run that first for cross-language standard files). Use when creating a
   new Python CLI, library, or application, or when the user mentions "new Python project",
-  "uv init", or "Python scaffold".
-allowed-tools: Read Grep Glob Bash Edit Write
+  "uv init", or "Python scaffold". Do NOT use for Go, Rust, Node, or Terraform
+  projects; use the matching scaffold-<lang> skill.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(uv *), Bash(git *)
 user-invocable: true
 metadata:
   title: Scaffold Python Project
@@ -236,13 +238,13 @@ layout python  # Auto-creates and activates .venv
 
 ### `.python-version`
 
-```
+```text
 3.12
 ```
 
 ### Project Layout
 
-```
+```text
 src/<package_name>/
   __init__.py
   cli.py           # if CLI

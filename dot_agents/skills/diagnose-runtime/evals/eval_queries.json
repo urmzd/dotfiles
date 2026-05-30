@@ -1,0 +1,86 @@
+{
+  "skill": "diagnose-runtime",
+  "description": "Routing evals: does the query trigger local runtime triage? Near-misses route to diagnose-ci (remote pipelines), fix-and-retry (apply + re-ship), and audit-security (suspicious process / compromise).",
+  "queries": [
+    {
+      "query": "determine the cause of this error I'm getting when I run the app",
+      "should_trigger": true,
+      "note": "Local crash/error triage -- the reproduce->isolate->hypothesize->verify loop."
+    },
+    {
+      "query": "explore why our system hangs after generating the pdf",
+      "should_trigger": true,
+      "note": "Classic local hang; likely an unclosed resource or a child process the parent waits on."
+    },
+    {
+      "query": "why is the computer running hot and the fan spinning constantly",
+      "should_trigger": true,
+      "note": "High-CPU triage: sort by pcpu before blaming hardware."
+    },
+    {
+      "query": "why is image loading so slow in my desktop app",
+      "should_trigger": true,
+      "note": "Slowness triage: separate decode from I/O from network with sample."
+    },
+    {
+      "query": "this process is stuck and won't respond, how do I find out where it's blocked",
+      "should_trigger": true,
+      "note": "Deadlock/hang: sample then spindump to see thread states."
+    },
+    {
+      "query": "my python script eats all my RAM over time, where's the leak",
+      "should_trigger": true,
+      "note": "Memory growth: watch RSS climb with ps -Ao pid,rss,comm -m."
+    },
+    {
+      "query": "the serial device on /dev/tty.usbserial isn't being detected, why",
+      "should_trigger": true,
+      "note": "Hardware/serial: check whether the OS sees the device at all."
+    },
+    {
+      "query": "what's holding the lock on this file, my build can't delete it",
+      "should_trigger": true,
+      "note": "Stuck file handle: lsof on the path to find the holder."
+    },
+    {
+      "query": "the test suite passes alone but hangs intermittently under load, help me find why",
+      "should_trigger": true,
+      "note": "Intermittent-under-load points at a resource limit (fds, pool), not logic."
+    },
+    {
+      "query": "port 8080 is already in use but I don't know what's holding it",
+      "should_trigger": true,
+      "note": "lsof -i :8080 to find the listener."
+    },
+    {
+      "query": "why did the CI pipeline fail on the last push",
+      "should_trigger": false,
+      "note": "Remote pipeline failure -- use diagnose-ci, not local runtime triage."
+    },
+    {
+      "query": "the GitHub Actions run is red, pull the failed step logs and tell me why",
+      "should_trigger": false,
+      "note": "Remote CI logs -- diagnose-ci owns gh run inspection."
+    },
+    {
+      "query": "fix the failing build and push it so CI goes green",
+      "should_trigger": false,
+      "note": "Apply + commit + re-ship loop -- fix-and-retry, not investigate-only."
+    },
+    {
+      "query": "I found the bug, now apply the patch, commit, and re-run until it passes",
+      "should_trigger": false,
+      "note": "Editing and re-shipping is out of scope; hand off to fix-and-retry."
+    },
+    {
+      "query": "there's an unknown process listening on a port and I think the machine is compromised",
+      "should_trigger": false,
+      "note": "Suspected compromise / suspicious listener -- audit-security, not a perf/correctness bug."
+    },
+    {
+      "query": "scan my repo for leaked API keys before I commit",
+      "should_trigger": false,
+      "note": "Secret-leak scanning -- audit-security."
+    }
+  ]
+}

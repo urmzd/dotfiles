@@ -2,9 +2,13 @@
 name: build-cli
 description: >
   Design and audit CLI tools end-to-end: output modes, TTY detection, JSON piping,
-  stderr/stdout separation, signal handling, install.sh, and portfolio-mandatory
-  self-update / --format flags. Use when building, reviewing, or releasing any CLI.
-allowed-tools: Read Grep Glob Bash Edit Write
+  stderr/stdout separation, color/symbol semantics, the ui module pattern, signal
+  handling, exit codes, and install.sh. Use when building, reviewing, or releasing any
+  CLI and you need general CLI design guidance. Do NOT use for the mandatory urmzd/*
+  portfolio CLI rules (argument-parser choice, self-update requirement, --format flag,
+  global flags, install.sh template): cli-standards owns those and overrides this skill
+  where they conflict.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: CLI Patterns
   category: development
@@ -32,7 +36,7 @@ A junior developer should understand any CLI tool's behavior from `--help` alone
 
 Standard behavior when no explicit format flag is given:
 
-```
+```text
 stdout.is_terminal() → human output (styled, colored)
 !stdout.is_terminal() → JSON output (machine-readable)
 ```
@@ -62,7 +66,7 @@ This enables piping: `tool command | jq '.field'` and `tool command 2>/dev/null`
 
 ### Prompts
 
-```
+```text
   Prompt text? [y/N] _
 ```
 
@@ -75,7 +79,7 @@ Bold prompt, `[y/N]` suffix. Rules:
 
 Prefix all hypothetical actions with `[dry-run]` to stderr:
 
-```
+```text
 [dry-run] Would create tag: v2.1.0
 [dry-run] Would push tag: v2.1.0
 ```
@@ -166,7 +170,7 @@ Every color has exactly one meaning. Do not deviate.
 
 All output is indented **2 spaces** from the terminal edge. Nested content adds **2 more spaces**.
 
-```
+```text
   header text
   ────────────────────────────────────────
 
@@ -188,7 +192,7 @@ All output is indented **2 spaces** from the terminal edge. Nested content adds 
 
 ### Header
 
-```
+```rust
 println!();  // blank line
 eprintln!("  {}", cmd.cyan().bold());
 eprintln!("  {}", "─".repeat(40).dim());
@@ -211,7 +215,7 @@ When done, replace with `✓` checkmark line via `phase_ok()`.
 
 ### Phase Completion
 
-```
+```text
   ✓ Phase name · optional detail
 ```
 
@@ -219,7 +223,7 @@ Green+bold checkmark. Detail after `·` is dim. Always 2-space indent.
 
 ### Tree Visualization
 
-```
+```text
    │   dim vertical connector
    ├─  dim branch connector (non-last item)
    └─  dim last-item connector
@@ -229,7 +233,7 @@ Tree connectors are always dim. Content after connectors uses semantic colors.
 
 ### Progress Tracking
 
-```
+```text
   [1/3] Step description
     ✓ sub-item
     → result
@@ -239,7 +243,7 @@ Index is cyan+bold. Description is bold. Sub-items indented 4 spaces.
 
 ### Warnings, Info, Errors
 
-```
+```text
   ⚠ Warning text          (yellow symbol, yellow text)
   ℹ Info text              (cyan symbol, dim text)
   error: message           (red, to stderr, with anyhow context chain)
@@ -247,7 +251,7 @@ Index is cyan+bold. Description is bold. Sub-items indented 4 spaces.
 
 ### Token/Cost Usage
 
-```
+```text
   ⊘ 1.2k in / 3.4k out · $0.0042
 ```
 

@@ -1,10 +1,14 @@
 ---
 name: write-code
 description: >
-  Operational tech-stack picks and coding patterns: error handling, testing strategy,
-  commit conventions, interface design, junior-friendly bias. Use when writing or
-  reviewing implementation code. (Personal Nix / chezmoi setup lives in write-code-portfolio.)
-allowed-tools: Read Grep Glob Bash Edit Write
+  Operational tech-stack picks and coding patterns: error handling per language,
+  commit conventions, interface design (Go SDKs), workspace layout, junior-friendly
+  bias. Use when writing or reviewing implementation code and you need a concrete
+  answer for "what tool, pattern, or idiom." Do NOT use for design-tradeoff reasoning
+  (use review-design) or the quality framework (use assess-quality). Personal Nix /
+  chezmoi / Powerlevel10k / Neovim machine specifics live in write-code-portfolio;
+  use that for portfolio-only setup.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Development Practices
   category: development
@@ -41,7 +45,7 @@ metadata:
 
 Angular Conventional Commits (validated by CI lint; `ship` skill handles AI-assisted authoring):
 
-```
+```text
 type(scope): lowercase imperative description (max 72 chars)
 ```
 

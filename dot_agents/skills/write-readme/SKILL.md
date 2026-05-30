@@ -1,7 +1,13 @@
 ---
 name: write-readme
-description: README structure. Centered header, badges, demos, section order, install.sh pattern, quickstart, fsrc usage, and llms.txt. Use when creating or updating any project README.
-allowed-tools: Read Grep Glob Bash Edit Write
+description: >
+  Structures and writes a project README: centered header, badges, demo image,
+  section order, install.sh one-liner, Quick Start, fsrc code embeds, and the
+  Agent Skill section. Use when creating or updating any project's README.md.
+  Do NOT use for AGENTS.md or the skills-vs-docs taxonomy -> use configure-ai
+  (configure-ai owns AGENTS.md and the docs taxonomy; write-readme owns README
+  structure). For llms.txt generation -> use create-llms-txt.
+allowed-tools: Read, Grep, Glob, Bash(git *), Edit, Write
 metadata:
   title: README Standards
   category: visual

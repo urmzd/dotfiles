@@ -1,9 +1,16 @@
 ---
 name: choose-stack
-description: Canonical tech stack reference organized by purpose. Release, docs/demos, codegen, and per-language tools. Use when choosing libraries, setting up projects, or selecting the right tool.
-allowed-tools: Read Grep Glob Bash
+description: >
+  Canonical tech-stack reference organized by purpose: release/versioning (sr),
+  docs/demos (teasr, fsrc), codegen (oag), and per-language tools (cargo, clippy,
+  clap, golangci-lint, biome, tsdown, uv, ruff, ty, pytest, pydantic, fastapi).
+  Use when choosing a library, picking the standard CLI/linter/logging tool for a
+  language, setting up a project, or asking "what do we use for X." Do NOT use for
+  coding patterns or error-handling idioms (use write-code) or testing frameworks in
+  depth (use test-code).
+allowed-tools: Read, Grep, Glob
 metadata:
-  title: Tools
+  title: Tools Reference
   category: development
   order: 2
 ---

@@ -5,7 +5,7 @@ description: >
   ISSUE_TEMPLATE, pull_request_template) using $COMMUNITY_HEALTH_CONTACT or
   git config user.email as the contact. Use when bootstrapping a new repo or
   backfilling community-health coverage.
-allowed-tools: Read Grep Glob Bash Edit Write
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(gh *), Edit, Write
 user-invocable: true
 metadata:
   title: Community Health
@@ -38,11 +38,12 @@ Templates contain `{PLACEHOLDER}` tokens that must be replaced when copied into 
 
 | Placeholder | Source | Example |
 |-------------|--------|---------|
+| `{OWNER}` | GitHub owner (user or org) from the remote URL or `gh repo view --json owner` | `urmzd` |
 | `{REPO}` | Repo name on GitHub (without owner) | `sr`, `teasr`, `saige` |
 | `{CURRENT_MAJOR}` | Current major version from the project manifest (Cargo.toml, pyproject.toml, package.json, etc.). Use `0` for pre-1.0 projects and adjust the supported-versions table accordingly. | `6`, `1`, `0` |
 | `{CHECK_COMMAND}` | The quality-gate command from the project's task runner | `just check`, `npm run ci`, `cargo test --workspace`, `go test ./...` |
 
-Always replace every placeholder. Leaving `{REPO}` or `{CURRENT_MAJOR}` unrendered in a shipped file is a bug.
+Always replace every placeholder. Leaving `{OWNER}`, `{REPO}`, or `{CURRENT_MAJOR}` unrendered in a shipped file is a bug.
 
 ## Contact
 
@@ -53,9 +54,9 @@ All community-health templates reference **`$COMMUNITY_HEALTH_CONTACT`** (fallin
 ### New repo (invoked by `scaffold-project` / `repo-init`)
 
 1. Copy `assets/CODE_OF_CONDUCT.md` to the repo root (no edits needed).
-2. Copy `assets/SECURITY.md`, substituting `{REPO}` and `{CURRENT_MAJOR}`. For pre-1.0 projects, rewrite the table to `0.x Yes / < 0.x No`.
+2. Copy `assets/SECURITY.md`, substituting `{OWNER}`, `{REPO}`, and `{CURRENT_MAJOR}`. For pre-1.0 projects, rewrite the table to `0.x Yes / < 0.x No`.
 3. Copy `assets/github/pull_request_template.md` to `.github/pull_request_template.md`, substituting `{CHECK_COMMAND}`. Append language-specific verification checks if the scaffold skill defines them (e.g. `cargo clippy -- -D warnings`).
-4. Copy the three `assets/github/ISSUE_TEMPLATE/*` files to `.github/ISSUE_TEMPLATE/`, substituting `{REPO}` in `config.yml`.
+4. Copy the three `assets/github/ISSUE_TEMPLATE/*` files to `.github/ISSUE_TEMPLATE/`, substituting `{OWNER}` and `{REPO}` in `config.yml`.
 
 ### Backfill an existing repo
 
@@ -71,6 +72,6 @@ Use `check-project` to verify the six files exist at the expected paths, placeho
 
 - **No auto-overwrite.** If a target file already exists and has been customized (e.g. a SECURITY.md with a project-specific Scope section), diff-merge rather than overwrite.
 - **Email comes from one source.** Resolve from `$COMMUNITY_HEALTH_CONTACT`, falling back to `git config user.email`. Do not silently substitute a different value mid-scaffold.
-- **Placeholders are mandatory.** A shipped template with `{REPO}` or `{CURRENT_MAJOR}` unrendered is a FAIL in `check-project`.
+- **Placeholders are mandatory.** A shipped template with `{OWNER}`, `{REPO}`, or `{CURRENT_MAJOR}` unrendered is a FAIL in `check-project`.
 - **One PR template.** Use the single `.github/pull_request_template.md` file. Do not add per-branch or per-type templates unless the project explicitly needs them.
 - **Issue forms over markdown.** Use the `.yml` issue-form schema, not legacy `.md` issue templates.

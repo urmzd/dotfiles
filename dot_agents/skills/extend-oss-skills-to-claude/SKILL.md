@@ -6,8 +6,8 @@ description: >
   substitutions, model/effort overrides, and deployment scoping. Use when
   adapting a portable skill for Claude Code, adding Claude-specific frontmatter,
   setting up subagent delegation, or configuring skill permissions.
+allowed-tools: Read, Grep, Glob, Bash(git *), Edit, Write
 user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 metadata:
   title: Extend OSS Skills to Claude
   category: ai
@@ -203,7 +203,7 @@ Override per-skill when the default isn't appropriate:
 ```yaml
 ---
 name: complex-analysis
-model: claude-opus-4-6
+model: <opus-model-id>
 effort: max
 context: fork
 ---

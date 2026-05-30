@@ -1,10 +1,14 @@
 ---
 name: assess-quality
 description: >
-  Foundational quality framework -- the five questions every other dev skill is
-  judged against. Use when onboarding to a project, defining a quality bar, or
-  arbitrating between review-design and write-code. Not for day-to-day code review.
-allowed-tools: Read Grep Glob Bash Edit Write
+  Foundational quality framework: the five questions (readable, easy to start,
+  expands without bloat, consistent, intentional) every other dev skill is judged
+  against, plus the dual-audience and workshop principles. Use when onboarding to a
+  project, defining a quality bar, setting an assessment checklist, or arbitrating
+  between review-design and write-code. Do NOT use for the design "why" layer (use
+  review-design) or concrete tool/pattern picks (use write-code). For day-to-day
+  "review my staged/unstaged changes" asks, use review-diff instead.
+allowed-tools: Read, Grep, Glob
 metadata:
   title: Code Quality
   category: development
@@ -70,7 +74,7 @@ Self-documenting code over comments. Names over documentation. Structure over ex
 1. What went wrong
 2. What to try next
 
-```
+```text
 error: no releasable commits since v1.2.0
 hint: use conventional commit format (e.g., "feat: add feature")
 ```
@@ -95,7 +99,7 @@ Read the entry point → understand all commands → drill into any subcommand. 
 
 **One command per task:**
 
-```
+```bash
 just init    # install hooks, download deps
 just build   # compile
 just test    # run all tests

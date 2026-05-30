@@ -2,9 +2,12 @@
 name: check-project
 description: >
   Validate project structure against scaffold conventions -- check for required files,
-  CI consistency, documentation completeness, and optional directory usage. Use to audit
-  an existing project or verify a scaffold was applied correctly.
-allowed-tools: Read Grep Glob Bash
+  CI consistency, documentation completeness, sub-package/workspace members, and
+  optional directory usage, reporting PASS/WARN/FAIL with fix suggestions. Use to audit
+  an existing project or verify a scaffold was applied correctly. Do NOT use to create
+  or modify project files; this is a read-only auditor (use the scaffold-* skills to
+  generate structure).
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(gh *)
 user-invocable: true
 metadata:
   title: Check Project
@@ -109,7 +112,7 @@ Skip `examples/` workspace members -- they are not published independently.
 
 ## Output Format
 
-```
+```text
 ## Project Audit: {project-name}
 
 ### FAIL (must fix)

@@ -3,9 +3,11 @@ name: scaffold-terraform
 description: >
   Scaffold a Terraform infrastructure project with CI/CD (plan on PR, apply on push),
   AWS OIDC auth, .envrc, and standard files. Uses terraform CLI as the native tool.
+  Loads on top of scaffold-project (run that first for cross-language standard files).
   Use when creating infrastructure repos, or when the user mentions "new Terraform project",
-  "terraform init", "AWS infra", or "infrastructure scaffold".
-allowed-tools: Read Grep Glob Bash Edit Write
+  "terraform init", "AWS infra", or "infrastructure scaffold". Do NOT use for Go, Rust,
+  Python, or Node application projects; use the matching scaffold-<lang> skill.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash(terraform *), Bash(git *)
 user-invocable: true
 metadata:
   title: Scaffold Terraform Project
@@ -205,7 +207,7 @@ dotenv
 
 ### Project Layout
 
-```
+```text
 main.tf           # primary resources
 variables.tf      # input variables
 outputs.tf        # output values
