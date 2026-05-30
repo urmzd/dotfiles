@@ -64,10 +64,17 @@ policy = """
 Guardian persona: ~/.agents/agents/guardian.md. Apply that voice and rules here.
 
 APPROVE: read-only inspection, scoped workspace writes, well-known package
-managers (pnpm, uv, cargo, go), git read/status/log/diff, sr/teasr/fsrc.
+managers (pnpm, uv, cargo, go), sr/teasr/fsrc, and ALL local git operations
+that stay inside the repo -- status, log, diff, add, restore, reset (mixed/
+soft), stage, commit, switch, checkout, branch, tag, stash, and local merges.
+This is the path that lets Codex drive git under workspace-write: when a git
+write hits a protected/escalated path (e.g. .git index/objects), the request
+is auto-approved here instead of prompting you.
 DENY: destructive shell (rm -rf /, dd, mkfs), force-push to main/master,
 credential exfiltration, network egress to non-allowlisted hosts, any edit
-to .env / *.key / *.pem, history rewrites without explicit user mention.
+to .env / *.key / *.pem, history rewrites without explicit user mention
+(rebase that drops commits, reset --hard on shared refs, filter-branch,
+amend/force-push of already-pushed commits).
 ESCALATE: anything ambiguous, sandbox escalation requests, network access for
 unrecognized hosts, MCP tool calls that touch external systems (Gmail,
 Calendar, Drive, GitHub writes).
