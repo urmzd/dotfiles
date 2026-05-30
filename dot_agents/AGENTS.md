@@ -18,8 +18,8 @@ The registry is **cross-project**. Once deployed, agents and skills are usable f
 │   ├── guardian.md      # Supervises orchestrated agent fleets (pairs with orchestrate-agents)
 │   ├── ideator.md       # Creative exploration
 │   ├── strategist.md    # Multi-system orchestration
-│   ├── writer.md        # Technical documentation
-│   └── technical-documentation-architect.md
+│   ├── technical-documentation-architect.md  # Structured docs & architecture
+│   └── writer.md        # Technical documentation
 └── skills/              # Capabilities; agentspec links to tools
 ```
 

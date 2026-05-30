@@ -17,7 +17,9 @@
 - [dot_zshrc.tmpl](https://github.com/urmzd/dotfiles/blob/main/dot_zshrc.tmpl): Zsh configuration template
 - [dot_agents/skills/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/): Portable AI agent skills directory
 - [dot_agents/agents/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/): Subagent definitions
-- [dot_codex/](https://github.com/urmzd/dotfiles/blob/main/dot_codex/): Codex CLI config, including the `guardian` profile used for orchestrated fleets
+- [dot_codex/](https://github.com/urmzd/dotfiles/blob/main/dot_codex/): Codex CLI config (workspace-write "Auto" base + writer/reviewer/plan/guardian profiles and `/agent` subagents)
+- [dot_gemini/settings.json](https://github.com/urmzd/dotfiles/blob/main/dot_gemini/settings.json): Gemini CLI config (auth, approval mode, read-only shell auto-approve allowlist)
+- [dot_copilot/settings.json](https://github.com/urmzd/dotfiles/blob/main/dot_copilot/settings.json): GitHub Copilot CLI config (model, effort, theme)
 
 ## Agents
 
@@ -41,7 +43,8 @@
 - [configure-ai](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/configure-ai/SKILL.md): AI tooling configuration, AGENTS.md, skills standard
 - [create-llms-txt](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/create-llms-txt/SKILL.md): Generate llms.txt files
 - [create-oss-skill](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/create-oss-skill/SKILL.md): Agent skill scaffolding and authoring (canonical spec)
-- [diagnose-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-ci/SKILL.md): Find failing pipelines, pull logs, identify root cause
+- [diagnose-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-ci/SKILL.md): Find failing remote CI pipelines, pull logs, identify root cause
+- [diagnose-runtime](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-runtime/SKILL.md): Triage local runtime errors, hangs, slowness, and hardware/serial issues (local counterpart to diagnose-ci)
 - [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/extend-oss-skills-to-claude/SKILL.md): Claude-specific deltas on top of create-oss-skill (prerequisite)
 - [fix-and-retry](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/fix-and-retry/SKILL.md): Diagnose CI failure, apply fix, commit, push, re-run
 - [manage-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-secrets/SKILL.md): 1Password-based secret workflow (vault layout, `1p://` references, `op run`)
@@ -51,6 +54,7 @@
 - [repo-init](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/repo-init/SKILL.md): Full repo bootstrap (create, license, scaffold, push)
 - [repo-status](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/repo-status/SKILL.md): Scan a folder of git repos and report activity, branch divergence, and uncommitted state (renamed from `status`)
 - [review-design](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/review-design/SKILL.md): Pragmatic Programmer principles (DRY, orthogonality, design by contract)
+- [review-diff](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/review-diff/SKILL.md): Review current staged/unstaged/untracked changes against a five-dimension rubric (prioritized findings)
 - [scaffold-go](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-go/SKILL.md): Go deltas on top of scaffold-project
 - [scaffold-node](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-node/SKILL.md): Node/TypeScript deltas on top of scaffold-project
 - [scaffold-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-project/SKILL.md): Project scaffolding conventions and standard files (canonical)
@@ -60,7 +64,7 @@
 - [setup-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-ci/SKILL.md): CI/CD pipeline setup and workflow conventions
 - [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Per-language version manager + direnv pattern (portable)
 - [setup-devenv-with-chezmoi](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv-with-chezmoi/SKILL.md): Chezmoi helpers for pinned installers and tracked `.envrc` templates
-- [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Commit, push, and watch CI until pass/fail
+- [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Generate a conventional commit, then optionally push and watch CI until pass/fail
 - [style-brand](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/style-brand/SKILL.md): Frame a project's visual identity. Ships Cyberdream + MonaspiceNe + teasr as a template, not a mandate
 - [sync-docs](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-docs/SKILL.md): Audit and synchronize project documentation (canonical doc-drift skill)
 - [sync-ecosystem](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-ecosystem/SKILL.md): Audit one repository against ecosystem conventions and emit a drift report (portable)

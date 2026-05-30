@@ -79,7 +79,7 @@ dotfiles cleanup         # Prune build artifacts and caches
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (with a `guardian` profile for orchestrated fleets), Gemini CLI, GitHub Copilot. Update with `dotfiles update-ai`.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Gemini CLI, GitHub Copilot. Update with `dotfiles update-ai`.
 
 ### Adding a new tool
 
@@ -121,7 +121,16 @@ AI coding agents are installed by `chezmoi apply` (sentinel-gated, no shell-star
 dotfiles status
 ```
 
-Claude Code config lives in `dot_claude/`. Includes settings, custom statusline, and project-scoped skills. Codex ships with a `guardian` profile used by the `orchestrate-agents` skill to supervise multi-agent fleets.
+Per-tool AI config is tracked and deployed by chezmoi:
+
+| Tool | Source | Default posture |
+| ---- | ------ | --------------- |
+| Claude Code | `dot_claude/` | Settings, custom statusline, project-scoped skills |
+| Codex | `dot_codex/` | Workspace-write "Auto" base (auto-run safe ops, guardian auto-reviewer vets escalations) + `writer`/`reviewer`/`plan`/`guardian` profile overlays and `/agent` subagents |
+| Gemini CLI | `dot_gemini/` | OAuth, `auto_edit` approval, read-only shell auto-approve allowlist, telemetry off |
+| GitHub Copilot | `dot_copilot/` | `settings.json` with model, `xhigh` effort, theme |
+
+Codex runs OpenAI's documented "Auto" preset by default: `sandbox_mode = "workspace-write"` + `approval_policy = "on-request"`, with the guardian auto-reviewer (`approvals_reviewer = "auto_review"`) classifying every escalation before it reaches you. Drop to `codex --profile reviewer` or `--profile plan` for read-only work; the `guardian` profile supervises `orchestrate-agents` fleets.
 
 ## Agent Skills
 
@@ -165,6 +174,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | ----- | ------- |
 | assess-quality | Foundational quality framework. The "why" layer above review-design and write-code |
 | review-design | Pragmatic Programmer principles (DRY, orthogonality, design by contract) |
+| review-diff | Review the current staged/unstaged/untracked changes against a five-dimension rubric (the home assess-quality and review-design hand day-to-day review to) |
 | write-code | Operational picks: error handling, testing strategy, commit conventions, interface design |
 | write-code-portfolio | Personal portfolio specifics (Nix Flakes, chezmoi machine polymorphism, Powerlevel10k, Neovim) |
 | test-code | Testing philosophy and per-language conventions |
@@ -195,9 +205,10 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 
 | Skill | Purpose |
 | ----- | ------- |
-| ship | Commit, push, and watch CI until pass/fail |
+| ship | Generate a conventional commit, then optionally push and watch CI until pass/fail |
 | pr | Create PRs with auto-generated summary from commits |
-| diagnose-ci | Find failing pipelines, pull logs, identify root cause |
+| diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
+| diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
 | repo-status | Scan a folder of git repos and report recent activity, branch divergence, and uncommitted state (renamed from `status`) |
 | release-audit | Audit releases, tags, and assets for health |
