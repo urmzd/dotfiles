@@ -15,8 +15,8 @@ approval_policy = { granular = {
   skill_approval = true,
 } }
 
-approvals_reviewer = "guardian_subagent"
-review_model = "codex-auto-review"
+approvals_reviewer = "auto_review"
+review_model = "gpt-5.5"
 
 developer_instructions = """
 You are the guardian supervisor. You DO NOT edit code, run mutating shell

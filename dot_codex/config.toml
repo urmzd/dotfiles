@@ -2,20 +2,33 @@
 # Codex base config (~/.codex/config.toml via chezmoi dot_ prefix).
 # Loaded for every `codex` session unless overridden by `codex --profile <name>`.
 #
-# Defaults: gpt-5.5 at xhigh reasoning, read-only sandbox. Safe by default;
-# escalate to a write-capable profile (writer) when actually shipping code.
+# Mode: OpenAI's documented "Auto" preset -- sandbox_mode = "workspace-write" +
+# approval_policy = "on-request". Codex reads anywhere, writes inside the
+# workspace, and runs routine local commands with no prompt; it ESCALATES the
+# risky boundary-crossings (network access, out-of-workspace writes, untrusted
+# or destructive commands). Those escalations do not go straight to you: the
+# guardian auto-reviewer (approvals_reviewer = "auto_review") classifies each
+# one first and only surfaces what its policy cannot auto-decide. This mirrors
+# Claude Code's "auto" permission mode: safe ops flow, risky ops get classified,
+# genuinely ambiguous ops reach the human.
+# Ref: https://developers.openai.com/codex/agent-approvals-security
 #
-# Codex approval_reviewer enum (per schema):
-#   "user"              human in the loop on every escalation
-#   "auto_review"       canonical name for the guardian-subagent reviewer
-#   "guardian_subagent" legacy alias of "auto_review" (still accepted)
+# Drop to a read-only profile (`codex --profile reviewer` or `--profile plan`)
+# for inspection-only work where no write should ever happen.
+#
+# approvals_reviewer enum (per official docs):
+#   "user"        human in the loop on every escalation
+#   "auto_review" canonical name for the guardian-subagent reviewer (USE THIS)
+# The legacy alias "guardian_subagent" still validates under --strict-config but
+# is undocumented in 0.135; "auto_review" is the canonical value.
 #
 # Companion profile overlays (separate files; legacy [profiles.X] nesting
-# was deprecated in v0.134.0):
-#   ~/.codex/guardian.config.toml  -- `codex --profile guardian`
-#   ~/.codex/writer.config.toml    -- `codex --profile writer`
-#   ~/.codex/reviewer.config.toml  -- `codex --profile reviewer`
-#   ~/.codex/plan.config.toml      -- `codex --profile plan`
+# was deprecated in v0.134.0; profiles now load via `codex -p <name>` from
+# $CODEX_HOME/<name>.config.toml):
+#   ~/.codex/writer.config.toml    -- `codex --profile writer`    (fast workspace-write)
+#   ~/.codex/reviewer.config.toml  -- `codex --profile reviewer`  (read-only review)
+#   ~/.codex/plan.config.toml      -- `codex --profile plan`      (read-only, hardest reasoning)
+#   ~/.codex/guardian.config.toml  -- `codex --profile guardian`  (read-only fleet supervisor)
 #
 # Companion subagent definitions (invoked inside a session via /agent <name>):
 #   ~/.codex/agents/guardian.toml  (supervisor; read-only; delegates edits)
@@ -24,20 +37,27 @@
 #
 # Shared Guardian persona lives at ~/.agents/agents/guardian.md and is consumed
 # by the `orchestrate-agents` skill when supervising a tmux fleet.
+#
+# Validate any change to this file against the installed binary:
+#   codex --strict-config exec --skip-git-repo-check "noop"
 # ---------------------------------------------------------------------------
 
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "auto"
 
-sandbox_mode = "read-only"
+# ---- "Auto" preset: write-capable, escalate on boundary --------------------
+# workspace-write + on-request is OpenAI's documented "Auto" mode: auto-run safe
+# in-workspace ops, ask before crossing the sandbox boundary.
+sandbox_mode = "workspace-write"
 approval_policy = "on-request"
 
 # ---- Guardian auto-reviewer (always armed) ---------------------------------
-# Routes every approval-eligible action through the guardian subagent BEFORE
-# escalating to the user. Inherits the active sandbox boundary.
-approvals_reviewer = "guardian_subagent"
-review_model = "codex-auto-review"
+# Routes every approval-eligible action (sandbox escalation, blocked network,
+# destructive tool call) through the reviewer subagent BEFORE it reaches you.
+# Inherits the active sandbox boundary. review_model must be a real model id.
+approvals_reviewer = "auto_review"
+review_model = "gpt-5.5"
 
 [auto_review]
 policy = """
@@ -48,8 +68,9 @@ managers (pnpm, uv, cargo, go), git read/status/log/diff, sr/teasr/fsrc.
 DENY: destructive shell (rm -rf /, dd, mkfs), force-push to main/master,
 credential exfiltration, network egress to non-allowlisted hosts, any edit
 to .env / *.key / *.pem, history rewrites without explicit user mention.
-ESCALATE: anything ambiguous, sandbox escalation requests, MCP tool calls
-that touch external systems (Gmail, Calendar, Drive, GitHub writes).
+ESCALATE: anything ambiguous, sandbox escalation requests, network access for
+unrecognized hosts, MCP tool calls that touch external systems (Gmail,
+Calendar, Drive, GitHub writes).
 
 Always report the decision in one line:
 GUARDIAN[<scope>]: <approve|deny|escalate> - <reason>
@@ -65,18 +86,29 @@ max_depth = 1
 job_max_runtime_seconds = 1800
 
 # ---- Sandbox / workspace tuning --------------------------------------------
+# network_access = false is the safest-but-usable default: no silent egress.
+# Under on-request, network-needing commands (pnpm/uv/cargo/go fetch) ESCALATE
+# to the guardian reviewer instead of failing silently or running unchecked.
+# /tmp and $TMPDIR stay writable so toolchains keep their scratch space.
+# writable_roots = [] keeps the workspace as the only writable area (least
+# privilege). To allow unattended installs in a specific project, scope it to a
+# writer-profile overlay rather than flipping network_access on the base.
 [sandbox_workspace_write]
 network_access = false
 exclude_slash_tmp = false
 exclude_tmpdir_env_var = false
+writable_roots = []
 
 # ---- Feature flags ---------------------------------------------------------
 [features]
-multi_agent = true        # required for /agent and spawned subagent threads
-hooks = true              # SubagentStart / SubagentStop visibility
-memories = false          # opt-out; AGENTS.md is the source of truth
+guardian_approval = true   # arms the approvals_reviewer / auto_review path
+multi_agent = true         # required for /agent and spawned subagent threads
+hooks = true               # SubagentStart / SubagentStop visibility
+memories = false           # opt-out; AGENTS.md is the source of truth
 
 # ---- Shell environment hygiene ---------------------------------------------
+# inherit = "core" passes only essential vars (not the full shell env); exclude
+# scrubs cloud creds and any *_TOKEN/*_SECRET/*_KEY from model-run commands.
 [shell_environment_policy]
 inherit = "core"
 exclude = ["AWS_*", "AZURE_*", "GCP_*", "*_TOKEN", "*_SECRET", "*_KEY"]

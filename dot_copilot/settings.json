@@ -1,0 +1,10 @@
+{
+  "model": "auto",
+  "theme": "auto",
+  "experimental": true,
+  "includeCoAuthoredBy": false,
+  "banner": "never",
+  "effortLevel": "xhigh",
+  "renderMarkdown": true,
+  "autoUpdate": true
+}

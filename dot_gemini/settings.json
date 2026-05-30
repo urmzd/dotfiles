@@ -4,8 +4,11 @@
       "selectedType": "oauth-personal"
     }
   },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
   "general": {
-    "previewFeatures": true
+    "defaultApprovalMode": "auto_edit"
   },
   "tools": {
     "allowed": [
@@ -22,8 +25,14 @@
       "run_shell_command(diff)",
       "run_shell_command(which)",
       "run_shell_command(pwd)",
-      "run_shell_command(env)",
-      "run_shell_command(uname)"
+      "run_shell_command(uname)",
+      "run_shell_command(rg)",
+      "run_shell_command(grep)",
+      "run_shell_command(git status)",
+      "run_shell_command(git diff)",
+      "run_shell_command(git log)",
+      "run_shell_command(git show)",
+      "run_shell_command(git branch)"
     ]
   }
 }
