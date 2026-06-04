@@ -194,6 +194,10 @@ require("lazy").setup({
 		"copilotlsp-nvim/copilot-lsp",
 		init = function()
 			vim.g.copilot_nes_debounce = 500
+			-- copilot-language-server ignores nvim's async shutdown request on exit
+			-- (exit_timeout defaults to false, so nvim never waits or force-kills).
+			-- Give it 500ms to shut down gracefully, then force-stop.
+			vim.lsp.config("copilot_ls", { exit_timeout = 500 })
 			vim.lsp.enable("copilot_ls")
 		end,
 		config = function()
@@ -230,7 +234,12 @@ require("lazy").setup({
 				"astro",
 				"ltex",
 			},
-			automatic_enable = true,
+			-- copilot-lsp already runs the server as "copilot_ls"; without this
+			-- exclusion mason-lspconfig auto-enables nvim-lspconfig's "copilot"
+			-- config too, spawning a duplicate copilot-language-server process.
+			automatic_enable = {
+				exclude = { "copilot" },
+			},
 		},
 	},
 	{
