@@ -2,15 +2,14 @@
 # Codex base config (~/.codex/config.toml via chezmoi dot_ prefix).
 # Loaded for every `codex` session unless overridden by `codex --profile <name>`.
 #
-# Mode: OpenAI's documented "Auto" preset -- sandbox_mode = "workspace-write" +
-# approval_policy = "on-request". Codex reads anywhere, writes inside the
-# workspace, and runs routine local commands with no prompt; it ESCALATES the
-# risky boundary-crossings (network access, out-of-workspace writes, untrusted
-# or destructive commands). Those escalations do not go straight to you: the
-# guardian auto-reviewer (approvals_reviewer = "auto_review") classifies each
-# one first and only surfaces what its policy cannot auto-decide. This mirrors
-# Claude Code's "auto" permission mode: safe ops flow, risky ops get classified,
-# genuinely ambiguous ops reach the human.
+# Mode: FULL ACCESS -- sandbox_mode = "danger-full-access" +
+# approval_policy = "never". No OS seatbelt, no approval prompts: Codex runs
+# every command unsandboxed, like Claude Code's --dangerously-skip-permissions
+# made the default. Deliberate choice (2026-06): the workspace-write seatbelt
+# blocked too many meaningful changes (.git writes, installs, out-of-workspace
+# edits). The guardian/auto_review and [sandbox_workspace_write] sections below
+# are INERT for base sessions but kept because profile overlays (writer/
+# reviewer/plan/guardian) merge onto this file and still use them.
 # Ref: https://developers.openai.com/codex/agent-approvals-security
 #
 # Drop to a read-only profile (`codex --profile reviewer` or `--profile plan`)
@@ -46,16 +45,17 @@ model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "auto"
 
-# ---- "Auto" preset: write-capable, escalate on boundary --------------------
-# workspace-write + on-request is OpenAI's documented "Auto" mode: auto-run safe
-# in-workspace ops, ask before crossing the sandbox boundary.
-sandbox_mode = "workspace-write"
-approval_policy = "on-request"
+# ---- Full access: no sandbox, no approvals ---------------------------------
+# danger-full-access + never disables the OS seatbelt and all prompting.
+# Codex can read/write/exec anywhere this user can. Drop to `codex -p reviewer`
+# or `-p plan` (read-only overlays) when that is too much trust for the task.
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
 
-# ---- Guardian auto-reviewer (always armed) ---------------------------------
-# Routes every approval-eligible action (sandbox escalation, blocked network,
-# destructive tool call) through the reviewer subagent BEFORE it reaches you.
-# Inherits the active sandbox boundary. review_model must be a real model id.
+# ---- Guardian auto-reviewer (inert under approval_policy = "never") --------
+# Nothing escalates in base sessions anymore, so this never fires there. Kept
+# for profile overlays that re-enable approvals: they merge onto this file and
+# inherit the reviewer + [auto_review] policy below.
 approvals_reviewer = "auto_review"
 review_model = "gpt-5.5"
 
@@ -92,14 +92,10 @@ max_threads = 6
 max_depth = 1
 job_max_runtime_seconds = 1800
 
-# ---- Sandbox / workspace tuning --------------------------------------------
-# network_access = false is the safest-but-usable default: no silent egress.
-# Under on-request, network-needing commands (pnpm/uv/cargo/go fetch) ESCALATE
-# to the guardian reviewer instead of failing silently or running unchecked.
-# /tmp and $TMPDIR stay writable so toolchains keep their scratch space.
-# writable_roots = [] keeps the workspace as the only writable area (least
-# privilege). To allow unattended installs in a specific project, scope it to a
-# writer-profile overlay rather than flipping network_access on the base.
+# ---- Sandbox / workspace tuning (inert under danger-full-access) -----------
+# Only applies when a profile overlay sets sandbox_mode = "workspace-write"
+# (e.g. writer). network_access = false keeps those sandboxed sessions free of
+# silent egress; /tmp and $TMPDIR stay writable for toolchain scratch space.
 [sandbox_workspace_write]
 network_access = false
 exclude_slash_tmp = false
