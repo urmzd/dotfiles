@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install AI tooling CLIs (Claude Code, Codex, Gemini, Copilot) at chezmoi apply time.
+# Install AI tooling CLIs (Claude Code, Codex, Antigravity, Copilot) at chezmoi apply time.
 # Sentinel-gated: re-runs do nothing once `~/.local/state/ai-tools-installed` exists.
 # Bump versions below + delete the sentinel (`dotfiles update-ai`) to upgrade.
 
@@ -15,7 +15,6 @@ fi
 # Pinned npm package versions
 NPM_PACKAGES=(
     "@openai/codex@0.135.0"
-    "@google/gemini-cli@0.44.1"
     "@github/copilot@1.0.56"
 )
 
@@ -37,6 +36,22 @@ if ! command -v claude >/dev/null 2>&1; then
     curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1 || echo "⚠️ Claude Code install failed"
 fi
 
+# Antigravity CLI (agy) — replaces legacy Gemini CLI. Self-updates in the
+# background, so no version pin. Installs to ~/.local/bin/agy.
+if ! command -v agy >/dev/null 2>&1 && [[ ! -x "$HOME/.local/bin/agy" ]]; then
+    echo "🤖 Installing Antigravity CLI..."
+    if curl -fsSL https://antigravity.google/cli/install.sh | bash >/dev/null 2>&1; then
+        # The installer appends PATH exports to ~/.zshrc/~/.zprofile/~/.profile;
+        # redundant (zshenv already adds ~/.local/bin) and clobbered by chezmoi apply.
+        for profile in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.profile"; do
+            [[ -f "$profile" ]] || continue
+            perl -i -0pe 's/\n*# Added by Antigravity CLI installer\nexport PATH="[^"]*\.local\/bin:\$PATH"\n?//g' "$profile" 2>/dev/null || true
+        done
+    else
+        echo "⚠️ Antigravity CLI install failed"
+    fi
+fi
+
 if command -v npm >/dev/null 2>&1; then
     for pkg in "${NPM_PACKAGES[@]}"; do
         name="${pkg%@*}"
@@ -46,7 +61,7 @@ if command -v npm >/dev/null 2>&1; then
         fi
     done
 else
-    echo "⚠️ npm not on PATH — skipping codex/gemini/copilot install. Re-run after fnm installs Node."
+    echo "⚠️ npm not on PATH — skipping codex/copilot install. Re-run after fnm installs Node."
 fi
 
 date -Iseconds > "$SENTINEL"

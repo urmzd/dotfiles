@@ -1,6 +1,6 @@
 ---
 name: configure-ai
-description: Authors AGENTS.md and defines the skills-vs-docs boundary for a repo. Configures AI coding tools (Claude Code, Codex, Gemini CLI, Copilot) and the skills-as-docs philosophy. Use when creating or auditing AGENTS.md, setting up AI tooling for a project, or deciding what belongs in a skill versus docs/. Do NOT use for README structure -> use write-readme; for llms.txt generation -> use create-llms-txt; for Claude-specific skill features (invocation control, subagents, model overrides) -> use extend-oss-skills-to-claude.
+description: Authors AGENTS.md and defines the skills-vs-docs boundary for a repo. Configures AI coding tools (Claude Code, Codex, Antigravity CLI, Copilot) and the skills-as-docs philosophy. Use when creating or auditing AGENTS.md, setting up AI tooling for a project, or deciding what belongs in a skill versus docs/. Do NOT use for README structure -> use write-readme; for llms.txt generation -> use create-llms-txt; for Claude-specific skill features (invocation control, subagents, model overrides) -> use extend-oss-skills-to-claude.
 allowed-tools: Read, Grep, Glob
 metadata:
   title: AI Workflows
@@ -32,7 +32,7 @@ metadata:
 |------|-------|
 | Claude Code (opus) | Primary AI coding assistant. Architecture, refactoring, multi-file edits |
 | OpenAI Codex | `workspace-write` "Auto" base config with a guardian auto-reviewer; ships writer, reviewer, plan, and guardian profiles/agents |
-| Google Gemini CLI | `auto_edit` approval mode with a read-only shell allowlist for unattended edits |
+| Google Antigravity CLI (agy) | Replaces legacy Gemini CLI; per-command allow/deny lists managed in-app via `/permissions`, `--sandbox` for terminal restrictions |
 | GitHub Copilot | Inline completion plus `settings.json` (model, reasoning effort, theme) |
 
 ## Claude Code Configuration

@@ -37,7 +37,7 @@ Typical layout for a chezmoi source directory (paths shown are inside the **sour
 - `dot_agents/skills/` -> `~/.agents/skills/` (agent skills)
 - `Brewfile` -> Homebrew packages (macOS source of truth for CLIs)
 - `run_onchange_after_install-*.sh.tmpl` -> Pinned upstream installers (gcloud, aws, cortex, ...)
-- `run_once_after_install-ai-clis.sh.tmpl` -> AI tools (Claude/Codex/Gemini/Copilot)
+- `run_once_after_install-ai-clis.sh.tmpl` -> AI tools (Claude/Codex/Antigravity/Copilot)
 
 ## Agents vs Skills
 

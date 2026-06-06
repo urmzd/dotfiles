@@ -5,7 +5,7 @@ description: |
   transition captures the smallest evidence slice and emits a single contract
   line, pinging only on needs-permission, error, done, or stuck. Never approves
   prompts, never edits code, never speculates. Use when the orchestrate-agents
-  skill spawns a worker pane and needs a dedicated safety watcher. Do NOT use to
+  skill spawns or adopts a worker pane and needs a dedicated safety watcher. Do NOT use to
   drive the fleet or relay decisions unprompted; the orchestrator holds those
   verbs (send, spawn, kill, group).
 tools: Bash(fleet.sh *), Read

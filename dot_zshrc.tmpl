@@ -96,7 +96,7 @@ function dotfiles() {
       echo "=== AI tool versions ==="
       echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed"
       echo -n "  codex:  "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $2}' || echo "not installed"
-      echo -n "  gemini: "; npm list -g @google/gemini-cli 2>/dev/null | grep @google/gemini-cli | awk '{print $2}' || echo "not installed"
+      echo -n "  agy:    "; agy --version 2>/dev/null || echo "not installed"
       echo -n "  cortex: "; cortex --version 2>/dev/null || echo "not installed"
       ;;
     cleanup)

@@ -9,7 +9,7 @@ flags only when the run is explicitly opted into a less careful safety mode.
 ## Preference order
 
 When a workstream does not pin a specific tool, pick in this order based on
-what is installed: **1. claude**, **2. codex**, **3. copilot**, **4. gemini**.
+what is installed: **1. claude**, **2. codex**, **3. copilot**, **4. agy**.
 `fleet.sh spawn ... auto` and `fleet.sh resolve_tool` already encode this.
 
 ## claude (Claude Code)
@@ -51,17 +51,19 @@ Run `codex --version` in `doctor` follow-up before relying on it.
 
 **Blocked-on-permission UI:** asks to allow a tool/command; confirm per its prompt.
 
-## gemini (Gemini CLI)
+## agy (Antigravity CLI — replaces legacy Gemini CLI)
 
 | Need | Command |
 |------|---------|
-| Interactive | `gemini` (positional query, `-m <model>`) |
-| Prompt then interactive | `gemini -i "<prompt>"` |
-| Headless | `gemini -p "<prompt>" [-o json]` |
-| Auto-approve edits | `gemini --approval-mode auto_edit` |
-| Full auto | `gemini --yolo` (or `--approval-mode yolo`) |
-| Read-only / plan | `gemini --approval-mode plan` |
-| Resume | `gemini -r latest` |
+| Interactive | `agy` (`--model <m>`, `--add-dir <d>`) |
+| Prompt then interactive | `agy -i "<prompt>"` |
+| Headless | `agy -p "<prompt>"` (`--print-timeout <dur>`, default 5m) |
+| Full auto | `agy --dangerously-skip-permissions` |
+| Sandboxed | `agy --sandbox` (terminal restrictions) |
+| Resume | `agy -c` (most recent) or `agy --conversation <id>` |
+
+No granular approval-mode flags as of 1.0.5; per-command allow/deny lists are
+managed in-app via `/permissions`.
 
 ## State-detection patterns
 

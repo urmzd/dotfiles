@@ -37,7 +37,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_config/` | `~/.config/` | Tool configs (Neovim, Ghostty, Tmux, direnv) |
 | `dot_zsh/` | `~/.zsh/` | Zsh functions and customizations |
 | `dot_codex/` | `~/.codex/` | Codex CLI config: workspace-write "Auto" base + `writer`/`reviewer`/`plan`/`guardian` profile overlays and matching `/agent` subagents in `dot_codex/agents/` |
-| `dot_gemini/` | `~/.gemini/` | Gemini CLI config (OAuth, `auto_edit` approval, read-only shell auto-approve allowlist) |
+| `dot_gemini/` | `~/.gemini/` | Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
 
 ## Discovering Structure

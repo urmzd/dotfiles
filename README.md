@@ -24,7 +24,7 @@
 - **Tmux** with `Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
 - **Neovim** (HEAD) with LSP for all included languages
-- **AI agents** (Claude Code, Gemini, Codex, Copilot) auto-installed via chezmoi
+- **AI agents** (Claude Code, Antigravity, Codex, Copilot) auto-installed via chezmoi
 - **A portable agent skills catalog** in [`dot_agents/skills/`](dot_agents/skills/) and subagents in [`dot_agents/agents/`](dot_agents/agents/), installable into any tool via [`agentspec`](https://github.com/urmzd/agentspec). See [Agent Skills](#agent-skills) for the full list.
 - **Chezmoi automation** scripts that trigger on apply
 - **Docker cleanup** launchd agent running daily at 3 AM
@@ -79,7 +79,7 @@ dotfiles cleanup         # Prune build artifacts and caches
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Gemini CLI, GitHub Copilot. Update with `dotfiles update-ai`.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update-ai`.
 
 ### Adding a new tool
 
@@ -127,7 +127,7 @@ Per-tool AI config is tracked and deployed by chezmoi:
 | ---- | ------ | --------------- |
 | Claude Code | `dot_claude/` | Settings, custom statusline, project-scoped skills |
 | Codex | `dot_codex/` | Workspace-write "Auto" base (auto-run safe ops, guardian auto-reviewer vets escalations) + `writer`/`reviewer`/`plan`/`guardian` profile overlays and `/agent` subagents |
-| Gemini CLI | `dot_gemini/` | OAuth, `auto_edit` approval, read-only shell auto-approve allowlist, telemetry off |
+| Antigravity CLI (agy) | `dot_gemini/` | Legacy Gemini CLI settings kept as agy first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` (authored in-app via `/config` and `/permissions`) |
 | GitHub Copilot | `dot_copilot/` | `settings.json` with model, `xhigh` effort, theme |
 
 Codex runs OpenAI's documented "Auto" preset by default: `sandbox_mode = "workspace-write"` + `approval_policy = "on-request"`, with the guardian auto-reviewer (`approvals_reviewer = "auto_review"`) classifying every escalation before it reaches you. Drop to `codex --profile reviewer` or `--profile plan` for read-only work; the `guardian` profile supervises `orchestrate-agents` fleets.
@@ -216,7 +216,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | sync-ecosystem-to-chezmoi | Apply a sync-ecosystem drift report back into the chezmoi source tree |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 | manage-secrets | 1Password-based secret workflow (vault layout, `1p://` references, `op run`) |
-| orchestrate-agents | Drive multiple agent CLIs (Claude, Codex, Gemini) over tmux with a shared fleet store |
+| orchestrate-agents | Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing |
 
 #### AI & documentation
 

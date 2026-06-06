@@ -1,24 +1,28 @@
 ---
 name: orchestrate-agents
 description: >-
-  Orchestrate multiple agent CLIs (Claude, Codex, Gemini) via tmux with a shared
-  fleet store, dispatching one guardian subagent per pane. Use when running a
-  multi-agent session, dispatching parallel work, or coordinating subagents
-  across panes.
+  Orchestrate multiple agent CLIs (Claude, Codex, Antigravity) via tmux with a shared
+  fleet store, dispatching one guardian subagent per pane. Survey-first: inspects
+  and adopts existing tmux sessions, windows, and agent panes before creating
+  anything new. Use when running a multi-agent session, dispatching parallel
+  work, or coordinating subagents across panes.
 allowed-tools: Bash, Task
 user-invocable: true
 ---
 
 # Orchestrate Agents
 
-> **Requires** tmux and at least one agent CLI (claude, codex, copilot, or gemini).
+> **Requires** tmux and at least one agent CLI (claude, codex, copilot, or agy).
 > **Optional:** agentspec (session transcripts), osascript (macOS notifications) or
 > notify-send (Linux notifications). Run `"$fleet" doctor` to see which are present;
 > a missing CLI just drops out of the preference order.
 
 Run several interactive agent CLIs at once inside one tmux session, supervise
 them, and alert the user the moment one is blocked, errored, idle, or done. You
-are the orchestrator: careful, never silently let an agent stall.
+are the orchestrator: careful, never silently let an agent stall. **Orchestrate
+what exists before creating anything**: survey running tmux state first, adopt
+and extend existing sessions/windows/panes, and spawn new ones only when nothing
+suitable is already running (or the user asks to extend).
 
 `scripts/fleet.sh` owns the fragile tmux plumbing (spawn, send, capture, idle
 detection, alerting). You decide what to spawn and when to ping.
@@ -40,61 +44,84 @@ If `doctor` shows a CLI missing, it just drops out of the preference order.
   returns, never by name (the user's shell hook may auto-rename windows; pane ids
   and `@fleet_*` tags are immune).
 - **Guardian** = a `guardian` subagent dedicated to one pane. Spawned at the same
-  moment as the pane. The orchestrator never reads `capture` directly during the
+  moment the pane joins the fleet (at `spawn`, or at `adopt` for existing panes).
+  The orchestrator never reads `capture` directly during the
   supervision loop; it reads the guardian's contract lines instead.
 
 Tool preference when a workstream does not pin one: **claude, codex** first, then
-**copilot**, then **gemini**. See [references/agent-clis.md](references/agent-clis.md)
+**copilot**, then **agy**. See [references/agent-clis.md](references/agent-clis.md)
 for each CLI's launch, headless, auto-approve, and resume flags.
 
 ## Workflow
 
-1. **Plan.** Turn the request into workstreams (windows) and agents (panes). State
-   the plan to the user before spawning: which tools, how many, what each does.
+1. **Survey first.** `"$fleet" doctor`, then `"$fleet" survey`. Understand what
+   is already running before touching anything: every tmux session, window, and
+   pane, which panes already run an agent CLI (`AGENT=yes` is a heuristic;
+   `capture` the pane to confirm), and which carry `@fleet_*` tags from a
+   previous run. Reconcile this picture with the request.
 
-2. **Source prompts (optional).** To assign a persona or skill as an agent's brief,
+2. **Plan around what exists.** Turn the request into workstreams and agents,
+   preferring in order: (a) **re-use** a session that already matches the task
+   (`start <name>` on an existing session adopts it; `adopt` tags its agent
+   panes), (b) **extend** that session with new groups/panes, (c) **create** a
+   fresh fleet only when nothing suitable is running. State the plan to the user
+   before mutating tmux: what you found, what you will adopt vs spawn, which
+   tools. Never kill, restart, or repurpose a pane you did not create without
+   the user's explicit consent.
+
+3. **Source prompts (optional).** To assign a persona or skill as an agent's brief,
    list what is available with `agentspec manage list` (add `--format json` to
-   parse). Feed the chosen prompt to the agent in step 5.
+   parse). Feed the chosen prompt to the agent in step 6.
 
-3. **Start the fleet:** `"$fleet" start <fleet-name>`. Print the `ATTACH=` line so
-   the user can `tmux attach` and watch.
+4. **Start or adopt the fleet:** `"$fleet" start <fleet-name>`. On an existing
+   session this adopts it (applies fleet display settings, emits `EXISTING=1`)
+   instead of creating a duplicate. Print the `ATTACH=` line so the user can
+   `tmux attach` and watch.
 
-4. **Create groups and spawn agents:**
+5. **Adopt existing panes, then spawn only what is missing:**
    ```bash
+   "$fleet" adopt <fleet> %3 --name api            # existing pane joins the fleet as-is
    win=$("$fleet" group <fleet> backend | awk -F= '/WINDOW/{print $2}')
    pane=$("$fleet" spawn <fleet> "$win" claude --name api --dir ~/repo | awk -F= '/PANE/{print $2}')
    ```
-   `spawn <fleet> <window> <tool>` where tool is `auto|claude|codex|copilot|gemini`.
-   It reuses the window's first pane for the first agent, splits for the rest.
+   `adopt` tags a running pane (no restart) so `list`/`state`/`ping` and
+   guardians cover it; tool is auto-detected from the pane's foreground command
+   (override with `--tool`). `spawn <fleet> <window> <tool>` where tool is
+   `auto|claude|codex|copilot|agy`; it reuses the window's first pane for the
+   first agent, splits for the rest.
 
-5. **Brief each agent.** Wait until the pane shows a ready input box
+6. **Brief each agent.** Wait until the pane shows a ready input box
    (`"$fleet" capture <pane>` until the CLI has booted), then send the task:
    ```bash
    "$fleet" send <pane> "Refactor the auth module. Run tests when done."
    ```
-   `send` pastes multi-line text safely and submits.
+   `send` pastes multi-line text safely and submits. Do **not** re-brief an
+   adopted pane that is already mid-task; `capture` it, summarize what it is
+   doing, and only send follow-up instructions the user has sanctioned.
 
-   5b. **Dispatch a guardian for this pane.** Immediately after the first
-   successful send, dispatch a `guardian` subagent for this pane (Claude Code:
-   `Task` tool with `subagent_type=guardian`; Codex: `/agent guardian` inside the
-   orchestrator session, or `codex --profile guardian` in a sidecar pane). Pass
-   `<fleet>`, `<pane>`, the agent name, and the `fleet.sh` path as the brief.
-   The guardian owns this pane until terminal state. See **Agent invocations**
-   below for the exact calls.
+   6b. **Dispatch a guardian for this pane.** Immediately after the first
+   successful send (or immediately after `adopt`, for panes already working),
+   dispatch a `guardian` subagent for this pane (Claude Code: `Task` tool with
+   `subagent_type=guardian`; Codex: `/agent guardian` inside the orchestrator
+   session, or `codex --profile guardian` in a sidecar pane). Pass `<fleet>`,
+   `<pane>`, the agent name, and the `fleet.sh` path as the brief. The guardian
+   owns this pane until terminal state. See **Agent invocations** below for the
+   exact calls.
 
-6. **Open the dashboard (optional):** `"$fleet" dashboard <fleet>` turns the control
+7. **Open the dashboard (optional):** `"$fleet" dashboard <fleet>` turns the control
    pane into a live, self-refreshing status table.
 
-7. **Supervise.** The orchestrator no longer polls `list`/`capture` for liveness.
+8. **Supervise.** The orchestrator no longer polls `list`/`capture` for liveness.
    It consumes guardian contract lines (see **Integration contract with guardian**
    below) as events. The orchestrator's only loop responsibility is: receive
    contract line, decide if user input is needed, surface the line to chat,
    collect the user's reply, instruct the originating guardian to relay it via
    `fleet.sh send`.
 
-8. **Wrap up.** Summarize each agent's outcome, citing transcripts (step on
+9. **Wrap up.** Summarize each agent's outcome, citing transcripts (step on
    "understand what's running"). Tear down with `"$fleet" kill <fleet>` only after
-   the user has what they need, or leave it attached for them to inspect.
+   the user has what they need — and only if the fleet was created by this run;
+   an adopted session is the user's, leave it attached.
 
 ## Supervision loop (delegated to guardians)
 
@@ -119,7 +146,8 @@ each guardian, not the orchestrator.
 
 ## Agent invocations
 
-Spawn exactly one guardian per pane, immediately after step 5's first `send`.
+Spawn exactly one guardian per pane, immediately after step 6's first `send`
+(or immediately after `adopt` for panes that joined mid-task).
 
 **Claude Code (orchestrator inside Claude):** use the `Task` tool.
 
@@ -167,7 +195,7 @@ showing it to the user.
    matters.
 2. **macOS notification** via `osascript` (Notification Center, with sound).
 3. **Terminal bell + status line** on the pane that needs attention.
-4. **Status dashboard pane** (when opened in step 6) reflects the new state.
+4. **Status dashboard pane** (when opened in step 7) reflects the new state.
 
 Ping when, and only when: an agent needs permission, errored, finished a
 workstream, or is stuck. Do not ping for normal progress.
@@ -182,6 +210,10 @@ agentspec session list <claude|codex|copilot|gemini>     # id | time | first pro
 agentspec session export <tool> --last                   # full transcript as markdown
 ```
 
+agentspec has no `agy` source yet (its `gemini` source reads the legacy Gemini
+CLI store, not `~/.gemini/antigravity-cli/`). For agy panes, fall back to
+`capture` and resume with `agy -c` / `agy --conversation <id>`.
+
 Use the transcript to disambiguate an `idle` agent (done vs stuck), to summarize
 what each agent accomplished, and to brief a follow-up agent with prior context.
 
@@ -194,7 +226,11 @@ what each agent accomplished, and to brief a follow-up agent with prior context.
   / full-auto run for this fleet. Auto-approve flags per tool are in the matrix.
 - Never approve a destructive or outward-facing action on an agent's behalf. Surface
   it and wait.
-- One fleet per run; name it after the task. Tear down with `kill` when finished.
+- **Survey before you mutate.** Never spawn into, kill, restart, or repurpose a
+  pane or session you did not create this run; adopt it (with the user's intent
+  clear) or leave it alone. `kill` is only for fleets this run created.
+- One fleet per run; name it after the task, or adopt the session that already
+  hosts the work instead of starting a parallel one.
 - **Each pane has exactly one guardian.** The orchestrator must not approve, kill,
   or send to a pane without going through (or explicitly overriding with the
   user's consent) that pane's guardian. If a guardian crashes or its thread ends,

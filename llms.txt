@@ -18,7 +18,7 @@
 - [dot_agents/skills/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/): Portable AI agent skills directory
 - [dot_agents/agents/](https://github.com/urmzd/dotfiles/blob/main/dot_agents/agents/): Subagent definitions
 - [dot_codex/](https://github.com/urmzd/dotfiles/blob/main/dot_codex/): Codex CLI config (workspace-write "Auto" base + writer/reviewer/plan/guardian profiles and `/agent` subagents)
-- [dot_gemini/settings.json](https://github.com/urmzd/dotfiles/blob/main/dot_gemini/settings.json): Gemini CLI config (auth, approval mode, read-only shell auto-approve allowlist)
+- [dot_gemini/settings.json](https://github.com/urmzd/dotfiles/blob/main/dot_gemini/settings.json): Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed
 - [dot_copilot/settings.json](https://github.com/urmzd/dotfiles/blob/main/dot_copilot/settings.json): GitHub Copilot CLI config (model, effort, theme)
 
 ## Agents
@@ -48,7 +48,7 @@
 - [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/extend-oss-skills-to-claude/SKILL.md): Claude-specific deltas on top of create-oss-skill (prerequisite)
 - [fix-and-retry](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/fix-and-retry/SKILL.md): Diagnose CI failure, apply fix, commit, push, re-run
 - [manage-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-secrets/SKILL.md): 1Password-based secret workflow (vault layout, `1p://` references, `op run`)
-- [orchestrate-agents](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/orchestrate-agents/SKILL.md): Drive multiple agent CLIs (Claude, Codex, Gemini) over tmux with a shared fleet store. Pairs with the `guardian` subagent
+- [orchestrate-agents](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/orchestrate-agents/SKILL.md): Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing. Pairs with the `guardian` subagent
 - [pr](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/pr/SKILL.md): Create PRs with auto-generated summary
 - [release-audit](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/release-audit/SKILL.md): Audit releases, tags, and assets for health
 - [repo-init](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/repo-init/SKILL.md): Full repo bootstrap (create, license, scaffold, push)

@@ -2,7 +2,10 @@
 # fleet.sh -- deterministic tmux plumbing for orchestrating AI coding agents.
 #
 # A "fleet" is one tmux session. Windows group agents into workstreams.
-# Panes hold one interactive agent CLI each (claude / codex / copilot / gemini).
+# Panes hold one interactive agent CLI each (claude / codex / copilot / agy).
+# Fleets are built survey-first: inspect what is already running (`survey`),
+# adopt existing sessions/panes (`start` on an existing name, `adopt`), and
+# only spawn new panes when nothing suitable exists.
 #
 # This script owns the fragile, repeated tmux incantations (send-keys timing,
 # bracketed paste, capture, idle hashing, alerting). The orchestrator decides
@@ -20,7 +23,7 @@ export PATH="$HOME/.local/bin:$HOME/.local/npm/bin:$PATH"
 
 # --- config -----------------------------------------------------------------
 # Tool preference when a requested tool is missing or "auto" is asked for.
-PREF_ORDER=(claude codex copilot gemini)
+PREF_ORDER=(claude codex copilot agy)
 IDLE_SECS="${FLEET_IDLE_SECS:-30}"      # no pane change for this long => idle
 CAPTURE_LINES="${FLEET_CAPTURE_LINES:-40}"
 RUNDIR_BASE="${FLEET_RUNDIR:-${TMPDIR:-/tmp}/agent-fleet}"
@@ -74,24 +77,87 @@ cmd_doctor() {
   echo "notifier=$notifier"
 }
 
+fleet_settings() {
+  # Display/alert settings shared by created and adopted fleets.
+  local fleet="$1"
+  tmux set -t "$fleet" pane-border-status top
+  tmux set -t "$fleet" pane-border-format ' #{?@fleet_name,#{@fleet_name} [#{@fleet_tool}],#{pane_current_command}} '
+  tmux set -t "$fleet" monitor-bell on
+  # The user's shell hook may auto-rename windows; we identify roles by pane
+  # options (@fleet_role), never by window or pane NAME, so renames are cosmetic.
+  tmux set -t "$fleet" automatic-rename off 2>/dev/null || true
+}
+
+cmd_survey() {
+  # survey [session] -- TSV inventory of every tmux pane (all sessions unless
+  # filtered) so the orchestrator can understand what is ALREADY running
+  # before creating or spawning anything. AGENT=yes is a heuristic: the
+  # pane's foreground command matches a known agent CLI (npm-wrapped CLIs may
+  # show as "node"; `capture` the pane to confirm). ROLE/NAME are fleet tags
+  # left by a previous run; "-" means untagged.
+  local filter="${1:-}"
+  local agent_re; agent_re="^($(IFS='|'; echo "${PREF_ORDER[*]}"))$"
+  printf 'SESSION\tWINDOW\tPANE\tCOMMAND\tAGENT\tROLE\tNAME\tCWD\n'
+  # Conditional placeholders: empty tmux fields would collapse under tab-IFS
+  # read (tabs are IFS whitespace), shifting every column after them.
+  tmux list-panes -a -F '#{session_name}	#{window_name}	#{pane_id}	#{pane_current_command}	#{?@fleet_role,#{@fleet_role},-}	#{?@fleet_name,#{@fleet_name},-}	#{pane_current_path}' 2>/dev/null |
+  while IFS=$'\t' read -r sess win pane cmdname role name cwd; do
+    if [[ -n "$filter" && "$sess" != "$filter" ]]; then continue; fi
+    agent=no
+    [[ "$cmdname" =~ $agent_re ]] && agent=yes
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "$sess" "$win" "$pane" "$cmdname" "$agent" "$role" "$name" "$cwd"
+  done
+}
+
 cmd_start() {
   local fleet="${1:?usage: start <fleet>}"
   if tmux has-session -t "$fleet" 2>/dev/null; then
-    echo "fleet: '$fleet' already exists" >&2
+    # Adopt: an existing session becomes the fleet. Apply display settings and
+    # the run dir, but do NOT touch panes -- tag agents explicitly via `adopt`.
+    echo "fleet: '$fleet' already exists -- adopting it" >&2
+    fleet_settings "$fleet"
+    mkdir -p "$(rundir "$fleet")"
+    echo "EXISTING=1"
   else
     tmux new-session -d -s "$fleet" -n control
-    tmux set -t "$fleet" pane-border-status top
-    tmux set -t "$fleet" pane-border-format ' #{?@fleet_name,#{@fleet_name} [#{@fleet_tool}],#{pane_current_command}} '
-    tmux set -t "$fleet" monitor-bell on
-    # The user's shell hook may auto-rename windows; we identify roles by pane
-    # options (@fleet_role), never by window or pane NAME, so renames are cosmetic.
-    tmux set -t "$fleet" automatic-rename off 2>/dev/null || true
+    fleet_settings "$fleet"
     local ctrl; ctrl=$(tmux list-panes -t "$fleet:control" -F '#{pane_id}' | head -1)
     tmux set -p -t "$ctrl" @fleet_role control
     mkdir -p "$(rundir "$fleet")"
   fi
   echo "FLEET=$fleet"
   echo "ATTACH=tmux attach -t $fleet"
+}
+
+cmd_adopt() {
+  # adopt <fleet> <pane> [--name N] [--tool T] -- tag an EXISTING pane as a
+  # fleet agent so list/state/ping and guardians cover it, without restarting
+  # whatever is running in it. The pane must live in the fleet's session
+  # (`list` walks the session); adopt the session first via `start <session>`.
+  local fleet="${1:?usage: adopt <fleet> <pane> [--name N] [--tool T]}"
+  local pane="${2:?need pane id}"; shift 2
+  local name="" tool=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name) name="$2"; shift 2;;
+      --tool) tool="$2"; shift 2;;
+      *) die "unknown adopt flag: $1";;
+    esac
+  done
+  require_session "$fleet"
+  local sess
+  sess=$(tmux display-message -p -t "$pane" '#{session_name}' 2>/dev/null) || die "no such pane: $pane"
+  [[ "$sess" == "$fleet" ]] || die "pane $pane is in session '$sess', not fleet '$fleet' (adopt that session: fleet.sh start $sess)"
+  [[ -n "$tool" ]] || tool=$(tmux display-message -p -t "$pane" '#{pane_current_command}')
+  [[ -n "$name" ]] || name="$tool"
+  tmux set -p -t "$pane" @fleet_role agent
+  tmux set -p -t "$pane" @fleet_name "$name"
+  tmux set -p -t "$pane" @fleet_tool "$tool"
+  mkdir -p "$(rundir "$fleet")"
+  echo "PANE=$pane"
+  echo "TOOL=$tool"
+  echo "NAME=$name"
 }
 
 cmd_group() {
@@ -247,7 +313,9 @@ have tmux || die "tmux is required"
 cmd="${1:-}"; shift || true
 case "$cmd" in
   doctor)    cmd_doctor "$@";;
+  survey)    cmd_survey "$@";;
   start)     cmd_start "$@";;
+  adopt)     cmd_adopt "$@";;
   group)     cmd_group "$@";;
   spawn)     cmd_spawn "$@";;
   send)      cmd_send "$@";;
@@ -263,10 +331,13 @@ case "$cmd" in
 fleet.sh -- tmux orchestration for AI coding agents
 
   doctor                         check tmux, agent CLIs, agentspec, notifier
-  start <fleet>                  create detached session (+ control window)
+  survey [session]               TSV inventory of ALL tmux panes (run this first)
+  start <fleet>                  create detached session, or adopt an existing one
+  adopt <fleet> <pane> [--name N] [--tool T]
+                                 tag an existing pane as a fleet agent (no restart)
   group <fleet> <name>           add a window (workstream group)
   spawn <fleet> <window> <tool> [--name N] [--dir D]
-                                 launch an agent CLI in a new pane (tool: auto|claude|codex|copilot|gemini)
+                                 launch an agent CLI in a new pane (tool: auto|claude|codex|copilot|agy)
   send  <pane> <text...>         paste text into a pane and submit
   capture <pane> [lines]         print recent pane output
   list  <fleet>                  TSV of every agent + inferred state
