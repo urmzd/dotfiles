@@ -1,18 +1,130 @@
 #!/usr/bin/env bash
-# Chezmoi run_onchange - Install/update Brewfile packages
-# Runs after the Brewfile target is rendered to $HOME. Re-runs whenever the
-# Brewfile template or the install_mobile flag changes.
-# Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} mobile={{ .install_mobile }}
-
+# Chezmoi run_onchange - Install/update Brewfile packages (resilient).
+# Runs after the Brewfile target is rendered to $HOME. Continues past individual
+# package failures, retries the remainder once, then categorizes what went wrong
+# (tap / permission / unknown formula / network / conflict) with next steps, and
+# soft-exits so the rest of the dotfiles still apply. brew bundle is idempotent,
+# so a later 'chezmoi apply' only reinstalls what is still missing.
+# Re-runs whenever the rendered Brewfile or the exclude list changes.
+# Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
 {{- if .is_macos }}
-set -euo pipefail
+set -uo pipefail
 
-if command -v brew >/dev/null 2>&1; then
-    BREWFILE="{{ .chezmoi.homeDir }}/Brewfile"
-    if [ -f "$BREWFILE" ]; then
-        echo "📦 Installing packages from Brewfile..."
-        brew bundle --file="$BREWFILE"
-        echo "✅ Brewfile packages installed"
-    fi
+# --- tiny UI helpers (color only on a TTY) ---------------------------------
+if [ -t 1 ]; then
+    c_reset=$'\033[0m'; c_red=$'\033[31m'; c_grn=$'\033[32m'
+    c_ylw=$'\033[33m'; c_blu=$'\033[34m'; c_bold=$'\033[1m'
+else
+    c_reset=''; c_red=''; c_grn=''; c_ylw=''; c_blu=''; c_bold=''
 fi
+info() { printf '%s\n' "${c_blu}▶${c_reset}  $*"; }
+ok()   { printf '%s\n' "${c_grn}✅${c_reset} $*"; }
+warn() { printf '%s\n' "${c_ylw}⚠️${c_reset}  $*"; }
+oops() { printf '%s\n' "${c_red}❌${c_reset} $*"; }
+
+if ! command -v brew >/dev/null 2>&1; then
+    warn "Homebrew not found; skipping Brewfile install."
+    exit 0
+fi
+
+BREWFILE="{{ .chezmoi.homeDir }}/Brewfile"
+if [ ! -f "$BREWFILE" ]; then
+    warn "No Brewfile at $BREWFILE; nothing to install."
+    exit 0
+fi
+
+LOG="$(mktemp -t brew-bundle.XXXXXX.log)"
+RUN_BREWFILE="$BREWFILE"
+TMP_BREWFILE=''
+cleanup() { rm -f "$LOG" "$TMP_BREWFILE"; }
+trap cleanup EXIT
+
+# --- optional exclude filter ("select all, deselect some") -----------------
+# Drop any brew/cask/tap line whose quoted target matches an excluded name.
+EXCLUDE="{{ .pkg_exclude }}"
+if [ -n "${EXCLUDE//[[:space:]]/}" ]; then
+    TMP_BREWFILE="$(mktemp -t Brewfile.XXXXXX)"
+    RUN_BREWFILE="$TMP_BREWFILE"
+    awk -v list="$EXCLUDE" '
+        BEGIN { n = split(list, a, /[ ,]+/); for (i = 1; i <= n; i++) if (a[i] != "") skip[a[i]] = 1 }
+        {
+            name = ""
+            if (match($0, /"[^"]+"/)) name = substr($0, RSTART + 1, RLENGTH - 2)
+            if (name != "" && (name in skip)) next
+            print
+        }
+    ' "$BREWFILE" > "$RUN_BREWFILE"
+    info "Excluding on request: ${EXCLUDE}"
+fi
+
+# brew bundle already attempts every entry and installs whatever it can, even
+# when some fail; it just exits non-zero afterwards. We capture that and decide.
+run_bundle() {
+    brew bundle --file="$RUN_BREWFILE" 2>&1 | tee -a "$LOG"
+    return "${PIPESTATUS[0]}"
+}
+
+info "Installing packages from Brewfile..."
+if run_bundle; then
+    ok "All Brewfile packages installed."
+    exit 0
+fi
+
+warn "Some packages failed on the first pass; refreshing Homebrew and retrying the remainder..."
+brew update >/dev/null 2>&1 || true
+: > "$LOG"  # keep only the retry output for diagnosis
+if run_bundle; then
+    ok "All Brewfile packages installed after retry."
+    exit 0
+fi
+
+# --- still failing: report what broke and how to fix it --------------------
+echo
+oops "Some Brewfile dependencies did not install."
+
+failed_pkgs="$(grep -Eo 'Installing [^ ]+ has failed' "$LOG" | awk '{print $2}' | sort -u)"
+if [ -n "$failed_pkgs" ]; then
+    printf '%s\n' "${c_bold}Failed:${c_reset}"
+    while IFS= read -r pkg; do printf '  - %s\n' "$pkg"; done <<< "$failed_pkgs"
+    echo
+fi
+
+printf '%s\n' "${c_bold}Suggested next steps:${c_reset}"
+matched=0
+
+if grep -qiE 'permission denied|not writable|operation not permitted' "$LOG"; then
+    matched=1
+    warn "Permission issue on the Homebrew prefix."
+    echo "    sudo chown -R \"\$(whoami)\":admin \"\$(brew --prefix)\"/* && brew doctor"
+fi
+if grep -qiE 'tapping|could not tap|failure while executing.*tap|repository not found|github api|\b40[13]\b' "$LOG"; then
+    matched=1
+    warn "Tap / GitHub access issue."
+    echo "    - Check auth + network:  gh auth status   (or export HOMEBREW_GITHUB_API_TOKEN)"
+    echo "    - Re-tap the failing tap:  brew untap <user>/<repo> && brew tap <user>/<repo>"
+fi
+if grep -qiE 'no available formula|no cask with this name|no formula|could not be found' "$LOG"; then
+    matched=1
+    warn "Unknown formula/cask (stale index or a renamed package)."
+    echo "    brew update && brew search <name>   # then fix the name in Brewfile.tmpl"
+fi
+if grep -qiE 'could not resolve host|ssl|curl.*(failed|error)|download.*failed|timed out' "$LOG"; then
+    matched=1
+    warn "Network / download issue."
+    echo "    - Re-run once your connection is stable:  brew bundle --file=\"$BREWFILE\""
+fi
+if grep -qiE 'already an app at|it conflicts with|already exists' "$LOG"; then
+    matched=1
+    warn "A cask conflicts with an app already on disk."
+    echo "    - Adopt the existing install:  brew bundle --file=\"$BREWFILE\" --force"
+    echo "    - Or remove the old app first, then re-run brew bundle."
+fi
+if [ "$matched" -eq 0 ]; then
+    echo "    - Review the output above, then re-run:  brew bundle --file=\"$BREWFILE\""
+fi
+
+echo
+warn "Continuing so the rest of your dotfiles still apply."
+warn "Fix the above and re-run 'chezmoi apply'; brew bundle only reinstalls what is missing."
+exit 0
 {{- end }}

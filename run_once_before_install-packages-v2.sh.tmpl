@@ -117,8 +117,8 @@ for pid in "${_clone_pids[@]}"; do
 done
 
 if [ "$_clone_failed" -ne 0 ]; then
-    echo "❌ One or more git clones failed"
-    exit 1
+    echo "⚠️ One or more git clones failed (network or permissions?). Continuing anyway;"
+    echo "   re-run 'chezmoi apply' after checking connectivity to retry the missing ones."
 fi
 
 # Cyberdream themes (depends on catppuccin being cloned)
@@ -223,15 +223,20 @@ fi
 # Install uv (Python package manager) if not present
 if ! command -v uv >/dev/null 2>&1; then
     echo "🐍 Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/install.sh | sh \
+        || echo "⚠️ uv install failed; re-run 'chezmoi apply' to retry."
 fi
 
 # Install rustup (Rust toolchain manager) if not present
 if ! command -v rustup >/dev/null 2>&1; then
     echo "🦀 Installing rustup..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    . "$HOME/.cargo/env"
-    rustup component add rust-analyzer rust-src
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+        . "$HOME/.cargo/env"
+        rustup component add rust-analyzer rust-src \
+            || echo "⚠️ rustup component add failed; run it manually once rustup is on PATH."
+    else
+        echo "⚠️ rustup install failed; re-run 'chezmoi apply' to retry."
+    fi
 fi
 
 echo "✅ Package installation completed!"

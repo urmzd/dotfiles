@@ -79,7 +79,16 @@ dotfiles cleanup         # Prune build artifacts and caches
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 
-**Mobile dev tooling** (Android Studio + SDK command-line tools + CocoaPods): gated behind the `install_mobile` feature flag, off by default. Enable at init or set `install_mobile = true` in `~/.config/chezmoi/chezmoi.toml` and re-run `chezmoi apply`.
+**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which sets defaults for the per-group toggles below. Each group can be overridden independently, and `pkg_exclude` drops individual packages by name.
+
+| Flag | Covers | Default by preset |
+| ---- | ------ | ----------------- |
+| `install_cloud` | docker, colima, kubectl, helm, k9s, terraform, runpodctl | off on `minimal`, on otherwise |
+| `install_fonts` | Monaspace + Iosevka Nerd Fonts | off on `minimal`, on otherwise |
+| `install_mobile` | Android Studio + SDK command-line tools + CocoaPods | on only for `full` |
+| `pkg_exclude` | comma-separated formula/cask names to skip (for example `k9s,deno`) | empty |
+
+Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
 **AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update-ai`.
 
@@ -105,7 +114,7 @@ These scripts run automatically on `chezmoi apply`:
 | Script | Type | Trigger |
 | ------ | ---- | ------- |
 | `install-packages-v2` | run_once (before) | First apply (installs Homebrew + bootstrap Linux packages) |
-| `brewfile-install` | run_onchange (after) | Brewfile or `install_mobile` flag changes |
+| `brewfile-install` | run_onchange (after) | Brewfile (any package group flag) or `pkg_exclude` changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |

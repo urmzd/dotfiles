@@ -7,11 +7,16 @@
 #   - claude/codex/...   -> run_once_after_install-ai-clis.sh.tmpl       (npm/curl)
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
 #
-# Mobile dev tooling (Android Studio + SDK + CocoaPods) is gated behind the
-# `install_mobile` flag; enable it via `chezmoi apply` prompts or ~/.config/chezmoi/chezmoi.toml.
+# Package selection is driven by prompts in .chezmoi.toml.tmpl: a `package_preset`
+# (minimal/standard/full) sets defaults for the per-group flags `install_cloud`,
+# `install_fonts`, and `install_mobile`, and `pkg_exclude` drops individual
+# packages by name at install time. Set any of these via `chezmoi init` prompts
+# or directly in ~/.config/chezmoi/chezmoi.toml, then re-run `chezmoi apply`.
 
+{{- if .install_cloud }}
 # Taps (third-party; core/cask are auto-tapped and need no declaration)
 tap "runpod/runpodctl"  # RunPod CLI; public GitHub tap, no credentials/trust needed
+{{- end }}
 
 # Core CLI
 brew "git"
@@ -32,10 +37,15 @@ brew "tealdeer"
 brew "coreutils"  # Provides gls/gdircolors used in dot_zshrc.tmpl color setup
 brew "reattach-to-user-namespace"  # tmux clipboard integration on macOS
 
+{{- if .use_secrets }}
+
 # Secrets
 cask "1password-cli"  # `op` CLI; pairs with manage-secrets skill (1Password desktop app needed for biometric unlock)
+{{- end }}
 
-# Cloud / infra
+{{- if .install_cloud }}
+
+# Cloud / infra (gated behind install_cloud flag)
 brew "terraform"
 brew "colima"
 brew "docker"
@@ -45,6 +55,7 @@ brew "kubectl"
 brew "helm"
 brew "k9s"
 brew "runpodctl"  # RunPod GPU cloud CLI (from runpod/runpodctl tap above)
+{{- end }}
 
 # Runtimes / language tooling
 brew "fnm"            # Node version manager
@@ -71,10 +82,13 @@ cask "android-commandlinetools"  # Android SDK command-line tools
 brew "cocoapods"                 # Dependency manager for Swift and Objective-C projects
 {{- end }}
 
-# Fonts
+{{- if .install_fonts }}
+
+# Fonts (gated behind install_fonts flag)
 cask "font-monaspace-nerd-font"  # MonaspiceNe Nerd Font (Monaspace Neon)
 cask "font-iosevka-nerd-font"    # Iosevka Nerd Font (https://typeof.net/Iosevka/)
 # cask "font-meslo-lg-nerd-font" # MesloLGS Nerd Font (legacy, replaced by MonaspiceNe)
+{{- end }}
 
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)

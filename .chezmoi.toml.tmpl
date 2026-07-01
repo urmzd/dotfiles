@@ -14,7 +14,18 @@
 {{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management (y/n)" -}}
 {{- $install_codex := promptBoolOnce . "install_codex" "Install OpenAI Codex CLI (y/n)" -}}
 {{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" -}}
-{{- $install_mobile := promptBoolOnce . "install_mobile" "Install mobile dev tooling: Android Studio + SDK + CocoaPods (y/n)" -}}
+
+{{- /* Package selection: a preset sets sensible defaults, then per-group      */}}
+{{- /* toggles let you opt in/out, and pkg_exclude drops individual packages   */}}
+{{- /* ("select all, deselect some"). Groups gate blocks in Brewfile.tmpl.     */}}
+{{- $preset := promptChoiceOnce . "package_preset" "Package preset (minimal = core CLI + editor, standard = + cloud/infra + fonts, full = + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
+{{- $default_cloud := ne $preset "minimal" -}}
+{{- $default_fonts := ne $preset "minimal" -}}
+{{- $default_mobile := eq $preset "full" -}}
+{{- $install_cloud := promptBoolOnce . "install_cloud" "Include cloud + infra tooling: docker, colima, kubectl, helm, k9s, terraform, runpodctl (y/n)" $default_cloud -}}
+{{- $install_fonts := promptBoolOnce . "install_fonts" "Include extra Nerd Fonts: Monaspace, Iosevka (y/n)" $default_fonts -}}
+{{- $install_mobile := promptBoolOnce . "install_mobile" "Include mobile dev tooling: Android Studio + SDK + CocoaPods (y/n)" $default_mobile -}}
+{{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name (comma-separated, optional; e.g. k9s,deno)" "" -}}
 
 {{- if $use_secrets }}
 encryption = "age"
@@ -37,7 +48,13 @@ encryption = "age"
     use_secrets = {{ $use_secrets }}
     install_codex = {{ $install_codex }}
     install_cortex = {{ $install_cortex }}
+
+    # Package selection (preset + per-group toggles + per-package excludes)
+    package_preset = {{ $preset | quote }}
+    install_cloud = {{ $install_cloud }}
+    install_fonts = {{ $install_fonts }}
     install_mobile = {{ $install_mobile }}
+    pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection
     is_macos = {{ eq .chezmoi.os "darwin" }}
