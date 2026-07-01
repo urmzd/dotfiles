@@ -869,9 +869,13 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"ahmedkhalf/project.nvim",
+		-- Maintained fork/rewrite of the abandoned ahmedkhalf/project.nvim;
+		-- upstream called vim.lsp.buf_get_clients(), removed in Neovim 0.11+.
+		-- The rewrite renames the module project_nvim -> project.
+		"DrKJeff16/project.nvim",
+		main = "project",
 		config = function()
-			require("project_nvim").setup({})
+			require("project").setup({})
 		end,
 	},
 	{
