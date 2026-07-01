@@ -42,8 +42,8 @@ if ! command -v brew >/dev/null 2>&1; then
     fi
 fi
 
-# Brewfile packages are installed by run_onchange_before_brewfile-install.sh.tmpl
-# which re-runs whenever the Brewfile hash changes.
+# Brewfile packages are installed by run_onchange_after_brewfile-install.sh.tmpl
+# which re-runs whenever the rendered Brewfile hash changes.
 
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

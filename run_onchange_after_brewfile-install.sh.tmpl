@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Chezmoi run_onchange - Install/update Brewfile packages
-# Triggered by: {{ include "Brewfile" | sha256sum }}
+# Runs after the Brewfile target is rendered to $HOME. Re-runs whenever the
+# Brewfile template or the install_mobile flag changes.
+# Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} mobile={{ .install_mobile }}
 
 {{- if .is_macos }}
 set -euo pipefail
 
 if command -v brew >/dev/null 2>&1; then
-    BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
+    BREWFILE="{{ .chezmoi.homeDir }}/Brewfile"
     if [ -f "$BREWFILE" ]; then
         echo "📦 Installing packages from Brewfile..."
         brew bundle --file="$BREWFILE"

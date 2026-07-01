@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Chezmoi run_onchange - Pre-generate zsh completions at apply time
 # Triggered by: {{ include "dot_zshrc.tmpl" | sha256sum }}
-# Triggered by: {{ include "Brewfile" | sha256sum }}
+# Triggered by: {{ include "Brewfile.tmpl" | sha256sum }}
 # Triggered by: {{ include "run_onchange_after_install-cloud-clis.sh.tmpl" | sha256sum }}
 
 set -euo pipefail

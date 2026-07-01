@@ -6,6 +6,12 @@
 #   - cortex             -> run_onchange_after_install-cortex.sh.tmpl   (pinned upstream)
 #   - claude/codex/...   -> run_once_after_install-ai-clis.sh.tmpl       (npm/curl)
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
+#
+# Mobile dev tooling (Android Studio + SDK + CocoaPods) is gated behind the
+# `install_mobile` flag; enable it via `chezmoi apply` prompts or ~/.config/chezmoi/chezmoi.toml.
+
+# Taps (third-party; core/cask are auto-tapped and need no declaration)
+tap "runpod/runpodctl"  # RunPod CLI; public GitHub tap, no credentials/trust needed
 
 # Core CLI
 brew "git"
@@ -38,6 +44,7 @@ brew "docker-compose"
 brew "kubectl"
 brew "helm"
 brew "k9s"
+brew "runpodctl"  # RunPod GPU cloud CLI (from runpod/runpodctl tap above)
 
 # Runtimes / language tooling
 brew "fnm"            # Node version manager
@@ -49,9 +56,6 @@ brew "luarocks"
 brew "luacheck"
 brew "stylua"
 
-# iOS/macOS Development
-brew "cocoapods"  # Dependency manager for Swift and Objective-C projects
-
 # Editor
 brew "neovim", args: ["HEAD"]  # Extensible Vim-based text editor (0.12-dev)
 
@@ -59,9 +63,13 @@ brew "neovim", args: ["HEAD"]  # Extensible Vim-based text editor (0.12-dev)
 brew "cmake"    # Cross-platform build system generator
 brew "gettext"  # GNU internationalization and localization support
 
-# Android Development
-cask "android-studio"         # Android IDE with SDK manager
+{{- if .install_mobile }}
+
+# Mobile Development (gated behind install_mobile flag)
+cask "android-studio"            # Android IDE with SDK manager
 cask "android-commandlinetools"  # Android SDK command-line tools
+brew "cocoapods"                 # Dependency manager for Swift and Objective-C projects
+{{- end }}
 
 # Fonts
 cask "font-monaspace-nerd-font"  # MonaspiceNe Nerd Font (Monaspace Neon)

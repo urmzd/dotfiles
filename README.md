@@ -71,7 +71,7 @@ dotfiles cleanup         # Prune build artifacts and caches
 
 ### What's installed
 
-**CLI essentials** (Homebrew on macOS, apt/dnf/pacman on Linux): git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, tree-sitter, uv, tealdeer, terraform, kubectl, helm, k9s, colima, docker, fnm, deno, go, lua, ...see [`Brewfile`](Brewfile).
+**CLI essentials** (Homebrew on macOS, apt/dnf/pacman on Linux): git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, tree-sitter, uv, tealdeer, terraform, kubectl, helm, k9s, colima, docker, fnm, deno, go, lua, ...see [`Brewfile.tmpl`](Brewfile.tmpl).
 
 **Version managers** (per-language, best-in-class): fnm (Node), uv (Python), rustup (Rust).
 
@@ -79,11 +79,13 @@ dotfiles cleanup         # Prune build artifacts and caches
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 
+**Mobile dev tooling** (Android Studio + SDK command-line tools + CocoaPods): gated behind the `install_mobile` feature flag, off by default. Enable at init or set `install_mobile = true` in `~/.config/chezmoi/chezmoi.toml` and re-run `chezmoi apply`.
+
 **AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update-ai`.
 
 ### Adding a new tool
 
-1. Homebrew: add to [`Brewfile`](Brewfile). Linux: add to the apt/dnf/pacman list in [`run_once_before_install-packages-v2.sh.tmpl`](run_once_before_install-packages-v2.sh.tmpl).
+1. Homebrew: add to [`Brewfile.tmpl`](Brewfile.tmpl). Linux: add to the apt/dnf/pacman list in [`run_once_before_install-packages-v2.sh.tmpl`](run_once_before_install-packages-v2.sh.tmpl).
 2. For tools needing version pinning: write a `run_onchange_after_install-<name>.sh.tmpl` mirroring the cortex / cloud-clis pattern.
 3. Run `chezmoi apply`. Completions regenerate if the package exposes zsh site-functions.
 
@@ -103,7 +105,7 @@ These scripts run automatically on `chezmoi apply`:
 | Script | Type | Trigger |
 | ------ | ---- | ------- |
 | `install-packages-v2` | run_once (before) | First apply (installs Homebrew + bootstrap Linux packages) |
-| `brewfile-install` | run_onchange (before) | Brewfile changes |
+| `brewfile-install` | run_onchange (after) | Brewfile or `install_mobile` flag changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |

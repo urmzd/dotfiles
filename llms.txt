@@ -10,7 +10,7 @@
 
 ## API / Key Files
 
-- [Brewfile](https://github.com/urmzd/dotfiles/blob/main/Brewfile): macOS Homebrew packages (source of truth for CLIs)
+- [Brewfile.tmpl](https://github.com/urmzd/dotfiles/blob/main/Brewfile.tmpl): macOS Homebrew packages (source of truth for CLIs; mobile dev tooling gated behind `install_mobile`)
 - [run_onchange_after_install-cortex.sh.tmpl](https://github.com/urmzd/dotfiles/blob/main/run_onchange_after_install-cortex.sh.tmpl): Snowflake Cortex Code CLI installer (pinned upstream)
 - [run_onchange_after_install-cloud-clis.sh.tmpl](https://github.com/urmzd/dotfiles/blob/main/run_onchange_after_install-cloud-clis.sh.tmpl): gcloud + aws-cli installers (pinned upstream)
 - [dot_config/](https://github.com/urmzd/dotfiles/blob/main/dot_config/): Neovim, Ghostty, Tmux, and other tool configs

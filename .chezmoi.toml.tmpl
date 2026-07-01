@@ -14,6 +14,7 @@
 {{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management (y/n)" -}}
 {{- $install_codex := promptBoolOnce . "install_codex" "Install OpenAI Codex CLI (y/n)" -}}
 {{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" -}}
+{{- $install_mobile := promptBoolOnce . "install_mobile" "Install mobile dev tooling: Android Studio + SDK + CocoaPods (y/n)" -}}
 
 {{- if $use_secrets }}
 encryption = "age"
@@ -36,6 +37,7 @@ encryption = "age"
     use_secrets = {{ $use_secrets }}
     install_codex = {{ $install_codex }}
     install_cortex = {{ $install_cortex }}
+    install_mobile = {{ $install_mobile }}
 
     # System detection
     is_macos = {{ eq .chezmoi.os "darwin" }}
