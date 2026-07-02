@@ -63,11 +63,22 @@ chezmoi edit <file>   # Edit source, then apply
 ### Maintenance
 
 ```bash
-dotfiles update          # brew upgrade && chezmoi apply
+dotfiles apply           # Preview diff, confirm, then apply  (-y skips confirm)
+dotfiles diff            # Preview pending chezmoi changes
+dotfiles edit            # Open dotfiles source in editor
+dotfiles config          # Re-run chezmoi prompts to pick up new/changed flags
+
+dotfiles update          # Everything: brew packages + AI CLIs, then apply
+dotfiles update packages # brew upgrade + apply
+dotfiles update groups   # Toggle package groups + excludes (fzf), then apply
+dotfiles update ai       # Reinstall AI CLIs at pinned versions
+
+dotfiles doctor          # chezmoi doctor + tool version checks
 dotfiles status          # Show installed AI tool versions
-dotfiles update-ai       # Re-install AI CLIs at pinned versions
-dotfiles cleanup         # Prune build artifacts and caches
+dotfiles clean           # Prune build artifacts and caches
 ```
+
+Run `dotfiles config` after pulling changes that add new prompts (like the package flags), then `dotfiles update groups` any time to fine-tune which groups install without hand-editing `chezmoi.toml`.
 
 ### What's installed
 
@@ -90,7 +101,7 @@ dotfiles cleanup         # Prune build artifacts and caches
 
 Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update-ai`.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update ai`.
 
 ### Adding a new tool
 
@@ -118,7 +129,7 @@ These scripts run automatically on `chezmoi apply`:
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
-| `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update-ai`) |
+| `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
 | `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag` CLIs) |
 | `configure-terminal` | run_once (after) | First apply only |

@@ -83,14 +83,128 @@ alias vi="nvim"
 alias vim="nvim"
 
 # Dotfiles management
+
+# Set a flat `key = value` under [data] in a chezmoi TOML config, keeping indent.
+_dotfiles_toml_set() {
+  local file=$1 key=$2 val=$3
+  grep -qE "^[[:space:]]*${key}[[:space:]]*=" "$file" || return 1
+  awk -v k="$key" -v v="$val" '
+    $0 ~ ("^[[:space:]]*" k "[[:space:]]*=") { sub(/=.*/, "= " v); print; next }
+    { print }
+  ' "$file" > "$file.dfw" && mv "$file.dfw" "$file"
+}
+
+# Interactive package-group + exclude editor (backs `dotfiles update groups`).
+_dotfiles_update_groups() {
+  local cfg=$1
+  command -v fzf >/dev/null && command -v jq >/dev/null || {
+    echo "❌ 'update groups' needs fzf and jq installed."; return 1
+  }
+  [ -f "$cfg" ] || { echo "❌ No chezmoi config at $cfg"; return 1; }
+  if ! grep -qE '^[[:space:]]*install_cloud[[:space:]]*=' "$cfg"; then
+    echo "Package flags not in config yet; running 'dotfiles config' first..."
+    chezmoi init || return 1
+  fi
+  local data; data="$(chezmoi data --format=json 2>/dev/null)"
+  local -A state desc
+  state[cloud]=$(print -r -- "$data" | jq -r '.install_cloud // false')
+  state[fonts]=$(print -r -- "$data" | jq -r '.install_fonts // false')
+  state[mobile]=$(print -r -- "$data" | jq -r '.install_mobile // false')
+  local excl; excl=$(print -r -- "$data" | jq -r '.pkg_exclude // ""')
+  desc[cloud]="docker, colima, kubectl, helm, k9s, terraform, runpodctl"
+  desc[fonts]="Monaspace + Iosevka Nerd Fonts"
+  desc[mobile]="Android Studio + SDK + CocoaPods"
+  local order=(cloud fonts mobile) tab=$'\t'
+  while true; do
+    local menu="" g m
+    for g in $order; do
+      [[ ${state[$g]} == true ]] && m="●" || m="○"
+      menu+="${g}${tab}${m} ${g}: ${desc[$g]}"$'\n'
+    done
+    menu+="__exclude${tab}✎ exclude list (current: ${excl:-none})"$'\n'
+    menu+="__apply${tab}✓ save & apply"$'\n'
+    menu+="__cancel${tab}✗ cancel"
+    local pick
+    pick=$(printf '%s' "$menu" | fzf --ansi --height=45% --reverse \
+        --delimiter="$tab" --with-nth=2.. \
+        --header='● on / ○ off  —  ENTER an item to toggle, then pick "save & apply"' \
+        --prompt='groups> ' | cut -d"$tab" -f1)
+    case "$pick" in
+      cloud|fonts|mobile)
+        [[ ${state[$pick]} == true ]] && state[$pick]=false || state[$pick]=true ;;
+      __exclude) vared -p "Exclude (comma-separated): " excl ;;
+      __apply) break ;;
+      *) echo "Aborted (no changes)."; return 0 ;;
+    esac
+  done
+  echo
+  echo "New selection: cloud=${state[cloud]} fonts=${state[fonts]} mobile=${state[mobile]} exclude='${excl}'"
+  _dotfiles_toml_set "$cfg" install_cloud  "${state[cloud]}"
+  _dotfiles_toml_set "$cfg" install_fonts  "${state[fonts]}"
+  _dotfiles_toml_set "$cfg" install_mobile "${state[mobile]}"
+  _dotfiles_toml_set "$cfg" pkg_exclude    "\"${excl}\""
+  echo "Applying..."
+  chezmoi apply
+}
+
 function dotfiles() {
+  local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
   case "${1:-help}" in
-    update)
-      brew update && brew upgrade && chezmoi apply
+    apply)
+      if [ -z "$(chezmoi diff 2>/dev/null)" ]; then
+        echo "✅ Already up to date."
+        return 0
+      fi
+      chezmoi diff
+      if [[ "${2:-}" == "-y" || "${2:-}" == "--yes" ]]; then
+        chezmoi apply
+        return
+      fi
+      if read -q "?Apply these changes? [y/N] "; then
+        echo; chezmoi apply
+      else
+        echo; echo "Aborted."
+      fi
       ;;
-    update-ai)
-      rm -f "$HOME/.local/state/ai-tools-installed"
-      chezmoi apply
+    diff)
+      chezmoi diff
+      ;;
+    edit)
+      cd ~/.local/share/chezmoi && ${EDITOR:-nvim} . && cd -
+      ;;
+    config)
+      # Re-run the init prompts so newly added flags get picked up. Answered
+      # promptOnce fields are kept; only new/missing ones are asked.
+      echo "🔧 Re-running chezmoi prompts (existing answers kept)..."
+      chezmoi init && chezmoi apply
+      ;;
+    update)
+      case "${2:-all}" in
+        all)
+          echo "⬆️  Updating everything (brew packages + AI CLIs)..."
+          brew update && brew upgrade
+          rm -f "$HOME/.local/state/ai-tools-installed"
+          chezmoi apply
+          ;;
+        packages|package|pkg)
+          brew update && brew upgrade && chezmoi apply
+          ;;
+        groups|group)
+          _dotfiles_update_groups "$cfg"
+          ;;
+        ai)
+          rm -f "$HOME/.local/state/ai-tools-installed"
+          chezmoi apply
+          ;;
+        *)
+          echo "Usage: dotfiles update [packages|groups|ai]   (no arg = everything)"
+          ;;
+      esac
+      ;;
+    doctor)
+      chezmoi doctor
+      echo; echo "=== dotfiles tool versions ==="
+      dotfiles status
       ;;
     status)
       echo "=== AI tool versions ==="
@@ -99,7 +213,7 @@ function dotfiles() {
       echo -n "  agy:    "; agy --version 2>/dev/null || echo "not installed"
       echo -n "  cortex: "; cortex --version 2>/dev/null || echo "not installed"
       ;;
-    cleanup)
+    clean)
       echo "Quick disk cleanup -- removing regenerable build artifacts and caches..."
       echo "Before:"; df -h / | awk 'NR==1 || NR==2'; echo ""
       find "$HOME/github" -maxdepth 3 -name target -type d -exec rm -rf {} + 2>/dev/null
@@ -109,26 +223,22 @@ function dotfiles() {
       brew cleanup --prune=all -s 2>/dev/null
       echo "After:"; df -h / | awk 'NR==1 || NR==2'
       ;;
-    edit)
-      cd ~/.local/share/chezmoi && ${EDITOR:-nvim} . && cd -
-      ;;
-    apply)
-      chezmoi apply
-      ;;
-    diff)
-      chezmoi diff
-      ;;
     *)
       echo "Usage: dotfiles <command>"
       echo ""
-      echo "Commands:"
-      echo "  status     Show installed AI tool versions"
-      echo "  update     brew upgrade + chezmoi apply"
-      echo "  update-ai  Clear AI tools sentinel and reinstall (chezmoi apply)"
-      echo "  cleanup    Remove regenerable build artifacts and caches"
-      echo "  edit       Open dotfiles source in editor"
-      echo "  apply      Apply dotfiles with chezmoi"
-      echo "  diff       Preview pending chezmoi changes"
+      echo "  apply             Preview diff, confirm, then apply  (-y skips confirm)"
+      echo "  diff              Preview pending chezmoi changes"
+      echo "  edit              Open dotfiles source in editor"
+      echo "  config            Re-run chezmoi prompts to pick up new/changed flags"
+      echo ""
+      echo "  update            Update everything: brew packages + AI CLIs, then apply"
+      echo "  update packages   brew upgrade + apply"
+      echo "  update groups     Toggle package groups + excludes (fzf), then apply"
+      echo "  update ai         Reinstall AI CLIs at pinned versions"
+      echo ""
+      echo "  doctor            chezmoi doctor + tool version checks"
+      echo "  status            Show installed AI tool versions"
+      echo "  clean             Remove regenerable build artifacts and caches"
       ;;
   esac
 }
