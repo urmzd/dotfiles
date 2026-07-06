@@ -100,6 +100,11 @@ set -g @continuum-restore 'off'
 # Catppuccin theme configuration - using cyberdream
 set -g @catppuccin_flavour 'cyberdream'
 
+# Show the window NAME (#W) in the status line instead of the pane title (#T),
+# which defaults to the hostname
+set -g @catppuccin_window_text " #W"
+set -g @catppuccin_window_current_text " #W"
+
 # Load Catppuccin theme manually (recommended over TPM)
 run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
 
@@ -109,9 +114,21 @@ set -g detach-on-destroy off
 # Reduce escape time for better vim experience
 set -sg escape-time 0
 
-# Disable automatic rename - we use smart naming via shell hook
+# Window naming: the shell precmd hook auto-names windows (repo:branch), but a
+# manual name always wins. tmux flags manually named windows by setting
+# window-level automatic-rename off (on rename-window, new-window -n, etc.);
+# the shell hook skips flagged windows and clears the flag after its own
+# renames. Escape-sequence renames from programs are blocked so names stay
+# stable for targeting windows/panes by name.
 set-window-option -g automatic-rename off
+set-option -g allow-rename off
+set-option -g allow-set-title off
 set-option -g set-titles on
+
+# Rename current pane title (window rename is the default prefix+,)
+bind T command-prompt -p "(pane title)" "select-pane -T '%%'"
+# Release a manually named window back to auto-naming
+bind R set-option -uw automatic-rename \; display-message "window released to auto-naming"
 
 # Activity monitoring
 setw -g monitor-activity on
