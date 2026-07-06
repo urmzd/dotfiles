@@ -4,7 +4,7 @@ set -euo pipefail
 
 if ! command -v agentspec &>/dev/null; then
     echo "Installing agentspec..."
-    curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/scripts/install.sh | sh
+    curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/install.sh | sh
 fi
 
 echo "Installing agent resources..."
