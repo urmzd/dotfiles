@@ -50,11 +50,37 @@ if [ -n "${EXCLUDE//[[:space:]]/}" ]; then
         {
             name = ""
             if (match($0, /"[^"]+"/)) name = substr($0, RSTART + 1, RLENGTH - 2)
-            if (name != "" && (name in skip)) next
+            base = name
+            sub(/^.*\//, "", base)  # tap-qualified entries (hashicorp/tap/terraform) exclude by basename too
+            if (name != "" && ((name in skip) || (base in skip))) next
             print
         }
     ' "$BREWFILE" > "$RUN_BREWFILE"
     info "Excluding on request: ${EXCLUDE}"
+fi
+
+# --- trust declared taps ----------------------------------------------------
+# Recent Homebrew sets HOMEBREW_REQUIRE_TAP_TRUST and refuses to load formulae
+# from untrusted third-party taps. Declaring a tap in the Brewfile is our trust
+# statement, so trust each declared tap up front (no-op on older Homebrew).
+if brew trust --help >/dev/null 2>&1; then
+    awk '/^tap[[:space:]]/ { if (match($0, /"[^"]+"/)) print substr($0, RSTART + 1, RLENGTH - 2) }' "$RUN_BREWFILE" |
+        while IFS= read -r tap_name; do
+            brew trust --tap "$tap_name" >/dev/null 2>&1 \
+                || warn "Could not trust tap ${tap_name}; its packages may fail to install."
+        done
+fi
+
+# --- one-time migration: terraform moved from homebrew/core (disabled at
+# 1.5.7 after the BUSL relicense) to hashicorp/tap. The old keg is still named
+# "terraform", so brew bundle would consider hashicorp/tap/terraform satisfied
+# and silently keep the frozen 1.5.7. Uninstall it so the tap version installs.
+if grep -q '"hashicorp/tap/terraform"' "$RUN_BREWFILE"; then
+    tf_receipt="$(brew --prefix)/opt/terraform/INSTALL_RECEIPT.json"
+    if [ -f "$tf_receipt" ] && grep -Eq '"tap":[[:space:]]*"homebrew/core"' "$tf_receipt"; then
+        info "Migrating terraform: homebrew/core (disabled, 1.5.7) -> hashicorp/tap..."
+        brew uninstall terraform || warn "Could not uninstall core terraform; hashicorp/tap/terraform may not link."
+    fi
 fi
 
 # brew bundle already attempts every entry and installs whatever it can, even

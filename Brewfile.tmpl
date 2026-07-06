@@ -15,6 +15,7 @@
 
 {{- if .install_cloud }}
 # Taps (third-party; core/cask are auto-tapped and need no declaration)
+tap "hashicorp/tap"     # Official HashiCorp tap; core's terraform is frozen at 1.5.7 and disabled (BUSL relicense)
 tap "runpod/runpodctl"  # RunPod CLI; public GitHub tap, no credentials/trust needed
 {{- end }}
 
@@ -46,7 +47,7 @@ cask "1password-cli"  # `op` CLI; pairs with manage-secrets skill (1Password des
 {{- if .install_cloud }}
 
 # Cloud / infra (gated behind install_cloud flag)
-brew "terraform"
+brew "hashicorp/tap/terraform"  # From hashicorp/tap above; homebrew/core's terraform was disabled 2025-04-04
 brew "colima"
 brew "docker"
 brew "docker-buildx"
