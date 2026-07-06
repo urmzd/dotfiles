@@ -83,8 +83,10 @@ fleet_settings() {
   tmux set -t "$fleet" pane-border-status top
   tmux set -t "$fleet" pane-border-format ' #{?@fleet_name,#{@fleet_name} [#{@fleet_tool}],#{pane_current_command}} '
   tmux set -t "$fleet" monitor-bell on
-  # The user's shell hook may auto-rename windows; we identify roles by pane
-  # options (@fleet_role), never by window or pane NAME, so renames are cosmetic.
+  # Explicitly set window names (new-window -n, rename-window) persist: the
+  # user's shell hook skips windows tmux flags as manually named. We still
+  # identify roles by pane options (@fleet_role), never by window or pane
+  # NAME, as defense in depth.
   tmux set -t "$fleet" automatic-rename off 2>/dev/null || true
 }
 
