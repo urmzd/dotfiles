@@ -1,1 +1,15 @@
 skills/
+
+# Repo metadata: lives in the repo only, never applied into $HOME.
+# install.sh is the single-file bootstrap fetched via curl; the rest are docs
+# and release config for the dotfiles repo itself.
+install.sh
+README.md
+AGENTS.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+LICENSE
+llms.txt
+sr.yaml
+requirements-pipx.txt

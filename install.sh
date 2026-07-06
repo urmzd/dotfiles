@@ -31,7 +31,24 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 fi
 
 # ---- 2. chezmoi + apply (single shot via chezmoi's own installer) ---------
+# Install the chezmoi binary somewhere stable instead of ./bin in a random cwd;
+# the Brewfile later installs the brew-managed copy, which takes over on PATH.
+CHEZMOI_BIN_DIR="${HOME}/.local/bin"
+mkdir -p "$CHEZMOI_BIN_DIR"
+
 log "Installing chezmoi and applying dotfiles from github.com/${GITHUB_USER}/dotfiles..."
-sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply "$GITHUB_USER"
+# When this script is piped (curl | bash), stdin is the script itself, so
+# chezmoi's first-run prompts would read garbage. Reattach stdin to the
+# terminal when one exists; otherwise run headless (promptOnce values are
+# skipped anyway once a config exists).
+if [ -t 0 ]; then
+    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER"
+elif { exec 3</dev/tty; } 2>/dev/null; then
+    exec 3<&-
+    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER" </dev/tty
+else
+    log "No TTY detected; running non-interactively."
+    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER"
+fi
 
 log "Done. Open a new terminal to pick up the new shell config."
