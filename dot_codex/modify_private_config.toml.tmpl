@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# chezmoi modify_ script for ~/.codex/config.toml.
+# Codex appends machine-local state to this file ([projects."..."] trust
+# entries, [tui.*]); a plain managed file would delete that state on every
+# apply. The managed base (.chezmoitemplates/codex-config.toml) stays
+# authoritative for everything it defines, comments included, and any
+# top-level table the base does NOT define is carried over from the live file.
+set -euo pipefail
+
+current="$(cat)"
+managed="$(cat <<'MANAGED_EOF'
+{{ include ".chezmoitemplates/codex-config.toml" -}}
+MANAGED_EOF
+)"
+
+printf '%s\n' "$managed"
+
+if [ -z "${current//[[:space:]]/}" ]; then
+    exit 0
+fi
+
+# BSD awk rejects multi-line -v strings, so the managed table headers arrive
+# as a first input file and the live config as the second.
+awk '
+    NR == FNR { mtab[$0] = 1; next }
+    /^\[/ { keep = !($0 in mtab); if (keep) print "" }
+    keep && NF { print }
+' <(printf '%s\n' "$managed" | grep '^\[' || true) - <<<"$current"

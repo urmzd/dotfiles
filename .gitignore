@@ -94,7 +94,6 @@ passwd*
 
 # Chezmoi
 .chezmoistate
-.chezmoitemplates
 chezmoi-*temp*
 
 # Nix

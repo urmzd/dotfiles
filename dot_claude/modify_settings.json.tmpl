@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# chezmoi modify_ script for ~/.claude/settings.json.
+# Claude Code writes to this file itself (/model, plugin toggles, /permissions),
+# so a plain managed file would clobber those edits on every apply. Instead we
+# merge: the live file wins on conflicts, the managed baseline
+# (.chezmoitemplates/claude-settings.json) fills in missing keys, and the
+# permissions.allow / permissions.deny lists are unioned so new managed rules
+# still reach every machine.
+set -euo pipefail
+
+current="$(cat)"
+managed="$(cat <<'MANAGED_EOF'
+{{ include ".chezmoitemplates/claude-settings.json" -}}
+MANAGED_EOF
+)"
+
+# First bootstrap: jq arrives via the Brewfile, which installs after files
+# apply. Seed an empty target with the baseline; never touch a non-empty one
+# without jq (the next apply, with jq present, merges properly).
+if ! command -v jq >/dev/null 2>&1; then
+    if [ -z "${current//[[:space:]]/}" ]; then
+        printf '%s\n' "$managed"
+    else
+        printf '%s' "$current"
+    fi
+    exit 0
+fi
+
+if [ -z "${current//[[:space:]]/}" ]; then
+    current='{}'
+fi
+
+# A live file Claude can't parse means something is already broken; keep it
+# as-is rather than papering over it with the baseline.
+if ! jq -e . >/dev/null 2>&1 <<<"$current"; then
+    echo "modify_settings.json: live ~/.claude/settings.json is not valid JSON; leaving it untouched" >&2
+    printf '%s' "$current"
+    exit 0
+fi
+
+jq -n --argjson managed "$managed" --argjson current "$current" '
+    ($managed * $current)
+    | .permissions.allow = ((($managed.permissions.allow // []) + ($current.permissions.allow // [])) | unique)
+    | (if (($managed.permissions.deny // []) + ($current.permissions.deny // [])) == []
+       then . else .permissions.deny = ((($managed.permissions.deny // []) + ($current.permissions.deny // [])) | unique) end)
+'
