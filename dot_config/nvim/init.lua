@@ -261,12 +261,36 @@ require("lazy").setup({
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
+		lazy = false,
 		build = ":TSUpdate",
-		opts = {
-			auto_install = true,
-			highlight = { enable = true },
-			indent = { enable = true },
-		},
+		config = function()
+			require("nvim-treesitter").setup({})
+			-- main branch has no highlight/indent/auto_install opts;
+			-- enable per-buffer and install missing parsers on demand
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
+				callback = function(args)
+					local lang = vim.treesitter.language.get_lang(args.match)
+					if not lang then
+						return
+					end
+					local ts = require("nvim-treesitter")
+					local function start()
+						if not vim.api.nvim_buf_is_valid(args.buf) then
+							return
+						end
+						pcall(vim.treesitter.start, args.buf, lang)
+						vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+					end
+					if vim.tbl_contains(ts.get_installed(), lang) then
+						start()
+					elseif vim.tbl_contains(ts.get_available(), lang) then
+						ts.install(lang):await(start)
+					end
+				end,
+			})
+		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
@@ -314,12 +338,6 @@ require("lazy").setup({
 			-- add any options here
 		},
 		lazy = false,
-	},
-	{
-		"IndianBoy42/tree-sitter-just",
-		config = function()
-			require("tree-sitter-just").setup({})
-		end,
 	},
 	{
 		"scottmckendry/cyberdream.nvim",
