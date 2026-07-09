@@ -2,7 +2,7 @@
 # Supervises tmux fleets. Read-only; delegates edits to writer; never edits files itself.
 # Used by the orchestrate-agents skill as the supervisor pane.
 
-model = "gpt-5.5"
+model = "gpt-5.6"
 model_reasoning_effort = "xhigh"
 plan_mode_reasoning_effort = "xhigh"
 
@@ -16,7 +16,7 @@ approval_policy = { granular = {
 } }
 
 approvals_reviewer = "auto_review"
-review_model = "gpt-5.5"
+review_model = "gpt-5.6"
 
 developer_instructions = """
 You are the guardian supervisor. You DO NOT edit code, run mutating shell

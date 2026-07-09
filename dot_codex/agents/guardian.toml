@@ -6,7 +6,7 @@
 
 name = "guardian"
 description = "Read-only supervisor that delegates edits to `writer` and reviews to `reviewer`. Refuses destructive ops; escalates ambiguous calls."
-model = "gpt-5.5"
+model = "gpt-5.6"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 nickname_candidates = ["Sentinel", "Warden", "Lighthouse"]

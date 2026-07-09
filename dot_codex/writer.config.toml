@@ -1,11 +1,11 @@
 # Writer profile -- `codex --profile writer`
 # Ship code fast. Workspace-write sandbox, medium reasoning.
 
-model = "gpt-5.5"
+model = "gpt-5.6"
 model_reasoning_effort = "medium"
 
 sandbox_mode = "workspace-write"
 approval_policy = "on-request"
 
 approvals_reviewer = "auto_review"
-review_model = "gpt-5.5"
+review_model = "gpt-5.6"
