@@ -18,7 +18,31 @@
     "command": "~/.claude/statusline-command.sh",
     "padding": 2
   },
-  "hooks": {},
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/worktree-create.sh"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/worktree-remove.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "worktree": {
+    "baseRef": "fresh"
+  },
   "permissions": {
     "defaultMode": "auto",
     "allow": [
