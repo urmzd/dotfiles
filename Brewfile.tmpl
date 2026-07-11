@@ -91,5 +91,11 @@ cask "font-iosevka-nerd-font"    # Iosevka Nerd Font (https://typeof.net/Iosevka
 # cask "font-meslo-lg-nerd-font" # MesloLGS Nerd Font (legacy, replaced by MonaspiceNe)
 {{- end }}
 
+# Apps
+cask "obsidian", args: { adopt: true }  # Notes app; adopt takes over a pre-existing manual install.
+                                        # The cask also links the bundled obsidian-cli to
+                                        # $(brew --prefix)/bin/obsidian, so no separate /usr/local/bin
+                                        # registration (in-app "Register CLI") is needed.
+
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)
