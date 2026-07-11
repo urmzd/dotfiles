@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# chezmoi modify_ script for ~/.docker/config.json.
+# Docker writes to this file itself (auths, credsStore, currentContext), so a
+# plain managed file would clobber logins on every apply. Instead we merge in
+# one key: cliPluginsExtraDirs pointing at Homebrew's shared plugin dir, which
+# is what makes `docker compose` and `docker buildx` resolve when the plugins
+# are installed as brew formulae (see `brew info docker-compose` caveats).
+set -euo pipefail
+
+current="$(cat)"
+
+passthrough() {
+    printf '%s' "$current"
+    exit 0
+}
+
+command -v brew >/dev/null 2>&1 || passthrough
+command -v jq >/dev/null 2>&1 || passthrough
+plugin_dir="$(brew --prefix)/lib/docker/cli-plugins"
+
+if [ -z "${current//[[:space:]]/}" ]; then
+    current='{}'
+fi
+
+# A live file docker can't parse means something is already broken; keep it
+# as-is rather than papering over it.
+if ! jq -e . >/dev/null 2>&1 <<<"$current"; then
+    echo "modify_config.json: live ~/.docker/config.json is not valid JSON; leaving it untouched" >&2
+    passthrough
+fi
+
+jq --arg dir "$plugin_dir" \
+    '.cliPluginsExtraDirs = ((.cliPluginsExtraDirs // []) + [$dir] | unique)' \
+    <<<"$current"
