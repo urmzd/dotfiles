@@ -51,7 +51,7 @@ Run `codex --version` in `doctor` follow-up before relying on it.
 
 **Blocked-on-permission UI:** asks to allow a tool/command; confirm per its prompt.
 
-## agy (Antigravity CLI — replaces legacy Gemini CLI)
+## agy (Antigravity CLI, replaces legacy Gemini CLI)
 
 | Need | Command |
 |------|---------|

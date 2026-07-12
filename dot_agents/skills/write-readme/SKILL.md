@@ -106,7 +106,7 @@ For projects with multiple visual outputs (3-col, 30% width):
 
 ## Prose Style
 
-- **No em-dashes** (` — ` or `—`). Use a period, a colon, or **bold indexing** (`**Term**`) instead. Em-dashes read as AI-generated and break the visual rhythm of terse documentation.
+- **No em-dashes**. Do not use U+2014. Use a period, a colon, or **bold indexing** (`**Term**`) instead. Em-dashes read as AI-generated and break the visual rhythm of terse documentation.
 - **No emojis** unless the user explicitly requests them. This includes section headers, bullet prefixes, and callouts.
 - **Imperative voice** in instructions (`Run the build` not `You can run the build`).
 - **No trailing summaries** ("In summary..." / "This means..."). If the point needs a summary, the prose above is too long.

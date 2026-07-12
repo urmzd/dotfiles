@@ -36,7 +36,7 @@ if ! command -v claude >/dev/null 2>&1; then
     curl -fsSL https://claude.ai/install.sh | bash >/dev/null 2>&1 || echo "⚠️ Claude Code install failed"
 fi
 
-# Antigravity CLI (agy) — replaces legacy Gemini CLI. Self-updates in the
+# Antigravity CLI (agy) replaces legacy Gemini CLI. Self-updates in the
 # background, so no version pin. Installs to ~/.local/bin/agy.
 if ! command -v agy >/dev/null 2>&1 && [[ ! -x "$HOME/.local/bin/agy" ]]; then
     echo "🤖 Installing Antigravity CLI..."
@@ -61,7 +61,7 @@ if command -v npm >/dev/null 2>&1; then
         fi
     done
 else
-    echo "⚠️ npm not on PATH — skipping codex/copilot install. Re-run after fnm installs Node."
+    echo "⚠️ npm not on PATH. Skipping codex/copilot install. Re-run after fnm installs Node."
 fi
 
 date -Iseconds > "$SENTINEL"

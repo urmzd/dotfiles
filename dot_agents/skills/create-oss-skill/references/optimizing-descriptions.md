@@ -12,7 +12,7 @@ Create ~20 queries in `eval_queries.json`: ~10 should-trigger, ~10 should-not-tr
 
 ```json
 [
-  { "query": "I've got a spreadsheet with revenue in col C — can you add a profit margin column?", "should_trigger": true },
+  { "query": "I've got a spreadsheet with revenue in col C. Can you add a profit margin column?", "should_trigger": true },
   { "query": "convert this json file to yaml", "should_trigger": false }
 ]
 ```

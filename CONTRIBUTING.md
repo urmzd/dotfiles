@@ -72,7 +72,8 @@ agentspec manage validate dot_agents/agents/<name>.md
 
 1. `chezmoi apply` to deploy
 2. `agentspec sync --fast` to link
-3. Invoke from your tool of choice (e.g., `/<name>` in Claude Code) and confirm the description triggers correctly
+3. Invoke from your tool of choice (for example, `/<name>` in Claude Code) and confirm the description triggers correctly
+4. For documentation changes, run `/clean-docs` or `dot_agents/skills/sync-docs/scripts/executable_check-doc-hygiene.sh .`
 
 **Style**
 

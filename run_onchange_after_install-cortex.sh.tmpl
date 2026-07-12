@@ -3,17 +3,17 @@
 # Bump CORTEX_VERSION below and `chezmoi apply` to upgrade.
 #
 # Why not the upstream `curl ... | sh` installer?
-#   1. It always tracks moving channel head — no `--version` argument.
+#   1. It always tracks moving channel head. No `--version` argument.
 #   2. It writes PATH lines into ~/.zshrc / ~/.bashrc / fish config, which
 #      collides with the dotfiles owning shell wiring.
 # Same shape as run_onchange_after_install-cloud-clis.sh.tmpl.
 #
-# Gated on the install_cortex chezmoi feature flag — no-op if false or unset.
+# Gated on the install_cortex chezmoi feature flag. No-op if false or unset.
 {{- if hasKey . "install_cortex" -}}
 {{ if .install_cortex -}}
 set -euo pipefail
 
-# Version pin — bump to upgrade. Find current channel heads at:
+# Version pin: bump to upgrade. Find current channel heads at:
 #   https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/stable_version.txt
 CORTEX_VERSION="1.0.61+210740.729320cf3330"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-shot bootstrap for this dotfiles repo.
-# Idempotent: re-running is safe — each step is gated on whether the tool is already installed.
+# Idempotent: re-running is safe. Each step is gated on whether the tool is already installed.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/install.sh | bash

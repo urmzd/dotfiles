@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Disk cleanup utilities for freeing space
-# Companion to disk_analysis.zsh (analysis) — this file does the actual cleanup
+# Companion to disk_analysis.zsh (analysis). This file does the actual cleanup.
 
 _cleanup_header() { echo "\n\033[0;36m=== $1 ===\033[0m" }
 _cleanup_skip()   { echo "\033[0;33m  skipped\033[0m ($1)" }
@@ -162,16 +162,16 @@ disk_cleanup() {
       echo "Usage: disk_cleanup [quick|deep|rust|node|go|nix|docker|pip|brew|caches] [search_dir]"
       echo
       echo "Modes:"
-      echo "  quick   — Rust targets, node_modules, Go/pip/brew caches (default)"
-      echo "  deep    — Everything in quick + Docker prune + Nix GC + misc caches"
-      echo "  rust    — Only Rust target/ directories"
-      echo "  node    — Only node_modules/ directories"
-      echo "  go      — Only Go build cache"
-      echo "  nix     — Only Nix garbage collection"
-      echo "  docker  — Only Docker system prune"
-      echo "  pip     — Only Python caches (pip, uv, __pycache__)"
-      echo "  brew    — Only Homebrew cache cleanup"
-      echo "  caches  — Only miscellaneous caches (huggingface, gradle, npm, pnpm)"
+      echo "  quick   : Rust targets, node_modules, Go/pip/brew caches (default)"
+      echo "  deep    : Everything in quick + Docker prune + Nix GC + misc caches"
+      echo "  rust    : Only Rust target/ directories"
+      echo "  node    : Only node_modules/ directories"
+      echo "  go      : Only Go build cache"
+      echo "  nix     : Only Nix garbage collection"
+      echo "  docker  : Only Docker system prune"
+      echo "  pip     : Only Python caches (pip, uv, __pycache__)"
+      echo "  brew    : Only Homebrew cache cleanup"
+      echo "  caches  : Only miscellaneous caches (huggingface, gradle, npm, pnpm)"
       echo
       echo "Optional search_dir defaults to ~/github"
       ;;

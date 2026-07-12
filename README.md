@@ -73,7 +73,7 @@ dotfiles update packages # brew upgrade + apply
 dotfiles update groups   # Toggle package groups + excludes (fzf), then apply
 dotfiles update ai       # Reinstall AI CLIs at pinned versions
 
-dotfiles doctor          # chezmoi doctor + tool version checks
+dotfiles doctor          # chezmoi doctor + tool versions + documentation hygiene
 dotfiles status          # Show installed AI tool versions
 dotfiles clean           # Prune build artifacts and caches
 ```
@@ -131,6 +131,7 @@ These scripts run automatically on `chezmoi apply`:
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
 | `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
+| `sync-agent-resources` | run (after) | Every apply (keeps new local skills and agents managed by `agentspec`) |
 | `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag` CLIs) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
@@ -196,7 +197,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | ----- | ------- |
 | assess-quality | Foundational quality framework. The "why" layer above review-design and write-code |
 | review-design | Pragmatic Programmer principles (DRY, orthogonality, design by contract) |
-| review-diff | Review the current staged/unstaged/untracked changes against a five-dimension rubric (the home assess-quality and review-design hand day-to-day review to) |
+| review-diff | Review staged, unstaged, and untracked changes using the assess-quality and review-design rubric |
 | write-code | Operational picks: error handling, testing strategy, commit conventions, interface design |
 | write-code-portfolio | Personal portfolio specifics (Nix Flakes, chezmoi machine polymorphism, Powerlevel10k, Neovim) |
 | test-code | Testing philosophy and per-language conventions |
@@ -219,6 +220,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | setup-ci | CI/CD pipeline conventions |
 | setup-devenv | Per-language version manager + direnv pattern (portable) |
 | setup-devenv-with-chezmoi | Chezmoi-specific helpers for pinned installers and tracked `.envrc` |
+| dotfiles | Chezmoi naming, templating, and agentspec resource management conventions |
 | sync-release | End-to-end release pipeline (sr.yaml, CI, multi-platform builds) |
 | repo-init | Full repo bootstrap (create, license, scaffold, push) |
 | community-health | GitHub Community Standards (CODE_OF_CONDUCT, SECURITY, ISSUE_TEMPLATE) with `$COMMUNITY_HEALTH_CONTACT` |
@@ -229,6 +231,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | ----- | ------- |
 | ship | Generate a conventional commit, then optionally push and watch CI until pass/fail |
 | pr | Create PRs with auto-generated summary from commits |
+| merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
@@ -239,6 +242,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 | manage-secrets | 1Password-based secret workflow (vault layout, `1p://` references, `op run`) |
 | orchestrate-agents | Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing |
+| use-worktrees | Create, enter, and clean up git worktrees under the standard `.worktrees/<name>` layout |
 
 #### AI & documentation
 
@@ -246,6 +250,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 
 | Skill | Purpose |
 | ----- | ------- |
+| clean-docs | Slash-invocable documentation cleanup: no em dashes, current facts, readable formatting, user-focused guidance |
 | configure-ai | AI tooling configuration, AGENTS.md, skills standard |
 | create-llms-txt | Generate llms.txt files |
 | create-oss-skill | Create portable agent skills (canonical spec) |

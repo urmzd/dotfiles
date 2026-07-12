@@ -90,7 +90,7 @@ if command -v pipx >/dev/null 2>&1 && command -v register-python-argcomplete >/d
     fi
 fi
 
-# AWS CLI uses bashcompinit-style completion — generate a wrapper
+# AWS CLI uses bashcompinit-style completion, generate a wrapper.
 if command -v aws_completer >/dev/null 2>&1; then
     AWS_COMP_PATH="$(command -v aws_completer)"
     cat > "$COMP_DIR/_aws" <<AWSEOF

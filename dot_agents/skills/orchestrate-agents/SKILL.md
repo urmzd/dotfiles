@@ -120,7 +120,7 @@ for each CLI's launch, headless, auto-approve, and resume flags.
 
 9. **Wrap up.** Summarize each agent's outcome, citing transcripts (step on
    "understand what's running"). Tear down with `"$fleet" kill <fleet>` only after
-   the user has what they need — and only if the fleet was created by this run;
+   the user has what they need, and only if the fleet was created by this run;
    an adopted session is the user's, leave it attached.
 
 ## Supervision loop (delegated to guardians)

@@ -7,7 +7,7 @@
 #
 set -euo pipefail
 
-# Version pins — bump these to upgrade. Chezmoi re-runs this script whenever
+# Version pins: bump these to upgrade. Chezmoi re-runs this script whenever
 # its content hash changes, so editing either value triggers a re-install.
 GCLOUD_VERSION="565.0.0"
 AWS_CLI_VERSION="2.33.2"
@@ -58,7 +58,7 @@ else
     mkdir -p "$(dirname "$GCLOUD_HOME")"
     mv "$gcloud_tmp/google-cloud-sdk" "$GCLOUD_HOME"
 
-    # Run installer without touching rc files — the dotfiles own PATH/completion wiring.
+    # Run installer without touching rc files. The dotfiles own PATH/completion wiring.
     "${GCLOUD_HOME}/install.sh" \
         --quiet \
         --usage-reporting=false \

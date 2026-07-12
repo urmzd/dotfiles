@@ -60,7 +60,7 @@ channels:
 #   github:
 #     release_name_template: "{{ tag_name }}"
 
-# Packages — one entry per release unit. For single-repo projects, use `path: .`.
+# Packages: one entry per release unit. For single-repo projects, use `path: .`.
 # Monorepos add more entries with their own tag_prefix, version_files, etc.
 packages:
   - path: .

@@ -215,7 +215,7 @@ Before publishing:
 7. Reference material split into separate files with conditional load instructions
 8. Scripts are self-contained, non-interactive, with `--help` and structured output
 9. `compatibility` included only if environment-specific requirements exist
-10. Validate with `skills-ref validate ./my-skill` if available
+10. Validate with `agentspec manage validate ./my-skill/SKILL.md` if available
 
 ## Template
 

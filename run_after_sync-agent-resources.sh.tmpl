@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Keep local agent skills and agents managed after every chezmoi apply.
+set -euo pipefail
+
+if ! command -v agentspec >/dev/null 2>&1; then
+    echo "agentspec not found; skipping local agent resource sync."
+    exit 0
+fi
+
+echo "Syncing local agent resources..."
+agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --all-tools
+
+if command -v jq >/dev/null 2>&1; then
+    tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"
+    trap 'rm -f "$tmp_status" "$tmp_status.source" "$tmp_status.unmanaged"' EXIT
+
+    agentspec --format json status >"$tmp_status"
+    {
+        find "{{ .chezmoi.sourceDir }}/dot_agents/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print 2>/dev/null |
+            sed 's#.*/dot_agents/skills/##; s#/SKILL.md##; s#^#skill\t#'
+        find "{{ .chezmoi.sourceDir }}/dot_agents/agents" -maxdepth 1 -name '*.md' -print 2>/dev/null |
+            sed 's#.*/dot_agents/agents/##; s#.md$##; s#^#agent\t#'
+    } | sort >"$tmp_status.source"
+
+    jq -r '.unmanaged[] | select(.found_in | index("shared-store")) | "\(.kind)\t\(.name)"' "$tmp_status" |
+        sort >"$tmp_status.unmanaged"
+
+    comm -12 "$tmp_status.source" "$tmp_status.unmanaged" |
+        while IFS="$(printf '\t')" read -r _kind name; do
+            [ -n "$name" ] || continue
+            agentspec manage add "$name" --all-tools
+        done
+
+    cut -f2 "$tmp_status.source" |
+        while IFS= read -r name; do
+            [ -n "$name" ] || continue
+            agentspec manage verify --accept --name "$name" >/dev/null || true
+        done
+fi
+
+agentspec sync --fast
