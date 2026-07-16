@@ -12,5 +12,7 @@ window-padding-y = 4
 
 # Theme (installed by bootstrap from cyberdream.nvim extras/ghostty)
 theme = cyberdream
-background-opacity = 0.8
-background-blur-radius = 15
+# Opacity high enough that text stays readable over white backgrounds;
+# blur flattens whatever still bleeds through.
+background-opacity = 0.92
+background-blur-radius = 30
