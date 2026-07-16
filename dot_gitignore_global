@@ -1,2 +1,8 @@
 .claude/
 .worktrees/
+.DS_Store
+node_modules/
+.venv/
+venv/
+__pycache__/
+.direnv/

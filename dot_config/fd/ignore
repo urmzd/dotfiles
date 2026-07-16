@@ -1,0 +1,10 @@
+# Global fd ignore (~/.config/fd/ignore): applies everywhere, including
+# outside git repos where .gitignore rules don't kick in.
+# Bypass with `fd --no-ignore` / `fd -u`.
+.git/
+node_modules/
+.venv/
+venv/
+__pycache__/
+.direnv/
+.worktrees/

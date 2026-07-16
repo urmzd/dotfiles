@@ -275,6 +275,16 @@ function snowsso() {
 # FZF integration
 {{ if lookPath "fzf" -}}
 source <(fzf --zsh)
+# Back fzf with fd so fuzzy finding respects .gitignore + ~/.config/fd/ignore
+# (fzf's built-in walker does not read .gitignore). Escape hatch: fd -I / -u.
+# Runtime check (not lookPath) so this activates once brew bundle installs fd.
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow'
+  _fzf_compgen_path() { fd --hidden --follow . "$1"; }
+  _fzf_compgen_dir() { fd --type d --hidden --follow . "$1"; }
+fi
 {{- end }}
 
 # fnm (Fast Node Manager) adds node/npm shims to PATH, auto-switches on cd.
