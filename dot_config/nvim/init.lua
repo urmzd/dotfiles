@@ -582,6 +582,8 @@ require("lazy").setup({
 			telescope.setup({
 				defaults = {
 					layout_strategy = "vertical",
+					-- .git is never gitignored, so hidden = true would surface it
+					file_ignore_patterns = { "^%.git/", "/%.git/" },
 				},
 				pickers = {
 					find_files = {

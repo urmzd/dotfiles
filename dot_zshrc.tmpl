@@ -275,15 +275,15 @@ function snowsso() {
 # FZF integration
 {{ if lookPath "fzf" -}}
 source <(fzf --zsh)
-# Back fzf with fd so fuzzy finding respects .gitignore + ~/.config/fd/ignore
+# Back fzf with fd so fuzzy finding respects .gitignore
 # (fzf's built-in walker does not read .gitignore). Escape hatch: fd -I / -u.
 # Runtime check (not lookPath) so this activates once brew bundle installs fd.
 if command -v fd >/dev/null 2>&1; then
-  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
   export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow'
-  _fzf_compgen_path() { fd --hidden --follow . "$1"; }
-  _fzf_compgen_dir() { fd --type d --hidden --follow . "$1"; }
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+  _fzf_compgen_path() { fd --hidden --follow --exclude .git . "$1"; }
+  _fzf_compgen_dir() { fd --type d --hidden --follow --exclude .git . "$1"; }
 fi
 {{- end }}
 
