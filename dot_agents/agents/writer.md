@@ -11,7 +11,7 @@ description: |
   cross-file consistency/formatting sweep against an existing convention (use
   curator).
 tools: Read, Edit, Write, Grep, Glob
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 # The Writer

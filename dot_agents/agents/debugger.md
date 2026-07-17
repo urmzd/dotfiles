@@ -8,7 +8,7 @@ description: |
   diagnosis of a regression. Edits to apply the minimal fix. Do NOT use for
   greenfield design or feature planning; use architect.
 tools: Read, Edit, Grep, Glob, Bash
-model: inherit
+model: sonnet
 ---
 
 # The Debugger

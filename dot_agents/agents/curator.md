@@ -11,7 +11,7 @@ description: |
   writer for single-file authoring, technical-documentation-architect for
   multi-file docs-site restructuring.
 tools: Read, Edit, Grep, Glob
-model: inherit
+model: haiku
 ---
 
 # The Curator

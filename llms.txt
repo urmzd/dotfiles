@@ -34,6 +34,7 @@
 
 ## Skills
 
+- [agent-design-doctrine](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/agent-design-doctrine/SKILL.md): House doctrine for LLM agent systems (safety in the harness, tools return results, deterministic evals, POC scope discipline)
 - [assess-quality](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/assess-quality/SKILL.md): Foundational quality framework (the "why" layer above review-design and write-code)
 - [audit-security](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/audit-security/SKILL.md): Security auditing and threat detection
 - [build-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-cli/SKILL.md): Design and audit CLI tools end-to-end (output modes, TTY, JSON, install.sh, portfolio self-update / `--format` requirements)
@@ -47,6 +48,7 @@
 - [diagnose-runtime](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-runtime/SKILL.md): Triage local runtime errors, hangs, slowness, and hardware/serial issues (local counterpart to diagnose-ci)
 - [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/extend-oss-skills-to-claude/SKILL.md): Claude-specific deltas on top of create-oss-skill (prerequisite)
 - [fix-and-retry](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/fix-and-retry/SKILL.md): Diagnose CI failure, apply fix, commit, push, re-run
+- [manage-detect-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-detect-secrets/SKILL.md): detect-secrets baseline mechanics (update flags, commit-loop break, allowlist pragmas, audit flow)
 - [manage-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-secrets/SKILL.md): 1Password-based secret workflow (vault layout, `1p://` references, `op run`)
 - [orchestrate-agents](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/orchestrate-agents/SKILL.md): Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing. Pairs with the `guardian` subagent
 - [pr](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/pr/SKILL.md): Create PRs with auto-generated summary
@@ -55,6 +57,7 @@
 - [repo-status](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/repo-status/SKILL.md): Scan a folder of git repos and report activity, branch divergence, and uncommitted state (renamed from `status`)
 - [review-design](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/review-design/SKILL.md): Pragmatic Programmer principles (DRY, orthogonality, design by contract)
 - [review-diff](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/review-diff/SKILL.md): Review current staged/unstaged/untracked changes against a five-dimension rubric (prioritized findings)
+- [run-eval-harness](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/run-eval-harness/SKILL.md): Run a project's eval suite end to end (launch, monitor, parse report, diff vs previous run; forks to a sonnet subagent)
 - [scaffold-go](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-go/SKILL.md): Go deltas on top of scaffold-project
 - [scaffold-node](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-node/SKILL.md): Node/TypeScript deltas on top of scaffold-project
 - [scaffold-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/scaffold-project/SKILL.md): Project scaffolding conventions and standard files (canonical)
@@ -71,6 +74,7 @@
 - [sync-ecosystem-to-chezmoi](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-ecosystem-to-chezmoi/SKILL.md): Apply a sync-ecosystem drift report back into the chezmoi source tree
 - [sync-release](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-release/SKILL.md): Release pipeline setup (sr.yaml v7)
 - [test-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/test-code/SKILL.md): Testing philosophy and per-language conventions
+- [triage-dotfiles-env](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/triage-dotfiles-env/SKILL.md): Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs)
 - [update-repo-meta](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/update-repo-meta/SKILL.md): Update GitHub repo topics, description, homepage
 - [write-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/write-code/SKILL.md): Operational tech-stack picks and coding patterns (portable)
 - [write-code-portfolio](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/write-code-portfolio/SKILL.md): Personal portfolio specifics (Nix Flakes, chezmoi machine polymorphism, Powerlevel10k, Neovim)

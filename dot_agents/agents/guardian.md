@@ -9,7 +9,7 @@ description: |
   drive the fleet or relay decisions unprompted; the orchestrator holds those
   verbs (send, spawn, kill, group).
 tools: Bash(fleet.sh *), Read
-model: opus
+model: haiku
 ---
 
 # The Guardian

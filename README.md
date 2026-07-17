@@ -234,6 +234,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
+| triage-dotfiles-env | Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs) with mandatory verification |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
 | repo-status | Scan a folder of git repos and report recent activity, branch divergence, and uncommitted state (renamed from `status`) |
 | release-audit | Audit releases, tags, and assets for health |
@@ -241,6 +242,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | sync-ecosystem-to-chezmoi | Apply a sync-ecosystem drift report back into the chezmoi source tree |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 | manage-secrets | 1Password-based secret workflow (vault layout, `1p://` references, `op run`) |
+| manage-detect-secrets | detect-secrets baseline mechanics: update flags, commit-loop break, allowlist pragmas, audit flow |
 | orchestrate-agents | Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing |
 | use-worktrees | Create, enter, and clean up git worktrees under the standard `.worktrees/<name>` layout |
 
@@ -250,12 +252,14 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 
 | Skill | Purpose |
 | ----- | ------- |
+| agent-design-doctrine | House doctrine for LLM agent systems: safety in the harness, tools return results, minimal loop code, deterministic evals, POC scope discipline |
 | clean-docs | Slash-invocable documentation cleanup: no em dashes, current facts, readable formatting, user-focused guidance |
 | configure-ai | AI tooling configuration, AGENTS.md, skills standard |
 | create-llms-txt | Generate llms.txt files |
 | create-oss-skill | Create portable agent skills (canonical spec) |
 | extend-oss-skills-to-claude | Claude-specific skill deltas (invocation control, subagent execution, model overrides) |
 | audit-security | Security auditing and threat detection |
+| run-eval-harness | Run a project's eval suite end to end: launch, monitor, parse the report, diff against the previous run (forks to a sonnet subagent) |
 | style-brand | Frame and document a project's visual identity. Ships Cyberdream + MonaspiceNe + teasr as a template, not a mandate |
 | sync-docs | Audit and synchronize project documentation (canonical doc-drift skill) |
 | write-readme | README structure and section order |
