@@ -127,7 +127,17 @@ vim.keymap.set("n", "<leader>o", ":only<CR>", { desc = "Close all other windows"
 vim.keymap.set("n", "<leader>=", "<C-w>=", { desc = "Equalize all window sizes" })
 
 -- Buffer cycling - Tab key (normal mode only, doesn't affect insert/command mode)
-vim.keymap.set("n", "<Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<Tab>", function()
+	local state = vim.b[vim.api.nvim_get_current_buf()].nes_state
+	if state then
+		if not require("copilot-lsp.nes").walk_cursor_start_edit() then
+			require("copilot-lsp.nes").apply_pending_nes()
+			require("copilot-lsp.nes").walk_cursor_end_edit()
+		end
+	else
+		vim.cmd("BufferLineCycleNext")
+	end
+end, { desc = "Copilot NES or next buffer" })
 vim.keymap.set("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 
 -- Buffer cycling - gt prefix (like tab navigation)
@@ -141,7 +151,11 @@ vim.keymap.set("n", "<leader>bse", "<cmd>BufferLineSortByExtension<CR>", { desc 
 vim.keymap.set("n", "<leader>bsd", "<cmd>BufferLineSortByDirectory<CR>", { desc = "Sort buffers by directory" })
 
 -- Escape
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
+vim.keymap.set("n", "<Esc>", function()
+	if not require("copilot-lsp.nes").clear() then
+		vim.cmd("nohlsearch")
+	end
+end, { desc = "Clear Copilot NES or search highlight" })
 
 vim.keymap.set("i", "jj", "<ESC>")
 vim.keymap.set("i", "jk", "<ESC>")
@@ -177,6 +191,20 @@ vim.lsp.config("mdx_analyzer", {
 require("lazy").setup({
 	{ "neovim/nvim-lspconfig" },
 	{
+		"copilotlsp-nvim/copilot-lsp",
+		init = function()
+			vim.g.copilot_nes_debounce = 500
+			-- copilot-language-server ignores nvim's async shutdown request on exit
+			-- (exit_timeout defaults to false, so nvim never waits or force-kills).
+			-- Give it 500ms to shut down gracefully, then force-stop.
+			vim.lsp.config("copilot_ls", { exit_timeout = 500 })
+			vim.lsp.enable("copilot_ls")
+		end,
+		config = function()
+			require("copilot-lsp").setup()
+		end,
+	},
+	{
 		"mason-org/mason.nvim",
 		opts = {},
 	},
@@ -206,8 +234,9 @@ require("lazy").setup({
 				"astro",
 				"ltex",
 			},
-			-- Copilot is disabled; keep it excluded so mason-lspconfig never
-			-- auto-enables nvim-lspconfig's "copilot" config.
+			-- copilot-lsp already runs the server as "copilot_ls"; without this
+			-- exclusion mason-lspconfig auto-enables nvim-lspconfig's "copilot"
+			-- config too, spawning a duplicate copilot-language-server process.
 			automatic_enable = {
 				exclude = { "copilot" },
 			},
@@ -902,6 +931,7 @@ require("lazy").setup({
 		"saghen/blink.cmp",
 		dependencies = {
 			"rafamadriz/friendly-snippets",
+			"fang2hou/blink-copilot",
 		},
 		version = "1.*",
 		opts = {
@@ -909,7 +939,18 @@ require("lazy").setup({
 			keymap = {
 				preset = "default",
 				["<CR>"] = { "select_and_accept", "fallback" },
-				["<Tab>"] = { "snippet_forward", "fallback" },
+				["<Tab>"] = {
+					function(cmp)
+						if vim.b[vim.api.nvim_get_current_buf()].nes_state then
+							cmp.hide()
+							require("copilot-lsp.nes").apply_pending_nes()
+							require("copilot-lsp.nes").walk_cursor_end_edit()
+							return true
+						end
+					end,
+					"snippet_forward",
+					"fallback",
+				},
 			},
 			appearance = { nerd_font_variant = "mono" },
 			completion = {
@@ -918,12 +959,34 @@ require("lazy").setup({
 			},
 			snippets = { preset = "luasnip" },
 			sources = {
-				default = { "lsp", "snippets", "buffer", "path", "lazydev" },
+				default = { "copilot", "lsp", "snippets", "buffer", "path", "lazydev" },
 				providers = {
+					copilot = {
+						name = "copilot",
+						module = "blink-copilot",
+						score_offset = 75,
+						async = true,
+						opts = {
+							max_completions = 3,
+							max_attempts = 4,
+						},
+					},
 					lazydev = {
 						name = "LazyDev",
 						module = "lazydev.integrations.blink",
 						score_offset = 100,
+					},
+					lsp = {
+						name = "LSP",
+						module = "blink.cmp.sources.lsp",
+						transform_items = function(_, items)
+							return vim.tbl_filter(function(item)
+								return not (
+									item.client_name
+									and string.find(string.lower(item.client_name), "copilot")
+								)
+							end, items)
+						end,
 					},
 				},
 			},
