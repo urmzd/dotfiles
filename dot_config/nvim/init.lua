@@ -17,10 +17,12 @@ if stdin_handle ~= "tty" then
 	is_subprocess = true
 end
 
--- Step 2: FALLBACK - Check specific subprocess indicators
--- Only check explicit subprocess flags, not broad env vars like CLAUDECODE
+-- Step 2: FALLBACK - Check the explicit subprocess flag only.
+-- Agent env vars (CLAUDECODE, CLAUDE_CODE_ENTRYPOINT) are inherited by
+-- interactive shells spawned from those tools, so they must not disable
+-- the clipboard; the TTY check above already catches real subprocesses.
 if not is_subprocess then
-	is_subprocess = vim.env.NVIM_SUBPROCESS == "1" or vim.env.CLAUDE_CODE_ENTRYPOINT ~= nil -- More specific than CLAUDECODE
+	is_subprocess = vim.env.NVIM_SUBPROCESS == "1"
 end
 
 -- Conditionally enable clipboard sync only in interactive environments
