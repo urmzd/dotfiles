@@ -218,7 +218,10 @@ require("lazy").setup({
 		opts = {
 			ensure_installed = {
 				"lua_ls",
+				-- ty handles type checking; basedpyright supplies the richer
+				-- completion, hover, and signature help ty still lacks.
 				"ty",
+				"basedpyright",
 				"rust_analyzer",
 				"gopls",
 				"clangd",
@@ -416,6 +419,16 @@ require("lazy").setup({
 			vim.opt.termguicolors = true
 			vim.opt.background = style
 			vim.cmd.colorscheme(colorscheme)
+
+			-- cyberdream's default BlinkCmpGhostText (#474d57) sits at ~2.2:1 against
+			-- the background, dimmer than Comment. Link it to Comment so LLM
+			-- completions are actually readable inline.
+			local ghost_hl = vim.api.nvim_create_augroup("GhostTextContrast", { clear = true })
+			local function set_ghost_hl()
+				vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { link = "Comment" })
+			end
+			vim.api.nvim_create_autocmd("ColorScheme", { group = ghost_hl, callback = set_ghost_hl })
+			set_ghost_hl()
 		end,
 	},
 	{
