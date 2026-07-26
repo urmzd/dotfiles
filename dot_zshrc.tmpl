@@ -292,11 +292,16 @@ fi
 eval "$(fnm env --use-on-cd --shell zsh)"
 {{- end }}
 
+{{ if lookPath "mise" -}}
 # mise activates per-project runtimes (JDK, Scala, ...) declared in .mise.toml
 # on cd. Deliberately AFTER fnm: mise can manage node as well, and whichever
 # activates last wins on PATH. Node stays with fnm, so keep node out of any
 # .mise.toml unless you mean to hand it over.
-{{ if lookPath "mise" -}}
+#
+# Comment inside the guard, not above it: mise is optional here (see the
+# install_alt_langs flag in Brewfile.tmpl), and a comment outside would render
+# into ~/.zshrc on machines without mise, describing an activation that is not
+# happening.
 eval "$(mise activate zsh)"
 {{- end }}
 
