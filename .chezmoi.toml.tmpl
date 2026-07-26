@@ -25,6 +25,9 @@
 {{- $install_cloud := promptBoolOnce . "install_cloud" "Include cloud + infra tooling: docker, colima, kubectl, helm, k9s, terraform, runpodctl (y/n)" $default_cloud -}}
 {{- $install_fonts := promptBoolOnce . "install_fonts" "Include extra Nerd Fonts: Monaspace, Iosevka (y/n)" $default_fonts -}}
 {{- $install_mobile := promptBoolOnce . "install_mobile" "Include mobile dev tooling: Android Studio + SDK + CocoaPods (y/n)" $default_mobile -}}
+{{- /* Not tied to the preset ladder: these are languages this setup does not   */}}
+{{- /* normally use, so even "full" leaves them out and they must be asked for. */}}
+{{- $install_alt_langs := promptBoolOnce . "install_alt_langs" "Include occasional-use language toolchains: mise (JDK), scala-cli, zig (y/n)" false -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name (comma-separated, optional; e.g. k9s,deno)" "" -}}
 
 {{- if $use_secrets }}
@@ -54,6 +57,7 @@ encryption = "age"
     install_cloud = {{ $install_cloud }}
     install_fonts = {{ $install_fonts }}
     install_mobile = {{ $install_mobile }}
+    install_alt_langs = {{ $install_alt_langs }}
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection
