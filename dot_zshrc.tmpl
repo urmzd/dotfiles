@@ -292,6 +292,14 @@ fi
 eval "$(fnm env --use-on-cd --shell zsh)"
 {{- end }}
 
+# mise activates per-project runtimes (JDK, Scala, ...) declared in .mise.toml
+# on cd. Deliberately AFTER fnm: mise can manage node as well, and whichever
+# activates last wins on PATH. Node stays with fnm, so keep node out of any
+# .mise.toml unless you mean to hand it over.
+{{ if lookPath "mise" -}}
+eval "$(mise activate zsh)"
+{{- end }}
+
 # Load local environment if exists
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 

@@ -69,13 +69,15 @@ brew "luarocks"
 brew "luacheck"
 brew "stylua"
 brew "zig"            # Also ships its own C/C++ cross-compiler (zig cc)
-brew "scala-cli"      # Self-contained Scala runner; supersedes the scala/sbt pair
-                      # for single-file and directory-scoped programs
-cask "temurin"        # JDK. The cask, not the openjdk formula: openjdk is keg-only,
-                      # so it is never symlinked onto PATH and /usr/libexec/java_home
-                      # cannot see it. macOS ships /usr/bin/java as a stub that only
-                      # prints "Unable to locate a Java Runtime", so `command -v java`
-                      # succeeds on a machine with no JDK at all.
+brew "scala-cli"      # Self-contained Scala runner, manages its own JVM; supersedes
+                      # the scala/sbt pair for directory-scoped programs
+brew "mise"           # JDK and other per-project runtimes, pinned by .mise.toml.
+                      # Chosen over the temurin cask (one global JDK, no switching)
+                      # and over SDKMAN, which has no formula and so could not be
+                      # declared here. Note that no `java` version manager is
+                      # optional on macOS: /usr/bin/java is a stub that exists, is
+                      # executable, and only prints "Unable to locate a Java
+                      # Runtime", so `command -v java` succeeds with no JDK at all.
 
 # Editor
 brew "neovim", args: ["HEAD"]  # Extensible Vim-based text editor (0.12-dev)
