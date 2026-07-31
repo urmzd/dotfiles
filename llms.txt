@@ -48,7 +48,6 @@
 - [diagnose-runtime](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/diagnose-runtime/SKILL.md): Triage local runtime errors, hangs, slowness, and hardware/serial issues (local counterpart to diagnose-ci)
 - [extend-oss-skills-to-claude](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/extend-oss-skills-to-claude/SKILL.md): Claude-specific deltas on top of create-oss-skill (prerequisite)
 - [fix-and-retry](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/fix-and-retry/SKILL.md): Diagnose CI failure, apply fix, commit, push, re-run
-- [manage-detect-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-detect-secrets/SKILL.md): detect-secrets baseline mechanics (update flags, commit-loop break, allowlist pragmas, audit flow)
 - [manage-secrets](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-secrets/SKILL.md): 1Password-based secret workflow (vault layout, `1p://` references, `op run`)
 - [orchestrate-agents](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/orchestrate-agents/SKILL.md): Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing. Pairs with the `guardian` subagent
 - [pr](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/pr/SKILL.md): Create PRs with auto-generated summary

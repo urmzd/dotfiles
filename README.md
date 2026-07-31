@@ -252,7 +252,6 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | sync-ecosystem-to-chezmoi | Apply a sync-ecosystem drift report back into the chezmoi source tree |
 | update-repo-meta | Update GitHub repo topics, description, homepage |
 | manage-secrets | 1Password-based secret workflow (vault layout, `1p://` references, `op run`) |
-| manage-detect-secrets | detect-secrets baseline mechanics: update flags, commit-loop break, allowlist pragmas, audit flow |
 | orchestrate-agents | Survey-first orchestration of agent CLIs (Claude, Codex, Antigravity) over tmux: adopt and extend existing sessions, spawn only what is missing |
 | use-worktrees | Create, enter, and clean up git worktrees under the standard `.worktrees/<name>` layout |
 
