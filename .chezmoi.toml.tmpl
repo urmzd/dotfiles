@@ -28,6 +28,9 @@
 {{- /* Not tied to the preset ladder: these are languages this setup does not   */}}
 {{- /* normally use, so even "full" leaves them out and they must be asked for. */}}
 {{- $install_alt_langs := promptBoolOnce . "install_alt_langs" "Include occasional-use language toolchains: mise (JDK), scala-cli, zig (y/n)" false -}}
+{{- /* Also off the preset ladder: ~153MB, and it pulls a pre-release tap.     */}}
+{{- /* Only worth carrying on machines that actually talk to Temporal.         */}}
+{{- $install_temporal := promptBoolOnce . "install_temporal" "Include Temporal CLI + Cloud extension (y/n)" false -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name (comma-separated, optional; e.g. k9s,deno)" "" -}}
 
 {{- if $use_secrets }}
@@ -58,6 +61,7 @@ encryption = "age"
     install_fonts = {{ $install_fonts }}
     install_mobile = {{ $install_mobile }}
     install_alt_langs = {{ $install_alt_langs }}
+    install_temporal = {{ $install_temporal }}
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection

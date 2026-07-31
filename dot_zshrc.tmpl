@@ -17,31 +17,35 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 plugins=(git zsh-syntax-highlighting zsh-completions)
 
-# Load Homebrew-installed completion scripts (e.g., just) before compinit
-{{- if and .is_macos (eq .chezmoi.arch "arm64") }}
-[[ -d "/opt/homebrew/share/zsh/site-functions" ]] && \
-  fpath=("/opt/homebrew/share/zsh/site-functions" $fpath)
-{{- else if and .is_macos (eq .chezmoi.arch "amd64") }}
-[[ -d "/usr/local/share/zsh/site-functions" ]] && \
-  fpath=("/usr/local/share/zsh/site-functions" $fpath)
-{{- end }}
+# --- completion fpath ------------------------------------------------------
+# Assemble fpath fully BEFORE oh-my-zsh, which runs the one and only compinit
+# (oh-my-zsh.sh always calls it, and offers no flag to skip). Running another
+# compinit here just paid for a second full scan of the same fpath -- zprof put
+# the pair at ~340ms of a ~510ms cold start.
+#
+# Order is precedence: zsh takes the first _cmd it finds.
+#   1. ~/.zsh/completions   deliberate overrides + tools brew has none for
+#   2. brew site-functions  version-matched, updates with the formula
+# The generator skips any tool Homebrew already ships, so (1) stays small and
+# only shadows on purpose (currently just _temporal, to route `temporal cloud`).
+typeset -U fpath  # brew site-functions and zsh-completions/src were each listed twice
 
-fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
-
-# Pre-generated completions (from chezmoi apply)
+# Written by chezmoi apply. fpath entries only -- anything needing compdef or
+# bashcompinit lives in completions-post.zsh below, sourced after compinit.
 [[ -f "$HOME/.zsh/brew-fpath.zsh" ]] && source "$HOME/.zsh/brew-fpath.zsh"
 [[ -d "$HOME/.zsh/completions" ]] && fpath=("$HOME/.zsh/completions" $fpath)
 
-# Initialize completions (use cached dump unless stale >24h)
-autoload -Uz compinit
-if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
-else
-  compinit -C
-fi
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
-# Load oh-my-zsh AFTER environment is properly set
+# Load oh-my-zsh AFTER environment is properly set. This is what runs compinit.
 source "$ZSH/oh-my-zsh.sh"
+
+# Completions that must be sourced rather than autoloaded from fpath: gcloud,
+# and the bash-style `complete -C/-F` registrations for aws and npm. These call
+# compdef/bashcompinit, so they only work once compinit has run. aws and npm
+# previously sat in fpath with no leading #compdef tag, so compinit never bound
+# them and neither actually completed anything.
+[[ -f "$HOME/.zsh/completions-post.zsh" ]] && source "$HOME/.zsh/completions-post.zsh"
 
 # Enable colors for ls - Cyberdream theme
 # Load AFTER oh-my-zsh to prevent it from being overridden
@@ -101,20 +105,32 @@ _dotfiles_update_groups() {
     echo "❌ 'update groups' needs fzf and jq installed."; return 1
   }
   [ -f "$cfg" ] || { echo "❌ No chezmoi config at $cfg"; return 1; }
-  if ! grep -qE '^[[:space:]]*install_cloud[[:space:]]*=' "$cfg"; then
-    echo "Package flags not in config yet; running 'dotfiles config' first..."
-    chezmoi init || return 1
-  fi
+  # Check every key we are about to write, not just install_cloud. A config
+  # written before a flag existed is missing only that flag, and
+  # _dotfiles_toml_set edits in place: it cannot create a key, so a toggle for
+  # an absent one would report success and change nothing.
+  local k
+  for k in install_cloud install_fonts install_mobile install_alt_langs install_temporal pkg_exclude; do
+    if ! grep -qE "^[[:space:]]*${k}[[:space:]]*=" "$cfg"; then
+      echo "'${k}' not in config yet; running 'dotfiles config' first..."
+      chezmoi init || return 1
+      break
+    fi
+  done
   local data; data="$(chezmoi data --format=json 2>/dev/null)"
   local -A state desc
   state[cloud]=$(print -r -- "$data" | jq -r '.install_cloud // false')
   state[fonts]=$(print -r -- "$data" | jq -r '.install_fonts // false')
   state[mobile]=$(print -r -- "$data" | jq -r '.install_mobile // false')
+  state[alt_langs]=$(print -r -- "$data" | jq -r '.install_alt_langs // false')
+  state[temporal]=$(print -r -- "$data" | jq -r '.install_temporal // false')
   local excl; excl=$(print -r -- "$data" | jq -r '.pkg_exclude // ""')
   desc[cloud]="docker, colima, kubectl, helm, k9s, terraform, runpodctl"
   desc[fonts]="Monaspace + Iosevka Nerd Fonts"
   desc[mobile]="Android Studio + SDK + CocoaPods"
-  local order=(cloud fonts mobile) tab=$'\t'
+  desc[alt_langs]="mise (JDK), scala-cli, zig  [heavy, off every preset]"
+  desc[temporal]="Temporal CLI + Cloud extension  [heavy, off every preset]"
+  local order=(cloud fonts mobile alt_langs temporal) tab=$'\t'
   while true; do
     local menu="" g m
     for g in $order; do
@@ -130,7 +146,7 @@ _dotfiles_update_groups() {
         --header='● on / ○ off. ENTER an item to toggle, then pick "save & apply"' \
         --prompt='groups> ' | cut -d"$tab" -f1)
     case "$pick" in
-      cloud|fonts|mobile)
+      cloud|fonts|mobile|alt_langs|temporal)
         [[ ${state[$pick]} == true ]] && state[$pick]=false || state[$pick]=true ;;
       __exclude) vared -p "Exclude (comma-separated): " excl ;;
       __apply) break ;;
@@ -138,11 +154,14 @@ _dotfiles_update_groups() {
     esac
   done
   echo
-  echo "New selection: cloud=${state[cloud]} fonts=${state[fonts]} mobile=${state[mobile]} exclude='${excl}'"
-  _dotfiles_toml_set "$cfg" install_cloud  "${state[cloud]}"
-  _dotfiles_toml_set "$cfg" install_fonts  "${state[fonts]}"
-  _dotfiles_toml_set "$cfg" install_mobile "${state[mobile]}"
-  _dotfiles_toml_set "$cfg" pkg_exclude    "\"${excl}\""
+  echo "New selection: cloud=${state[cloud]} fonts=${state[fonts]} mobile=${state[mobile]}"
+  echo "               alt_langs=${state[alt_langs]} temporal=${state[temporal]} exclude='${excl}'"
+  _dotfiles_toml_set "$cfg" install_cloud     "${state[cloud]}"
+  _dotfiles_toml_set "$cfg" install_fonts     "${state[fonts]}"
+  _dotfiles_toml_set "$cfg" install_mobile    "${state[mobile]}"
+  _dotfiles_toml_set "$cfg" install_alt_langs "${state[alt_langs]}"
+  _dotfiles_toml_set "$cfg" install_temporal  "${state[temporal]}"
+  _dotfiles_toml_set "$cfg" pkg_exclude       "\"${excl}\""
   echo "Applying..."
   chezmoi apply
 }

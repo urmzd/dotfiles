@@ -98,7 +98,11 @@ Run `dotfiles config` after pulling changes that add new prompts (like the packa
 | `install_cloud` | docker, colima, kubectl, helm, k9s, terraform, runpodctl | off on `minimal`, on otherwise |
 | `install_fonts` | Monaspace + Iosevka Nerd Fonts | off on `minimal`, on otherwise |
 | `install_mobile` | Android Studio + SDK command-line tools + CocoaPods | on only for `full` |
+| `install_alt_langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
+| `install_temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
 | `pkg_exclude` | comma-separated formula/cask names to skip (for example `k9s,deno`) | empty |
+
+The last two sit off the preset ladder on purpose, including `full`. Both are heavy (llvm alone, pulled in by zig, is over a gigabyte; Temporal is roughly 153 MB) and neither is something this setup reaches for by default, so they have to be asked for by name.
 
 Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
@@ -108,7 +112,10 @@ Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `ch
 
 1. Homebrew: add to [`Brewfile.tmpl`](Brewfile.tmpl). Linux: add to the apt/dnf/pacman list in [`run_once_before_install-packages-v2.sh.tmpl`](run_once_before_install-packages-v2.sh.tmpl).
 2. For tools needing version pinning: write a `run_onchange_after_install-<name>.sh.tmpl` mirroring the cortex / cloud-clis pattern.
-3. Run `chezmoi apply`. Completions regenerate if the package exposes zsh site-functions.
+3. Run `chezmoi apply`. Completions regenerate automatically, but check which of the three shapes the tool needs first:
+   - Ships its own `_<tool>` into Homebrew's `share/zsh/site-functions`. Nothing to do, and [`run_onchange_after_z-generate-completions.sh.tmpl`](run_onchange_after_z-generate-completions.sh.tmpl) deliberately skips generating a rival copy, since Homebrew's tracks the installed formula version.
+   - Has a `<tool> completion zsh` subcommand but no site-functions. Add a `generate_completion` line. Output goes to `~/.zsh/completions/` and is autoloaded lazily, so it costs nothing at shell startup.
+   - Is bash-style (`complete -C` / `complete -F`, as with aws and npm) or otherwise needs `compdef`. It has to be appended to `~/.zsh/completions-post.zsh` instead, which `~/.zshrc` sources after `compinit`. A file placed in `fpath` without a leading `#compdef` line is never bound to any command and silently completes nothing.
 
 ### Adding a new dotfile
 

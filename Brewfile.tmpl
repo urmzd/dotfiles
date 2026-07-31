@@ -18,6 +18,10 @@
 tap "hashicorp/tap"     # Official HashiCorp tap; core's terraform is frozen at 1.5.7 and disabled (BUSL relicense)
 tap "runpod/runpodctl"  # RunPod CLI; public GitHub tap, no credentials/trust needed
 {{- end }}
+{{- /* `get` not a bare key: see the install_alt_langs note further down. */}}
+{{- if get . "install_temporal" }}
+tap "temporalio/prerelease"  # Official Temporal tap; carries the pre-release Cloud extension
+{{- end }}
 
 # Core CLI
 brew "git"
@@ -57,6 +61,21 @@ brew "kubectl"
 brew "helm"
 brew "k9s"
 brew "runpodctl"  # RunPod GPU cloud CLI (from runpod/runpodctl tap above)
+{{- end }}
+
+{{- if get . "install_temporal" }}
+
+# Temporal (gated behind install_temporal flag; ~153MB, and the extension is
+# pre-release). Deliberately its own flag rather than part of install_cloud:
+# nothing else in that group implies you run workflows.
+brew "temporal"                            # Server/workflow CLI; ships its own _temporal into
+                                           # site-functions via generate_completions_from_executable
+brew "temporalio/prerelease/temporal-cloud"  # `temporal cloud ...` control-plane extension. It is a
+                                           # separate binary the base CLI shells out to by PATH
+                                           # lookup, and supersedes the older standalone tcld.
+                                           # Completion for the subtree is not automatic; the
+                                           # generator in run_onchange_after_z-generate-completions
+                                           # patches _temporal to route it.
 {{- end }}
 
 # Runtimes / language tooling
