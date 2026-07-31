@@ -89,6 +89,7 @@ Run `dotfiles config` after pulling changes that add new prompts (like the packa
 **Upstream-pinned installers** (security/auth fixes ship faster than distro repos):
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
+- gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
 **Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which sets defaults for the per-group toggles below. Each group can be overridden independently, and `pkg_exclude` drops individual packages by name.
 
@@ -128,6 +129,7 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (after) | Brewfile (any package group flag) or `pkg_exclude` changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
+| `install-gh-extensions` | run_onchange (after) | Script changes (re-pin a gh extension version) |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
 | `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
@@ -175,6 +177,7 @@ All skills are installed automatically via `chezmoi apply`. The [`install-skills
 | [better-auth/skills](https://github.com/better-auth/skills) | better-auth-best-practices |
 | [vercel/ai](https://github.com/vercel/ai) | ai-sdk |
 | [fastapi/fastapi](https://github.com/fastapi/fastapi) | fastapi |
+| [github/gh-stack](https://github.com/github/gh-stack) | gh-stack |
 
 To manage skills and agents manually:
 

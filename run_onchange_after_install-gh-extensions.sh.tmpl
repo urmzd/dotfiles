@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Install gh CLI extensions pinned to specific upstream releases.
+#
+# Why pin? gh extensions auto-install the latest release, so an unpinned
+# install drifts silently between machines. Bump a pin below and
+# `chezmoi apply` to upgrade: chezmoi re-runs this script whenever its
+# content hash changes.
+#
+set -euo pipefail
+
+# "OWNER/REPO TAG" pairs. One line per extension.
+EXTENSIONS=(
+    # Stacked PRs: gh stack init/add/push/submit/rebase.
+    "github/gh-stack v0.1.0"
+)
+
+if ! command -v gh >/dev/null 2>&1; then
+    echo "[--] gh not found; skipping gh extension install."
+    exit 0
+fi
+
+for entry in "${EXTENSIONS[@]}"; do
+    repo="${entry%% *}"
+    pin="${entry##* }"
+    name="${repo##*/}"
+
+    # `gh extension list` prints "NAME REPO VERSION"; read the field after the repo.
+    installed="$(gh extension list 2>/dev/null |
+        awk -v r="$repo" '{ for (i = 1; i <= NF; i++) if (tolower($i) == tolower(r)) { print $(i + 1); exit } }')"
+
+    if [[ "$installed" == "$pin" ]]; then
+        echo "[OK] $repo $pin already installed"
+        continue
+    fi
+
+    if [[ -n "$installed" ]]; then
+        # No re-pin in place: remove, then install at the new tag.
+        echo "[..] Updating $repo (${installed} -> ${pin})"
+        gh extension remove "$name" >/dev/null 2>&1 || true
+    else
+        echo "[..] Installing $repo $pin"
+    fi
+
+    if gh extension install "$repo" --pin "$pin" >/dev/null 2>&1; then
+        echo "[OK] Installed $repo $pin"
+    else
+        echo "[!!] Failed to install $repo $pin (needs gh auth / network); continuing."
+    fi
+done
