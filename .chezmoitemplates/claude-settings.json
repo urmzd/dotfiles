@@ -1,5 +1,12 @@
 {
-  "env": {},
+  "env": {
+    "CLAUDE_CODE_SUPPRESS_SESSION_ATTRIBUTION": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "includeCoAuthoredBy": false,
   "model": "claude-opus-5[1m]",
   "enabledPlugins": {
