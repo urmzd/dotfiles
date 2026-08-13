@@ -41,8 +41,8 @@
 #   codex --strict-config exec --skip-git-repo-check "noop"
 # ---------------------------------------------------------------------------
 
-model = "gpt-5.6"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-sol"
+model_reasoning_effort = "medium"
 model_reasoning_summary = "auto"
 
 # ---- Full access: no sandbox, no approvals ---------------------------------
@@ -58,6 +58,16 @@ approval_policy = "never"
 # inherit the reviewer + [auto_review] policy below.
 approvals_reviewer = "auto_review"
 review_model = "gpt-5.6"
+
+# ---- Turn-ended notifier ---------------------------------------------------
+# Written by the Codex desktop app on launch; managed here so `chezmoi apply`
+# stops deleting it (the modify_ merge only carries over live [tables], and a
+# bare top-level key like this one sits above the first table). Absolute path
+# because .chezmoitemplates content is included verbatim, not rendered.
+notify = ["/Users/urmzd/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
+# Fast mode, set from the TUI. Same reason as notify: managed here or lost.
+service_tier = "fast"
 
 [auto_review]
 policy = """
@@ -108,6 +118,7 @@ guardian_approval = true   # arms the approvals_reviewer / auto_review path
 multi_agent = true         # required for /agent and spawned subagent threads
 hooks = true               # SubagentStart / SubagentStop visibility
 memories = false           # opt-out; AGENTS.md is the source of truth
+js_repl = false            # node_repl MCP stays wired, but no in-session JS REPL
 
 # ---- Shell environment hygiene ---------------------------------------------
 # inherit = "core" passes only essential vars (not the full shell env); exclude
