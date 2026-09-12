@@ -23,7 +23,7 @@
 - **Zsh** with Oh My Zsh + Powerlevel10k and pre-generated completions
 - **Tmux** with `Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
-- **Neovim** (HEAD) with LSP for all included languages
+- **Neovim** (HEAD) with LSP for all included languages, tuned for reviewing agent work: a clickable Files/Changes/Tests sidebar, worktree switching, and buffers that reload when an agent edits them. See [`dot_config/nvim/README.md`](dot_config/nvim/README.md).
 - **AI agents** (Claude Code, Antigravity, Codex, Copilot) auto-installed via chezmoi
 - **A portable agent skills catalog** in [`dot_agents/skills/`](dot_agents/skills/) and subagents in [`dot_agents/agents/`](dot_agents/agents/), installable into any tool via [`agentspec`](https://github.com/urmzd/agentspec). See [Agent Skills](#agent-skills) for the full list.
 - **Chezmoi automation** scripts that trigger on apply
