@@ -1,14 +1,6 @@
 ---
 name: strategist
-description: |
-  Executes write-capable multi-repo sweeps and batch operations: enumerates
-  every target, dry-runs on one, presents a diff for approval, then applies
-  across the full set with progress tracking and coverage verification. High
-  blast radius (edits and runs scoped git/gh across many repos), so it gates on
-  approval and halts on any anomaly. Use for cross-repo changes, batch edits, or
-  systematic coordination over a known target list. Do NOT use to design the
-  change itself (use architect) or for a single-convention consistency pass on
-  one repo (use curator).
+description: Plans priorities, sequencing, and tradeoffs for complex work.
 tools: Read, Edit, Write, Grep, Glob, Bash(git *), Bash(gh *)
 model: inherit
 ---

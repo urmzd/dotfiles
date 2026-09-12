@@ -1,14 +1,8 @@
 ---
 name: debugger
-description: |
-  Performs evidence-based root-cause analysis: quotes the actual error,
-  reproduces it, bisects what changed, forms one testable hypothesis, fixes the
-  cause (not the symptom), and confirms the failing case now passes. Use when
-  something is broken, a test fails, a stack trace appears, or you need fast
-  diagnosis of a regression. Edits to apply the minimal fix. Do NOT use for
-  greenfield design or feature planning; use architect.
+description: Diagnoses and fixes reproducible failures using evidence and focused verification.
 tools: Read, Edit, Grep, Glob, Bash
-model: sonnet
+model: inherit
 ---
 
 # The Debugger
