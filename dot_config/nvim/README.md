@@ -71,6 +71,39 @@ buffer silently swapping out from under a review is worse than a message. The
 file tree uses a libuv watcher rather than refreshing only on `:write`, so files
 an agent creates or deletes appear without a nudge.
 
+## Language servers
+
+Servers are **not** installed up front. Opening a file installs what that
+filetype needs, once, and only if this machine can actually build and run it.
+mason installs npm packages with npm and Go packages with go, so the check is
+against the backend each package declares; a server that needs a toolchain the
+machine lacks is skipped with one message rather than failing on every startup.
+Formatters follow the same path, derived from conform's own `formatters_by_ft`.
+
+| Language | Server | Why this one |
+|---|---|---|
+| Lua | `lua_ls` | |
+| Python | `ty` + `basedpyright` | ty type-checks; basedpyright has the completion and hover ty still lacks |
+| Rust | `rust_analyzer` | |
+| Go | `gopls` | |
+| C / C++ | `clangd` | |
+| TypeScript / JS | `vtsls` | wraps the same TypeScript service VS Code drives, unlike plain `ts_ls` |
+| Kotlin | `kotlin_lsp` | JetBrains' own, built on IntelliJ; supersedes the community fwcd server |
+| Scala | Metals v2 via `nvim-metals` | not in mason at all, so coursier fetches it |
+| Java | `jdtls` via `nvim-jdtls` | Metals v2 also does Java, but two servers per buffer helps nobody |
+| Terraform | `terraformls` | |
+| Docker | `docker_language_server` | Docker's official one: Dockerfiles, Compose and Bake, where `dockerls` was Dockerfiles only |
+| JSON / YAML | `jsonls` / `yamlls` | |
+| Bash | `bashls` | |
+| Markdown / MDX | `marksman` / `mdx_analyzer` | |
+| Astro | `astro` | |
+| Prose, LaTeX | `ltex_plus` | `ltex-ls` is unmaintained; `ltex-ls-plus` is the fork that still ships |
+
+Scala needs `coursier` on PATH (`brew install coursier`, or the `install_alt_langs`
+Brewfile preset). Metals v2 is pinned to a milestone build, `2.0.0-M17`, because
+that is what v2 currently ships as; v1.6.x remains the stable line if you would
+rather move back.
+
 ## Layout
 
 | Path | Contents |
@@ -78,6 +111,7 @@ an agent creates or deletes appear without a nudge.
 | `init.lua` | options, keymaps, and the full lazy.nvim plugin spec |
 | `lua/sidebar.lua` | the panel switcher and its tab strip |
 | `lua/worktree.lua` | worktree listing, switching, creation, removal |
+| `lua/lsp.lua` | the server roster and on-demand install |
 | `lua/debug_helpers.lua` | persistent DAP breakpoints |
 | `after/lsp/*.lua` | per-server LSP settings |
 | `ftplugin/*.lua` | per-filetype settings |

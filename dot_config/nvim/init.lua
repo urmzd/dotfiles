@@ -245,52 +245,63 @@ require("lazy").setup({
 			"mason-org/mason.nvim",
 			"neovim/nvim-lspconfig",
 		},
-		opts = {
-			ensure_installed = {
-				"lua_ls",
-				-- ty handles type checking; basedpyright supplies the richer
-				-- completion, hover, and signature help ty still lacks.
-				"ty",
-				"basedpyright",
-				"rust_analyzer",
-				"gopls",
-				"clangd",
-				"metals",
-				"kotlin_language_server",
-				"terraformls",
-				"dockerls",
-				"jsonls",
-				"yamlls",
-				"bashls",
-				"ts_ls",
-				"marksman",
-				"mdx_analyzer",
-				"astro",
-				"ltex",
-			},
-			-- Copilot is disabled; keep it excluded so mason-lspconfig never
-			-- auto-enables nvim-lspconfig's "copilot" config.
-			automatic_enable = {
-				exclude = { "copilot" },
-			},
-		},
+		opts = function()
+			return {
+				-- No ensure_installed: installing eighteen servers on every
+				-- machine regardless of what it opens is what lua/lsp.lua
+				-- exists to stop. Servers arrive when a filetype asks for one.
+				ensure_installed = {},
+				-- Enable exactly the roster, so a server left over from an
+				-- earlier list (ts_ls, ltex, dockerls) stops being started
+				-- alongside the one that replaced it. Naming the roster also
+				-- keeps nvim-lspconfig's "copilot" config from being enabled.
+				automatic_enable = require("lsp").servers,
+			}
+		end,
 	},
+	-- mason-tool-installer is gone: it existed only to eagerly install the
+	-- formatter list, which lua/lsp.lua now derives from conform's own
+	-- formatters_by_ft and installs per filetype, gated the same way as the
+	-- servers. One list, not two.
 	{
-		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		dependencies = { "mason-org/mason.nvim" },
-		opts = {
-			ensure_installed = {
-				"ruff",
-				"stylua",
-				"biome",
-				"clang-format",
-				"goimports",
-				"gofumpt",
-				"shfmt",
-				"google-java-format",
-				"yamlfmt",
-			},
-		},
+		"scalameta/nvim-metals",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		-- Java is deliberately not in this list even though Metals v2 handles
+		-- it: jdtls via nvim-jdtls is still the Java server here, and two
+		-- servers competing over the same buffer helps nobody.
+		ft = { "scala", "sbt" },
+		opts = function()
+			local metals_config = require("metals").bare_config()
+			metals_config.settings = {
+				-- Metals v2 is the Databricks-originated rewrite that indexes
+				-- sources directly instead of waiting on the build. Still a
+				-- milestone build, so the version is pinned rather than
+				-- floating.
+				serverVersion = "2.0.0-M17",
+				showImplicitArguments = true,
+			}
+			metals_config.init_options.statusBarProvider = "off"
+			return metals_config
+		end,
+		config = function(self, metals_config)
+			local group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = self.ft,
+				group = group,
+				callback = function()
+					-- Metals is fetched by coursier, not mason, so without
+					-- coursier there is nothing to attach to.
+					if vim.fn.executable("cs") ~= 1 and vim.fn.executable("coursier") ~= 1 then
+						vim.notify_once(
+							"Scala: install coursier (brew install coursier) to get Metals",
+							vim.log.levels.WARN
+						)
+						return
+					end
+					require("metals").initialize_or_attach(metals_config)
+				end,
+			})
+		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -1159,3 +1170,6 @@ require("sidebar").setup()
 
 -- Worktrees: switch between the checkouts agents work in.
 require("worktree").setup()
+
+-- Servers and formatters install themselves when a filetype asks for one.
+require("lsp").setup()
