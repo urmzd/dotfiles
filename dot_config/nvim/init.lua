@@ -1142,13 +1142,18 @@ require("lazy").setup({
 			},
 		},
 	},
-	-- {
-	-- 	dir = "~/github/lazyspeak.nvim",
-	-- 	build = ":LazySpeakInstall",
-	-- 	opts = {
-	-- 		agent = { adapter = "claudecode" },
-	-- 	},
-	-- },
+	{
+		-- Local checkout, so this only loads on a machine that has it.
+		dir = "~/github/lazyspeak.nvim",
+		enabled = vim.fn.isdirectory(vim.fn.expand("~/github/lazyspeak.nvim")) == 1,
+		build = ":LazySpeakInstall",
+		opts = {
+			agent = { adapter = "claudecode" },
+			keys = {
+				push_to_talk = "<leader><space>",
+			},
+		},
+	},
 })
 
 -- Undotree Keymap
