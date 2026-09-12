@@ -102,8 +102,38 @@ vim.opt.ttimeoutlen = 5
 vim.opt.undodir = vim.fn.stdpath("config") .. "/undo"
 vim.o.hlsearch = not vim.o.hlsearch -- Toggles search highlighting on each config load
 
+-- Full mouse support so the sidebar tab strip (see lua/sidebar.lua) and
+-- bufferline tabs are clickable, not just keyable.
+vim.opt.mouse = "a"
+
+-- Opening and closing the sidebar shifts every other window; "screen" keeps the
+-- text under the cursor visually still while that happens.
+vim.opt.splitkeep = "screen"
+
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+
+-- Coding agents edit files on disk while this editor holds them open, so an
+-- unreloaded buffer is a stale review. Re-stat on every event that means
+-- "attention just came back to Neovim" and reload silently when Neovim can.
+vim.opt.autoread = true
+local external_edits = vim.api.nvim_create_augroup("ExternalEdits", { clear = true })
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermLeave", "TermClose" }, {
+	group = external_edits,
+	callback = function()
+		if vim.bo.buftype == "" and vim.fn.mode() == "n" then
+			pcall(vim.cmd.checktime)
+		end
+	end,
+	desc = "Reload buffers changed on disk by another process",
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	group = external_edits,
+	callback = function(args)
+		vim.notify(("Reloaded %s (changed on disk)"):format(vim.fn.fnamemodify(args.file, ":~:.")), vim.log.levels.WARN)
+	end,
+	desc = "Say so when a buffer is reloaded underneath you",
+})
 
 -- Buffer and Window Navigation
 
@@ -362,6 +392,15 @@ require("lazy").setup({
 				return component ~= nil
 			end, {
 				{
+					-- Which checkout am I reviewing? Blank on the primary one,
+					-- so it only speaks up when the answer is not the obvious.
+					function()
+						local ok, worktree = pcall(require, "worktree")
+						return ok and worktree.label() or ""
+					end,
+					color = { fg = "#bb9af7" },
+				},
+				{
 					-- Trouble status indicator
 					function()
 						local ok, trouble = pcall(require, "trouble")
@@ -472,7 +511,18 @@ require("lazy").setup({
 				offsets = {
 					{
 						filetype = "neo-tree",
-						text = "File Explorer",
+						-- One neo-tree window shows several sidebar panels, so
+						-- the header follows whichever one is active.
+						text = function()
+							local ok, sidebar = pcall(require, "sidebar")
+							return ok and sidebar.title() or "Explorer"
+						end,
+						text_align = "center",
+						separator = true,
+					},
+					{
+						filetype = "neotest-summary",
+						text = "󰙨 Tests",
 						text_align = "center",
 						separator = true,
 					},
@@ -562,12 +612,18 @@ require("lazy").setup({
 		},
 		config = function()
 			require("neo-tree").setup({
+				-- The sidebar tab strip renders these; neo-tree's own selector
+				-- would only ever know about neo-tree's sources.
+				source_selector = { winbar = false, statusline = false },
 				filesystem = {
 					follow_current_file = {
 						enabled = true, -- Automatically reveal and focus current file
 						leave_dirs_open = false, -- Close folders when moving to another file
 					},
 					hijack_netrw_behavior = "open_current",
+					-- Agents create and delete files outside Neovim; watch the
+					-- filesystem instead of only refreshing on :write.
+					use_libuv_file_watcher = true,
 				},
 				window = {
 					mappings = {
@@ -576,7 +632,6 @@ require("lazy").setup({
 					},
 				},
 			})
-			vim.keymap.set("n", "<leader>v", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
 		end,
 		lazy = false,
 	},
@@ -640,6 +695,18 @@ require("lazy").setup({
 		},
 		config = function()
 			require("neotest").setup({
+				-- The summary shares the sidebar's window slot, so it has to
+				-- open where neo-tree opens rather than in neotest's default
+				-- right-hand split.
+				summary = {
+					open = "topleft vsplit | vertical resize 40",
+				},
+				-- Reviewing agent work means reading test results next to the
+				-- code, not in a separate panel.
+				status = {
+					virtual_text = true,
+					signs = true,
+				},
 				adapters = {
 					require("neotest-python")({
 						runner = "pytest",
@@ -831,9 +898,15 @@ require("lazy").setup({
 				{ "<leader>b", group = "buffer" },
 				{ "<leader>d", group = "debug" },
 				{ "<leader>f", group = "find" },
+				{ "<leader>g", group = "git" },
+				{ "<leader>s", group = "sidebar" },
 				{ "<leader>t", group = "test" },
 				{ "<leader>v", group = "vimux" },
+				{ "<leader>w", group = "worktree" },
 				{ "<leader>x", group = "trouble" },
+				{ "<leader>1", desc = "Sidebar: Files" },
+				{ "<leader>2", desc = "Sidebar: Changes" },
+				{ "<leader>3", desc = "Sidebar: Tests" },
 			},
 		},
 		keys = {
@@ -848,7 +921,47 @@ require("lazy").setup({
 	},
 	{ "mbbill/undotree" },
 	{ "Bekaboo/deadcolumn.nvim", opts = {} },
-	{ "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
+	{
+		"sindrets/diffview.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("diffview").setup({
+				enhanced_diff_hl = true,
+			})
+
+			-- Reviewing a branch an agent wrote means diffing against the merge
+			-- base with the default branch, which is rarely the same thing as
+			-- the working tree diff.
+			local function default_branch()
+				local remote_head =
+					vim.fn.systemlist({ "git", "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD" })[1]
+				if vim.v.shell_error == 0 and remote_head and remote_head ~= "" then
+					return remote_head
+				end
+				for _, candidate in ipairs({ "origin/main", "origin/master", "main", "master" }) do
+					vim.fn.system({ "git", "rev-parse", "--verify", "--quiet", candidate })
+					if vim.v.shell_error == 0 then
+						return candidate
+					end
+				end
+				return nil
+			end
+
+			vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Diff working tree" })
+			vim.keymap.set("n", "<leader>gD", function()
+				local base = default_branch()
+				if not base then
+					vim.notify("No default branch to diff against", vim.log.levels.WARN)
+					return
+				end
+				vim.cmd("DiffviewOpen " .. base .. "...HEAD")
+			end, { desc = "Diff branch vs default branch" })
+			vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "History of this file" })
+			vim.keymap.set("n", "<leader>gH", "<cmd>DiffviewFileHistory<cr>", { desc = "History of this repo" })
+			vim.keymap.set("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close diff view" })
+			vim.keymap.set("n", "<leader>gs", "<cmd>Neogit<cr>", { desc = "Git status (Neogit)" })
+		end,
+	},
 	{
 		"preservim/vimux",
 		config = function()
@@ -1040,3 +1153,9 @@ require("lazy").setup({
 
 -- Undotree Keymap
 vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "Toggle Undotree" })
+
+-- Sidebar: Files / Changes / Tests behind one clickable tab strip.
+require("sidebar").setup()
+
+-- Worktrees: switch between the checkouts agents work in.
+require("worktree").setup()

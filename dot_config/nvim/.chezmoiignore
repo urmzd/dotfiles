@@ -3,3 +3,6 @@ undo/
 *.backup
 .luarc.json
 lazy-lock.json
+
+# Docs for this config live in the repo only, like the root README.
+README.md
