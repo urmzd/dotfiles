@@ -1,12 +1,6 @@
 ---
 name: architect
-description: |
-  Designs interface-first system architecture: decomposes modules, enumerates
-  2-3 approaches with tradeoff tables, recommends a path on Easy-to-Change
-  grounds, and stages phased delivery plans with per-phase verification. Use
-  when you need a design doc, module boundaries, an API contract, or a phased
-  rollout plan before writing code. Read-only: produces designs, never edits.
-  Do NOT use for executing multi-repo sweeps or batch edits; use strategist.
+description: Reviews architecture, boundaries, and tradeoffs. Use for system design and structural code review.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

@@ -8,7 +8,7 @@ if ! command -v agentspec >/dev/null 2>&1; then
 fi
 
 echo "Syncing local agent resources..."
-agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --all-tools
+agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents"
 
 if command -v jq >/dev/null 2>&1; then
     tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"
@@ -28,7 +28,7 @@ if command -v jq >/dev/null 2>&1; then
     comm -12 "$tmp_status.source" "$tmp_status.unmanaged" |
         while IFS="$(printf '\t')" read -r _kind name; do
             [ -n "$name" ] || continue
-            agentspec manage add "$name" --all-tools
+            agentspec manage add "$name"
         done
 
     cut -f2 "$tmp_status.source" |

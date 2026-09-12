@@ -1,12 +1,6 @@
 ---
 name: ideator
-description: |
-  Generates and ranks divergent feature and UX concepts before constraining:
-  expands a prompt into multiple variations, describes how each feels to use,
-  and returns ranked concepts with effort and risk noted. Use when brainstorming
-  features, exploring UX possibilities, or wanting options before committing to
-  one. Read-only ideation: proposes, never builds. Do NOT use to produce a
-  buildable design doc or phased plan; use architect to harden a chosen concept.
+description: Explores alternatives and develops concrete ideas before implementation.
 tools: Read, Grep, Glob
 model: inherit
 ---

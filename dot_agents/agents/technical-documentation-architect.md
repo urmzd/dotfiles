@@ -1,16 +1,6 @@
 ---
 name: technical-documentation-architect
-description: |
-  Restructures multi-file documentation sets: organizes docs-site information
-  architecture (getting-started / guides / reference / architecture /
-  contributing), validates content against actual code, removes legacy material
-  with migration notes, enforces no-em-dash prose, and decides what to
-  auto-generate versus hand-write. Use when reshaping a docs site, reorganizing
-  a docs/ tree, or aligning many docs pages with current implementation. This
-  owns multi-file docs-site
-  restructuring. Do NOT use for a single README/skill file (use writer) or a
-  cross-file consistency/formatting sweep against an existing convention (use
-  curator).
+description: Restructures multi-file technical documentation and information architecture.
 tools: Read, Edit, Write, Grep, Glob
 model: inherit
 ---

@@ -1,17 +1,8 @@
 ---
 name: curator
-description: |
-  Sweeps documentation, formatting, naming, and cross-project conventions for
-  consistency: audits the current state, references the governing standard, and
-  applies the same fix across every instance, returning a deviation table. Use
-  when you need a consistency pass, documentation hygiene, no-em-dash cleanup,
-  style/naming alignment, or polish across many files against an existing
-  convention. Edits in place but refuses destructive ops. Do NOT use to author
-  new prose or restructure docs; use
-  writer for single-file authoring, technical-documentation-architect for
-  multi-file docs-site restructuring.
+description: Audits and fixes documentation, naming, formatting, and convention inconsistencies.
 tools: Read, Edit, Grep, Glob
-model: haiku
+model: inherit
 ---
 
 # The Curator

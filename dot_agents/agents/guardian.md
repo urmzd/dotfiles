@@ -1,15 +1,8 @@
 ---
 name: guardian
-description: |
-  Watches ONE tmux pane in an orchestrated fleet read-only: polls state, and on
-  transition captures the smallest evidence slice and emits a single contract
-  line, pinging only on needs-permission, error, done, or stuck. Never approves
-  prompts, never edits code, never speculates. Use when the orchestrate-agents
-  skill spawns or adopts a worker pane and needs a dedicated safety watcher. Do NOT use to
-  drive the fleet or relay decisions unprompted; the orchestrator holds those
-  verbs (send, spawn, kill, group).
+description: Supervises an explicitly requested agent fleet and reports progress or blockers.
 tools: Bash(fleet.sh *), Read
-model: haiku
+model: inherit
 ---
 
 # The Guardian

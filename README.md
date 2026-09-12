@@ -24,7 +24,7 @@
 - **Tmux** with `Ctrl+a` prefix, vim keys, Catppuccin cyberdream theme
 - **Ghostty** terminal with cyberdream theme and MonaspiceNe Nerd Font
 - **Neovim** (HEAD) with LSP for all included languages, tuned for reviewing agent work: a clickable Files/Changes/Tests sidebar, worktree switching, and buffers that reload when an agent edits them. See [`dot_config/nvim/README.md`](dot_config/nvim/README.md).
-- **AI agents** (Claude Code, Antigravity, Codex, Copilot) auto-installed via chezmoi
+- **AI agents** (Claude Code, Antigravity, Codex, Copilot, OpenCode) auto-installed via chezmoi
 - **A portable agent skills catalog** in [`dot_agents/skills/`](dot_agents/skills/) and subagents in [`dot_agents/agents/`](dot_agents/agents/), installable into any tool via [`agentspec`](https://github.com/urmzd/agentspec). See [Agent Skills](#agent-skills) for the full list.
 - **Chezmoi automation** scripts that trigger on apply
 - **Docker cleanup** launchd agent running daily at 3 AM
@@ -106,7 +106,7 @@ The last two sit off the preset ladder on purpose, including `full`. Both are he
 
 Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. Update with `dotfiles update ai`.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh`](run_once_after_install-opencode.sh), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
 
 ### Adding a new tool
 
@@ -161,6 +161,7 @@ Per-tool AI config is tracked and deployed by chezmoi:
 | Codex | `dot_codex/` | Workspace-write "Auto" base (auto-run safe ops, guardian auto-reviewer vets escalations) + `writer`/`reviewer`/`plan`/`guardian` profile overlays and `/agent` subagents |
 | Antigravity CLI (agy) | `dot_gemini/` | Legacy Gemini CLI settings kept as agy first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` (authored in-app via `/config` and `/permissions`) |
 | GitHub Copilot | `dot_copilot/` | `settings.json` with model, `xhigh` effort, theme |
+| OpenCode | `dot_config/opencode/` | Shared instructions; agentspec renders agents into `~/.config/opencode/agents/` with inherited models and provider-specific overrides |
 
 Codex runs OpenAI's documented "Auto" preset by default: `sandbox_mode = "workspace-write"` + `approval_policy = "on-request"`, with the guardian auto-reviewer (`approvals_reviewer = "auto_review"`) classifying every escalation before it reaches you. Drop to `codex --profile reviewer` or `--profile plan` for read-only work; the `guardian` profile supervises `orchestrate-agents` fleets.
 
