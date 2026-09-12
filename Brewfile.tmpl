@@ -102,6 +102,9 @@ brew "stylua"
 brew "zig"            # Also ships its own C/C++ cross-compiler (zig cc)
 brew "scala-cli"      # Self-contained Scala runner, manages its own JVM; supersedes
                       # the scala/sbt pair for directory-scoped programs
+brew "coursier"       # Fetches and runs JVM artifacts. Required by nvim-metals:
+                      # Metals is the one language server mason cannot install,
+                      # so Neovim gets it through coursier or not at all.
 brew "mise"           # JDK and other per-project runtimes, pinned by .mise.toml.
                       # Chosen over the temurin cask (one global JDK, no switching)
                       # and over SDKMAN, which has no formula and so could not be
