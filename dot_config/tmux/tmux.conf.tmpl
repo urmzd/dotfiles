@@ -95,6 +95,8 @@ set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 # Disable auto-restore to prevent multiple sessions on startup
 set -g @continuum-restore 'off'
+# Autosave interval in minutes (default 15)
+set -g @continuum-save-interval '5'
 {{- end }}
 
 # Catppuccin theme configuration - using cyberdream
