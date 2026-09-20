@@ -1,0 +1,25 @@
+# Central direnv configuration, managed by chezmoi.
+
+# use fnm [dir]
+# Loads the Node version pinned by .nvmrc or .node-version in dir (default: the
+# .envrc's own directory). Pass a path when the pin lives in a sub-package,
+# e.g. `use fnm apps/web`.
+use_fnm() {
+  local dir="${1:-.}"
+
+  if ! has fnm; then
+    log_error "use fnm: fnm is not installed"
+    return 1
+  fi
+  if [[ ! -d "$dir" ]]; then
+    log_error "use fnm: no such directory: $dir"
+    return 1
+  fi
+
+  watch_file "$dir/.nvmrc" "$dir/.node-version"
+
+  eval "$(fnm env --shell bash)"
+  # fnm resolves the pin from the working directory. The switch is a symlink
+  # under FNM_MULTISHELL_PATH, so doing it in a subshell still takes effect.
+  (cd "$dir" && fnm use --install-if-missing --silent-if-unchanged)
+}
