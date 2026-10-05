@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 (2026-10-05)
+
+### Features
+
+- **python**: default to uv-managed Python 3.12; pin gcloud to it ([0acd136](https://github.com/urmzd/dotfiles/commit/0acd136c4b8ce7390116a3eaf8efd2bbd9cdb676))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.6.0...v0.7.0)
+
+
 ## 0.6.0 (2026-10-05)
 
 ### Features
