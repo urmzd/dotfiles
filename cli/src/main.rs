@@ -1,6 +1,7 @@
 mod catalog;
 mod chezmoi;
 mod commands;
+mod identity;
 mod ui;
 
 use std::process::ExitCode;
@@ -69,6 +70,9 @@ enum Command {
         #[arg(long)]
         force: bool,
     },
+    /// Set up this machine's GitHub identity: gh sign-in, SSH and GPG keys
+    /// created and uploaded, signing key saved, then a signed test commit
+    Identity,
     /// Show pending changes, confirm, then chezmoi apply
     Apply {
         /// Skip the confirmation
@@ -134,6 +138,7 @@ fn main() -> ExitCode {
         } => commands::remove(&ctx, ids, uninstall, no_apply),
         Command::List { selected } => commands::list(&ctx, selected),
         Command::Setup { ids, force } => commands::setup(&ctx, ids, force),
+        Command::Identity => identity::run(&ctx),
         Command::Apply { yes } => commands::apply(&ctx, yes),
         Command::Diff => commands::diff(),
         Command::Config => commands::config(&ctx),

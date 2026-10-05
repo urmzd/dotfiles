@@ -102,11 +102,40 @@ impl Config {
     }
 
     pub fn machine(&self) -> Option<String> {
+        self.data_str("machine")
+    }
+
+    /// A string under [data]; None when missing or empty.
+    pub fn data_str(&self, key: &str) -> Option<String> {
         self.doc
             .get("data")?
-            .get("machine")?
+            .get(key)?
             .as_str()
+            .filter(|s| !s.is_empty())
             .map(String::from)
+    }
+
+    /// Set a string under [data], keeping the line's existing formatting and
+    /// trailing comment.
+    pub fn set_data_str(&mut self, key: &str, val: &str) -> Result<()> {
+        let data = self
+            .doc
+            .get_mut("data")
+            .and_then(Item::as_table_like_mut)
+            .with_context(|| format!("no [data] table in {}", self.path.display()))?;
+        let mut new = Value::from(val);
+        match data.get_mut(key) {
+            Some(item) => {
+                if let Some(old) = item.as_value() {
+                    *new.decor_mut() = old.decor().clone();
+                }
+                *item = Item::Value(new);
+            }
+            None => {
+                data.insert(key, Item::Value(new));
+            }
+        }
+        Ok(())
     }
 
     /// Replace the selection, sorted and de-duplicated.
@@ -185,6 +214,22 @@ mod tests {
         assert!(text.contains(r#"packages = ["acli", "twg"]"#), "{text}");
         assert!(text.contains("# Optional packages") && text.contains("autoCommit = true"));
         assert_eq!(Config::load(&path).unwrap().packages(), vec!["acli", "twg"]);
+    }
+
+    #[test]
+    fn sets_strings_keeping_format() {
+        let (_d, path) = write(CONFIG);
+        let mut cfg = Config::load(&path).unwrap();
+        assert_eq!(cfg.data_str("name").as_deref(), Some("A"));
+        assert_eq!(cfg.data_str("missing"), None);
+        cfg.set_data_str("name", "B").unwrap();
+        cfg.set_data_str("work_signing_key", "ABC123").unwrap();
+        cfg.save().unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        assert!(text.contains("    name = \"B\""), "{text}");
+        let cfg = Config::load(&path).unwrap();
+        assert_eq!(cfg.data_str("work_signing_key").as_deref(), Some("ABC123"));
+        assert_eq!(cfg.packages(), vec!["docker", "obsidian"]);
     }
 
     #[test]

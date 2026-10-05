@@ -49,7 +49,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) repo, and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) (git URL or local folder), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -70,6 +70,7 @@ The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Eve
 dotfiles packages        # Search + toggle optional packages, then apply
 dotfiles add acli twg    # Select by id; `remove` deselects (--uninstall to brew uninstall)
 dotfiles setup           # Pending sign-in / interactive installers for selected packages
+dotfiles identity        # This machine's GitHub identity: gh, SSH + GPG keys, signing check
 dotfiles apply           # Show pending changes, confirm, then apply (-y skips confirm)
 dotfiles diff            # Full diff of pending changes
 dotfiles config          # Re-run the setup questions (saved answers kept), then apply
@@ -135,7 +136,15 @@ The Brewfile installer continues past individual package failures, retries the r
 
 ### Work pack
 
-Company-specific setup lives in a **work pack**: a separate git repo of plain files, owned by the company and shareable with teammates whether or not they use these dotfiles. On a work machine, `chezmoi init` asks for its URL and clones it to `~/.config/work/` (refreshed every 24h by [`.chezmoiexternal.toml.tmpl`](.chezmoiexternal.toml.tmpl)). Only the URL is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. You can also clone or create `~/.config/work/` by hand. To start one, copy the [`work-pack/`](work-pack/) template into a new company repo; its README has the steps.
+Company-specific setup lives in an optional **work pack**: a folder of plain files, usually a company git repo shareable with teammates whether or not they use these dotfiles. On a work machine `chezmoi init` asks for `work_pack`, which can be:
+
+| `work_pack` | Folder the hooks read | Fetching |
+| ----------- | --------------------- | -------- |
+| empty | `~/.config/work/` (create it by hand, or leave it absent) | none |
+| a git URL | `~/.config/work/` | cloned on apply, then fast-forwarded at most daily by [`run_after_sync-work-pack.sh.tmpl`](run_after_sync-work-pack.sh.tmpl) |
+| a local folder (`/path` or `~/path`) | that folder, in place | none |
+
+Fetching never fails the apply: an unreachable or private repo (common on a new laptop before `dotfiles identity` adds its SSH key), a missing folder, or a non-git folder in the way only prints a warning with the next step. Only the setting is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. To start one, copy the [`work-pack/`](work-pack/) template into a new company repo; its README has the steps.
 
 Every file is optional, and each hook is a no-op when its file is missing:
 
@@ -153,29 +162,24 @@ A work machine also defaults git to the work email, skips personal apps (Obsidia
 
 #### Setting up a machine's GitHub identity
 
-Run these on the machine itself, signed in to that machine's GitHub account (the work account on a work laptop). The same steps work on a personal machine with your personal email.
+One command, run on the machine itself, safe to re-run:
 
 ```bash
-# 1. Sign gh in as this machine's account, with permission to add keys
-gh auth login                                   # pick the work account on a work laptop
-gh auth refresh -s write:gpg_key,admin:public_key
-
-# 2. SSH key for pushing (~/.ssh/config uses ~/.ssh/github for github.com)
-ssh-keygen -t ed25519 -C "you@company.com" -f ~/.ssh/github
-gh ssh-key add ~/.ssh/github.pub --title "$(hostname)"
-
-# 3. GPG signing key, named after the email this machine commits with
-gpg --quick-gen-key "Your Name <you@company.com>" ed25519 sign 2y
-gpg --armor --export you@company.com | gh gpg-key add -
-
-# 4. Let chezmoi pick the key up (it matches the key by email), then apply
-chezmoi init && chezmoi apply
-
-# 5. Check: a throwaway signed commit should show "Good signature"
-cd "$(mktemp -d)" && git init -q && git commit -q --allow-empty -m test && git log --show-signature -1
+dotfiles identity            # add --dry-run to see what it would do first
 ```
 
-The email in step 3 must be a verified address on the GitHub account (Settings > Emails), or GitHub shows commits as unverified. `pinentry-mac` (managed on macOS) shows the passphrase dialog, so signing also works from editors and agent sessions; tick "Save in Keychain" to stop being asked. If the first `chezmoi init` ran before the key existed (the usual case on a new machine), step 4 re-detects it: an empty saved key is looked up again on every `chezmoi init`. To pin a specific key instead, set `work_signing_key` (work) or `gpg_signing_key` (personal) in `~/.config/chezmoi/chezmoi.toml` to its fingerprint (`gpg --list-secret-keys --keyid-format=long`).
+It reads the account and email from your chezmoi config (the work account and work email on a work laptop), then:
+
+| Step | What happens | Skipped when |
+| ---- | ------------ | ------------ |
+| gh | signs in as that account in the browser (or switches to it), adds the `write:gpg_key`, `admin:public_key`, `user:email` scopes | already signed in with those scopes |
+| SSH | creates `~/.ssh/github` (what `~/.ssh/config` uses for github.com) and uploads it | the key exists and GitHub has it |
+| GPG | creates an ed25519 signing key for the email and uploads it | a usable key exists and GitHub has it |
+| Email | warns if the email is not verified on the account (commits would show as unverified) | verified |
+| Save | writes the key to `work_signing_key` / `gpg_signing_key` and re-applies `~/.gitconfig` | already saved |
+| Check | makes a signed throwaway commit and requires "Good signature" | |
+
+Passphrases are asked by `ssh-keygen` and by `pinentry-mac`'s dialog (managed on macOS, so signing also works from editors and agent sessions; tick "Save in Keychain"). `chezmoi init` also finds an existing key by its email, so creating one by hand works too: `gpg --quick-gen-key "Name <email>" ed25519 sign 2y`, then `gpg --armor --export <email> | gh gpg-key add -`.
 
 ### Chezmoi automation
 

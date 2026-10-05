@@ -37,7 +37,7 @@ fn load() -> Result<(Paths, Catalog, Config)> {
     Ok((paths, catalog, config))
 }
 
-fn require_tty(what: &str) -> Result<()> {
+pub fn require_tty(what: &str) -> Result<()> {
     if !std::io::stdin().is_terminal() {
         bail!("{what} needs a terminal");
     }
