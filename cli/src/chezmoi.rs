@@ -75,6 +75,15 @@ pub fn has_pending_changes() -> Result<bool> {
     .is_empty())
 }
 
+/// Managed files that applying would change (`chezmoi status`, scripts excluded).
+pub fn pending_files() -> Result<Vec<String>> {
+    Ok(chezmoi_output(&["status", "--exclude", "scripts"])?
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(String::from)
+        .collect())
+}
+
 /// chezmoi's warning that .chezmoi.toml.tmpl changed since the config was
 /// generated, i.e. `chezmoi init` would pick up new or changed questions.
 pub fn config_template_changed() -> bool {
@@ -87,6 +96,7 @@ pub fn config_template_changed() -> bool {
 }
 
 /// The local chezmoi config, edited in place with formatting and comments kept.
+#[derive(Clone)]
 pub struct Config {
     path: PathBuf,
     doc: DocumentMut,
@@ -107,6 +117,35 @@ impl Config {
             path: path.to_path_buf(),
             doc,
         })
+    }
+
+    /// A config held in memory only (tests).
+    #[cfg(test)]
+    pub fn parse(text: &str) -> Result<Self> {
+        Ok(Self {
+            path: PathBuf::new(),
+            doc: text.parse::<DocumentMut>()?,
+        })
+    }
+
+    /// Whether [data] has `key` at all, whatever its value.
+    pub fn has_data(&self, key: &str) -> bool {
+        self.doc.get("data").and_then(|d| d.get(key)).is_some()
+    }
+
+    pub fn set_data_bool(&mut self, key: &str, val: bool) -> Result<()> {
+        let data = self
+            .doc
+            .get_mut("data")
+            .and_then(Item::as_table_like_mut)
+            .with_context(|| format!("no [data] table in {}", self.path.display()))?;
+        match data.get_mut(key) {
+            Some(item) => *item = Item::Value(Value::from(val)),
+            None => {
+                data.insert(key, Item::Value(Value::from(val)));
+            }
+        }
+        Ok(())
     }
 
     /// Selected package ids. Missing key means nothing selected yet.

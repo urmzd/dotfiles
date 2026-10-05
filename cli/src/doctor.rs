@@ -1,6 +1,7 @@
 //! `dotfiles doctor`: one health report for the machine, each finding with the
 //! command that fixes it. Read-only.
 
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 use anyhow::Result;
@@ -10,6 +11,8 @@ use crate::catalog::{Catalog, WorkCatalog};
 use crate::chezmoi::{self, Config, Paths};
 use crate::commands::Ctx;
 use crate::identity::{gh_login, output};
+use crate::migrate;
+use crate::state::{self, Inventory, Managed};
 use crate::{Format, Outcome, ui};
 
 #[derive(Serialize, Clone, Copy, PartialEq)]
@@ -89,7 +92,7 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
     check_signing(&mut r);
     check_shadowing(&mut r);
     if let (Some(catalog), Some(config)) = (&catalog, &config) {
-        check_packages(&mut r, catalog, config);
+        check_packages(&mut r, &paths.home, catalog, config);
     }
 
     if ctx.format == Format::Json {
@@ -431,42 +434,49 @@ fn check_shadowing(r: &mut Report) {
     }
 }
 
-fn check_packages(r: &mut Report, catalog: &Catalog, config: &Config) {
-    let selected = catalog.effective(&config.packages());
-    let passes = |check: &str| {
-        Command::new("sh")
-            .args(["-c", check])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|s| s.success())
-    };
-    let mut missing = Vec::new();
-    let mut setup = Vec::new();
-    for p in catalog.packages.iter().filter(|p| selected.contains(&p.id)) {
-        let Some(check) = &p.check else { continue };
-        if passes(check) {
-            continue;
-        }
-        if p.script.is_some() {
-            missing.push(p.id.clone());
-        } else if !p.setup.is_empty() {
-            setup.push(p.id.clone());
-        }
+/// The same plan `dotfiles plan` prints: desired vs what is installed now.
+fn check_packages(r: &mut Report, home: &Path, catalog: &Catalog, config: &Config) {
+    // Migrations run on a copy: doctor reports, it never writes.
+    let mut config = config.clone();
+    if let Ok(changes) = migrate::run(&mut config, catalog)
+        && !changes.is_empty()
+    {
+        r.warn("migrations", changes.join("; "), "dotfiles apply");
     }
-    if missing.is_empty() {
-        r.ok("packages", "selected installer-based packages are present");
+    let exclude = state::excludes(config.data_str("pkg_exclude"));
+    let plan = state::plan(
+        catalog,
+        &config.packages(),
+        &Inventory::read(),
+        &exclude,
+        &Managed::load(home),
+    );
+    if plan.install.is_empty() {
+        r.ok(
+            "packages",
+            format!(
+                "all {} desired packages are installed",
+                catalog.effective(&config.packages()).len()
+            ),
+        );
     } else {
         r.warn(
             "packages",
-            format!("selected but not installed: {}", missing.join(", ")),
+            format!("selected but not installed: {}", plan.install.join(", ")),
             "dotfiles apply",
         );
     }
-    if !setup.is_empty() {
+    if !plan.remove.is_empty() {
+        r.warn(
+            "packages",
+            format!("deselected but still installed: {}", plan.remove.join(", ")),
+            "dotfiles apply --prune",
+        );
+    }
+    if !plan.setup.is_empty() {
         r.warn(
             "setup",
-            format!("sign-in pending: {}", setup.join(", ")),
+            format!("sign-in pending: {}", plan.setup.join(", ")),
             "dotfiles package setup",
         );
     }

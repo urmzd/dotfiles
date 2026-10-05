@@ -10,6 +10,8 @@ use serde_json::json;
 
 use crate::catalog::{Catalog, Package, WorkCatalog};
 use crate::chezmoi::{self, Config, Paths};
+use crate::migrate;
+use crate::state::{self, Inventory, Managed, Plan};
 use crate::{Format, Outcome, UpdateTarget, ui};
 
 pub struct Ctx {
@@ -328,7 +330,8 @@ fn commit(
     if no_apply {
         ui::hint("apply later: dotfiles apply");
     } else {
-        chezmoi_apply()?;
+        let files = chezmoi_apply();
+        converge(paths, catalog, config, false).and(files)?;
     }
 
     let needs_setup: Vec<&Package> = added.into_iter().filter(|p| !p.setup.is_empty()).collect();
@@ -454,23 +457,197 @@ fn run_setup(ctx: &Ctx, targets: &[&Package], force: bool) -> Result<Outcome> {
 
 // ---- chezmoi wrappers -----------------------------------------------------------
 
-pub fn apply(ctx: &Ctx, yes: bool) -> Result<Outcome> {
-    if !chezmoi::has_pending_changes()? {
+/// Desired vs observed, computed fresh: pending migrations (applied in
+/// memory), managed files that differ, and the package plan.
+struct Pending {
+    migrations: Vec<String>,
+    files: Vec<String>,
+    plan: Plan,
+}
+
+impl Pending {
+    fn compute(paths: &Paths, catalog: &Catalog, config: &mut Config) -> Result<Self> {
+        let migrations = migrate::run(config, catalog)?;
+        let files = chezmoi::pending_files()?;
+        let exclude = state::excludes(config.data_str("pkg_exclude"));
+        let plan = state::plan(
+            catalog,
+            &config.packages(),
+            &Inventory::read(),
+            &exclude,
+            &Managed::load(&paths.home),
+        );
+        Ok(Self {
+            migrations,
+            files,
+            plan,
+        })
+    }
+
+    fn has_work(&self, prune: bool) -> bool {
+        !self.migrations.is_empty() || !self.files.is_empty() || self.plan.has_work(prune)
+    }
+
+    fn show(&self, catalog: &Catalog, prune: bool) {
+        let name = |id: &String| catalog.get(id).map_or(id.clone(), |p| p.name.clone());
+        if !self.migrations.is_empty() {
+            ui::section("Config migrations");
+            for m in &self.migrations {
+                ui::ok(m);
+            }
+        }
+        if !self.files.is_empty() {
+            ui::section(&format!(
+                "Files ({} to update; details: dotfiles diff)",
+                self.files.len()
+            ));
+            for f in &self.files {
+                ui::skip(f.trim());
+            }
+        }
+        let plan = &self.plan;
+        if !(plan.install.is_empty() && plan.remove.is_empty() && plan.setup.is_empty()) {
+            ui::section("Packages");
+        }
+        for id in &plan.install {
+            ui::ok(&format!("+ {} ({id}): selected, not installed", name(id)));
+        }
+        for id in &plan.remove {
+            if prune {
+                ui::ok(&format!(
+                    "- {} ({id}): deselected, will be uninstalled",
+                    name(id)
+                ));
+            } else {
+                ui::skip(&format!(
+                    "- {} ({id}): deselected, still installed (remove with --prune)",
+                    name(id)
+                ));
+            }
+        }
+        for id in &plan.setup {
+            ui::skip(&format!(
+                "~ {} ({id}): sign-in pending (dotfiles package setup {id})",
+                name(id)
+            ));
+        }
+        if !plan.unmanaged.is_empty() {
+            ui::skip(&format!(
+                "installed by hand, left alone: {} (adopt: dotfiles package add <id>)",
+                plan.unmanaged.join(", ")
+            ));
+        }
+    }
+
+    fn json(&self) -> serde_json::Value {
+        json!({ "migrations": self.migrations, "files": self.files, "packages": self.plan })
+    }
+}
+
+pub fn plan(ctx: &Ctx, prune: bool) -> Result<Outcome> {
+    let (paths, catalog, mut config) = load()?;
+    let pending = Pending::compute(&paths, &catalog, &mut config)?;
+    if ctx.format == Format::Json {
+        println!("{}", serde_json::to_string_pretty(&pending.json())?);
+    } else if pending.has_work(prune) {
+        pending.show(&catalog, prune);
+        ui::hint("apply: dotfiles apply");
+    } else {
+        pending.show(&catalog, prune);
+        ui::ok("up to date: every selected package is installed");
+    }
+    Ok(if pending.has_work(prune) {
+        Outcome::Done
+    } else {
+        Outcome::NoChange
+    })
+}
+
+/// Make the machine match the desired state: config migrations, managed
+/// files (chezmoi apply), then any selected package still missing.
+pub fn apply(ctx: &Ctx, yes: bool, prune: bool) -> Result<Outcome> {
+    let (paths, catalog, mut config) = load()?;
+    let pending = Pending::compute(&paths, &catalog, &mut config)?;
+    if !pending.has_work(prune) {
+        pending.show(&catalog, prune);
         ui::ok("already up to date");
+        // Still record ownership, so a later deselect can be pruned.
+        if !ctx.dry_run {
+            let mut managed = Managed::load(&paths.home);
+            let exclude = state::excludes(config.data_str("pkg_exclude"));
+            managed.refresh(&catalog, &config.packages(), &Inventory::read(), &exclude);
+            managed.save()?;
+        }
         return Ok(Outcome::NoChange);
     }
-    ui::section("Pending changes");
-    chezmoi::run(&["status", "--exclude", "scripts"])?;
+    pending.show(&catalog, prune);
     if ctx.dry_run {
         ui::skip("dry run; nothing applied");
         return Ok(Outcome::Done);
     }
-    if !yes && !confirm("Apply these changes? (dotfiles diff shows details)", false)? {
+    if !yes && !confirm("Apply these changes?", true)? {
         ui::skip("cancelled; nothing applied");
         return Ok(Outcome::NoChange);
     }
-    chezmoi_apply()?;
+    if !pending.migrations.is_empty() {
+        config.save()?;
+    }
+    let files = if pending.files.is_empty() && pending.migrations.is_empty() {
+        Ok(())
+    } else {
+        chezmoi_apply()
+    };
+    // Converge even when chezmoi reported a failed step: packages are independent.
+    let packages = converge(&paths, &catalog, &config, prune);
+    files.and(packages)?;
     Ok(Outcome::Done)
+}
+
+/// Install what the plan says is missing (and, with `prune`, uninstall what
+/// was deselected), probing again first since chezmoi apply may have just
+/// installed some of it. Records ownership afterwards.
+fn converge(paths: &Paths, catalog: &Catalog, config: &Config, prune: bool) -> Result<()> {
+    let selected = config.packages();
+    let exclude = state::excludes(config.data_str("pkg_exclude"));
+    let mut managed = Managed::load(&paths.home);
+    let inv = Inventory::read();
+    let plan = state::plan(catalog, &selected, &inv, &exclude, &managed);
+    let mut failed = Vec::new();
+    if plan.has_work(prune) {
+        ui::section("Packages");
+    }
+    for id in &plan.install {
+        let Some(p) = catalog.get(id) else { continue };
+        let cmd = state::install_command(p, &inv, &exclude);
+        if cmd.is_empty() || !sh(&format!("install {}", p.name), &cmd)? {
+            failed.push(id.clone());
+        }
+    }
+    if prune {
+        for id in &plan.remove {
+            let Some(p) = catalog.get(id) else { continue };
+            match state::uninstall_command(p, &inv) {
+                Some(cmd) => {
+                    if !sh(&format!("uninstall {}", p.name), &cmd)? {
+                        failed.push(id.clone());
+                    }
+                }
+                None => ui::warn(&format!(
+                    "{} came from an installer script; remove it by hand",
+                    p.name
+                )),
+            }
+        }
+    }
+    managed.refresh(catalog, &selected, &Inventory::read(), &exclude);
+    managed.save()?;
+    if !failed.is_empty() {
+        bail!(
+            "could not install or remove: {}; retry: dotfiles apply (dotfiles doctor shows the state)",
+            failed.join(", ")
+        );
+    }
+    Ok(())
 }
 
 pub fn diff() -> Result<Outcome> {
@@ -686,13 +863,13 @@ pub fn update_all(ctx: &Ctx) -> Result<Outcome> {
         ui::warn(&format!("CLI update failed: {err:#}"));
         ui::hint("retry later: dotfiles self-update");
     }
-    ui::section("Dotfiles (pull + apply)");
-    if !chezmoi::run(&["update", "--keep-going"])?.success() {
-        bail!(
-            "some steps failed (listed above); everything else was applied. Retry with: dotfiles update"
-        );
+    ui::section("Dotfiles (pull)");
+    if !chezmoi::run(&["update", "--apply=false"])?.success() {
+        ui::warn("could not pull the dotfiles; applying the current checkout");
+        ui::hint("check: git -C \"$(chezmoi source-path)\" status");
     }
-    Ok(Outcome::Done)
+    // A fresh process would load the pulled catalog; this one reads it now.
+    apply(ctx, true, false)
 }
 
 pub fn self_update() -> Result<Outcome> {

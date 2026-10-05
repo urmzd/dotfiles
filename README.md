@@ -76,17 +76,20 @@ dotfiles package setup           # Pending sign-in / interactive installers for 
 dotfiles package update          # brew upgrade + AI CLIs, then apply (or: brew | ai)
 dotfiles identity                # This machine's GitHub identity: gh, SSH + GPG keys, signing check
 dotfiles doctor                  # Health check, each finding with the command that fixes it
-dotfiles apply                   # Show pending changes, confirm, then apply (-y skips confirm)
-dotfiles diff                    # Full diff of pending changes
+dotfiles plan                    # Desired vs installed: migrations, files, packages (+ missing, - deselected)
+dotfiles apply                   # Make the machine match the plan (-y skips confirm, --prune uninstalls deselected)
+dotfiles diff                    # Full diff of pending file changes
 dotfiles config                  # Re-run the setup questions (saved answers kept), then apply
 dotfiles status                  # Machine, packages, pending setup, tool versions
-dotfiles update                  # Update everything: the CLI, then pull the dotfiles and apply
+dotfiles update                  # Update everything: the CLI, pull the dotfiles, then apply
 dotfiles self-update             # Update only the CLI
 dotfiles edit                    # Open the dotfiles source in $EDITOR
 dotfiles clean                   # Prune build artifacts and caches under ~/github
 ```
 
-`dotfiles doctor` checks chezmoi, the catalog and selection, whether the CLI is the latest release, unapplied changes, Python (3.12+, gcloud pinned), that `gh` is signed in as this machine's account, that the commit signing key exists, AI CLIs installed twice (the first on PATH wins), and selected packages that are missing or waiting for sign-in. `--format json` prints the findings for scripts.
+**Desired state, like Terraform.** The desired packages are the selection plus required work pack entries; what is installed is probed fresh every run (Homebrew, npm, uv, the Linux package manager, or a package's `check`), never remembered, so a failed install cannot be marked done. `dotfiles plan` shows the difference, `dotfiles apply` closes it, and `dotfiles update` runs both after pulling. Selection changes that ship in a release (for example, existing machines gaining Claude Code) run as migrations on the next apply instead of waiting for `chezmoi init`. Only packages the CLI has seen installed are offered for `--prune`; software installed by hand is listed, never removed. Ownership lives in `~/.local/state/dotfiles/managed.json`.
+
+`dotfiles doctor` checks chezmoi, the catalog and selection, whether the CLI is the latest release, unapplied changes, Python (3.12+, gcloud pinned), that `gh` is signed in as this machine's account, that the commit signing key exists, AI CLIs installed twice (the first on PATH wins), and the package plan: selected packages that are missing, deselected ones still installed, pending migrations, and pending sign-ins. `--format json` prints the findings for scripts.
 
 ### What's installed
 

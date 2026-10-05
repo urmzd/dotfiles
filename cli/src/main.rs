@@ -3,6 +3,8 @@ mod chezmoi;
 mod commands;
 mod doctor;
 mod identity;
+mod migrate;
+mod state;
 mod ui;
 
 use std::process::ExitCode;
@@ -49,11 +51,20 @@ enum Command {
         #[arg(long)]
         account: Option<String>,
     },
-    /// Show pending changes, confirm, then chezmoi apply
+    /// Make the machine match the desired state: migrations, files, packages
     Apply {
         /// Skip the confirmation
         #[arg(short, long)]
         yes: bool,
+        /// Also uninstall packages deselected since this CLI installed them
+        #[arg(long)]
+        prune: bool,
+    },
+    /// Compare desired and installed state: files, packages, migrations
+    Plan {
+        /// Include uninstalls of deselected packages
+        #[arg(long)]
+        prune: bool,
     },
     /// Show pending changes in full
     Diff,
@@ -190,7 +201,8 @@ fn main() -> ExitCode {
         Command::List(l) => commands::list(&ctx, l.selected),
         Command::Setup(s) => commands::setup(&ctx, s.ids, s.force),
         Command::Identity { account } => identity::run(&ctx, account),
-        Command::Apply { yes } => commands::apply(&ctx, yes),
+        Command::Apply { yes, prune } => commands::apply(&ctx, yes, prune),
+        Command::Plan { prune } => commands::plan(&ctx, prune),
         Command::Diff => commands::diff(),
         Command::Config => commands::config(&ctx),
         Command::Status => commands::status(&ctx),

@@ -31,7 +31,8 @@ Check the CLI first: `command -v dotfiles`. If missing, tell the user to run
 | What is installable, and what is selected | `dotfiles package list --format json` (fields: id, name, category, selected, installs, setup, work_pack, required) |
 | Machine health with fixes | `dotfiles doctor --format json` (fields: check, level ok/warn/fail, detail, fix) |
 | Machine type, versions, selection | `dotfiles status` |
-| What an apply would change | `dotfiles diff` |
+| Desired vs installed (missing, deselected, migrations, files) | `dotfiles plan --format json` (exit 2 = nothing to do) |
+| Full file diff | `dotfiles diff` |
 
 ## Do
 
@@ -40,9 +41,11 @@ Check the CLI first: `command -v dotfiles`. If missing, tell the user to run
 | Install a catalog tool | `dotfiles package add <id>...` (applies; resolve names to ids from the list) |
 | Remove one | `dotfiles package remove <id>...` (add `--uninstall` only if the user wants the software gone, not just deselected) |
 | Fix what doctor reports | run each finding's `fix`, then rerun `dotfiles doctor` |
+| A selected tool is missing | `dotfiles plan`, then `dotfiles apply --yes` (installs are retried every apply; nothing is ever marked done) |
 | Update everything | `dotfiles update` (CLI, then pull dotfiles and apply) |
 | Update installed packages | `dotfiles package update` (`brew` or `ai` to narrow) |
-| Apply pending changes | `dotfiles apply --yes` |
+| Make the machine match the plan | `dotfiles apply --yes` |
+| Also uninstall deselected packages | `dotfiles apply --yes --prune` (only ones the CLI installed; confirm with the user first) |
 
 Exit code 2 means nothing changed, not failure.
 
