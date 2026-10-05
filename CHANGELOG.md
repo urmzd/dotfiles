@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 (2026-10-05)
+
+### Features
+
+- **cli**: group package commands, dotfiles update self-updates, real doctor ([f1ea28b](https://github.com/urmzd/dotfiles/commit/f1ea28b325185db7abfa52b4bc0226149277ebfa))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.8.0...v0.9.0)
+
+
 ## 0.8.0 (2026-10-05)
 
 ### Features
