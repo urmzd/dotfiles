@@ -1,0 +1,3 @@
+# Targets that are no longer managed and should be deleted on apply.
+# .gitconfig-personal: replaced by one identity per machine (2026-10).
+.gitconfig-personal

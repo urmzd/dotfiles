@@ -49,7 +49,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), personal email, machine type (`personal` or `work`), Cortex, package preset, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A work machine also asks for a work email and an optional [work pack](#work-pack) repo; a personal machine asks about secrets management instead. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email and an optional [work pack](#work-pack) repo, and never for personal details. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -126,14 +126,14 @@ Every file is optional, and each hook is a no-op when its file is missing:
 | File | Loaded by |
 | ---- | --------- |
 | `env.zsh` | `~/.zshenv` (all shells, including agent tool calls) |
-| `gitconfig` | `[include]` in `~/.gitconfig`; the dotfiles repo and `~/personal/` still use your personal identity |
+| `gitconfig` | `[include]` in `~/.gitconfig` (company URL rewrites, extra settings) |
 | `ssh_config` | `Include` at the top of `~/.ssh/config` |
 | `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply |
 | `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` |
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
-**Signing keys** stay per context, so one GitHub account can serve both (add the work email to it as a verified address). `chezmoi init` finds each GPG key by email UID: the personal key signs only the dotfiles repo and `~/personal/`; `work_signing_key` signs everything else on a work machine. With no work key, work commits go unsigned rather than borrowing the personal key. Keep the key in your local `chezmoi.toml`, never in the shared work pack.
+**One identity per machine.** A work machine only pulls this repo; edits happen on a personal machine. So a work machine is asked for its work email only, signs with `work_signing_key`, and carries no personal email or key. With no work key, work commits go unsigned rather than borrowing a personal one. One GitHub account can still serve both: add the work email to it as a verified address and upload the work key. `chezmoi init` finds each GPG key by its email, and the key stays in your local `chezmoi.toml`, never in the shared work pack.
 
 ### Chezmoi automation
 

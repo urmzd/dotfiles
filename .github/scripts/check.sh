@@ -23,7 +23,8 @@ for machine in personal work; do
     chezmoi init --config "$work/empty.toml" --source "$src" --config-path "$cfg" \
         --persistent-state "$work/$machine.boltdb" \
         --no-tty --promptDefaults --promptChoice "Machine type=$machine" \
-        --promptString "Personal email (commits in this repo and ~/personal)=ci@example.com"
+        --promptString "Email for git commits=ci@example.com" \
+        --promptString "Work email for git commits=ci@work.example.com"
 
     common=(--config "$cfg" --source "$src" --destination "$work/home-$machine"
             --persistent-state "$work/$machine.boltdb" --no-tty)

@@ -1,9 +1,9 @@
 # Git configuration template
 # Managed by Chezmoi - template adapts to different machines
-{{- /* Default identity: work email + work key on a work machine, personal     */}}
-{{- /* otherwise. The personal key never signs here on a work machine; with    */}}
-{{- /* no work key, work commits go unsigned. ~/.gitconfig-personal restores   */}}
-{{- /* the personal identity and key in its directories.                        */}}
+{{- /* One identity per machine: work email + work key on a work machine,      */}}
+{{- /* personal email + key otherwise. Work machines only pull the dotfiles,   */}}
+{{- /* so they carry no personal identity; with no work key, commits go        */}}
+{{- /* unsigned rather than borrowing a personal key.                          */}}
 {{- $ssh_only := and .is_personal (not .gpg_signing_key) .ssh_signing_key }}
 {{- $signing_key := .gpg_signing_key | default .ssh_signing_key }}
 {{- if .is_work }}
@@ -21,15 +21,6 @@
 # Git silently skips a missing include, so this is a no-op until it exists.
 [include]
     path = ~/.config/work/gitconfig
-
-# Personal identity for the dotfiles repo (and ~/personal on work machines).
-# Comes after the work pack so it wins inside these directories.
-[includeIf "gitdir:~/.local/share/chezmoi/"]
-    path = ~/.gitconfig-personal
-{{- if .is_work }}
-[includeIf "gitdir:~/personal/"]
-    path = ~/.gitconfig-personal
-{{- end }}
 
 [github]
     user = {{ .github_username | quote }}
