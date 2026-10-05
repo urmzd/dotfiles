@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 (2026-10-05)
+
+### Features
+
+- **cli**: let dotfiles identity resolve a gh account mismatch ([a0bfee7](https://github.com/urmzd/dotfiles/commit/a0bfee765f82e8207b27d11e148a7a2ea6b002ad))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.4.1...v0.5.0)
+
+
 ## 0.4.1 (2026-10-05)
 
 ### Bug Fixes
