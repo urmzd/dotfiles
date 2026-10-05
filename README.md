@@ -144,6 +144,8 @@ Every file is optional, and each hook is a no-op when its file is missing:
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
+**Signing keys** stay per context, so one GitHub account can serve both (add the work email to it as a verified address). `chezmoi init` finds each GPG key by email UID: the personal key signs only the dotfiles repo and `~/personal/`; `work_signing_key` signs everything else on a work machine. With no work key, work commits go unsigned rather than borrowing the personal key. Keep the key in your local `chezmoi.toml`, never in the shared work pack.
+
 ### Chezmoi automation
 
 These scripts run automatically on `chezmoi apply`:

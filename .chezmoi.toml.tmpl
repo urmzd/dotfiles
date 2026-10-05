@@ -24,16 +24,18 @@
 {{-   end -}}
 {{- end -}}
 
-{{- /* GPG key: first secret key's fingerprint, prompted only if none exists. */}}
+{{- /* GPG keys are matched by email UID: personal key <- personal email,     */}}
+{{- /* work key <- work email. Prompted only when no matching key exists.      */}}
+{{- $has_gpg := lookPath "gpg" -}}
 {{- $gpg_signing_key := "" -}}
 {{- if hasKey . "gpg_signing_key" -}}
 {{-   $gpg_signing_key = .gpg_signing_key -}}
 {{- else -}}
-{{-   if lookPath "gpg" -}}
-{{-     $gpg_signing_key = output "gpg" "--list-secret-keys" "--with-colons" | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
+{{-   if $has_gpg -}}
+{{-     $gpg_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
 {{-   end -}}
 {{-   if not $gpg_signing_key -}}
-{{-     $gpg_signing_key = promptString "GPG signing key ID (optional)" "" -}}
+{{-     $gpg_signing_key = promptString "Personal GPG signing key ID (optional)" "" -}}
 {{-   end -}}
 {{- end -}}
 {{- /* SSH signing is never prompted; set ssh_signing_key in chezmoi.toml to use it. */}}
@@ -54,9 +56,20 @@
 
 {{- $work_email := $email -}}
 {{- $work_pack_repo := "" -}}
+{{- $work_signing_key := "" -}}
 {{- $use_secrets := false -}}
 {{- if $is_work -}}
 {{-   $work_email = promptStringOnce . "work_email" "Work email (default for every repo outside ~/personal)" $email -}}
+{{-   if hasKey . "work_signing_key" -}}
+{{-     $work_signing_key = .work_signing_key -}}
+{{-   else -}}
+{{-     if $has_gpg -}}
+{{-       $work_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $work_email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
+{{-     end -}}
+{{-     if not $work_signing_key -}}
+{{-       $work_signing_key = promptString "Work GPG signing key ID; your personal key is never used for work (optional)" "" -}}
+{{-     end -}}
+{{-   end -}}
 {{-   $work_pack_repo = promptStringOnce . "work_pack_repo" "Work pack git URL to clone into ~/.config/work (optional)" "" -}}
 {{- else -}}
 {{-   $use_secrets = promptBoolOnce . "use_secrets" "Use age encryption + 1Password CLI for secrets (y/n)" false -}}
@@ -97,6 +110,8 @@ encryption = "age"
     github_username = {{ $github_username | quote }}
     gpg_signing_key = {{ $gpg_signing_key | quote }}
     ssh_signing_key = {{ $ssh_signing_key | quote }}
+    # Signs default (work) repos on a work machine; the personal key never does.
+    work_signing_key = {{ $work_signing_key | quote }}
 
     # Machine type: "personal" or "work". is_personal/is_work are derived.
     machine = {{ $machine | quote }}
