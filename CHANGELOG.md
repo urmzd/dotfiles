@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 (2026-10-05)
+
+### Features
+
+- **cli**: desired-state package management: dotfiles plan, converging apply, --prune, release migrations ([dc7192f](https://github.com/urmzd/dotfiles/commit/dc7192fe202e3100755831a1004ba77dcfbfdb58))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.11.2...v0.12.0)
+
+
 ## 0.11.2 (2026-10-05)
 
 ### Bug Fixes
