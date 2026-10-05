@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 (2026-10-05)
+
+### Features
+
+- **agents**: make AI coding CLIs selectable catalog packages ([1fa45eb](https://github.com/urmzd/dotfiles/commit/1fa45eb984aa9fda4518b8bc340f6ddf7d095e88))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.7.0...v0.8.0)
+
+
 ## 0.7.0 (2026-10-05)
 
 ### Features
