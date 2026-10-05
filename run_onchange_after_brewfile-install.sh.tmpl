@@ -93,6 +93,18 @@ if grep -q '"hashicorp/tap/terraform"' "$RUN_BREWFILE"; then
     fi
 fi
 
+# --- one-time migration: temporal-cloud moved from temporalio/prerelease to
+# temporalio/brew (2026-10). Homebrew refuses one formula name from two taps,
+# so remove the old keg and tap; brew bundle then installs the new one.
+if grep -q '"temporalio/brew/temporal-cloud"' "$RUN_BREWFILE"; then
+    tc_receipt="$(brew --prefix)/opt/temporal-cloud/INSTALL_RECEIPT.json"
+    if [ -f "$tc_receipt" ] && grep -Eq '"tap":[[:space:]]*"temporalio/prerelease"' "$tc_receipt"; then
+        ui_step "migrating temporal-cloud: temporalio/prerelease -> temporalio/brew"
+        brew uninstall temporal-cloud >/dev/null 2>&1 || ui_warn "could not uninstall the prerelease temporal-cloud"
+        brew untap temporalio/prerelease >/dev/null 2>&1 || true
+    fi
+fi
+
 # brew bundle already attempts every entry and installs whatever it can, even
 # when some fail; it just exits non-zero afterwards. We capture that and decide.
 # Satisfied entries ("Using <pkg>") stay in the log only; the terminal shows
@@ -125,7 +137,7 @@ fi
 ui_fail "these packages did not install:"
 
 failed_pkgs="$({
-    grep -Eo 'Installing [^ ]+ has failed' "$LOG" | awk '{print $2}'
+    grep -Eo '(Installing|Upgrading) [^ ]+ has failed' "$LOG" | awk '{print $2}'
     grep -Eo 'No available (formula|cask)[a-z ]* with the name "[^"]+"' "$LOG" | sed 's/.*"\(.*\)"/\1/'
 } | sort -u)"
 if [ -n "$failed_pkgs" ]; then
