@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.2 (2026-10-05)
+
+### Bug Fixes
+
+- **python**: re-check the default Python on every apply so a failed first install heals ([18c5ee2](https://github.com/urmzd/dotfiles/commit/18c5ee2e485dca21f5ec17aaec73262daad0dea3))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.9.1...v0.9.2)
+
+
 ## 0.9.1 (2026-10-05)
 
 ### Bug Fixes
