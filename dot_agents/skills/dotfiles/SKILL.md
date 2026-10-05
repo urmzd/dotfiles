@@ -84,3 +84,5 @@ After editing a local skill or agent:
 - Do not hard-code one user's source path in reusable docs. Use `chezmoi source-path`.
 - When a new skill exists in `dot_agents/skills/` but appears unmanaged, adopt it with `agentspec manage add <name> --all-tools`.
 - Use `private_` for sensitive configs. Do not manage SSH keys, API keys, or tokens in chezmoi.
+- When `diff.command` is an editor such as `nvim`, `chezmoi diff` hangs without a TTY (agents, CI, captured output). Pass `--use-builtin-diff`.
+- On a fresh Mac, `#!/usr/bin/env bash` scripts run under `/bin/bash` 3.2 until Homebrew installs bash 5. Check rendered scripts with `/bin/bash -n`; 3.2 misparses a heredoc inside `$(...)` when the text contains parentheses.
