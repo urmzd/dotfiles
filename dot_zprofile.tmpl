@@ -19,6 +19,12 @@ fi
 
 {{- end }}
 
+# Default Python ahead of Homebrew's python3 (Homebrew is prepended above).
+if [ -x "$HOME/.local/share/dotfiles/python/bin/python3" ]; then
+    export PATH="$HOME/.local/share/dotfiles/python/bin:$PATH"
+fi
+
+
 # Add user's private bin to PATH if it exists
 if [ -d "$HOME/bin" ]; then
     export PATH="$HOME/bin:$PATH"

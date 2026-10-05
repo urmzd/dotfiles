@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Default Python: a uv-managed CPython, linked into one stable folder that
+# zsh puts first on PATH (~/.zshenv, ~/.zprofile) and gcloud uses through
+# CLOUDSDK_PYTHON. Without it, `python3` is whatever comes first on PATH:
+# macOS's /usr/bin/python3 (3.9) on a machine without Homebrew's Python,
+# which breaks gcloud components; or a Homebrew python@3.x pulled in as a
+# dependency, newer than gcloud supports.
+#
+# Bump PYTHON_VERSION to change the default; this script re-runs when it does.
+# Runs before files are applied, after install-packages-v2 installs uv.
+set -u
+{{ includeTemplate "ui.sh" . }}
+
+PYTHON_VERSION="3.12"
+LINK_DIR="$HOME/.local/share/dotfiles/python/bin"
+
+uv_bin="$(command -v uv 2>/dev/null || true)"
+[ -n "$uv_bin" ] || [ ! -x "$HOME/.local/bin/uv" ] || uv_bin="$HOME/.local/bin/uv"
+if [ -z "$uv_bin" ]; then
+    ui_section "Python $PYTHON_VERSION"
+    ui_warn "uv is not installed yet; the default Python is set on the next apply"
+    exit 0
+fi
+
+ui_section "Python $PYTHON_VERSION (default, via uv)"
+if ! "$uv_bin" python install "$PYTHON_VERSION" >/dev/null 2>&1; then
+    ui_warn "uv could not install Python $PYTHON_VERSION; python3 stays whatever PATH finds"
+    ui_hint "retry: chezmoi apply (or: uv python install $PYTHON_VERSION)"
+    exit 0
+fi
+interpreter="$("$uv_bin" python find --managed-python "$PYTHON_VERSION" 2>/dev/null || "$uv_bin" python find "$PYTHON_VERSION")"
+
+mkdir -p "$LINK_DIR"
+for name in python python3 "python$PYTHON_VERSION"; do
+    ln -sfn "$interpreter" "$LINK_DIR/$name"
+done
+ui_ok "python3 -> $("$LINK_DIR/python3" --version 2>&1) ($interpreter)"

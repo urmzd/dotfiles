@@ -71,44 +71,13 @@ main() {
 
     echo "Installed dotfiles to $install_dir/dotfiles"
 
+    # Never edit shell startup files: the dotfiles manage PATH (~/.local/bin is
+    # on it), and an edit behind chezmoi's back makes `chezmoi apply` stop to
+    # ask about ~/.zshrc. Just say what to add.
     case ":$PATH:" in
         *":$install_dir:"*) ;;
-        *) add_to_path "$install_dir" ;;
+        *) echo "Note: $install_dir is not on PATH; add it to use \`dotfiles\` by name." ;;
     esac
-}
-
-add_to_path() {
-    install_dir="$1"
-
-    case "$(basename "$SHELL")" in
-        zsh)  profile="$HOME/.zshrc" ;;
-        bash)
-            if [ -f "$HOME/.bashrc" ]; then
-                profile="$HOME/.bashrc"
-            else
-                profile="$HOME/.profile"
-            fi
-            ;;
-        fish) profile="$HOME/.config/fish/config.fish" ;;
-        *)    profile="$HOME/.profile" ;;
-    esac
-
-    if [ "$(basename "$SHELL")" = "fish" ]; then
-        if ! grep -q "$install_dir" "$profile" 2>/dev/null; then
-            mkdir -p "$(dirname "$profile")"
-            echo "" >> "$profile"
-            echo "# Added by the dotfiles CLI installer" >> "$profile"
-            echo "set -Ux fish_user_paths $install_dir \$fish_user_paths" >> "$profile"
-            echo "Added $install_dir to $profile"
-            echo "Restart your shell or run: source $profile"
-        fi
-    elif [ -n "$profile" ] && ! grep -q "$install_dir" "$profile" 2>/dev/null; then
-        echo "" >> "$profile"
-        echo "# Added by the dotfiles CLI installer" >> "$profile"
-        echo "export PATH=\"$install_dir:\$PATH\"" >> "$profile"
-        echo "Added $install_dir to $profile"
-        echo "Restart your shell or run: source $profile"
-    fi
 }
 
 # Download the binary for $1 into $2, verified against the release's .sha256

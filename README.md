@@ -89,6 +89,8 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 
 **Version managers** (per-language, best-in-class): fnm (Node), uv (Python), rustup (Rust).
 
+**Default Python** is a uv-managed CPython 3.12 ([`run_onchange_before_install-python.sh.tmpl`](run_onchange_before_install-python.sh.tmpl)): `python`/`python3` link to it from `~/.local/share/dotfiles/python/bin`, which zsh puts ahead of Homebrew and `/usr/bin`, and gcloud uses it through `CLOUDSDK_PYTHON`. Without it, `python3` falls back to macOS's 3.9 (which breaks gcloud components) or to whatever `python@3.x` Homebrew pulled in. Bump `PYTHON_VERSION` in that script to change it.
+
 **Upstream-pinned installers** (security/auth fixes ship faster than distro repos):
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)

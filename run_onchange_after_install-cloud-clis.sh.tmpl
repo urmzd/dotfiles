@@ -63,6 +63,11 @@ else
     mv "$gcloud_tmp/google-cloud-sdk" "$GCLOUD_HOME"
 
     # Run installer without touching rc files. The dotfiles own PATH/completion wiring.
+    # Run the installer on the default Python (run_onchange_before_install-python),
+    # never macOS's 3.9.
+    if [ -x "$HOME/.local/share/dotfiles/python/bin/python3" ]; then
+        export CLOUDSDK_PYTHON="$HOME/.local/share/dotfiles/python/bin/python3"
+    fi
     "${GCLOUD_HOME}/install.sh" \
         --quiet \
         --usage-reporting=false \
