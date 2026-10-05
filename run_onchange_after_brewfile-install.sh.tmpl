@@ -119,6 +119,13 @@ run_bundle() {
 
 ui_run "refreshed the Homebrew index" brew update --quiet || true
 
+# npm entries install with whatever `npm` is on PATH. Node comes from fnm, so
+# activate its default version: globals land where `npm -g` puts them in an
+# interactive shell. uv entries use `uv tool install`, already on PATH.
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --shell bash 2>/dev/null)" && fnm use default >/dev/null 2>&1 || true
+fi
+
 ui_step "brew bundle (only changes are shown)"
 if run_bundle; then
     ui_ok "all Brewfile packages installed"

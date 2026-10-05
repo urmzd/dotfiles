@@ -33,6 +33,12 @@ pub struct Package {
     pub dnf: Vec<String>,
     #[serde(default)]
     pub pacman: Vec<String>,
+    /// Node CLIs, `npm -g` into fnm's default Node.
+    #[serde(default)]
+    pub npm: Vec<String>,
+    /// Python CLIs, `uv tool install`.
+    #[serde(default)]
+    pub uv: Vec<String>,
     /// Interactive commands (sign-in, TTY installers) run by `dotfiles setup`.
     #[serde(default)]
     pub setup: Vec<String>,
@@ -47,22 +53,26 @@ pub struct Package {
 
 impl Package {
     /// What installs on this platform, for display: Homebrew formulae and
-    /// casks on macOS, otherwise every Linux package name the entry lists.
+    /// casks on macOS, otherwise every Linux package name the entry lists,
+    /// plus npm and uv tools on both.
     pub fn installs(&self) -> Vec<String> {
-        if cfg!(target_os = "macos") {
+        let mut names: Vec<String> = if cfg!(target_os = "macos") {
             self.brew.iter().chain(&self.cask).cloned().collect()
         } else {
-            let mut names: Vec<String> = self
+            let mut linux: Vec<String> = self
                 .apt
                 .iter()
                 .chain(&self.dnf)
                 .chain(&self.pacman)
                 .cloned()
                 .collect();
-            names.sort();
-            names.dedup();
-            names
-        }
+            linux.sort();
+            linux.dedup();
+            linux
+        };
+        names.extend(self.npm.iter().map(|p| format!("{p} (npm)")));
+        names.extend(self.uv.iter().map(|p| format!("{p} (uv)")));
+        names
     }
 }
 
@@ -146,6 +156,7 @@ adopt = true
         )
         .unwrap();
         let p = c.get("k8s").unwrap();
+        assert!(p.npm.is_empty() && p.uv.is_empty());
         assert_eq!(p.apt, vec!["kubectl", "helm"]);
         if !cfg!(target_os = "macos") {
             assert_eq!(p.installs(), vec!["helm", "kubectl"]);

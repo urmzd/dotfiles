@@ -91,7 +91,23 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 - gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
-**Optional packages** live in [`catalog.toml`](catalog.toml): Docker, Kubernetes, Terraform, RunPod, Temporal, Zig, Scala, mise, Android, CocoaPods, Nerd Fonts, Obsidian, Notion, Linear, Cursor, the Atlassian CLI (`acli`), and the Teamwork Graph CLI (`twg`). Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
+**Optional packages** live in [`catalog.toml`](catalog.toml), grouped by category:
+
+| Category | Packages |
+| -------- | -------- |
+| cloud | Docker + Colima, Kubernetes (kubectl, helm, k9s), Terraform, RunPod, Temporal |
+| languages | Zig, Scala (scala-cli + coursier), mise |
+| mobile | Android Studio + SDK, CocoaPods |
+| fonts | Nerd Fonts (MonaspiceNe, Iosevka) |
+| notes | Obsidian, Notion, Granola, Mintlify CLI (`mint`) |
+| editors | Cursor, Visual Studio Code |
+| chat | Slack, Discord, Zoom |
+| productivity | 1Password, Raycast, Linear, Figma |
+| ai | Claude, ChatGPT (desktop apps) |
+| media | Spotify |
+| work | Atlassian CLI (`acli`), Teamwork Graph CLI (`twg`) |
+
+Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
 
 On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev) seeds the selection from each entry's `presets`. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI release is needed.
 

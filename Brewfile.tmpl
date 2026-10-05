@@ -63,7 +63,7 @@ brew "gettext"  # GNU internationalization and localization support
 # Optional packages selected from catalog.toml
 {{- $selected := get . "packages" | default list }}
 {{- range (include "catalog.toml" | fromToml).package }}
-{{-   if and (has .id $selected) (or (get . "brew") (get . "cask")) }}
+{{-   if and (has .id $selected) (or (get . "brew") (get . "cask") (get . "npm") (get . "uv")) }}
 
 # {{ .name }} ({{ .id }}): {{ .description }}
 {{-     range (get . "tap" | default list) }}
@@ -75,6 +75,12 @@ brew {{ . | quote }}
 {{-     $adopt := get . "adopt" }}
 {{-     range (get . "cask" | default list) }}
 cask {{ . | quote }}{{ if $adopt }}, args: { adopt: true }{{ end }}
+{{-     end }}
+{{-     range (get . "npm" | default list) }}
+npm {{ . | quote }}
+{{-     end }}
+{{-     range (get . "uv" | default list) }}
+uv {{ . | quote }}
 {{-     end }}
 {{-   end }}
 {{- end }}

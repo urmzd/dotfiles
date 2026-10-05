@@ -10,17 +10,40 @@ set -uo pipefail
 ui_section "Optional packages (catalog)"
 
 {{- $selected := get . "packages" | default list }}
-{{- $apt := list }}{{ $dnf := list }}{{ $pacman := list }}
+{{- $apt := list }}{{ $dnf := list }}{{ $pacman := list }}{{ $npm := list }}{{ $uv := list }}
 {{- range (include "catalog.toml" | fromToml).package }}
 {{-   if has .id $selected }}
 {{-     $apt = concat $apt (get . "apt" | default list) }}
 {{-     $dnf = concat $dnf (get . "dnf" | default list) }}
 {{-     $pacman = concat $pacman (get . "pacman" | default list) }}
+{{-     $npm = concat $npm (get . "npm" | default list) }}
+{{-     $uv = concat $uv (get . "uv" | default list) }}
 {{-   end }}
 {{- end }}
 apt_pkgs=({{ range $apt }}{{ . | quote }} {{ end }})
 dnf_pkgs=({{ range $dnf }}{{ . | quote }} {{ end }})
 pacman_pkgs=({{ range $pacman }}{{ . | quote }} {{ end }})
+npm_pkgs=({{ range $npm }}{{ . | quote }} {{ end }})
+uv_pkgs=({{ range $uv }}{{ . | quote }} {{ end }})
+
+# Node and Python CLIs: npm -g into fnm's default Node, uv tool install.
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --shell bash 2>/dev/null)" && fnm use default >/dev/null 2>&1 || true
+fi
+for pkg in ${npm_pkgs[@]+"${npm_pkgs[@]}"}; do
+    if npm list -g "$pkg" >/dev/null 2>&1; then
+        ui_skip "$pkg already installed (npm)"
+    else
+        ui_run "installed $pkg (npm)" npm install -g "$pkg" || true
+    fi
+done
+for pkg in ${uv_pkgs[@]+"${uv_pkgs[@]}"}; do
+    if uv tool list 2>/dev/null | grep -q "^$pkg "; then
+        ui_skip "$pkg already installed (uv)"
+    else
+        ui_run "installed $pkg (uv)" uv tool install "$pkg" || true
+    fi
+done
 
 if command -v apt-get >/dev/null 2>&1; then
     manager=apt; pkgs=(${apt_pkgs[@]+"${apt_pkgs[@]}"})

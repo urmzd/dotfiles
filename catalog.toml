@@ -9,6 +9,8 @@
 # Fields (only id, name, description, category are required):
 #   tap, brew, cask   Homebrew entries (macOS). `adopt = true` lets a cask take
 #                     over an app installed by hand.
+#   npm, uv           Node CLIs (npm -g into fnm's default Node) and Python CLIs
+#                     (uv tool install). Same on macOS (via brew bundle) and Linux.
 #   apt, dnf, pacman  Linux package names; run_onchange_after_install-catalog-linux
 #                     installs them. A package with none is macOS-only (setup
 #                     steps still run anywhere).
@@ -134,14 +136,14 @@ category = "fonts"
 cask = ["font-monaspice-nerd-font", "font-iosevka-nerd-font"]
 presets = ["standard", "full"]
 
-# ---- Apps -------------------------------------------------------------------
+# ---- Notes and docs ---------------------------------------------------------
 
 [[package]]
 id = "obsidian"
 name = "Obsidian"
 # The cask also links obsidian-cli to $(brew --prefix)/bin/obsidian.
 description = "Markdown notes app"
-category = "apps"
+category = "notes"
 cask = ["obsidian"]
 adopt = true
 presets = ["minimal", "standard", "full"]
@@ -151,24 +153,133 @@ machines = ["personal"]
 id = "notion"
 name = "Notion"
 description = "Docs and wiki workspace app"
-category = "apps"
+category = "notes"
 cask = ["notion"]
+adopt = true
+
+[[package]]
+id = "granola"
+name = "Granola"
+description = "AI meeting notes from your calls"
+category = "notes"
+cask = ["granola"]
+adopt = true
+
+[[package]]
+id = "mintlify"
+name = "Mintlify CLI"
+# npm package "mint" (formerly "mintlify"); installed into fnm's default Node
+# by brew bundle, like other npm globals.
+description = "mint: preview, check, and build Mintlify docs sites"
+category = "notes"
+npm = ["mint"]
+
+# ---- Editors ------------------------------------------------------------------
+
+[[package]]
+id = "cursor"
+name = "Cursor"
+description = "AI code editor (VS Code based)"
+category = "editors"
+cask = ["cursor"]
+adopt = true
+
+[[package]]
+id = "vscode"
+name = "Visual Studio Code"
+description = "Microsoft's code editor"
+category = "editors"
+cask = ["visual-studio-code"]
+adopt = true
+
+# ---- Communication ----------------------------------------------------------
+
+[[package]]
+id = "slack"
+name = "Slack"
+description = "Team chat"
+category = "chat"
+cask = ["slack"]
+adopt = true
+
+[[package]]
+id = "discord"
+name = "Discord"
+description = "Community voice and text chat"
+category = "chat"
+cask = ["discord"]
+adopt = true
+
+[[package]]
+id = "zoom"
+name = "Zoom"
+description = "Video meetings"
+category = "chat"
+cask = ["zoom"]
+adopt = true
+
+# ---- Productivity -------------------------------------------------------------
+
+[[package]]
+id = "1password"
+name = "1Password"
+# Desktop app. The `op` CLI comes with use_secrets; the app adds biometric
+# unlock for it.
+description = "Password manager desktop app"
+category = "productivity"
+cask = ["1password"]
+adopt = true
+
+[[package]]
+id = "raycast"
+name = "Raycast"
+description = "Launcher and command palette (Spotlight replacement)"
+category = "productivity"
+cask = ["raycast"]
 adopt = true
 
 [[package]]
 id = "linear"
 name = "Linear"
 description = "Linear issue tracker desktop app"
-category = "apps"
+category = "productivity"
 cask = ["linear"]
 adopt = true
 
 [[package]]
-id = "cursor"
-name = "Cursor"
-description = "AI code editor (VS Code based)"
-category = "apps"
-cask = ["cursor"]
+id = "figma"
+name = "Figma"
+description = "Design and prototyping desktop app"
+category = "productivity"
+cask = ["figma"]
+adopt = true
+
+# ---- AI apps ------------------------------------------------------------------
+
+[[package]]
+id = "claude-desktop"
+name = "Claude"
+description = "Anthropic's Claude desktop app"
+category = "ai"
+cask = ["claude"]
+adopt = true
+
+[[package]]
+id = "chatgpt"
+name = "ChatGPT"
+description = "OpenAI's ChatGPT desktop app (also hosts Codex computer use)"
+category = "ai"
+cask = ["chatgpt"]
+adopt = true
+
+# ---- Media --------------------------------------------------------------------
+
+[[package]]
+id = "spotify"
+name = "Spotify"
+description = "Music streaming"
+category = "media"
+cask = ["spotify"]
 adopt = true
 
 # ---- Work tools -------------------------------------------------------------
