@@ -63,6 +63,7 @@ The `guardian` subagent and the `orchestrate-agents` skill are designed to work 
 
 - Shell scripts: POSIX-compatible where possible, bash/zsh when needed
 - Templates: Use `{{ .chezmoi.os }}` guards for platform-specific blocks
+- Script output: every `run_` script includes `{{ includeTemplate "ui.sh" . }}` and prints only through its `ui_*` helpers (one `ui_section`, quiet when nothing changed, a `ui_hint` with the next step under every warning or failure). No raw `echo` status lines or emoji.
 
 ## Testing
 

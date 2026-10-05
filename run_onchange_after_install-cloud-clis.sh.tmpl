@@ -6,6 +6,9 @@
 # repos package them. Same approach as run_onchange_after_install-cortex.sh.tmpl.
 #
 set -euo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "Cloud CLIs"
+trap 'ui_fail "stopped at line $LINENO"; ui_hint "fix the cause, then rerun: chezmoi apply"' ERR
 
 # Version pins: bump these to upgrade. Chezmoi re-runs this script whenever
 # its content hash changes, so editing either value triggers a re-install.
@@ -46,9 +49,9 @@ if [[ -x "${GCLOUD_HOME}/bin/gcloud" ]]; then
 fi
 
 if [[ "${installed_gcloud}" == "${GCLOUD_VERSION}" ]]; then
-    echo "[OK] gcloud ${GCLOUD_VERSION} already installed at ${GCLOUD_HOME}"
+    ui_skip "gcloud ${GCLOUD_VERSION} already installed"
 else
-    echo "[..] Installing gcloud ${GCLOUD_VERSION} (was: ${installed_gcloud:-none})"
+    ui_step "installing gcloud ${GCLOUD_VERSION} (was: ${installed_gcloud:-none})"
     gcloud_tmp="$WORKDIR/gcloud"
     mkdir -p "$gcloud_tmp"
     curl -fsSL "$GCLOUD_URL" -o "$gcloud_tmp/$GCLOUD_ARCHIVE"
@@ -66,7 +69,7 @@ else
         --command-completion=false \
         --install-python=false \
         >/dev/null
-    echo "[OK] Installed gcloud ${GCLOUD_VERSION}"
+    ui_ok "installed gcloud ${GCLOUD_VERSION}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -78,9 +81,9 @@ if [[ -x "${AWS_HOME}/aws" ]]; then
 fi
 
 if [[ "${installed_aws}" == "${AWS_CLI_VERSION}" ]]; then
-    echo "[OK] aws-cli ${AWS_CLI_VERSION} already installed at ${AWS_HOME}"
+    ui_skip "aws-cli ${AWS_CLI_VERSION} already installed"
 else
-    echo "[..] Installing aws-cli ${AWS_CLI_VERSION} (was: ${installed_aws:-none})"
+    ui_step "installing aws-cli ${AWS_CLI_VERSION} (was: ${installed_aws:-none})"
     aws_tmp="$WORKDIR/aws"
     mkdir -p "$aws_tmp"
 
@@ -130,5 +133,5 @@ EOF
     ln -sf "${AWS_HOME}/aws" "${LOCAL_BIN}/aws"
     ln -sf "${AWS_HOME}/aws_completer" "${LOCAL_BIN}/aws_completer"
 {{- end }}
-    echo "[OK] Installed aws-cli ${AWS_CLI_VERSION}"
+    ui_ok "installed aws-cli ${AWS_CLI_VERSION}"
 fi

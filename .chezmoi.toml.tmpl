@@ -78,25 +78,25 @@
 {{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" false -}}
 
 {{- /* ---- Packages ------------------------------------------------------- */}}
-{{- /* The preset decides the groups. Opt-in extras sit off the ladder (heavy, */}}
-{{- /* rarely used) and pkg_exclude drops single packages by name.             */}}
+{{- /* The preset seeds the group flags on first init only. After that the     */}}
+{{- /* saved flags win, so `dotfiles update groups` edits survive re-init.     */}}
 {{- $preset := promptChoiceOnce . "package_preset" "Package preset (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
-{{- $install_cloud := ne $preset "minimal" -}}
-{{- $install_fonts := ne $preset "minimal" -}}
-{{- $install_mobile := eq $preset "full" -}}
-
-{{- $pkg_extras := "" -}}
-{{- if hasKey . "pkg_extras" -}}
-{{-   $pkg_extras = .pkg_extras -}}
-{{- else if or (hasKey . "install_alt_langs") (hasKey . "install_temporal") -}}
-{{-   $legacy := list -}}
-{{-   if get . "install_alt_langs" }}{{ $legacy = append $legacy "alt-langs" }}{{ end -}}
-{{-   if get . "install_temporal" }}{{ $legacy = append $legacy "temporal" }}{{ end -}}
-{{-   $pkg_extras = join "," $legacy -}}
-{{- else -}}
-{{-   $pkg_extras = promptString "Extra package groups; separate with commas (optional; alt-langs: mise/scala-cli/zig; temporal: Temporal CLI)" "" -}}
+{{- $groups := dict "install_cloud" (ne $preset "minimal") "install_fonts" (ne $preset "minimal") "install_mobile" (eq $preset "full") -}}
+{{- range $key, $_ := $groups -}}
+{{-   if hasKey $ $key }}{{ $_ := set $groups $key (index $ $key) }}{{ end -}}
 {{- end -}}
-{{- $extras := splitList "," (nospace $pkg_extras) -}}
+
+{{- /* Off-ladder extras (heavy, rarely used): one question on first init.    */}}
+{{- $install_alt_langs := false -}}
+{{- $install_temporal := false -}}
+{{- if or (hasKey . "install_alt_langs") (hasKey . "install_temporal") -}}
+{{-   $install_alt_langs = get . "install_alt_langs" | default false -}}
+{{-   $install_temporal = get . "install_temporal" | default false -}}
+{{- else -}}
+{{-   $extras := promptString "Extra package groups; separate with commas (optional; alt-langs: mise/scala-cli/zig; temporal: Temporal CLI)" "" | nospace | splitList "," -}}
+{{-   $install_alt_langs = has "alt-langs" $extras -}}
+{{-   $install_temporal = has "temporal" $extras -}}
+{{- end -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name; separate with commas (optional; e.g. k9s)" "" -}}
 
 {{- if $use_secrets }}
@@ -124,14 +124,13 @@ encryption = "age"
     use_secrets = {{ $use_secrets }}
     install_cortex = {{ $install_cortex }}
 
-    # Package selection: preset -> groups, plus opt-in extras and excludes
+    # Package selection: preset seeds the groups on first init; edit freely after
     package_preset = {{ $preset | quote }}
-    install_cloud = {{ $install_cloud }}
-    install_fonts = {{ $install_fonts }}
-    install_mobile = {{ $install_mobile }}
-    pkg_extras = {{ $pkg_extras | quote }}
-    install_alt_langs = {{ has "alt-langs" $extras }}
-    install_temporal = {{ has "temporal" $extras }}
+    install_cloud = {{ $groups.install_cloud }}
+    install_fonts = {{ $groups.install_fonts }}
+    install_mobile = {{ $groups.install_mobile }}
+    install_alt_langs = {{ $install_alt_langs }}
+    install_temporal = {{ $install_temporal }}
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection

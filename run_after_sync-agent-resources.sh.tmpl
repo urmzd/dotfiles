@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 # Keep local agent skills and agents managed after every chezmoi apply.
+# Runs on every apply, so it prints one summary line, not agentspec's full report.
 set -euo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "Agent resources"
 
 if ! command -v agentspec >/dev/null 2>&1; then
-    echo "agentspec not found; skipping local agent resource sync."
+    ui_skip "agentspec not installed; skipping sync"
     exit 0
 fi
 
-echo "Syncing local agent resources..."
-agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents"
+ui_run "registered dotfiles skills and agents" agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" || true
 
 if command -v jq >/dev/null 2>&1; then
     tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"
-    trap 'rm -f "$tmp_status" "$tmp_status.source" "$tmp_status.unmanaged"' EXIT
+    trap 'rm -f "$tmp_status" "$tmp_status.source" "$tmp_status.unmanaged" "$tmp_status.sync"' EXIT
 
     agentspec --format json status >"$tmp_status"
     {
@@ -28,14 +30,26 @@ if command -v jq >/dev/null 2>&1; then
     comm -12 "$tmp_status.source" "$tmp_status.unmanaged" |
         while IFS="$(printf '\t')" read -r _kind name; do
             [ -n "$name" ] || continue
-            agentspec manage add "$name"
+            agentspec manage add "$name" >/dev/null 2>&1 && ui_ok "adopted $name" || ui_warn "could not adopt $name"
         done
 
     cut -f2 "$tmp_status.source" |
         while IFS= read -r name; do
             [ -n "$name" ] || continue
-            agentspec manage verify --accept --name "$name" >/dev/null || true
+            agentspec manage verify --accept --name "$name" >/dev/null 2>&1 || true
         done
-fi
 
-agentspec sync --fast
+    if agentspec --format json sync --fast >"$tmp_status.sync" 2>/dev/null; then
+        read -r managed linked issues < <(jq -r '"\(.managed) \(.links_created + .links_reconciled) \(.integrity_issues)"' "$tmp_status.sync")
+        ui_ok "synced: ${managed} managed, ${linked} links updated"
+        if [ "${issues:-0}" -gt 0 ]; then
+            ui_warn "${issues} integrity issues outside the dotfiles"
+            ui_hint "inspect: agentspec status"
+        fi
+    else
+        ui_fail "agentspec sync failed"
+        ui_hint "rerun for details: agentspec sync --fast"
+    fi
+else
+    ui_run "synced" agentspec sync --fast || true
+fi

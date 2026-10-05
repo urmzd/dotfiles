@@ -93,22 +93,22 @@ Run `dotfiles config` after pulling changes that add new prompts (like the packa
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 - gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
-**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which decides the groups below. `pkg_extras` opts into off-ladder groups, and `pkg_exclude` drops individual packages by name.
+**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which seeds the group flags below on first init. After that the saved flags win, so `dotfiles update groups` edits survive a re-init. `pkg_exclude` drops individual packages by name.
 
-| Setting | Covers | Value |
-| ------- | ------ | ----- |
+| Flag | Covers | Seeded by preset |
+| ---- | ------ | ---------------- |
 | `install_cloud` | docker, colima, kubectl, helm, k9s, terraform, runpodctl | off on `minimal`, on otherwise |
 | `install_fonts` | Monaspace + Iosevka Nerd Fonts | off on `minimal`, on otherwise |
 | `install_mobile` | Android Studio + SDK command-line tools + CocoaPods | on only for `full` |
-| `pkg_extras` = `alt-langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
-| `pkg_extras` = `temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
+| `install_alt_langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
+| `install_temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
 | `pkg_exclude` | comma-separated formula/cask names to skip (for example `k9s,deno`) | empty |
 
 The two extras sit off the preset ladder on purpose, including `full`. Both are heavy (llvm alone, pulled in by zig, is over a gigabyte; Temporal is roughly 153 MB) and neither is something this setup reaches for by default, so they have to be asked for by name.
 
 Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (Homebrew cask on macOS, npm on Linux; workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh`](run_once_after_install-opencode.sh), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (Homebrew cask on macOS, npm on Linux; workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh.tmpl`](run_once_after_install-opencode.sh.tmpl), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
 
 ### Adding a new tool
 

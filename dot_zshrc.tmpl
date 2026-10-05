@@ -87,6 +87,7 @@ alias vi="nvim"
 alias vim="nvim"
 
 # Dotfiles management
+{{ includeTemplate "ui.sh" . }}
 
 # Set a flat `key = value` under [data] in a chezmoi TOML config, keeping indent.
 _dotfiles_toml_set() {
@@ -102,9 +103,9 @@ _dotfiles_toml_set() {
 _dotfiles_update_groups() {
   local cfg=$1
   command -v fzf >/dev/null && command -v jq >/dev/null || {
-    echo "❌ 'update groups' needs fzf and jq installed."; return 1
+    ui_fail "'update groups' needs fzf and jq"; return 1
   }
-  [ -f "$cfg" ] || { echo "❌ No chezmoi config at $cfg"; return 1; }
+  [ -f "$cfg" ] || { ui_fail "no chezmoi config at $cfg"; ui_hint "run: chezmoi init"; return 1; }
   # Check every key we are about to write, not just install_cloud. A config
   # written before a flag existed is missing only that flag, and
   # _dotfiles_toml_set edits in place: it cannot create a key, so a toggle for
@@ -112,7 +113,7 @@ _dotfiles_update_groups() {
   local k
   for k in install_cloud install_fonts install_mobile install_alt_langs install_temporal pkg_exclude; do
     if ! grep -qE "^[[:space:]]*${k}[[:space:]]*=" "$cfg"; then
-      echo "'${k}' not in config yet; running 'dotfiles config' first..."
+      ui_step "'${k}' not in config yet; running chezmoi init first"
       chezmoi init || return 1
       break
     fi
@@ -150,19 +151,17 @@ _dotfiles_update_groups() {
         [[ ${state[$pick]} == true ]] && state[$pick]=false || state[$pick]=true ;;
       __exclude) vared -p "Exclude (comma-separated): " excl ;;
       __apply) break ;;
-      *) echo "Aborted (no changes)."; return 0 ;;
+      *) ui_skip "cancelled; nothing changed"; return 0 ;;
     esac
   done
-  echo
-  echo "New selection: cloud=${state[cloud]} fonts=${state[fonts]} mobile=${state[mobile]}"
-  echo "               alt_langs=${state[alt_langs]} temporal=${state[temporal]} exclude='${excl}'"
+  ui_ok "cloud=${state[cloud]} fonts=${state[fonts]} mobile=${state[mobile]} alt_langs=${state[alt_langs]} temporal=${state[temporal]}"
+  ui_ok "exclude='${excl}'"
   _dotfiles_toml_set "$cfg" install_cloud     "${state[cloud]}"
   _dotfiles_toml_set "$cfg" install_fonts     "${state[fonts]}"
   _dotfiles_toml_set "$cfg" install_mobile    "${state[mobile]}"
   _dotfiles_toml_set "$cfg" install_alt_langs "${state[alt_langs]}"
   _dotfiles_toml_set "$cfg" install_temporal  "${state[temporal]}"
   _dotfiles_toml_set "$cfg" pkg_exclude       "\"${excl}\""
-  echo "Applying..."
   chezmoi apply
 }
 
@@ -176,23 +175,24 @@ function dotfiles() {
   local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoi.toml"
   case "${1:-help}" in
     apply)
-      if [ -z "$(chezmoi diff 2>/dev/null)" ]; then
-        echo "✅ Already up to date."
+      # Built-in diff: diff.command is nvim, which hangs when captured (no TTY).
+      if [ -z "$(chezmoi diff --use-builtin-diff --no-pager 2>/dev/null)" ]; then
+        ui_ok "already up to date"
         return 0
       fi
-      chezmoi diff
+      chezmoi status
       if [[ "${2:-}" == "-y" || "${2:-}" == "--yes" ]]; then
         chezmoi apply
         return
       fi
-      if read -q "?Apply these changes? [y/N] "; then
+      if read -q "?Apply these changes? (dotfiles diff shows details) [y/N] "; then
         echo; chezmoi apply
       else
-        echo; echo "Aborted."
+        echo; ui_skip "cancelled; nothing applied"
       fi
       ;;
     diff)
-      chezmoi diff
+      chezmoi diff --use-builtin-diff
       ;;
     edit)
       cd ~/.local/share/chezmoi && ${EDITOR:-nvim} . && cd -
@@ -200,13 +200,13 @@ function dotfiles() {
     config)
       # Re-run the init prompts so newly added flags get picked up. Answered
       # promptOnce fields are kept; only new/missing ones are asked.
-      echo "🔧 Re-running chezmoi prompts (existing answers kept)..."
+      ui_section "Re-running setup questions (saved answers are kept)"
       chezmoi init && chezmoi apply
       ;;
     update)
       case "${2:-all}" in
         all)
-          echo "⬆️  Updating everything (brew packages + AI CLIs)..."
+          ui_section "Updating Homebrew packages and AI CLIs"
           brew update && brew upgrade
           _dotfiles_update_opencode || return $?
           rm -f "$HOME/.local/state/ai-tools-installed"
@@ -224,7 +224,7 @@ function dotfiles() {
           chezmoi apply
           ;;
         *)
-          echo "Usage: dotfiles update [packages|groups|ai]   (no arg = everything)"
+          ui_fail "unknown target '${2}'"; ui_hint "usage: dotfiles update [packages|groups|ai]   (no arg = everything)"; return 2
           ;;
       esac
       ;;
@@ -245,7 +245,7 @@ function dotfiles() {
     status)
       echo "=== AI tool versions ==="
       echo -n "  claude: "; claude --version 2>/dev/null || echo "not installed"
-      echo -n "  codex:  "; npm list -g @openai/codex 2>/dev/null | grep @openai/codex | awk '{print $2}' || echo "not installed"
+      echo -n "  codex:  "; codex --version 2>/dev/null || echo "not installed"
       echo -n "  agy:    "; agy --version 2>/dev/null || echo "not installed"
       echo -n "  opencode: "; opencode --version 2>/dev/null || echo "not installed"
       echo -n "  cortex: "; cortex --version 2>/dev/null || echo "not installed"
@@ -271,7 +271,7 @@ function dotfiles() {
       echo "  update            Update everything: brew packages + AI CLIs, then apply"
       echo "  update packages   brew upgrade + apply"
       echo "  update groups     Toggle package groups + excludes (fzf), then apply"
-      echo "  update ai         Reinstall AI CLIs at pinned versions"
+      echo "  update ai         Reinstall AI CLIs (Claude Code, agy, Copilot, OpenCode)"
       echo ""
       echo "  doctor            chezmoi doctor + tool versions + documentation hygiene"
       echo "  status            Show installed AI tool versions"

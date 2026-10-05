@@ -9,10 +9,10 @@
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
 #
 # Package selection is driven by prompts in .chezmoi.toml.tmpl: `package_preset`
-# (minimal/standard/full) derives the group flags `install_cloud`,
-# `install_fonts`, and `install_mobile`; `pkg_extras` opts into the off-ladder
-# groups (alt-langs, temporal); `pkg_exclude` drops individual packages by name
-# at install time. Edit ~/.config/chezmoi/chezmoi.toml or re-run `chezmoi init`,
+# (minimal/standard/full) seeds the group flags `install_cloud`,
+# `install_fonts`, and `install_mobile` on first init; `install_alt_langs` and
+# `install_temporal` are off-ladder opt-ins; `pkg_exclude` drops individual
+# packages by name at install time. Edit ~/.config/chezmoi/chezmoi.toml or re-run `chezmoi init`,
 # then `chezmoi apply`.
 
 {{- if .install_cloud }}

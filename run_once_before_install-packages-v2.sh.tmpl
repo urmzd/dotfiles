@@ -5,34 +5,35 @@
 
 set -euo pipefail
 
-echo "🔧 Installing packages for {{ .chezmoi.os }}/{{ .chezmoi.arch }}..."
+{{ includeTemplate "ui.sh" . }}
+ui_section "System packages ({{ .chezmoi.os }}/{{ .chezmoi.arch }})"
 
 {{- if .is_macos }}
 # macOS package installation
 
 # Install Xcode Command Line Tools if not present
 if ! xcode-select -p >/dev/null 2>&1; then
-    echo "🔨 Installing Xcode Command Line Tools..."
+    ui_step "installing Xcode Command Line Tools"
     xcode-select --install
 
     # Wait for installation to complete
-    echo "⏳ Waiting for Xcode Command Line Tools installation..."
+    ui_step "waiting for Xcode Command Line Tools installation"
     retries=0
     until xcode-select -p >/dev/null 2>&1; do
         sleep 5
         retries=$((retries + 1))
         if [ "$retries" -ge 60 ]; then
-            echo "❌ Xcode Command Line Tools installation timed out"
+            ui_fail "Xcode Command Line Tools installation timed out"
             exit 1
         fi
     done
-    echo "✅ Xcode Command Line Tools installed"
+    ui_ok "Xcode Command Line Tools installed"
 else
-    echo "✅ Xcode Command Line Tools already installed"
+    ui_skip "Xcode Command Line Tools already installed"
 fi
 
 if ! command -v brew >/dev/null 2>&1; then
-    echo "🍺 Installing Homebrew..."
+    ui_step "installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     # Make brew available in this shell for any subsequent steps.
     if [ -x /opt/homebrew/bin/brew ]; then
@@ -47,10 +48,10 @@ fi
 
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "🐚 Installing Oh My Zsh..."
+    ui_step "installing Oh My Zsh"
     RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 else
-    echo "✅ Oh My Zsh already installed"
+    ui_skip "Oh My Zsh already installed"
 fi
 
 # Install plugins and themes in parallel where possible
@@ -63,49 +64,49 @@ _clone_pids=()
 
 # Powerlevel10k
 if [ ! -d "$P10K_PATH" ]; then
-    echo "⚡ Installing Powerlevel10k theme..."
+    ui_step "installing Powerlevel10k theme"
     (git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_PATH" \
-        && echo "✅ Powerlevel10k installed" \
-        || echo "❌ Failed to clone Powerlevel10k") &
+        && ui_ok "Powerlevel10k installed" \
+        || ui_fail "failed to clone Powerlevel10k") &
     _clone_pids+=($!)
 else
-    echo "✅ Powerlevel10k already installed"
+    ui_skip "Powerlevel10k already installed"
 fi
 
 # zsh-completions
 if [ ! -d "$ZSH_COMPLETIONS_PATH" ]; then
-    echo "🧠 Installing zsh-completions plugin..."
+    ui_step "installing zsh-completions plugin"
     (git clone https://github.com/zsh-users/zsh-completions "$ZSH_COMPLETIONS_PATH" \
-        && echo "✅ zsh-completions installed" \
-        || echo "❌ Failed to clone zsh-completions") &
+        && ui_ok "zsh-completions installed" \
+        || ui_fail "failed to clone zsh-completions") &
     _clone_pids+=($!)
 else
-    echo "✅ zsh-completions already installed"
+    ui_skip "zsh-completions already installed"
 fi
 
 # TPM (Tmux Plugin Manager)
 if [ ! -d "$TPM_PATH" ]; then
-    echo "🔌 Installing TPM (Tmux Plugin Manager)..."
+    ui_step "installing TPM (Tmux Plugin Manager)"
     mkdir -p "$(dirname "$TPM_PATH")"
     (git clone https://github.com/tmux-plugins/tpm "$TPM_PATH" \
         && chmod +x "$TPM_PATH/tpm" \
-        && echo "✅ TPM installed. Run 'tmux' and press 'prefix + I' to install plugins" \
-        || echo "❌ Failed to clone TPM") &
+        && ui_ok "TPM installed (in tmux, press prefix + I to install plugins)" \
+        || ui_fail "failed to clone TPM") &
     _clone_pids+=($!)
 else
-    echo "✅ TPM already installed"
+    ui_skip "TPM already installed"
 fi
 
 # Catppuccin tmux theme
 if [ ! -d "$CATPPUCCIN_PATH/tmux" ]; then
-    echo "🎨 Installing Catppuccin tmux theme..."
+    ui_step "installing Catppuccin tmux theme"
     mkdir -p "$CATPPUCCIN_PATH"
     (git clone -b v2.1.3 https://github.com/catppuccin/tmux.git "$CATPPUCCIN_PATH/tmux" \
-        && echo "✅ Catppuccin tmux theme installed" \
-        || echo "❌ Failed to clone Catppuccin tmux theme") &
+        && ui_ok "Catppuccin tmux theme installed" \
+        || ui_fail "failed to clone Catppuccin tmux theme") &
     _clone_pids+=($!)
 else
-    echo "✅ Catppuccin tmux theme already installed"
+    ui_skip "Catppuccin tmux theme already installed"
 fi
 
 # Wait for all parallel clones to finish
@@ -117,45 +118,45 @@ for pid in "${_clone_pids[@]}"; do
 done
 
 if [ "$_clone_failed" -ne 0 ]; then
-    echo "⚠️ One or more git clones failed (network or permissions?). Continuing anyway;"
-    echo "   re-run 'chezmoi apply' after checking connectivity to retry the missing ones."
+    ui_warn "one or more git clones failed (network or permissions?); continuing"
+    ui_hint "check connectivity, then rerun: chezmoi apply"
 fi
 
 # Cyberdream themes (depends on catppuccin being cloned)
 CYBERDREAM_THEME="$CATPPUCCIN_PATH/tmux/themes/catppuccin_cyberdream_tmux.conf"
 if [ ! -f "$CYBERDREAM_THEME" ]; then
-    echo "🌊 Installing Cyberdream theme..."
+    ui_step "installing Cyberdream theme"
 
     CYBERDREAM_NVIM_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/tmux/cyberdream.conf"
     if [ -f "$CYBERDREAM_NVIM_PATH" ]; then
         cp "$CYBERDREAM_NVIM_PATH" "$CYBERDREAM_THEME"
-        echo "✅ Cyberdream theme copied from nvim plugin"
+        ui_ok "Cyberdream theme copied from nvim plugin"
     else
         curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/tmux/cyberdream.conf -o "$CYBERDREAM_THEME" || {
-            echo "⚠️ Failed to download cyberdream theme, will be installed later"
+            ui_warn "failed to download cyberdream theme; retried on the next apply"
         }
     fi
 else
-    echo "✅ Cyberdream theme already installed"
+    ui_skip "Cyberdream theme already installed"
 fi
 
 GHOSTTY_THEMES_DIR="$HOME/.config/ghostty/themes"
 GHOSTTY_CYBERDREAM_THEME="$GHOSTTY_THEMES_DIR/cyberdream"
 if [ ! -f "$GHOSTTY_CYBERDREAM_THEME" ]; then
-    echo "🌊 Installing Cyberdream Ghostty theme..."
+    ui_step "installing Cyberdream Ghostty theme"
     mkdir -p "$GHOSTTY_THEMES_DIR"
 
     CYBERDREAM_GHOSTTY_PATH="$HOME/.local/share/nvim/lazy/cyberdream.nvim/extras/ghostty/cyberdream"
     if [ -f "$CYBERDREAM_GHOSTTY_PATH" ]; then
         cp "$CYBERDREAM_GHOSTTY_PATH" "$GHOSTTY_CYBERDREAM_THEME"
-        echo "✅ Cyberdream Ghostty theme copied from nvim plugin"
+        ui_ok "Cyberdream Ghostty theme copied from nvim plugin"
     else
         curl -fsSL --max-time 30 https://raw.githubusercontent.com/scottmckendry/cyberdream.nvim/main/extras/ghostty/cyberdream -o "$GHOSTTY_CYBERDREAM_THEME" || {
-            echo "⚠️ Failed to download cyberdream Ghostty theme, will be installed later"
+            ui_warn "failed to download cyberdream Ghostty theme; retried on the next apply"
         }
     fi
 else
-    echo "✅ Cyberdream Ghostty theme already installed"
+    ui_skip "Cyberdream Ghostty theme already installed"
 fi
 
 {{- else if .is_linux }}
@@ -164,7 +165,7 @@ fi
 # gcloud / aws-cli / cortex install via run_onchange scripts with pinned versions.
 
 if command -v apt >/dev/null 2>&1; then
-    echo "📦 Installing packages with apt..."
+    ui_step "installing packages with apt"
     sudo apt update
     apt_packages=(
         curl wget
@@ -176,13 +177,13 @@ if command -v apt >/dev/null 2>&1; then
     )
     for package in "${apt_packages[@]}"; do
         if ! dpkg -l "$package" >/dev/null 2>&1; then
-            echo "Installing $package..."
-            sudo apt install -y "$package" || echo "⚠️ Failed to install $package (may not be in this Ubuntu/Debian release)"
+            ui_step "installing $package"
+            sudo apt install -y "$package" || ui_warn "failed to install $package (may not be in this Ubuntu/Debian release)"
         fi
     done
 
 elif command -v dnf >/dev/null 2>&1; then
-    echo "📦 Installing packages with dnf..."
+    ui_step "installing packages with dnf"
     dnf_packages=(
         curl wget
         git gh fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
@@ -193,13 +194,13 @@ elif command -v dnf >/dev/null 2>&1; then
     )
     for package in "${dnf_packages[@]}"; do
         if ! rpm -q "$package" >/dev/null 2>&1; then
-            echo "Installing $package..."
-            sudo dnf install -y "$package" || echo "⚠️ Failed to install $package"
+            ui_step "installing $package"
+            sudo dnf install -y "$package" || ui_warn "failed to install $package"
         fi
     done
 
 elif command -v pacman >/dev/null 2>&1; then
-    echo "📦 Installing packages with pacman..."
+    ui_step "installing packages with pacman"
     pacman_packages=(
         curl wget
         git github-cli fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
@@ -210,33 +211,32 @@ elif command -v pacman >/dev/null 2>&1; then
     )
     for package in "${pacman_packages[@]}"; do
         if ! pacman -Q "$package" >/dev/null 2>&1; then
-            echo "Installing $package..."
-            sudo pacman -S --noconfirm "$package" || echo "⚠️ Failed to install $package"
+            ui_step "installing $package"
+            sudo pacman -S --noconfirm "$package" || ui_warn "failed to install $package"
         fi
     done
 
 else
-    echo "⚠️ No supported package manager found (apt, dnf, pacman)"
+    ui_warn "no supported package manager found (apt, dnf, pacman)"
 fi
 {{- end }}
 
 # Install uv (Python package manager) if not present
 if ! command -v uv >/dev/null 2>&1; then
-    echo "🐍 Installing uv..."
+    ui_step "installing uv"
     curl -LsSf https://astral.sh/uv/install.sh | sh \
-        || echo "⚠️ uv install failed; re-run 'chezmoi apply' to retry."
+        || ui_warn "uv install failed; rerun chezmoi apply to retry"
 fi
 
 # Install rustup (Rust toolchain manager) if not present
 if ! command -v rustup >/dev/null 2>&1; then
-    echo "🦀 Installing rustup..."
+    ui_step "installing rustup"
     if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
         . "$HOME/.cargo/env"
         rustup component add rust-analyzer rust-src \
-            || echo "⚠️ rustup component add failed; run it manually once rustup is on PATH."
+            || ui_warn "rustup component add failed; run it once rustup is on PATH"
     else
-        echo "⚠️ rustup install failed; re-run 'chezmoi apply' to retry."
+        ui_warn "rustup install failed; rerun chezmoi apply to retry"
     fi
 fi
 
-echo "✅ Package installation completed!"

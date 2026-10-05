@@ -7,6 +7,8 @@
 # content hash changes.
 #
 set -euo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "gh extensions"
 
 # "OWNER/REPO TAG" pairs. One line per extension.
 EXTENSIONS=(
@@ -15,7 +17,7 @@ EXTENSIONS=(
 )
 
 if ! command -v gh >/dev/null 2>&1; then
-    echo "[--] gh not found; skipping gh extension install."
+    ui_skip "gh not installed; skipping"
     exit 0
 fi
 
@@ -29,21 +31,22 @@ for entry in "${EXTENSIONS[@]}"; do
         awk -v r="$repo" '{ for (i = 1; i <= NF; i++) if (tolower($i) == tolower(r)) { print $(i + 1); exit } }')"
 
     if [[ "$installed" == "$pin" ]]; then
-        echo "[OK] $repo $pin already installed"
+        ui_skip "$repo $pin already installed"
         continue
     fi
 
     if [[ -n "$installed" ]]; then
         # No re-pin in place: remove, then install at the new tag.
-        echo "[..] Updating $repo (${installed} -> ${pin})"
+        ui_step "updating $repo (${installed} -> ${pin})"
         gh extension remove "$name" >/dev/null 2>&1 || true
     else
-        echo "[..] Installing $repo $pin"
+        ui_step "installing $repo $pin"
     fi
 
     if gh extension install "$repo" --pin "$pin" >/dev/null 2>&1; then
-        echo "[OK] Installed $repo $pin"
+        ui_ok "installed $repo $pin"
     else
-        echo "[!!] Failed to install $repo $pin (needs gh auth / network); continuing."
+        ui_warn "could not install $repo $pin"
+        ui_hint "needs gh auth and network: gh auth status"
     fi
 done

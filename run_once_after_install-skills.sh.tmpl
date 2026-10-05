@@ -1,28 +1,31 @@
 #!/usr/bin/env bash
 # Install agent skills and agents via agentspec CLI
 set -euo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "Agent skills"
 
 if ! command -v agentspec &>/dev/null; then
-    echo "Installing agentspec..."
-    curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/install.sh | sh
+    ui_run "installed agentspec" sh -c 'curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/install.sh | sh' || exit 1
 fi
 
-echo "Installing agent resources..."
-
-# Local skills and agents from dotfiles repo (dot_agents/ → ~/.agents/)
-agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" --all-tools
-
-# Third-party skills
-agentspec manage add vercel-labs/skills --all-tools
-agentspec manage add vercel/ai-elements --all-tools
-agentspec manage add vercel/streamdown --all-tools
-agentspec manage add google-gemini/gemini-skills --all-tools
-agentspec manage add better-auth/skills@better-auth/best-practices --all-tools
-agentspec manage add vercel/ai@skills/use-ai-sdk --all-tools
-agentspec manage add fastapi/fastapi@fastapi/.agents/skills/fastapi --all-tools
-agentspec manage add github/gh-stack@skills/gh-stack --all-tools
+# Local skills and agents from dotfiles repo (dot_agents/ -> ~/.agents/), then
+# third-party skills. A failed source is reported and skipped, not fatal.
+SOURCES=(
+    "{{ .chezmoi.sourceDir }}/dot_agents"
+    vercel-labs/skills
+    vercel/ai-elements
+    vercel/streamdown
+    google-gemini/gemini-skills
+    better-auth/skills@better-auth/best-practices
+    vercel/ai@skills/use-ai-sdk
+    fastapi/fastapi@fastapi/.agents/skills/fastapi
+    github/gh-stack@skills/gh-stack
+)
+for src in "${SOURCES[@]}"; do
+    label="$src"
+    [[ "$src" == /* ]] && label="dotfiles skills and agents"
+    ui_run "added $label" agentspec manage add "$src" --all-tools || true
+done
 
 # Sync: discover, link, and verify all resources
-agentspec sync --fast
-
-echo "Agent resources installed successfully."
+ui_run "linked into every installed AI tool" agentspec sync --fast || true

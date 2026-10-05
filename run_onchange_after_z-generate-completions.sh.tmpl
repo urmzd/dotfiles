@@ -38,7 +38,10 @@ mkdir -p "$(dirname "$FPATH_FILE")"
     echo "# Everything here needs compdef/bashcompinit, which compinit defines."
 } >> "$POST_FILE"
 
-echo "Generating zsh completions..."
+{{ includeTemplate "ui.sh" . }}
+ui_section "zsh completions"
+# Tallies for the one-line summary; failures are listed individually.
+n_generated=0; n_brew=0; n_wired=0; failed_tools=()
 
 # ============================================================================
 # 1. Discover Homebrew site-functions on macOS.
@@ -51,7 +54,6 @@ if command -v brew >/dev/null 2>&1; then
     if [[ -d "${brew_prefix}/share/zsh/site-functions" ]]; then
         BREW_SITE="${brew_prefix}/share/zsh/site-functions"
         echo "fpath=(\"${BREW_SITE}\" \$fpath)" >> "$FPATH_FILE"
-        echo "  Found brew site-functions: ${BREW_SITE}"
     fi
 fi
 
@@ -76,7 +78,6 @@ if [[ -n "${GCLOUD_COMP:-}" ]]; then
         echo "# Google Cloud SDK completions"
         echo "source \"$GCLOUD_COMP\""
     } >> "$POST_FILE"
-    echo "  Found gcloud completion: $GCLOUD_COMP"
 fi
 
 # ============================================================================
@@ -95,15 +96,15 @@ generate_completion() {
 
     if [[ -n "$BREW_SITE" && -f "$BREW_SITE/_$tool" ]]; then
         rm -f "$target"  # drop a snapshot left by an earlier run
-        echo "  Skipped: _$tool (Homebrew ships it)"
+        n_brew=$((n_brew + 1))
         return 0
     fi
 
     if eval "$cmd" > "$target" 2>/dev/null; then
-        echo "  Generated: _$tool"
+        n_generated=$((n_generated + 1))
     else
         rm -f "$target"
-        echo "  Skipped: _$tool (generation failed)"
+        failed_tools+=("$tool")
     fi
 }
 
@@ -124,7 +125,7 @@ generate_completion "just"          "just --completions zsh"
 # rustup also provides cargo completions
 if command -v rustup >/dev/null 2>&1 && [[ ! ( -n "$BREW_SITE" && -f "$BREW_SITE/_cargo" ) ]]; then
     if rustup completions zsh cargo > "$COMP_DIR/_cargo" 2>/dev/null; then
-        echo "  Generated: _cargo (via rustup)"
+        n_generated=$((n_generated + 1))
     else
         rm -f "$COMP_DIR/_cargo"
     fi
@@ -134,9 +135,9 @@ fi
 if command -v pipx >/dev/null 2>&1 && command -v register-python-argcomplete >/dev/null 2>&1; then
     if [[ -n "$BREW_SITE" && -f "$BREW_SITE/_pipx" ]]; then
         rm -f "$COMP_DIR/_pipx"
-        echo "  Skipped: _pipx (Homebrew ships it)"
+        n_brew=$((n_brew + 1))
     elif register-python-argcomplete --shell zsh pipx > "$COMP_DIR/_pipx" 2>/dev/null; then
-        echo "  Generated: _pipx"
+        n_generated=$((n_generated + 1))
     else
         rm -f "$COMP_DIR/_pipx"
     fi
@@ -157,7 +158,7 @@ if command -v aws_completer >/dev/null 2>&1; then
         echo "autoload -Uz bashcompinit && bashcompinit"
         echo "complete -C \"$(command -v aws_completer)\" aws"
     } >> "$POST_FILE"
-    echo "  Wired: aws (post-compinit)"
+    n_wired=$((n_wired + 1))
 fi
 
 if command -v npm >/dev/null 2>&1; then
@@ -169,7 +170,7 @@ if command -v npm >/dev/null 2>&1; then
             echo "# npm (emits a shell function + complete registration)"
             echo "source \"$NPM_COMP\""
         } >> "$POST_FILE"
-        echo "  Wired: npm (post-compinit)"
+        n_wired=$((n_wired + 1))
     else
         rm -f "$NPM_COMP"
     fi
@@ -201,10 +202,10 @@ if command -v temporal >/dev/null 2>&1; then
     trap 'rm -f "$TEMPORAL_RAW" "$TEMPORAL_PATCH"' EXIT
 
     if ! temporal completion zsh > "$TEMPORAL_RAW" 2>/dev/null; then
-        echo "  Skipped: _temporal (generation failed)"
+        failed_tools+=("temporal")
     elif ! command -v temporal-cloud >/dev/null 2>&1; then
         cp "$TEMPORAL_RAW" "$COMP_DIR/_temporal"
-        echo "  Generated: _temporal (no cloud extension installed)"
+        n_generated=$((n_generated + 1))
     else
         cat > "$TEMPORAL_PATCH" <<'AWKEOF'
 $0 == "    requestComp=\"${words[1]} __complete ${words[2,-1]}\"" {
@@ -234,12 +235,12 @@ END { if (!patched_req || !patched_out) exit 3 }
 AWKEOF
 
         if awk -f "$TEMPORAL_PATCH" "$TEMPORAL_RAW" > "$COMP_DIR/_temporal" 2>/dev/null; then
-            echo "  Generated: _temporal (with cloud extension routing)"
+            n_generated=$((n_generated + 1))
         else
             cp "$TEMPORAL_RAW" "$COMP_DIR/_temporal"
-            echo "  Generated: _temporal (UNPATCHED -- cobra template changed;"
-            echo "             'temporal cloud <TAB>' will not complete. Use"
-            echo "             'temporal-cloud <TAB>' or update this script.)"
+            n_generated=$((n_generated + 1))
+            ui_warn "_temporal generated unpatched (cobra template changed)"
+            ui_hint "'temporal cloud <TAB>' will not complete; use 'temporal-cloud <TAB>' or update this script"
         fi
     fi
 
@@ -262,7 +263,7 @@ AWKEOF
                 -e 's/^#compdef temporal$/#compdef temporal-cloud/' \
                 -e 's/^compdef _temporal_cloud temporal$/compdef _temporal_cloud temporal-cloud/' \
                 "$TEMPORAL_RAW" > "$COMP_DIR/_temporal_cloud"
-            echo "  Generated: _temporal_cloud (binds temporal-cloud)"
+            n_generated=$((n_generated + 1))
         fi
     fi
 fi
@@ -275,4 +276,7 @@ fi
 # single compinit (it dumps to ~/.zcompdump-$SHORT_HOST-$ZSH_VERSION).
 rm -f "$HOME/.zcompdump" "$HOME/.zcompdump.zwc"
 
-echo "Completions generated successfully."
+ui_ok "${n_generated} generated, ${n_brew} from Homebrew, ${n_wired} wired post-compinit"
+for tool in ${failed_tools[@]+"${failed_tools[@]}"}; do
+    ui_warn "could not generate _${tool}"
+done

@@ -12,6 +12,9 @@
 {{- if hasKey . "install_cortex" -}}
 {{ if .install_cortex -}}
 set -euo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "Cortex Code CLI"
+trap 'ui_fail "stopped at line $LINENO"; ui_hint "fix the cause, then rerun: chezmoi apply"' ERR
 
 # Version pin: bump to upgrade. Find current channel heads at:
 #   https://sfc-repo.snowflakecomputing.com/cortex-code-cli/a4643c4278/stable_version.txt
@@ -43,11 +46,11 @@ if [[ -x "${LOCAL_BIN}/cortex" && -d "${CORTEX_HOME}" ]]; then
 fi
 
 if [[ "${installed_cortex}" == "${CORTEX_VERSION}" ]]; then
-    echo "[OK] cortex ${CORTEX_VERSION} already installed at ${CORTEX_HOME}"
+    ui_skip "cortex ${CORTEX_VERSION} already installed"
     exit 0
 fi
 
-echo "[..] Installing cortex ${CORTEX_VERSION} (${CORTEX_OS}-${CORTEX_ARCH})"
+ui_step "installing cortex ${CORTEX_VERSION} (${CORTEX_OS}-${CORTEX_ARCH})"
 
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
@@ -66,7 +69,7 @@ tar_name="$(jq -r ".packages.${CORTEX_OS}.${CORTEX_ARCH}.name" "$manifest")"
 expected_sha="$(jq -r ".packages.${CORTEX_OS}.${CORTEX_ARCH}.checksum" "$manifest")"
 
 if [[ -z "$tar_name" || "$tar_name" == "null" ]]; then
-    echo "[ERR] Cortex ${CORTEX_VERSION} not available for ${CORTEX_OS}-${CORTEX_ARCH}" >&2
+    ui_fail "cortex ${CORTEX_VERSION} not available for ${CORTEX_OS}-${CORTEX_ARCH}"
     exit 1
 fi
 
@@ -83,7 +86,7 @@ else
 fi
 
 if [[ "$actual_sha" != "$expected_sha" ]]; then
-    echo "[ERR] Checksum mismatch for ${tar_name}: expected ${expected_sha}, got ${actual_sha}" >&2
+    ui_fail "checksum mismatch for ${tar_name}: expected ${expected_sha}, got ${actual_sha}"
     exit 1
 fi
 
@@ -91,7 +94,7 @@ fi
 tar -xzf "$tar_path" -C "$WORKDIR"
 extracted="$(find "$WORKDIR" -maxdepth 1 -type d -name 'coco-*' | head -n1)"
 if [[ -z "$extracted" || ! -x "$extracted/cortex" ]]; then
-    echo "[ERR] cortex binary not found in extracted archive" >&2
+    ui_fail "cortex binary not found in extracted archive"
     exit 1
 fi
 
@@ -103,6 +106,6 @@ mv "$extracted" "$CORTEX_HOME"
 # so we symlink instead of copying.
 ln -sf "${CORTEX_HOME}/cortex" "${LOCAL_BIN}/cortex"
 
-echo "[OK] Installed cortex ${CORTEX_VERSION}"
+ui_ok "installed cortex ${CORTEX_VERSION}"
 {{- end }}
 {{- end }}

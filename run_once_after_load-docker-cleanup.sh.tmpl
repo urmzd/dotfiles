@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 # Load Docker cleanup launchd agent
-
 {{- if .is_macos }}
+{{ includeTemplate "ui.sh" . }}
+ui_section "Docker cleanup"
 
 PLIST_PATH="$HOME/Library/LaunchAgents/com.docker.cleanup.plist"
 
 # Unload if already loaded (ignore errors)
 launchctl unload "$PLIST_PATH" 2>/dev/null || true
 
-# Load the agent
 if launchctl load "$PLIST_PATH" 2>/dev/null; then
-    echo "Docker cleanup launchd agent loaded (runs daily at 3 AM)"
+    ui_ok "launchd agent loaded (daily at 3 AM)"
 else
-    echo "Failed to load Docker cleanup launchd agent"
+    ui_fail "could not load $PLIST_PATH"
+    ui_hint "check it: launchctl load -w $PLIST_PATH"
     exit 1
 fi
-
-{{- else }}
-echo "Skipping Docker cleanup setup (not macOS)"
 {{- end }}
