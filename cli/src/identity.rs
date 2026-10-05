@@ -416,19 +416,90 @@ fn ensure_ssh(ctx: &Ctx, id: &Identity, home: &Path) -> Result<bool> {
         ui::skip("would upload the SSH key to GitHub");
     } else {
         let title = format!("{} (dotfiles)", hostname());
-        let status = Command::new("gh")
-            .args(["ssh-key", "add"])
-            .arg(&public)
-            .args(["--title", &title])
-            .status()
-            .context("running gh ssh-key add")?;
-        if !status.success() {
-            bail!("gh ssh-key add failed");
+        match upload_ssh_key(&public, &title)? {
+            Upload::Done => {}
+            // GitHub allows one SSH key per account; this one belongs to
+            // another account (e.g. a copied ~/.ssh). Offer a dedicated key.
+            Upload::InUseElsewhere => {
+                let question = format!(
+                    "{} is already registered to another GitHub account. Create a new key for {}?",
+                    public.display(),
+                    id.account
+                );
+                let create = inquire::Confirm::new(&question)
+                    .with_default(true)
+                    .with_help_message("the old key is kept as ~/.ssh/github.old and keeps working for that account")
+                    .prompt()?;
+                if !create {
+                    bail!(
+                        "SSH key not uploaded: it belongs to another account; remove it there or rerun and create a new key"
+                    );
+                }
+                let old = key.with_extension("old");
+                let old_pub = key.with_extension("old.pub");
+                if old.exists() || old_pub.exists() {
+                    bail!(
+                        "{} already exists; move it aside, then rerun dotfiles identity",
+                        old.display()
+                    );
+                }
+                std::fs::rename(&key, &old).with_context(|| format!("moving {}", key.display()))?;
+                std::fs::rename(&public, &old_pub)
+                    .with_context(|| format!("moving {}", public.display()))?;
+                ui::ok(&format!("kept the old key as {}", old.display()));
+                ui::step(&format!(
+                    "creating SSH key {} for {}",
+                    key.display(),
+                    id.account
+                ));
+                if !Command::new("ssh-keygen")
+                    .args(["-t", "ed25519", "-C", &id.email, "-f"])
+                    .arg(&key)
+                    .status()
+                    .context("running ssh-keygen")?
+                    .success()
+                {
+                    bail!("ssh-keygen failed (the old key is at {})", old.display());
+                }
+                if upload_ssh_key(&public, &title)? != Upload::Done {
+                    bail!("the new SSH key was rejected too; check gh auth status");
+                }
+            }
         }
         ui::ok(&format!("uploaded the SSH key as \"{title}\""));
         changed = true;
     }
     Ok(changed)
+}
+
+#[derive(PartialEq)]
+enum Upload {
+    Done,
+    InUseElsewhere,
+}
+
+/// `gh ssh-key add`, telling GitHub's "key is already in use" (HTTP 422: the
+/// key is on another account) apart from other failures.
+fn upload_ssh_key(public: &Path, title: &str) -> Result<Upload> {
+    let out = Command::new("gh")
+        .args(["ssh-key", "add"])
+        .arg(public)
+        .args(["--title", title])
+        .output()
+        .context("running gh ssh-key add")?;
+    if out.status.success() {
+        return Ok(Upload::Done);
+    }
+    let err = String::from_utf8_lossy(&out.stderr);
+    // The API says "key is already in use" (HTTP 422); gh's wording around it
+    // varies by version, so match either.
+    if err.contains("already in use") || err.contains("HTTP 422") {
+        return Ok(Upload::InUseElsewhere);
+    }
+    bail!(
+        "gh ssh-key add failed: {}",
+        err.lines().next().unwrap_or("").trim()
+    )
 }
 
 /// Whether a local `.pub` line's key material is among GitHub's keys.
