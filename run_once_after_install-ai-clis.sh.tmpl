@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Install AI tooling CLIs (Claude Code, Codex, Antigravity, Copilot) at chezmoi apply time.
+# On macOS Codex comes from the Homebrew cask (Brewfile.tmpl); npm is Linux-only.
 # Sentinel-gated: re-runs do nothing once `~/.local/state/ai-tools-installed` exists.
 # Bump versions below + delete the sentinel (`dotfiles update-ai`) to upgrade.
 
@@ -8,13 +9,33 @@ set -euo pipefail
 SENTINEL="$HOME/.local/state/ai-tools-installed"
 mkdir -p "$(dirname "$SENTINEL")"
 
+{{- if .is_macos }}
+
+# One-time migration: Codex moved from npm to the Homebrew cask. npm copies in
+# fnm's per-Node globals shadow the cask on PATH (and vanish on a Node switch),
+# and the ~/.local/npm copy lost its vendor binary. Remove them once the cask
+# is in place; runs before the sentinel check so existing machines migrate.
+if command -v brew >/dev/null 2>&1 && brew list --cask codex >/dev/null 2>&1; then
+    for prefix in "$HOME/.local/npm" "${FNM_DIR:-$HOME/.local/share/fnm}"/node-versions/*/installation; do
+        if [[ -d "$prefix/lib/node_modules/@openai/codex" ]]; then
+            echo "🧹 Removing npm Codex from $prefix (now provided by the brew cask)"
+            rm -rf "$prefix/lib/node_modules/@openai/codex"
+            rm -f "$prefix/bin/codex"
+        fi
+    done
+fi
+{{- end }}
+
 if [[ -f "$SENTINEL" ]]; then
     exit 0
 fi
 
-# Pinned npm package versions
+# npm packages. Codex is unpinned: its config (.chezmoitemplates/codex-config.toml)
+# tracks current releases, and an old pin failed to parse it on fresh machines.
 NPM_PACKAGES=(
-    "@openai/codex@0.135.0"
+{{- if not .is_macos }}
+    "@openai/codex"
+{{- end }}
     "@github/copilot@1.0.73"
 )
 
@@ -55,6 +76,7 @@ fi
 if command -v npm >/dev/null 2>&1; then
     for pkg in "${NPM_PACKAGES[@]}"; do
         name="${pkg%@*}"
+        [[ -n "$name" ]] || name="$pkg"  # unpinned scoped name: "@scope/pkg" has no version suffix
         if ! npm list -g "$name" >/dev/null 2>&1; then
             echo "🤖 Installing $pkg..."
             npm install -g "$pkg" 2>&1 | grep -v "npm WARN" || echo "⚠️ Failed to install $pkg"

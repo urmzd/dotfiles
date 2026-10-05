@@ -4,7 +4,7 @@
 
 [user]
     name = {{ .name | quote }}
-    email = {{ .personal_email | quote }}
+    email = {{ .email | quote }}
 {{- if .gpg_signing_key }}
     signingkey = {{ .gpg_signing_key | quote }}
 {{- else if .ssh_signing_key }}

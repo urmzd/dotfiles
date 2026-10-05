@@ -40,6 +40,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_gemini/` | `~/.gemini/` | Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` |
 | `dot_config/opencode/` | `~/.config/opencode/` | OpenCode instructions; native install, update, and status managed by dotfiles; portable agents rendered by agentspec |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
+| (not tracked) | `~/.config/work/` | Work pack: company overlay cloned from `work_pack_repo` via `.chezmoiexternal.toml.tmpl`; never add its files to this repo |
 
 ## Discovering Structure
 

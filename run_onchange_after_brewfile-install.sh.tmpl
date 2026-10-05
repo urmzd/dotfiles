@@ -5,8 +5,14 @@
 # (tap / permission / unknown formula / network / conflict) with next steps, and
 # soft-exits so the rest of the dotfiles still apply. brew bundle is idempotent,
 # so a later 'chezmoi apply' only reinstalls what is still missing.
-# Re-runs whenever the rendered Brewfile or the exclude list changes.
+# Re-runs whenever the Brewfile, the package selection, or the work pack
+# Brewfile (~/.config/work/Brewfile, appended when present) changes.
 # Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
+# Selection: {{ .package_preset }} extras={{ get . "pkg_extras" }} secrets={{ .use_secrets }} work={{ .is_work }}
+{{- $work_brewfile := joinPath .chezmoi.homeDir ".config/work/Brewfile" }}
+{{- if stat $work_brewfile }}
+# Work pack: {{ include $work_brewfile | sha256sum }}
+{{- end }}
 {{- if .is_macos }}
 set -uo pipefail
 
@@ -36,15 +42,26 @@ fi
 LOG="$(mktemp -t brew-bundle.XXXXXX.log)"
 RUN_BREWFILE="$BREWFILE"
 TMP_BREWFILE=''
-cleanup() { rm -f "$LOG" "$TMP_BREWFILE"; }
+WORK_MERGED=''
+cleanup() { rm -f "$LOG" "$TMP_BREWFILE" "$WORK_MERGED"; }
 trap cleanup EXIT
+
+# --- work pack Brewfile -----------------------------------------------------
+# Appended to the personal Brewfile so excludes, tap trust, and the failure
+# report below cover company packages too.
+WORK_BREWFILE="{{ $work_brewfile }}"
+if [ -f "$WORK_BREWFILE" ]; then
+    WORK_MERGED="$(mktemp -t Brewfile-work.XXXXXX)"
+    cat "$BREWFILE" "$WORK_BREWFILE" > "$WORK_MERGED"
+    RUN_BREWFILE="$WORK_MERGED"
+    info "Including work pack Brewfile: $WORK_BREWFILE"
+fi
 
 # --- optional exclude filter ("select all, deselect some") -----------------
 # Drop any brew/cask/tap line whose quoted target matches an excluded name.
 EXCLUDE="{{ .pkg_exclude }}"
 if [ -n "${EXCLUDE//[[:space:]]/}" ]; then
     TMP_BREWFILE="$(mktemp -t Brewfile.XXXXXX)"
-    RUN_BREWFILE="$TMP_BREWFILE"
     awk -v list="$EXCLUDE" '
         BEGIN { n = split(list, a, /[ ,]+/); for (i = 1; i <= n; i++) if (a[i] != "") skip[a[i]] = 1 }
         {
@@ -55,7 +72,8 @@ if [ -n "${EXCLUDE//[[:space:]]/}" ]; then
             if (name != "" && ((name in skip) || (base in skip))) next
             print
         }
-    ' "$BREWFILE" > "$RUN_BREWFILE"
+    ' "$RUN_BREWFILE" > "$TMP_BREWFILE"
+    RUN_BREWFILE="$TMP_BREWFILE"
     info "Excluding on request: ${EXCLUDE}"
 fi
 

@@ -3,7 +3,7 @@
 
 [user]
     name = {{ .name | quote }}
-    email = {{ .work_email | quote }}
+    email = {{ (ternary .work_email .email .is_work) | quote }}
 {{- if .gpg_signing_key }}
     signingkey = {{ .gpg_signing_key | quote }}
 {{- else if .ssh_signing_key }}
@@ -11,10 +11,19 @@
     signingkey = {{ .ssh_signing_key | quote }}
 {{- end }}
 
-# Conditional include for personal projects (e.g., dotfiles repository)
-# This overrides user.name and user.email with personal values
+# Work pack (shareable company overlay, see .chezmoiexternal.toml.tmpl).
+# Git silently skips a missing include, so this is a no-op until it exists.
+[include]
+    path = ~/.config/work/gitconfig
+
+# Personal identity for the dotfiles repo (and ~/personal on work machines).
+# Comes after the work pack so it wins inside these directories.
 [includeIf "gitdir:~/.local/share/chezmoi/"]
     path = ~/.gitconfig-personal
+{{- if .is_work }}
+[includeIf "gitdir:~/personal/"]
+    path = ~/.gitconfig-personal
+{{- end }}
 
 [github]
     user = {{ .github_username | quote }}
@@ -107,19 +116,11 @@
     undo = reset --soft HEAD^
 
     # Show what I did today
-    today = log --since='1 day ago' --oneline --author={{ .email | quote }}
+    today = log --since='1 day ago' --oneline --author={{ (ternary .work_email .email .is_work) | quote }}
 
     # Clean merged branches
     cleanup = "!git branch --merged | grep -v '\\*\\|main\\|develop' | xargs -n 1 git branch -d"
 
-{{- if .is_work }}
-# Work-specific configurations
-[url "git@github-work:company/"]
-    insteadOf = git@github.com:company/
-
-[includeIf "gitdir:~/work/"]
-    path = ~/.gitconfig-work
-{{- end }}
 
 {{- if .has_homebrew }}
 # Homebrew git settings

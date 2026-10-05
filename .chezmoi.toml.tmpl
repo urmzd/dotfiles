@@ -1,37 +1,90 @@
 # Chezmoi configuration template
 # This file configures chezmoi behavior and contains template variables
 
-{{- $name := promptStringOnce . "name" "What is your full name" -}}
-{{- $email := promptStringOnce . "email" "What is your primary email address" -}}
-{{- $personal_email := promptStringOnce . "personal_email" "What is your personal email (for dotfiles repo)" -}}
-{{- $work_email := promptStringOnce . "work_email" "What is your work email (optional, defaults to primary)" -}}
-{{- $github_username := promptStringOnce . "github_username" "What is your GitHub username" -}}
-{{- $gpg_signing_key := promptStringOnce . "gpg_signing_key" "GPG signing key ID (recommended, run 'gpg --list-secret-keys --keyid-format=long' to find)" -}}
-{{- $ssh_signing_key := promptStringOnce . "ssh_signing_key" "SSH signing key path (not recommended, e.g. ~/.ssh/id_ed25519.pub, optional)" -}}
+{{- /* Every value below is asked at most once and only when it cannot be      */}}
+{{- /* derived. Re-running `chezmoi init` on a configured machine reuses saved  */}}
+{{- /* values, and configs written before a key existed are migrated from the   */}}
+{{- /* legacy keys instead of re-prompting.                                     */}}
 
-{{- $is_personal := promptBoolOnce . "is_personal" "Is this a personal machine (y/n)" -}}
-{{- $is_work := promptBoolOnce . "is_work" "Is this a work machine (y/n)" -}}
-{{- $use_secrets := promptBoolOnce . "use_secrets" "Do you want to use secrets management (y/n)" -}}
-{{- $install_codex := promptBoolOnce . "install_codex" "Install OpenAI Codex CLI (y/n)" -}}
-{{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" -}}
+{{- /* ---- Identity ------------------------------------------------------- */}}
+{{- $default_name := "" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $default_name = output "id" "-F" | trim -}}
+{{- end -}}
+{{- $name := promptStringOnce . "name" "Full name" $default_name -}}
+{{- $email := promptStringOnce . "email" "Personal email (commits in this repo and ~/personal)" -}}
 
-{{- /* Package selection: a preset sets sensible defaults, then per-group      */}}
-{{- /* toggles let you opt in/out, and pkg_exclude drops individual packages   */}}
-{{- /* ("select all, deselect some"). Groups gate blocks in Brewfile.tmpl.     */}}
-{{- $preset := promptChoiceOnce . "package_preset" "Package preset (minimal = core CLI + editor, standard = + cloud/infra + fonts, full = + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
-{{- $default_cloud := ne $preset "minimal" -}}
-{{- $default_fonts := ne $preset "minimal" -}}
-{{- $default_mobile := eq $preset "full" -}}
-{{- $install_cloud := promptBoolOnce . "install_cloud" "Include cloud + infra tooling: docker, colima, kubectl, helm, k9s, terraform, runpodctl (y/n)" $default_cloud -}}
-{{- $install_fonts := promptBoolOnce . "install_fonts" "Include extra Nerd Fonts: Monaspace, Iosevka (y/n)" $default_fonts -}}
-{{- $install_mobile := promptBoolOnce . "install_mobile" "Include mobile dev tooling: Android Studio + SDK + CocoaPods (y/n)" $default_mobile -}}
-{{- /* Not tied to the preset ladder: these are languages this setup does not   */}}
-{{- /* normally use, so even "full" leaves them out and they must be asked for. */}}
-{{- $install_alt_langs := promptBoolOnce . "install_alt_langs" "Include occasional-use language toolchains: mise (JDK), scala-cli, zig (y/n)" false -}}
-{{- /* Also off the preset ladder: ~153MB, and it pulls a pre-release tap.     */}}
-{{- /* Only worth carrying on machines that actually talk to Temporal.         */}}
-{{- $install_temporal := promptBoolOnce . "install_temporal" "Include Temporal CLI + Cloud extension (y/n)" false -}}
-{{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name (comma-separated, optional; e.g. k9s,deno)" "" -}}
+{{- /* GitHub user comes from this repo's origin remote; ask only if unparseable. */}}
+{{- $github_username := get . "github_username" -}}
+{{- if not $github_username -}}
+{{-   $remote := output "git" "-C" .chezmoi.sourceDir "remote" "get-url" "origin" | trim -}}
+{{-   $github_username = regexReplaceAll "^.*github\\.com[:/]([^/]+)/.*$" $remote "${1}" -}}
+{{-   if or (eq $github_username $remote) (not $github_username) -}}
+{{-     $github_username = promptString "GitHub username" -}}
+{{-   end -}}
+{{- end -}}
+
+{{- /* GPG key: first secret key's fingerprint, prompted only if none exists. */}}
+{{- $gpg_signing_key := "" -}}
+{{- if hasKey . "gpg_signing_key" -}}
+{{-   $gpg_signing_key = .gpg_signing_key -}}
+{{- else -}}
+{{-   if lookPath "gpg" -}}
+{{-     $gpg_signing_key = output "gpg" "--list-secret-keys" "--with-colons" | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
+{{-   end -}}
+{{-   if not $gpg_signing_key -}}
+{{-     $gpg_signing_key = promptString "GPG signing key ID (optional)" "" -}}
+{{-   end -}}
+{{- end -}}
+{{- /* SSH signing is never prompted; set ssh_signing_key in chezmoi.toml to use it. */}}
+{{- $ssh_signing_key := get . "ssh_signing_key" | default "" -}}
+
+{{- /* ---- Machine -------------------------------------------------------- */}}
+{{- /* One choice replaces the old is_personal/is_work pair. Legacy configs    */}}
+{{- /* migrate from is_work without a prompt.                                  */}}
+{{- $machine := get . "machine" -}}
+{{- if not $machine -}}
+{{-   if hasKey . "is_work" -}}
+{{-     $machine = ternary "work" "personal" .is_work -}}
+{{-   else -}}
+{{-     $machine = promptChoice "Machine type" (list "personal" "work") "personal" -}}
+{{-   end -}}
+{{- end -}}
+{{- $is_work := eq $machine "work" -}}
+
+{{- $work_email := $email -}}
+{{- $work_pack_repo := "" -}}
+{{- $use_secrets := false -}}
+{{- if $is_work -}}
+{{-   $work_email = promptStringOnce . "work_email" "Work email (default for every repo outside ~/personal)" $email -}}
+{{-   $work_pack_repo = promptStringOnce . "work_pack_repo" "Work pack git URL to clone into ~/.config/work (optional)" "" -}}
+{{- else -}}
+{{-   $use_secrets = promptBoolOnce . "use_secrets" "Use age encryption + 1Password CLI for secrets (y/n)" false -}}
+{{- end -}}
+
+{{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" false -}}
+
+{{- /* ---- Packages ------------------------------------------------------- */}}
+{{- /* The preset decides the groups. Opt-in extras sit off the ladder (heavy, */}}
+{{- /* rarely used) and pkg_exclude drops single packages by name.             */}}
+{{- $preset := promptChoiceOnce . "package_preset" "Package preset (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
+{{- $install_cloud := ne $preset "minimal" -}}
+{{- $install_fonts := ne $preset "minimal" -}}
+{{- $install_mobile := eq $preset "full" -}}
+
+{{- $pkg_extras := "" -}}
+{{- if hasKey . "pkg_extras" -}}
+{{-   $pkg_extras = .pkg_extras -}}
+{{- else if or (hasKey . "install_alt_langs") (hasKey . "install_temporal") -}}
+{{-   $legacy := list -}}
+{{-   if get . "install_alt_langs" }}{{ $legacy = append $legacy "alt-langs" }}{{ end -}}
+{{-   if get . "install_temporal" }}{{ $legacy = append $legacy "temporal" }}{{ end -}}
+{{-   $pkg_extras = join "," $legacy -}}
+{{- else -}}
+{{-   $pkg_extras = promptString "Extra package groups; separate with commas (optional; alt-langs: mise/scala-cli/zig; temporal: Temporal CLI)" "" -}}
+{{- end -}}
+{{- $extras := splitList "," (nospace $pkg_extras) -}}
+{{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name; separate with commas (optional; e.g. k9s)" "" -}}
 
 {{- if $use_secrets }}
 encryption = "age"
@@ -40,28 +93,30 @@ encryption = "age"
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
-    personal_email = {{ $personal_email | quote }}
-    work_email = {{ if ne $work_email "" }}{{ $work_email | quote }}{{ else }}{{ $email | quote }}{{ end }}
+    work_email = {{ $work_email | quote }}
     github_username = {{ $github_username | quote }}
     gpg_signing_key = {{ $gpg_signing_key | quote }}
     ssh_signing_key = {{ $ssh_signing_key | quote }}
 
-    # Machine type flags
-    is_personal = {{ $is_personal }}
+    # Machine type: "personal" or "work". is_personal/is_work are derived.
+    machine = {{ $machine | quote }}
+    is_personal = {{ not $is_work }}
     is_work = {{ $is_work }}
+    # Shareable company overlay cloned to ~/.config/work (see .chezmoiexternal.toml.tmpl)
+    work_pack_repo = {{ $work_pack_repo | quote }}
 
     # Feature flags
     use_secrets = {{ $use_secrets }}
-    install_codex = {{ $install_codex }}
     install_cortex = {{ $install_cortex }}
 
-    # Package selection (preset + per-group toggles + per-package excludes)
+    # Package selection: preset -> groups, plus opt-in extras and excludes
     package_preset = {{ $preset | quote }}
     install_cloud = {{ $install_cloud }}
     install_fonts = {{ $install_fonts }}
     install_mobile = {{ $install_mobile }}
-    install_alt_langs = {{ $install_alt_langs }}
-    install_temporal = {{ $install_temporal }}
+    pkg_extras = {{ $pkg_extras | quote }}
+    install_alt_langs = {{ has "alt-langs" $extras }}
+    install_temporal = {{ has "temporal" $extras }}
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection

@@ -49,6 +49,8 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), personal email, machine type (`personal` or `work`), Cortex, package preset, extras, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A work machine also asks for a work email and an optional [work pack](#work-pack) repo; a personal machine asks about secrets management instead. Re-running `chezmoi init` reuses every saved answer.
+
 ## Usage
 
 ### Day-to-day
@@ -91,22 +93,22 @@ Run `dotfiles config` after pulling changes that add new prompts (like the packa
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 - gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
-**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which sets defaults for the per-group toggles below. Each group can be overridden independently, and `pkg_exclude` drops individual packages by name.
+**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which decides the groups below. `pkg_extras` opts into off-ladder groups, and `pkg_exclude` drops individual packages by name.
 
-| Flag | Covers | Default by preset |
-| ---- | ------ | ----------------- |
+| Setting | Covers | Value |
+| ------- | ------ | ----- |
 | `install_cloud` | docker, colima, kubectl, helm, k9s, terraform, runpodctl | off on `minimal`, on otherwise |
 | `install_fonts` | Monaspace + Iosevka Nerd Fonts | off on `minimal`, on otherwise |
 | `install_mobile` | Android Studio + SDK command-line tools + CocoaPods | on only for `full` |
-| `install_alt_langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
-| `install_temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
+| `pkg_extras` = `alt-langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
+| `pkg_extras` = `temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
 | `pkg_exclude` | comma-separated formula/cask names to skip (for example `k9s,deno`) | empty |
 
-The last two sit off the preset ladder on purpose, including `full`. Both are heavy (llvm alone, pulled in by zig, is over a gigabyte; Temporal is roughly 153 MB) and neither is something this setup reaches for by default, so they have to be asked for by name.
+The two extras sit off the preset ladder on purpose, including `full`. Both are heavy (llvm alone, pulled in by zig, is over a gigabyte; Temporal is roughly 153 MB) and neither is something this setup reaches for by default, so they have to be asked for by name.
 
 Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh`](run_once_after_install-opencode.sh), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
+**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (Homebrew cask on macOS, npm on Linux; workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh`](run_once_after_install-opencode.sh), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
 
 ### Adding a new tool
 
@@ -125,6 +127,22 @@ Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `ch
 4. Platform-specific blocks use `{{ if eq .chezmoi.os "darwin" }}...{{ end }}`
 
 ## Configuration
+
+### Work pack
+
+Company-specific setup lives in a **work pack**: a separate git repo of plain files, owned by the company and shareable with teammates whether or not they use these dotfiles. On a work machine, `chezmoi init` asks for its URL and clones it to `~/.config/work/` (refreshed every 24h by [`.chezmoiexternal.toml.tmpl`](.chezmoiexternal.toml.tmpl)). Only the URL is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. You can also clone or create `~/.config/work/` by hand.
+
+Every file is optional, and each hook is a no-op when its file is missing:
+
+| File | Loaded by |
+| ---- | --------- |
+| `env.zsh` | `~/.zshenv` (all shells, including agent tool calls) |
+| `gitconfig` | `[include]` in `~/.gitconfig`; the dotfiles repo and `~/personal/` still use your personal identity |
+| `ssh_config` | `Include` at the top of `~/.ssh/config` |
+| `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply |
+| `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` |
+
+A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
 ### Chezmoi automation
 

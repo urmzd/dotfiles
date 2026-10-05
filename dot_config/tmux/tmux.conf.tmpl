@@ -89,15 +89,13 @@ set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'christoomey/vim-tmux-navigator'
 # Note: Using manual catppuccin installation (not TPM) to avoid conflicts
 
-{{- if .is_personal }}
-# Personal plugins
+# Session persistence
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 # Disable auto-restore to prevent multiple sessions on startup
 set -g @continuum-restore 'off'
 # Autosave interval in minutes (default 15)
 set -g @continuum-save-interval '5'
-{{- end }}
 
 # Catppuccin theme configuration - using cyberdream
 set -g @catppuccin_flavour 'cyberdream'

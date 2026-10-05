@@ -4,6 +4,10 @@
 # Include colima SSH config
 Include {{ .chezmoi.homeDir }}/.colima/ssh_config
 
+# Work pack hosts (bastions, internal hosts); ssh skips a missing Include.
+# Must stay above the first Host block or it only applies to that host.
+Include {{ .chezmoi.homeDir }}/.config/work/ssh_config
+
 # Global settings
 Host *
     AddKeysToAgent yes
@@ -25,18 +29,6 @@ Host github.com
     AddKeysToAgent yes
     UseKeychain yes
     IdentityFile ~/.ssh/github
-
-{{- if .is_work }}
-# Work-specific servers (configure manually for your organization)
-#
-# Example server configuration:
-# Host work-server
-#     HostName your-work-server.com
-#     User {{ .github_username }}
-#     IdentityFile ~/.ssh/work_key
-#     Port 22
-#     ForwardAgent yes
-{{- end }}
 
 {{- if .is_personal }}
 # Personal servers (configure manually for your setup)

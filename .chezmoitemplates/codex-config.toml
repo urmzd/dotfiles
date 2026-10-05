@@ -99,12 +99,19 @@ review_model = "gpt-5.6"
 # ---- Turn-ended notifier ---------------------------------------------------
 # Written by the Codex desktop app on launch; managed here so `chezmoi apply`
 # stops deleting it (the modify_ merge only carries over live [tables], and a
-# bare top-level key like this one sits above the first table). Absolute path
-# because .chezmoitemplates content is included verbatim, not rendered.
-notify = ["/Users/urmzd/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+# bare top-level key like this one sits above the first table). Emitted only
+# when the desktop app's client exists, so machines without it get no
+# dangling path.
+{{- $notify := joinPath .chezmoi.homeDir ".codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient" }}
+{{- if stat $notify }}
+notify = [{{ $notify | quote }}, "turn-ended"]
+{{- end }}
+{{- if not .is_work }}
 
 # Fast mode, set from the TUI. Same reason as notify: managed here or lost.
+# Personal only: priority tier bills at a premium, which a work org may not allow.
 service_tier = "priority"
+{{- end }}
 
 [auto_review]
 policy = """
