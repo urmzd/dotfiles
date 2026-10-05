@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.0 (2026-10-05)
+
+### Features
+
+- **work-pack**: company catalog.toml joins the package picker; manage-machine skill drives the dotfiles CLI ([6b6c1f3](https://github.com/urmzd/dotfiles/commit/6b6c1f3ea432c08ddb9c0da1488fbaadc72a6d09))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.10.0...v0.11.0)
+
+
 ## 0.10.0 (2026-10-05)
 
 ### Features
