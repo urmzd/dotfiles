@@ -48,6 +48,17 @@ pub fn fail(msg: &str) {
     eprintln!("  {} {msg}", paint("31", "✗"));
 }
 
+/// A planned change: `+` adds (green), `-` removes (red), `~` needs a hand
+/// (yellow). Plan output uses these instead of ✓, which means "done".
+pub fn change(sign: char, msg: &str) {
+    let code = match sign {
+        '+' => "32",
+        '-' => "31",
+        _ => "33",
+    };
+    eprintln!("  {} {msg}", paint(code, &sign.to_string()));
+}
+
 /// Indented next step under a warning or failure.
 pub fn hint(msg: &str) {
     eprintln!("    {}", paint("2", msg));

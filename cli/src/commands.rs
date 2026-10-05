@@ -376,18 +376,25 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
         return Ok(Outcome::Done);
     }
 
+    let id_width = rows.iter().map(|p| p.id.len()).max().unwrap_or(0);
+    let name_width = rows
+        .iter()
+        .map(|p| p.name.chars().count() + tag(p).len())
+        .max()
+        .unwrap_or(0);
     let mut category = "";
     for p in rows {
         if p.category != category {
             category = &p.category;
             ui::section(category);
         }
-        let tag = match (p.work, p.required) {
-            (true, true) => " (work pack, required)",
-            (true, false) => " (work pack)",
-            _ => "",
-        };
-        let line = format!("{:<12} {}{tag}  {}", p.id, p.name, ui::dim(&p.description));
+        let label = format!("{}{}", p.name, tag(p));
+        let line = format!(
+            "{:<id_width$}  {:<name_width$}  {}",
+            p.id,
+            label,
+            ui::dim(&p.description)
+        );
         if selected.contains(&p.id) {
             ui::ok(&line)
         } else {
@@ -396,6 +403,14 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
     }
     ui::hint("change: dotfiles package");
     Ok(Outcome::Done)
+}
+
+fn tag(p: &Package) -> &'static str {
+    match (p.work, p.required) {
+        (true, true) => " (work pack, required)",
+        (true, false) => " (work pack)",
+        _ => "",
+    }
 }
 
 // ---- Setup ----------------------------------------------------------------------
@@ -493,7 +508,7 @@ impl Pending {
         if !self.migrations.is_empty() {
             ui::section("Config migrations");
             for m in &self.migrations {
-                ui::ok(m);
+                ui::change('+', m);
             }
         }
         if !self.files.is_empty() {
@@ -502,7 +517,9 @@ impl Pending {
                 self.files.len()
             ));
             for f in &self.files {
-                ui::skip(f.trim());
+                // `chezmoi status` lines are "<2 status columns> <path>".
+                let path = f.get(3..).unwrap_or(f).trim();
+                ui::change('~', &format!("~/{path}"));
             }
         }
         let plan = &self.plan;
@@ -510,30 +527,40 @@ impl Pending {
             ui::section("Packages");
         }
         for id in &plan.install {
-            ui::ok(&format!("+ {} ({id}): selected, not installed", name(id)));
+            ui::change(
+                '+',
+                &format!("{} ({id}): selected, not installed", name(id)),
+            );
         }
         for id in &plan.remove {
             if prune {
-                ui::ok(&format!(
-                    "- {} ({id}): deselected, will be uninstalled",
-                    name(id)
-                ));
+                ui::change(
+                    '-',
+                    &format!("{} ({id}): deselected, will be uninstalled", name(id)),
+                );
             } else {
-                ui::skip(&format!(
-                    "- {} ({id}): deselected, still installed (remove with --prune)",
-                    name(id)
-                ));
+                ui::change(
+                    '-',
+                    &format!(
+                        "{} ({id}): deselected, still installed (remove with --prune)",
+                        name(id)
+                    ),
+                );
             }
         }
         for id in &plan.setup {
-            ui::skip(&format!(
-                "~ {} ({id}): sign-in pending (dotfiles package setup {id})",
-                name(id)
-            ));
+            ui::change(
+                '~',
+                &format!(
+                    "{} ({id}): sign-in pending (dotfiles package setup {id})",
+                    name(id)
+                ),
+            );
         }
         if !plan.unmanaged.is_empty() {
+            ui::section("Not managed (installed by hand, left alone)");
             ui::skip(&format!(
-                "installed by hand, left alone: {} (adopt: dotfiles package add <id>)",
+                "{} (adopt: dotfiles package add <id>)",
                 plan.unmanaged.join(", ")
             ));
         }

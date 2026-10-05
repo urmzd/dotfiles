@@ -59,23 +59,9 @@ fn chezmoi_output(args: &[&str]) -> Result<String> {
     Ok(String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
-/// True when applying would change something. Uses the builtin diff: the
-/// configured diff.command (nvim) hangs when its output is captured.
-/// Scripts are excluded: run_after scripts run on every apply, so chezmoi
-/// always lists them and they would make every machine look out of date.
-pub fn has_pending_changes() -> Result<bool> {
-    Ok(!chezmoi_output(&[
-        "diff",
-        "--use-builtin-diff",
-        "--no-pager",
-        "--exclude",
-        "scripts",
-    ])?
-    .trim()
-    .is_empty())
-}
-
-/// Managed files that applying would change (`chezmoi status`, scripts excluded).
+/// Managed files that applying would change (`chezmoi status`). Scripts are
+/// excluded: run_after scripts run on every apply, so chezmoi always lists
+/// them and they would make every machine look out of date.
 pub fn pending_files() -> Result<Vec<String>> {
     Ok(chezmoi_output(&["status", "--exclude", "scripts"])?
         .lines()

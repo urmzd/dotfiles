@@ -44,8 +44,7 @@ enum Command {
         #[arg(long)]
         no_apply: bool,
     },
-    /// Set up this machine's GitHub identity: gh sign-in, SSH and GPG keys
-    /// created and uploaded, signing key saved, then a signed test commit
+    /// GitHub identity: gh sign-in, SSH and GPG keys, signed test commit
     Identity {
         /// GitHub account this machine pushes as; saved as github_username
         #[arg(long)]
@@ -72,8 +71,7 @@ enum Command {
     Config,
     /// Selection, machine type, and installed tool versions
     Status,
-    /// Health check: chezmoi, catalog, CLI version, pending changes, Python,
-    /// gh account, commit signing, shadowed CLIs, pending package setup
+    /// Health check; every finding comes with the command that fixes it
     Doctor,
     /// Open the dotfiles source in $EDITOR
     Edit,

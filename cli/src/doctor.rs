@@ -282,22 +282,29 @@ fn newer(a: &str, b: &str) -> bool {
     parse(a) > parse(b)
 }
 
+/// Unapplied file changes and a changed setup template, as one finding:
+/// `dotfiles config` (chezmoi init, then apply) fixes both at once.
 fn check_pending(r: &mut Report) {
-    if chezmoi::config_template_changed() {
-        r.warn(
-            "config",
-            "the setup questions changed since this machine's config was generated",
-            "chezmoi init (saved answers are kept), then dotfiles apply",
-        );
-    }
-    match chezmoi::has_pending_changes() {
-        Ok(true) => r.warn(
+    let questions = chezmoi::config_template_changed();
+    let files = chezmoi::pending_files().map(|f| f.len());
+    match (questions, files) {
+        (true, Ok(0)) => r.warn(
             "apply",
-            "the dotfiles have changes not applied yet",
+            "the setup questions changed since this config was generated",
+            "dotfiles config (saved answers are kept)",
+        ),
+        (true, Ok(n)) => r.warn(
+            "apply",
+            format!("the setup questions changed, and {n} file(s) are not applied"),
+            "dotfiles config (saved answers are kept; applies after)",
+        ),
+        (false, Ok(0)) => r.ok("apply", "everything is applied"),
+        (false, Ok(n)) => r.warn(
+            "apply",
+            format!("{n} file(s) not applied yet (dotfiles plan lists them)"),
             "dotfiles apply",
         ),
-        Ok(false) => r.ok("apply", "everything is applied"),
-        Err(_) => r.warn(
+        (_, Err(_)) => r.warn(
             "apply",
             "could not compute pending changes",
             "chezmoi diff --use-builtin-diff",
