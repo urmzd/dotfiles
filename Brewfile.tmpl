@@ -8,22 +8,9 @@
 #   - company tools      -> ~/.config/work/Brewfile (work pack, appended at install time)
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
 #
-# Package selection is driven by prompts in .chezmoi.toml.tmpl: `package_preset`
-# (minimal/standard/full) seeds the group flags `install_cloud`,
-# `install_fonts`, and `install_mobile` on first init; `install_alt_langs` and
-# `install_temporal` are off-ladder opt-ins; `pkg_exclude` drops individual
-# packages by name at install time. Edit ~/.config/chezmoi/chezmoi.toml or re-run `chezmoi init`,
-# then `chezmoi apply`.
-
-{{- if .install_cloud }}
-# Taps (third-party; core/cask are auto-tapped and need no declaration)
-tap "hashicorp/tap"     # Official HashiCorp tap; core's terraform is frozen at 1.5.7 and disabled (BUSL relicense)
-tap "runpod/runpodctl"  # RunPod CLI; public GitHub tap, no credentials/trust needed
-{{- end }}
-{{- /* `get` not a bare key: see the install_alt_langs note further down. */}}
-{{- if get . "install_temporal" }}
-tap "temporalio/prerelease"  # Official Temporal tap; carries the pre-release Cloud extension
-{{- end }}
+# Optional packages come from catalog.toml: the ids listed in [data].packages
+# (local chezmoi.toml, edited with `dotfiles packages`) are rendered at the end
+# of this file. `pkg_exclude` drops individual packages by name at install time.
 
 # Core CLI
 brew "git"
@@ -53,35 +40,6 @@ cask "codex"     # OpenAI Codex CLI; brew-managed so it survives fnm Node switch
 cask "1password-cli"  # `op` CLI; pairs with manage-secrets skill (1Password desktop app needed for biometric unlock)
 {{- end }}
 
-{{- if .install_cloud }}
-
-# Cloud / infra (gated behind install_cloud flag)
-brew "hashicorp/tap/terraform"  # From hashicorp/tap above; homebrew/core's terraform was disabled 2025-04-04
-brew "colima"
-brew "docker"
-brew "docker-buildx"
-brew "docker-compose"
-brew "kubectl"
-brew "helm"
-brew "k9s"
-brew "runpodctl"  # RunPod GPU cloud CLI (from runpod/runpodctl tap above)
-{{- end }}
-
-{{- if get . "install_temporal" }}
-
-# Temporal (gated behind install_temporal flag; ~153MB, and the extension is
-# pre-release). Deliberately its own flag rather than part of install_cloud:
-# nothing else in that group implies you run workflows.
-brew "temporal"                            # Server/workflow CLI; ships its own _temporal into
-                                           # site-functions via generate_completions_from_executable
-brew "temporalio/prerelease/temporal-cloud"  # `temporal cloud ...` control-plane extension. It is a
-                                           # separate binary the base CLI shells out to by PATH
-                                           # lookup, and supersedes the older standalone tcld.
-                                           # Completion for the subtree is not automatic; the
-                                           # generator in run_onchange_after_z-generate-completions
-                                           # patches _temporal to route it.
-{{- end }}
-
 # Runtimes / language tooling
 brew "fnm"            # Node version manager
 brew "deno"
@@ -91,32 +49,6 @@ brew "lua"
 brew "luarocks"
 brew "luacheck"
 brew "stylua"
-{{- /* `get` rather than a bare .install_alt_langs: chezmoi raises a hard error */}}
-{{- /* on a missing map key, so a bare reference would break `chezmoi apply`   */}}
-{{- /* on any machine whose config predates this flag, until `chezmoi init`    */}}
-{{- /* regenerated it. get returns empty (falsey) instead.                     */}}
-{{- if get . "install_alt_langs" }}
-
-# Occasional-use language toolchains (gated behind install_alt_langs flag).
-#
-# Deliberately not part of any preset, including "full": these are languages
-# this setup does not normally reach for, and llvm (pulled in by zig) alone is
-# well over a gigabyte. Opt in with `install_alt_langs = true` in
-# ~/.config/chezmoi/chezmoi.toml, then re-run `chezmoi apply`.
-brew "zig"            # Also ships its own C/C++ cross-compiler (zig cc)
-brew "scala-cli"      # Self-contained Scala runner, manages its own JVM; supersedes
-                      # the scala/sbt pair for directory-scoped programs
-brew "coursier"       # Fetches and runs JVM artifacts. Required by nvim-metals:
-                      # Metals is the one language server mason cannot install,
-                      # so Neovim gets it through coursier or not at all.
-brew "mise"           # JDK and other per-project runtimes, pinned by .mise.toml.
-                      # Chosen over the temurin cask (one global JDK, no switching)
-                      # and over SDKMAN, which has no formula and so could not be
-                      # declared here. Note that no `java` version manager is
-                      # optional on macOS: /usr/bin/java is a stub that exists, is
-                      # executable, and only prints "Unable to locate a Java
-                      # Runtime", so `command -v java` succeeds with no JDK at all.
-{{- end }}
 
 # Editor
 brew "neovim", args: ["HEAD"]  # Extensible Vim-based text editor (0.12-dev)
@@ -125,30 +57,24 @@ brew "neovim", args: ["HEAD"]  # Extensible Vim-based text editor (0.12-dev)
 brew "cmake"    # Cross-platform build system generator
 brew "gettext"  # GNU internationalization and localization support
 
-{{- if .install_mobile }}
-
-# Mobile Development (gated behind install_mobile flag)
-cask "android-studio"            # Android IDE with SDK manager
-cask "android-commandlinetools"  # Android SDK command-line tools
-brew "cocoapods"                 # Dependency manager for Swift and Objective-C projects
-{{- end }}
-
-{{- if .install_fonts }}
-
-# Fonts (gated behind install_fonts flag)
-cask "font-monaspice-nerd-font"  # MonaspiceNe Nerd Font (Monaspace Neon; renamed from font-monaspace-nerd-font)
-cask "font-iosevka-nerd-font"    # Iosevka Nerd Font (https://typeof.net/Iosevka/)
-# cask "font-meslo-lg-nerd-font" # MesloLGS Nerd Font (legacy, replaced by MonaspiceNe)
-{{- end }}
-
-{{- if .is_personal }}
-
-# Apps (personal machines only)
-cask "obsidian", args: { adopt: true }  # Notes app; adopt takes over a pre-existing manual install.
-                                        # The cask also links the bundled obsidian-cli to
-                                        # $(brew --prefix)/bin/obsidian, so no separate /usr/local/bin
-                                        # registration (in-app "Register CLI") is needed.
-{{- end }}
-
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)
+
+# Optional packages selected from catalog.toml
+{{- $selected := get . "packages" | default list }}
+{{- range (include "catalog.toml" | fromToml).package }}
+{{-   if and (has .id $selected) (or (get . "brew") (get . "cask")) }}
+
+# {{ .name }} ({{ .id }}): {{ .description }}
+{{-     range (get . "tap" | default list) }}
+tap {{ . | quote }}
+{{-     end }}
+{{-     range (get . "brew" | default list) }}
+brew {{ . | quote }}
+{{-     end }}
+{{-     $adopt := get . "adopt" }}
+{{-     range (get . "cask" | default list) }}
+cask {{ . | quote }}{{ if $adopt }}, args: { adopt: true }{{ end }}
+{{-     end }}
+{{-   end }}
+{{- end }}

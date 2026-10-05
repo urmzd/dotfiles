@@ -17,8 +17,9 @@ cd dotfiles
 |---------|-------------|
 | `chezmoi diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
-| `dotfiles update` | `brew upgrade` + `chezmoi apply` |
-| `dotfiles status` | Show installed AI tool versions |
+| `dotfiles packages` | Search + toggle optional packages from `catalog.toml`, then apply |
+| `dotfiles update` | `brew upgrade` + AI CLIs + `chezmoi apply` |
+| `dotfiles status` | Machine, packages, pending setup, tool versions |
 
 For chezmoi file naming conventions (`dot_`, `private_`, `.tmpl`, `run_once_*`, `run_onchange_*`), see [AGENTS.md, File Naming Conventions](AGENTS.md#file-naming-conventions).
 

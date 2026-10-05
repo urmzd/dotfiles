@@ -64,27 +64,25 @@ chezmoi edit <file>   # Edit source, then apply
 
 ### Maintenance
 
+The `dotfiles` command is a separate Rust CLI, [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli), installed on first apply and updated with `dotfiles self-update`.
+
 ```bash
-dotfiles apply           # Preview diff, confirm, then apply  (-y skips confirm)
-dotfiles diff            # Preview pending chezmoi changes
-dotfiles edit            # Open dotfiles source in editor
-dotfiles config          # Re-run chezmoi prompts to pick up new/changed flags
-
-dotfiles update          # Everything: brew packages + AI CLIs, then apply
-dotfiles update packages # brew upgrade + apply
-dotfiles update groups   # Toggle package groups + excludes (fzf), then apply
-dotfiles update ai       # Reinstall AI CLIs at pinned versions
-
-dotfiles doctor          # chezmoi doctor + tool versions + documentation hygiene
-dotfiles status          # Show installed AI tool versions
-dotfiles clean           # Prune build artifacts and caches
+dotfiles packages        # Search + toggle optional packages, then apply
+dotfiles add acli twg    # Select by id; `remove` deselects (--uninstall to brew uninstall)
+dotfiles setup           # Pending sign-in / interactive installers for selected packages
+dotfiles apply           # Show pending changes, confirm, then apply (-y skips confirm)
+dotfiles diff            # Full diff of pending changes
+dotfiles config          # Re-run the setup questions (saved answers kept), then apply
+dotfiles update          # brew upgrade + AI CLIs, then apply (or: packages | ai)
+dotfiles status          # Machine, packages, pending setup, tool versions
+dotfiles doctor          # chezmoi doctor + catalog checks + documentation hygiene
+dotfiles edit            # Open the dotfiles source in $EDITOR
+dotfiles clean           # Prune build artifacts and caches under ~/github
 ```
-
-Run `dotfiles config` after pulling changes that add new prompts (like the package flags), then `dotfiles update groups` any time to fine-tune which groups install without hand-editing `chezmoi.toml`.
 
 ### What's installed
 
-**CLI essentials** (Homebrew on macOS, apt/dnf/pacman on Linux): git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, tree-sitter, uv, tealdeer, terraform, kubectl, helm, k9s, colima, docker, fnm, deno, go, lua, ...see [`Brewfile.tmpl`](Brewfile.tmpl).
+**CLI essentials** (Homebrew on macOS, apt/dnf/pacman on Linux): git, gh, fzf, ripgrep, jq, yq, just, tmux, direnv, chezmoi, tree-sitter, uv, tealdeer, fnm, deno, go, lua, ...see [`Brewfile.tmpl`](Brewfile.tmpl).
 
 **Version managers** (per-language, best-in-class): fnm (Node), uv (Python), rustup (Rust).
 
@@ -93,20 +91,11 @@ Run `dotfiles config` after pulling changes that add new prompts (like the packa
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 - gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
-**Package selection** is prompt-driven. `chezmoi init` asks for a `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev), which seeds the group flags below on first init. After that the saved flags win, so `dotfiles update groups` edits survive a re-init. `pkg_exclude` drops individual packages by name.
+**Optional packages** live in [`catalog.toml`](catalog.toml): Docker, Kubernetes, Terraform, RunPod, Temporal, Zig, Scala, mise, Android, CocoaPods, Nerd Fonts, Obsidian, Notion, Linear, Cursor, the Atlassian CLI (`acli`), and the Teamwork Graph CLI (`twg`). Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries, and packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
 
-| Flag | Covers | Seeded by preset |
-| ---- | ------ | ---------------- |
-| `install_cloud` | docker, colima, kubectl, helm, k9s, terraform, runpodctl | off on `minimal`, on otherwise |
-| `install_fonts` | Monaspace + Iosevka Nerd Fonts | off on `minimal`, on otherwise |
-| `install_mobile` | Android Studio + SDK command-line tools + CocoaPods | on only for `full` |
-| `install_alt_langs` | mise (JDK), scala-cli, zig | off on every preset, ask only |
-| `install_temporal` | Temporal CLI + pre-release Cloud extension | off on every preset, ask only |
-| `pkg_exclude` | comma-separated formula/cask names to skip (for example `k9s,deno`) | empty |
+On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev) seeds the selection from each entry's `presets`. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI release is needed.
 
-The two extras sit off the preset ladder on purpose, including `full`. Both are heavy (llvm alone, pulled in by zig, is over a gigabyte; Temporal is roughly 153 MB) and neither is something this setup reaches for by default, so they have to be asked for by name.
-
-Set any of these at init or in `~/.config/chezmoi/chezmoi.toml`, then re-run `chezmoi apply`. The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
+The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
 **AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (Homebrew cask on macOS, npm on Linux; workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh.tmpl`](run_once_after_install-opencode.sh.tmpl), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
 

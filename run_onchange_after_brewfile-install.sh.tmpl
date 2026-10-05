@@ -8,7 +8,8 @@
 # Re-runs whenever the Brewfile, the package selection, or the work pack
 # Brewfile (~/.config/work/Brewfile, appended when present) changes.
 # Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
-# Selection: {{ .package_preset }} groups={{ .install_cloud }}/{{ .install_fonts }}/{{ .install_mobile }}/{{ get . "install_alt_langs" }}/{{ get . "install_temporal" }} secrets={{ .use_secrets }} work={{ .is_work }}
+# Selection: {{ get . "packages" | default list | join "," }} secrets={{ .use_secrets }} work={{ .is_work }}
+# Catalog: {{ include "catalog.toml" | sha256sum }}
 {{- $work_brewfile := joinPath .chezmoi.homeDir ".config/work/Brewfile" }}
 {{- if stat $work_brewfile }}
 # Work pack: {{ include $work_brewfile | sha256sum }}

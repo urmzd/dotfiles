@@ -1,0 +1,178 @@
+# Optional packages, selected per machine. Core tools stay in Brewfile.tmpl.
+#
+# Selection is a list of ids at [data].packages in the local
+# ~/.config/chezmoi/chezmoi.toml (never committed). Three readers:
+#   - `dotfiles packages` (urmzd/dotfiles-cli): search-as-you-type picker
+#   - Brewfile.tmpl: emits the Homebrew lines for selected packages
+#   - .chezmoi.toml.tmpl: seeds the selection on first init from `presets`
+#
+# Fields (only id, name, description, category are required):
+#   tap, brew, cask   Homebrew entries (macOS). `adopt = true` lets a cask take
+#                     over an app installed by hand.
+#   setup             interactive commands run by `dotfiles setup <id>`, for
+#                     sign-in or installers that need a TTY (never during apply)
+#   check             shell test that passes once setup is done; setup is
+#                     skipped while it passes
+#   presets           presets that select it on first init
+#   machines          machine types those presets apply to (default: both)
+
+# ---- Containers and cloud ---------------------------------------------------
+
+[[package]]
+id = "docker"
+name = "Docker + Colima"
+description = "docker CLI, buildx, compose, and the Colima VM runtime"
+category = "cloud"
+brew = ["colima", "docker", "docker-buildx", "docker-compose"]
+presets = ["standard", "full"]
+
+[[package]]
+id = "kubernetes"
+name = "Kubernetes"
+description = "kubectl, helm, and the k9s terminal UI"
+category = "cloud"
+brew = ["kubectl", "helm", "k9s"]
+presets = ["standard", "full"]
+
+[[package]]
+id = "terraform"
+name = "Terraform"
+# homebrew/core's terraform is frozen at 1.5.7 and disabled (BUSL relicense).
+description = "Terraform from the official HashiCorp tap"
+category = "cloud"
+tap = ["hashicorp/tap"]
+brew = ["hashicorp/tap/terraform"]
+presets = ["standard", "full"]
+
+[[package]]
+id = "runpod"
+name = "RunPod CLI"
+description = "runpodctl for RunPod GPU cloud"
+category = "cloud"
+tap = ["runpod/runpodctl"]
+brew = ["runpodctl"]
+presets = ["standard", "full"]
+
+[[package]]
+id = "temporal"
+name = "Temporal"
+# ~153MB and a pre-release tap, so no preset selects it. temporal-cloud is a
+# separate binary the base CLI shells out to; completions are patched in
+# run_onchange_after_z-generate-completions.
+description = "Temporal CLI plus the pre-release Cloud extension"
+category = "cloud"
+tap = ["temporalio/prerelease"]
+brew = ["temporal", "temporalio/prerelease/temporal-cloud"]
+
+# ---- Languages (heavy; no preset selects them) -----------------------------
+
+[[package]]
+id = "zig"
+name = "Zig"
+# Pulls in llvm, well over a gigabyte.
+description = "Zig toolchain, including the zig cc cross-compiler"
+category = "languages"
+brew = ["zig"]
+
+[[package]]
+id = "scala"
+name = "Scala"
+# coursier is how Neovim gets Metals: mason cannot install it.
+description = "scala-cli runner plus coursier (needed by nvim-metals)"
+category = "languages"
+brew = ["scala-cli", "coursier"]
+
+[[package]]
+id = "mise"
+name = "mise"
+# Activated in ~/.zshrc after fnm; keep node out of .mise.toml.
+description = "Per-project runtimes such as the JDK, pinned by .mise.toml"
+category = "languages"
+brew = ["mise"]
+
+# ---- Mobile -----------------------------------------------------------------
+
+[[package]]
+id = "android"
+name = "Android"
+description = "Android Studio and the SDK command-line tools"
+category = "mobile"
+cask = ["android-studio", "android-commandlinetools"]
+presets = ["full"]
+
+[[package]]
+id = "cocoapods"
+name = "CocoaPods"
+description = "Dependency manager for Swift and Objective-C projects"
+category = "mobile"
+brew = ["cocoapods"]
+presets = ["full"]
+
+# ---- Fonts ------------------------------------------------------------------
+
+[[package]]
+id = "nerd-fonts"
+name = "Nerd Fonts"
+description = "MonaspiceNe (the terminal font) and Iosevka Nerd Fonts"
+category = "fonts"
+cask = ["font-monaspice-nerd-font", "font-iosevka-nerd-font"]
+presets = ["standard", "full"]
+
+# ---- Apps -------------------------------------------------------------------
+
+[[package]]
+id = "obsidian"
+name = "Obsidian"
+# The cask also links obsidian-cli to $(brew --prefix)/bin/obsidian.
+description = "Markdown notes app"
+category = "apps"
+cask = ["obsidian"]
+adopt = true
+presets = ["minimal", "standard", "full"]
+machines = ["personal"]
+
+[[package]]
+id = "notion"
+name = "Notion"
+description = "Docs and wiki workspace app"
+category = "apps"
+cask = ["notion"]
+adopt = true
+
+[[package]]
+id = "linear"
+name = "Linear"
+description = "Linear issue tracker desktop app"
+category = "apps"
+cask = ["linear"]
+adopt = true
+
+[[package]]
+id = "cursor"
+name = "Cursor"
+description = "AI code editor (VS Code based)"
+category = "apps"
+cask = ["cursor"]
+adopt = true
+
+# ---- Work tools -------------------------------------------------------------
+
+[[package]]
+id = "acli"
+name = "Atlassian CLI"
+description = "Jira, Confluence, and Rovo Dev from the terminal"
+category = "work"
+tap = ["atlassian/acli"]
+brew = ["atlassian/acli/acli"]
+setup = ["acli jira auth login --web"]
+check = "acli jira auth status"
+
+[[package]]
+id = "twg"
+name = "Teamwork Graph CLI"
+# The official installer signs in with OAuth in the browser and installs agent
+# skills, so it needs a TTY: it runs from `dotfiles setup`, never during apply.
+description = "Gives coding agents your Jira, Confluence, and Bitbucket data"
+category = "work"
+setup = ["curl -fsSL --retry 2 https://teamwork-graph.atlassian.com/cli/install | bash"]
+check = "command -v twg >/dev/null && twg doctor >/dev/null 2>&1"

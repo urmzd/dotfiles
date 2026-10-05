@@ -78,24 +78,26 @@
 {{- $install_cortex := promptBoolOnce . "install_cortex" "Install Snowflake Cortex Code CLI (y/n)" false -}}
 
 {{- /* ---- Packages ------------------------------------------------------- */}}
-{{- /* The preset seeds the group flags on first init only. After that the     */}}
-{{- /* saved flags win, so `dotfiles update groups` edits survive re-init.     */}}
-{{- $preset := promptChoiceOnce . "package_preset" "Package preset (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
-{{- $groups := dict "install_cloud" (ne $preset "minimal") "install_fonts" (ne $preset "minimal") "install_mobile" (eq $preset "full") -}}
-{{- range $key, $_ := $groups -}}
-{{-   if hasKey $ $key }}{{ $_ := set $groups $key (index $ $key) }}{{ end -}}
-{{- end -}}
-
-{{- /* Off-ladder extras (heavy, rarely used): one question on first init.    */}}
-{{- $install_alt_langs := false -}}
-{{- $install_temporal := false -}}
-{{- if or (hasKey . "install_alt_langs") (hasKey . "install_temporal") -}}
-{{-   $install_alt_langs = get . "install_alt_langs" | default false -}}
-{{-   $install_temporal = get . "install_temporal" | default false -}}
+{{- /* Optional packages are catalog.toml ids in `packages`, edited later with  */}}
+{{- /* `dotfiles packages`. First init seeds them from a preset; configs from   */}}
+{{- /* before the catalog migrate from their install_* group flags instead.    */}}
+{{- $catalog := include "catalog.toml" | fromToml -}}
+{{- $packages := list -}}
+{{- if hasKey . "packages" -}}
+{{-   $packages = .packages -}}
+{{- else if hasKey . "install_cloud" -}}
+{{-   $legacy := dict "install_cloud" (list "docker" "kubernetes" "terraform" "runpod") "install_fonts" (list "nerd-fonts") "install_mobile" (list "android" "cocoapods") "install_alt_langs" (list "zig" "scala" "mise") "install_temporal" (list "temporal") -}}
+{{-   range $flag, $ids := $legacy -}}
+{{-     if get $ $flag }}{{ $packages = concat $packages $ids }}{{ end -}}
+{{-   end -}}
+{{-   if not $is_work }}{{ $packages = append $packages "obsidian" }}{{ end -}}
 {{- else -}}
-{{-   $extras := promptString "Extra package groups; separate with commas (optional; alt-langs: mise/scala-cli/zig; temporal: Temporal CLI)" "" | nospace | splitList "," -}}
-{{-   $install_alt_langs = has "alt-langs" $extras -}}
-{{-   $install_temporal = has "temporal" $extras -}}
+{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles packages` (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
+{{-   range $catalog.package -}}
+{{-     if and (has $preset (get . "presets" | default list)) (has $machine (get . "machines" | default (list "personal" "work"))) -}}
+{{-       $packages = append $packages .id -}}
+{{-     end -}}
+{{-   end -}}
 {{- end -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name; separate with commas (optional; e.g. k9s)" "" -}}
 
@@ -124,13 +126,8 @@ encryption = "age"
     use_secrets = {{ $use_secrets }}
     install_cortex = {{ $install_cortex }}
 
-    # Package selection: preset seeds the groups on first init; edit freely after
-    package_preset = {{ $preset | quote }}
-    install_cloud = {{ $groups.install_cloud }}
-    install_fonts = {{ $groups.install_fonts }}
-    install_mobile = {{ $groups.install_mobile }}
-    install_alt_langs = {{ $install_alt_langs }}
-    install_temporal = {{ $install_temporal }}
+    # Optional packages: catalog.toml ids. Edit with `dotfiles packages`.
+    packages = {{ $packages | uniq | sortAlpha | toToml }}
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection
