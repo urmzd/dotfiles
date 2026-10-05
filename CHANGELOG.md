@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0 (2026-10-05)
+
+### Features
+
+- **cli**: dotfiles update updates the CLI and pulls + applies the dotfiles; self-update is the binary alone ([3c2ad41](https://github.com/urmzd/dotfiles/commit/3c2ad4168777f705e6a4f9670e3ae139b4ffebe2))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.9.2...v0.10.0)
+
+
 ## 0.9.2 (2026-10-05)
 
 ### Bug Fixes
