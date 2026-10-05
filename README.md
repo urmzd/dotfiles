@@ -49,7 +49,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email and an optional [work pack](#work-pack) repo, and never for personal details. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) repo, and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -149,7 +149,33 @@ Every file is optional, and each hook is a no-op when its file is missing:
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
-**One identity per machine.** A work machine only pulls this repo; edits happen on a personal machine. So a work machine is asked for its work email only, signs with `work_signing_key`, and carries no personal email or key. With no work key, work commits go unsigned rather than borrowing a personal one. One GitHub account can still serve both: add the work email to it as a verified address and upload the work key. `chezmoi init` finds each GPG key by its email, and the key stays in your local `chezmoi.toml`, never in the shared work pack.
+**One identity per machine.** A work machine only pulls this repo (it is public, so no GitHub account is needed for that); edits happen on a personal machine. A work machine is asked for its work email and the **work GitHub account** it pushes as, signs with `work_signing_key`, and carries no personal email, key, or account. With no work key, work commits go unsigned rather than borrowing a personal one. `chezmoi init` finds each GPG key by its email, and the key stays in your local `chezmoi.toml`, never in the shared work pack.
+
+#### Setting up a machine's GitHub identity
+
+Run these on the machine itself, signed in to that machine's GitHub account (the work account on a work laptop). The same steps work on a personal machine with your personal email.
+
+```bash
+# 1. Sign gh in as this machine's account, with permission to add keys
+gh auth login                                   # pick the work account on a work laptop
+gh auth refresh -s write:gpg_key,admin:public_key
+
+# 2. SSH key for pushing (~/.ssh/config uses ~/.ssh/github for github.com)
+ssh-keygen -t ed25519 -C "you@company.com" -f ~/.ssh/github
+gh ssh-key add ~/.ssh/github.pub --title "$(hostname)"
+
+# 3. GPG signing key, named after the email this machine commits with
+gpg --quick-gen-key "Your Name <you@company.com>" ed25519 sign 2y
+gpg --armor --export you@company.com | gh gpg-key add -
+
+# 4. Let chezmoi pick the key up (it matches the key by email), then apply
+chezmoi init && chezmoi apply
+
+# 5. Check: a throwaway signed commit should show "Good signature"
+cd "$(mktemp -d)" && git init -q && git commit -q --allow-empty -m test && git log --show-signature -1
+```
+
+The email in step 3 must be a verified address on the GitHub account (Settings > Emails), or GitHub shows commits as unverified. `pinentry-mac` (managed on macOS) shows the passphrase dialog, so signing also works from editors and agent sessions; tick "Save in Keychain" to stop being asked. If the first `chezmoi init` ran before the key existed (the usual case on a new machine), step 4 re-detects it: an empty saved key is looked up again on every `chezmoi init`. To pin a specific key instead, set `work_signing_key` (work) or `gpg_signing_key` (personal) in `~/.config/chezmoi/chezmoi.toml` to its fingerprint (`gpg --list-secret-keys --keyid-format=long`).
 
 ### Chezmoi automation
 

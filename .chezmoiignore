@@ -17,3 +17,8 @@ catalog.toml
 work-pack/
 cli/
 requirements-pipx.txt
+
+# pinentry-mac is macOS-only; Linux keeps gpg's default pinentry.
+{{- if ne .chezmoi.os "darwin" }}
+.gnupg/gpg-agent.conf
+{{- end }}

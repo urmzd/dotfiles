@@ -13,16 +13,6 @@
 {{- end -}}
 {{- $name := promptStringOnce . "name" "Full name" $default_name -}}
 
-{{- /* GitHub user comes from this repo's origin remote; ask only if unparseable. */}}
-{{- $github_username := get . "github_username" -}}
-{{- if not $github_username -}}
-{{-   $remote := output "git" "-C" .chezmoi.sourceDir "remote" "get-url" "origin" | trim -}}
-{{-   $github_username = regexReplaceAll "^.*github\\.com[:/]([^/]+)/.*$" $remote "${1}" -}}
-{{-   if or (eq $github_username $remote) (not $github_username) -}}
-{{-     $github_username = promptString "GitHub username" -}}
-{{-   end -}}
-{{- end -}}
-
 {{- /* ---- Machine -------------------------------------------------------- */}}
 {{- /* Asked before any email: it decides which identity this machine has.     */}}
 {{- /* Legacy configs migrate from is_work without a prompt.                   */}}
@@ -36,6 +26,22 @@
 {{- end -}}
 {{- $is_work := eq $machine "work" -}}
 
+{{- /* GitHub account this machine pushes as. Personal: this repo's owner,    */}}
+{{- /* read from the origin remote. Work: the separate work account, asked    */}}
+{{- /* once (the dotfiles repo is public, so pulling it needs no account).    */}}
+{{- $github_username := get . "github_username" -}}
+{{- if not $github_username -}}
+{{-   if $is_work -}}
+{{-     $github_username = promptString "Work GitHub username (the account this machine pushes as)" -}}
+{{-   else -}}
+{{-     $remote := output "git" "-C" .chezmoi.sourceDir "remote" "get-url" "origin" | trim -}}
+{{-     $github_username = regexReplaceAll "^.*github\\.com[:/]([^/]+)/.*$" $remote "${1}" -}}
+{{-     if or (eq $github_username $remote) (not $github_username) -}}
+{{-       $github_username = promptString "GitHub username" -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+
 {{- /* One identity per machine. A work machine only pulls this repo (edits    */}}
 {{- /* happen on a personal machine), so it never asks for a personal email or */}}
 {{- /* key. GPG keys are matched by email UID; prompted only when none match.  */}}
@@ -48,24 +54,22 @@
 {{- $use_secrets := false -}}
 {{- if $is_work -}}
 {{-   $work_email = promptStringOnce . "work_email" "Work email for git commits" -}}
-{{-   if not (hasKey . "work_signing_key") -}}
-{{-     if $has_gpg -}}
-{{-       $work_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $work_email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
-{{-     end -}}
-{{-     if not $work_signing_key -}}
-{{-       $work_signing_key = promptString "Work GPG signing key ID (optional)" "" -}}
-{{-     end -}}
+{{- /* Detect whenever no key is saved, so creating the key and re-running  */ -}}
+{{- /* `chezmoi init` picks it up; prompt only on the first init.           */ -}}
+{{-   if and (not $work_signing_key) $has_gpg -}}
+{{-     $work_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $work_email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
+{{-   end -}}
+{{-   if and (not $work_signing_key) (not (hasKey . "work_signing_key")) -}}
+{{-     $work_signing_key = promptString "Work GPG signing key ID (optional)" "" -}}
 {{-   end -}}
 {{-   $work_pack_repo = promptStringOnce . "work_pack_repo" "Work pack git URL to clone into ~/.config/work (optional)" "" -}}
 {{- else -}}
 {{-   $email = promptStringOnce . "email" "Email for git commits" -}}
-{{-   if not (hasKey . "gpg_signing_key") -}}
-{{-     if $has_gpg -}}
-{{-       $gpg_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
-{{-     end -}}
-{{-     if not $gpg_signing_key -}}
-{{-       $gpg_signing_key = promptString "GPG signing key ID (optional)" "" -}}
-{{-     end -}}
+{{-   if and (not $gpg_signing_key) $has_gpg -}}
+{{-     $gpg_signing_key = output "sh" "-c" "gpg --list-secret-keys --with-colons -- \"<$1>\" 2>/dev/null || true" "sh" $email | regexFind "fpr:+[0-9A-F]{40}" | regexFind "[0-9A-F]{40}" -}}
+{{-   end -}}
+{{-   if and (not $gpg_signing_key) (not (hasKey . "gpg_signing_key")) -}}
+{{-     $gpg_signing_key = promptString "GPG signing key ID (optional)" "" -}}
 {{-   end -}}
 {{-   $use_secrets = promptBoolOnce . "use_secrets" "Use age encryption + 1Password CLI for secrets (y/n)" false -}}
 {{- end -}}

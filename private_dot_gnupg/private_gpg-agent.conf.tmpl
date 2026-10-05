@@ -1,0 +1,4 @@
+{{- /* macOS only (see .chezmoiignore): pinentry-mac shows the passphrase  */ -}}
+{{- /* dialog for signing from editors and agent sessions, which have no TTY */ -}}
+{{- /* for the default curses pinentry. The passphrase can go in Keychain.   */ -}}
+pinentry-program {{ if eq .chezmoi.arch "arm64" }}/opt/homebrew{{ else }}/usr/local{{ end }}/bin/pinentry-mac

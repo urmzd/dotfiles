@@ -83,6 +83,9 @@ alias ls='ls --color=auto'
 
 export EDITOR='nvim'
 
+# Lets a terminal pinentry find this TTY when gpg signs a commit.
+export GPG_TTY=$(tty)
+
 alias vi="nvim"
 alias vim="nvim"
 

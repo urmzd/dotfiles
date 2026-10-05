@@ -24,7 +24,8 @@ for machine in personal work; do
         --persistent-state "$work/$machine.boltdb" \
         --no-tty --promptDefaults --promptChoice "Machine type=$machine" \
         --promptString "Email for git commits=ci@example.com" \
-        --promptString "Work email for git commits=ci@work.example.com"
+        --promptString "Work email for git commits=ci@work.example.com" \
+        --promptString "Work GitHub username (the account this machine pushes as)=ci-work"
 
     common=(--config "$cfg" --source "$src" --destination "$work/home-$machine"
             --persistent-state "$work/$machine.boltdb" --no-tty)
