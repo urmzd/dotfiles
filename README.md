@@ -91,7 +91,7 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 - Snowflake Cortex Code, [`run_onchange_after_install-cortex.sh.tmpl`](run_onchange_after_install-cortex.sh.tmpl) (gated on `install_cortex` feature flag)
 - gh CLI extensions, [`run_onchange_after_install-gh-extensions.sh.tmpl`](run_onchange_after_install-gh-extensions.sh.tmpl) ([`github/gh-stack`](https://github.com/github/gh-stack) for stacked PRs)
 
-**Optional packages** live in [`catalog.toml`](catalog.toml): Docker, Kubernetes, Terraform, RunPod, Temporal, Zig, Scala, mise, Android, CocoaPods, Nerd Fonts, Obsidian, Notion, Linear, Cursor, the Atlassian CLI (`acli`), and the Teamwork Graph CLI (`twg`). Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries, and packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
+**Optional packages** live in [`catalog.toml`](catalog.toml): Docker, Kubernetes, Terraform, RunPod, Temporal, Zig, Scala, mise, Android, CocoaPods, Nerd Fonts, Obsidian, Notion, Linear, Cursor, the Atlassian CLI (`acli`), and the Teamwork Graph CLI (`twg`). Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
 
 On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev) seeds the selection from each entry's `presets`. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI release is needed.
 
@@ -119,7 +119,7 @@ The Brewfile installer continues past individual package failures, retries the r
 
 ### Work pack
 
-Company-specific setup lives in a **work pack**: a separate git repo of plain files, owned by the company and shareable with teammates whether or not they use these dotfiles. On a work machine, `chezmoi init` asks for its URL and clones it to `~/.config/work/` (refreshed every 24h by [`.chezmoiexternal.toml.tmpl`](.chezmoiexternal.toml.tmpl)). Only the URL is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. You can also clone or create `~/.config/work/` by hand.
+Company-specific setup lives in a **work pack**: a separate git repo of plain files, owned by the company and shareable with teammates whether or not they use these dotfiles. On a work machine, `chezmoi init` asks for its URL and clones it to `~/.config/work/` (refreshed every 24h by [`.chezmoiexternal.toml.tmpl`](.chezmoiexternal.toml.tmpl)). Only the URL is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. You can also clone or create `~/.config/work/` by hand. To start one, copy the [`work-pack/`](work-pack/) template into a new company repo; its README has the steps.
 
 Every file is optional, and each hook is a no-op when its file is missing:
 
@@ -146,6 +146,7 @@ These scripts run automatically on `chezmoi apply`:
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `install-gh-extensions` | run_onchange (after) | Script changes (re-pin a gh extension version) |
+| `install-catalog-linux` | run_onchange (after) | Linux only: the `packages` selection or `catalog.toml` changes |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
 | `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |

@@ -1,0 +1,9 @@
+# Company SSH hosts, included at the top of ~/.ssh/config.
+
+# Host bastion
+#     HostName bastion.example.com
+#     User your-username
+#     IdentityFile ~/.ssh/work_ed25519
+#
+# Host *.internal.example.com
+#     ProxyJump bastion

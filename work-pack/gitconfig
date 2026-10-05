@@ -1,0 +1,6 @@
+# Company git settings, included from ~/.gitconfig. The work email and signing
+# key come from each person's chezmoi config, not from here.
+
+# Use SSH for company repos even when cloned over HTTPS:
+# [url "git@github.com:example-org/"]
+#     insteadOf = https://github.com/example-org/
