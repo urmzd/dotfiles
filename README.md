@@ -103,7 +103,8 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 | editors | Cursor, Visual Studio Code |
 | chat | Slack, Discord, Zoom |
 | productivity | 1Password, Raycast, Linear, Figma |
-| ai | Claude, ChatGPT (desktop apps) |
+| ai | Claude, ChatGPT (desktop apps), Warp Agent CLI (`warp`) |
+| terminals | Warp |
 | media | Spotify |
 | work | Atlassian CLI (`acli`), Teamwork Graph CLI (`twg`) |
 

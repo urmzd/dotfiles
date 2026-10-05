@@ -272,6 +272,25 @@ category = "ai"
 cask = ["chatgpt"]
 adopt = true
 
+[[package]]
+id = "warp-cli"
+name = "Warp Agent CLI"
+# Warp's agentic CLI (cask warp-agent-cli, binary `warp`, macOS 14+). Not
+# Cloudflare WARP, whose command is also called warp-cli.
+description = "warp: Warp's coding agent in any terminal"
+category = "ai"
+cask = ["warp-agent-cli"]
+
+# ---- Terminals ----------------------------------------------------------------
+
+[[package]]
+id = "warp"
+name = "Warp"
+description = "Warp terminal app (Ghostty stays the default terminal)"
+category = "terminals"
+cask = ["warp"]
+adopt = true
+
 # ---- Media --------------------------------------------------------------------
 
 [[package]]
