@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 (2026-10-05)
+
+### Bug Fixes
+
+- **apply**: keep going past failing steps; gh extensions wait for sign-in ([9d3594d](https://github.com/urmzd/dotfiles/commit/9d3594dcc4f6e65a27c6fb570c8d41f696cc8bb8))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.4.0...v0.4.1)
+
+
 ## 0.4.0 (2026-10-05)
 
 ### Features
