@@ -31,7 +31,7 @@ with numbered choices like `❯ 1. Yes`. Send `1` + Enter to approve once told t
 |------|---------|
 | Interactive | `codex` (or `codex "<prompt>"` to seed the first turn) |
 | Headless | `codex exec "<prompt>"` |
-| Approval / sandbox | `codex --ask-for-approval <untrusted\|on-failure\|on-request\|never> --sandbox <mode>` |
+| Approval / sandbox | `codex --ask-for-approval <on-request\|never> --sandbox <mode>` |
 | Full auto | `codex --full-auto` |
 | Bypass everything | `codex --dangerously-bypass-approvals-and-sandbox` |
 | Resume | `codex resume --last` |

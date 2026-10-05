@@ -19,14 +19,13 @@
 # Drop to a read-only profile (`codex --profile reviewer` or `--profile plan`)
 # for inspection-only work where no write should ever happen.
 #
-# ---- Full option space (verified against codex-cli 0.153.4, not docs) -------
+# ---- Full option space (verified against codex-cli 0.160.0, not docs) -------
 # Enumerated by feeding a bogus value and reading the serde error, e.g.
 #   codex --strict-config exec -c approval_policy=bogus --skip-git-repo-check x
 #
-# approval_policy: "untrusted" | "on-failure" | "on-request" | "granular" | "never"
-#   Only "on-request" and "never" are still exposed by `-a/--ask-for-approval`;
-#   "untrusted" and "on-failure" remain deserializable but are dropped from the
-#   CLI help in 0.153.4 (deprecated -- do not adopt them).
+# approval_policy: "on-request" | "granular" | "never"
+#   codex-cli 0.160 rejects "untrusted" outright ("no longer supported");
+#   "on-failure" was dropped from the CLI help in 0.153.4. Do not use either.
 #   "granular" is a NEWTYPE variant, so a bare string fails to parse. It takes a
 #   GranularApprovalConfig of five booleans and reads as:
 #     approval_policy = { granular = { sandbox_approval = true, rules = true,
@@ -94,7 +93,7 @@ approval_policy = "on-request"
 # managers, scoped out-of-workspace edits) and only surfaces the ambiguous or
 # destructive ones. Profile overlays merge onto this file and inherit it.
 approvals_reviewer = "auto_review"
-review_model = "gpt-5.6"
+review_model = "codex-auto-review"  # purpose-built approval reviewer
 
 # ---- Turn-ended notifier ---------------------------------------------------
 # Written by the Codex desktop app on launch; managed here so `chezmoi apply`
