@@ -15,7 +15,8 @@ cd dotfiles
 
 | Command | What it does |
 |---------|-------------|
-| `chezmoi diff` | Preview pending changes |
+| `.github/scripts/check.sh` | Render every template for personal and work machines (what CI runs) |
+| `chezmoi diff --use-builtin-diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
 | `dotfiles packages` | Search + toggle optional packages from `catalog.toml`, then apply |
 | `dotfiles update` | `brew upgrade` + AI CLIs + `chezmoi apply` |

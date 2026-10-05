@@ -49,7 +49,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), personal email, machine type (`personal` or `work`), Cortex, package preset, extras, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A work machine also asks for a work email and an optional [work pack](#work-pack) repo; a personal machine asks about secrets management instead. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), personal email, machine type (`personal` or `work`), Cortex, package preset, and excludes. GitHub user comes from the repo remote and the GPG key from your keyring. A work machine also asks for a work email and an optional [work pack](#work-pack) repo; a personal machine asks about secrets management instead. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -142,7 +142,7 @@ These scripts run automatically on `chezmoi apply`:
 | Script | Type | Trigger |
 | ------ | ---- | ------- |
 | `install-packages-v2` | run_once (before) | First apply (installs Homebrew + bootstrap Linux packages) |
-| `brewfile-install` | run_onchange (after) | Brewfile (any package group flag) or `pkg_exclude` changes |
+| `brewfile-install` | run_onchange (after) | Brewfile, `catalog.toml`, the `packages` selection, `pkg_exclude`, or the work pack Brewfile changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `install-gh-extensions` | run_onchange (after) | Script changes (re-pin a gh extension version) |
@@ -150,9 +150,20 @@ These scripts run automatically on `chezmoi apply`:
 | `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
 | `sync-agent-resources` | run (after) | Every apply (keeps new local skills and agents managed by `agentspec`) |
-| `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag` CLIs) |
+| `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag`, and the `dotfiles` CLI) |
 | `configure-terminal` | run_once (after) | First apply only |
 | `load-docker-cleanup` | run_once (after) | First apply only |
+
+Every script prints through [`.chezmoitemplates/ui.sh`](.chezmoitemplates/ui.sh): one `==>` header per script, quiet when nothing changed, and a next step under every warning or failure.
+
+### CI and releases
+
+| Workflow | Runs on | What it does |
+| -------- | ------- | ------------ |
+| [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then syntax-checks every rendered `run_` script |
+| [`release.yml`](.github/workflows/release.yml) | push to `main` | After CI passes, [sr](https://github.com/urmzd/sr) tags the release and updates `CHANGELOG.md` from conventional commits |
+
+Run the same check locally before pushing: `.github/scripts/check.sh`. The `dotfiles` CLI releases separately from [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli) (binaries plus crates.io via trusted publishing). Release secrets for both repos are managed in `urmzd/infra`.
 
 ### AI tools
 

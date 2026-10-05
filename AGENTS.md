@@ -40,6 +40,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_gemini/` | `~/.gemini/` | Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` |
 | `dot_config/opencode/` | `~/.config/opencode/` | OpenCode instructions; native install, update, and status managed by dotfiles; portable agents rendered by agentspec |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
+| `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI ([urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli)) |
 | (not tracked) | `~/.config/work/` | Work pack: company overlay cloned from `work_pack_repo` via `.chezmoiexternal.toml.tmpl`; never add its files to this repo |
 
 ## Discovering Structure
@@ -68,9 +69,12 @@ The `guardian` subagent and the `orchestrate-agents` skill are designed to work 
 ## Testing
 
 ```bash
-chezmoi diff                    # Dry-run before applying
+.github/scripts/check.sh        # Render personal + work machines, bash -n every run_ script (same as CI)
+chezmoi diff --use-builtin-diff # Dry-run before applying (diff.command is nvim; it hangs headless)
 chezmoi verify                  # Verify source state
 ```
+
+CI (`.github/workflows/ci.yml`) runs `check.sh` on macOS and Linux for every PR; `release.yml` runs it again, then `sr` tags and writes `CHANGELOG.md` on push to `main`.
 
 ## Commit Guidelines
 

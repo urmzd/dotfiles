@@ -99,8 +99,8 @@ Formatters follow the same path, derived from conform's own `formatters_by_ft`.
 | Astro | `astro` | |
 | Prose, LaTeX | `ltex_plus` | `ltex-ls` is unmaintained; `ltex-ls-plus` is the fork that still ships |
 
-Scala needs `coursier` on PATH (`brew install coursier`, or the `install_alt_langs`
-Brewfile preset). Metals v2 is pinned to a milestone build, `2.0.0-M17`, because
+Scala needs `coursier` on PATH (`dotfiles add scala`, which installs scala-cli and
+coursier). Metals v2 is pinned to a milestone build, `2.0.0-M17`, because
 that is what v2 currently ships as; v1.6.x remains the stable line if you would
 rather move back.
 
