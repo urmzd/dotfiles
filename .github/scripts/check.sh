@@ -11,6 +11,11 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 : > "$work/empty.toml"
 
+# Parse with the oldest bash a script can meet: macOS's /bin/bash 3.2 runs
+# every `env bash` script on a fresh Mac before Homebrew installs bash 5.
+shell=bash
+[ "$(uname -s)" = Darwin ] && shell=/bin/bash
+
 for machine in personal work; do
     echo "==> $machine"
     cfg="$work/$machine.toml"
@@ -33,7 +38,7 @@ for machine in personal work; do
     tar -xf "$work/$machine.tar" -C "$work/$machine-files"
     count=0
     while IFS= read -r script; do
-        bash -n "$work/$machine-files/$script"
+        "$shell" -n "$work/$machine-files/$script"
         count=$((count + 1))
     done < <(chezmoi "${common[@]}" managed --include scripts)
     echo "  ✓ $count scripts parse"

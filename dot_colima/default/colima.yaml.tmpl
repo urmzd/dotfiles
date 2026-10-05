@@ -1,5 +1,10 @@
-{{- /* Calculate 3/4 of system memory in GiB for macOS */ -}}
-{{- $memBytes := output "sysctl" "-n" "hw.memsize" | trim | int64 -}}
+{{- /* Calculate 3/4 of system memory in GiB (sysctl on macOS, /proc on Linux) */ -}}
+{{- $memBytes := 0 -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $memBytes = output "sysctl" "-n" "hw.memsize" | trim | int64 -}}
+{{- else -}}
+{{-   $memBytes = output "awk" "/^MemTotal:/ { print $2 * 1024 }" "/proc/meminfo" | trim | int64 -}}
+{{- end -}}
 {{- $memGiB := div $memBytes 1073741824 -}}
 {{- $targetMem := div (mul $memGiB 3) 4 -}}
 # Number of CPUs to be allocated to the virtual machine.

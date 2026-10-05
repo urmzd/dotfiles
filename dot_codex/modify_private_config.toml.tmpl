@@ -9,10 +9,13 @@
 set -euo pipefail
 
 current="$(cat)"
-managed="$(cat <<'MANAGED_EOF'
+# read -d '' rather than $(cat <<EOF): macOS's /bin/bash 3.2 misparses a
+# heredoc inside $(...) when the text holds parentheses, and that is the bash
+# `env bash` finds on a fresh Mac before Homebrew's bash is installed.
+IFS= read -r -d '' managed <<'MANAGED_EOF' || true
 {{ includeTemplate "codex-config.toml" . -}}
 MANAGED_EOF
-)"
+managed="${managed%$'\n'}"
 
 printf '%s\n' "$managed"
 
