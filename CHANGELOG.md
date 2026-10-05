@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.1 (2026-10-05)
+
+### Bug Fixes
+
+- **agents**: link adopted dotfiles skills to every AI tool, healing ones adopted unlinked ([ddff864](https://github.com/urmzd/dotfiles/commit/ddff864afbc2a938c4644bdb6476d7912e50f5b1))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.11.0...v0.11.1)
+
+
 ## 0.11.0 (2026-10-05)
 
 ### Features
