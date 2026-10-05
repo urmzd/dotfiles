@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "dotfiles-cli"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "agentspec-update",
  "anyhow",

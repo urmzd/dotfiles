@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-10-05)
+
+### Features
+
+- **cli**: identity offers a new SSH key when the old one is on another account ([6372e98](https://github.com/urmzd/dotfiles/commit/6372e98cb4455ef38b54c7cea09a164a6f026a9c))
+- **cli**: dotfiles identity --account to change the machine's GitHub account ([b71c513](https://github.com/urmzd/dotfiles/commit/b71c5133aa35117a55a1efd29cc7a66c4d50789f))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.5.0...v0.6.0)
+
+
 ## 0.5.0 (2026-10-05)
 
 ### Features
