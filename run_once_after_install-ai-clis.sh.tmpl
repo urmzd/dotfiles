@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
 # Install AI tooling CLIs (Claude Code, Codex, Antigravity, Copilot) at chezmoi apply time.
 # On macOS Codex comes from the Homebrew cask (Brewfile.tmpl); npm is Linux-only.
 # Sentinel-gated: re-runs do nothing once `~/.local/state/ai-tools-installed` exists.

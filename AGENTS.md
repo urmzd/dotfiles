@@ -64,7 +64,7 @@ The `guardian` subagent and the `orchestrate-agents` skill are designed to work 
 
 ## Code Style
 
-- Shell scripts: POSIX-compatible where possible, bash/zsh when needed
+- Shell scripts: POSIX-compatible where possible, bash/zsh when needed. **bash 3.2 is the floor**: `#!/usr/bin/env bash` finds macOS's `/bin/bash` 3.2 on a fresh Mac. Every `run_` and `modify_` template starts with `{{ includeTemplate "bash-modern.sh" . }}` right after the shebang, which re-runs the script under Homebrew's bash 5 when present, but scripts must still work on 3.2. No associative arrays, `mapfile`, `${x,,}`, `|&`, `&>>`, `[[ -v`, or heredocs inside `$(...)` (3.2 misparses them; use `IFS= read -r -d '' var <<'EOF' || true`). `.github/scripts/lint-shell.sh` enforces this in CI.
 - Templates: Use `{{ .chezmoi.os }}` guards for platform-specific blocks
 - Script output: every `run_` script includes `{{ includeTemplate "ui.sh" . }}` and prints only through its `ui_*` helpers (one `ui_section`, quiet when nothing changed, a `ui_hint` with the next step under every warning or failure). No raw `echo` status lines or emoji.
 

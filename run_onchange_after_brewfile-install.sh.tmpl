@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
 # Chezmoi run_onchange - Install/update Brewfile packages (resilient).
 # Runs after the Brewfile target is rendered to $HOME. Continues past individual
 # package failures, retries the remainder once, then categorizes what went wrong

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
 # chezmoi modify_ script for ~/.docker/config.json.
 # Docker writes to this file itself (auths, credsStore, currentContext), so a
 # plain managed file would clobber logins on every apply. Instead we merge in

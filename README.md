@@ -203,7 +203,7 @@ Every script prints through [`.chezmoitemplates/ui.sh`](.chezmoitemplates/ui.sh)
 
 | Workflow | Runs on | What it does |
 | -------- | ------- | ------------ |
-| [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then syntax-checks every rendered `run_` script; `cli/` gets rustfmt, clippy, and tests |
+| [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then runs the shell gate ([`lint-shell.sh`](.github/scripts/lint-shell.sh)): every script parses under the shell that runs it, with macOS's bash 3.2 as the floor, no bash-4-only constructs, and every `modify_` merge script produces valid, key-preserving output under 3.2; `cli/` gets rustfmt, clippy, and tests |
 | [`release.yml`](.github/workflows/release.yml) | push to `main` | After CI passes, [sr](https://github.com/urmzd/sr) tags the release, bumps `cli/Cargo.toml`, and updates `CHANGELOG.md` from conventional commits; a build matrix then attaches `dotfiles-<target>` binaries and `.sha256` files to the release |
 
 Run the same checks locally before pushing: `.github/scripts/check.sh`, plus `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings`, and `cargo test` in `cli/`. Release secrets are managed in `urmzd/infra`.

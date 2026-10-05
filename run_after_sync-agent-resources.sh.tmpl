@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
 # Keep local agent skills and agents managed after every chezmoi apply.
 # Runs on every apply, so it prints one summary line, not agentspec's full report.
 set -euo pipefail

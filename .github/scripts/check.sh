@@ -16,6 +16,16 @@ trap 'rm -rf "$work"' EXIT
 shell=bash
 [ "$(uname -s)" = Darwin ] && shell=/bin/bash
 
+# Render with the floor shell too: put a `bash` that is /bin/bash first on PATH
+# (what `#!/usr/bin/env bash` finds on a fresh Mac) and disable the switch to a
+# newer bash, so modify_ scripts run under 3.2 during the render.
+export DOTFILES_BASH_FLOOR=1
+if [ "$(uname -s)" = Darwin ]; then
+    mkdir -p "$work/floor-bin"
+    ln -sf /bin/bash "$work/floor-bin/bash"
+    export PATH="$work/floor-bin:$PATH"
+fi
+
 for machine in personal work; do
     echo "==> $machine"
     cfg="$work/$machine.toml"
@@ -44,4 +54,6 @@ for machine in personal work; do
         count=$((count + 1))
     done < <(chezmoi "${common[@]}" managed --include scripts)
     echo "  ✓ $count scripts parse"
+
+    "$src/.github/scripts/lint-shell.sh" "$cfg"
 done
