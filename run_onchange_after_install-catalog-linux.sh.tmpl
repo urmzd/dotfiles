@@ -18,6 +18,7 @@ ui_section "Optional packages (catalog)"
 {{-     $dnf = concat $dnf (get . "dnf" | default list) }}
 {{-     $pacman = concat $pacman (get . "pacman" | default list) }}
 {{-     $npm = concat $npm (get . "npm" | default list) }}
+{{-     $npm = concat $npm (get . "linux_npm" | default list) }}
 {{-     $uv = concat $uv (get . "uv" | default list) }}
 {{-   end }}
 {{- end }}

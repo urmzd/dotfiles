@@ -39,6 +39,19 @@ pub struct Package {
     /// Python CLIs, `uv tool install`.
     #[serde(default)]
     pub uv: Vec<String>,
+    /// Installer URL run during apply when `check` fails (Claude Code, agy, ...).
+    #[serde(default)]
+    pub script: Option<String>,
+    #[serde(default)]
+    pub script_shell: Option<String>,
+    #[serde(default)]
+    pub script_args: Vec<String>,
+    /// Command run after a successful script install.
+    #[serde(default)]
+    pub post: Option<String>,
+    /// npm packages for Linux only (macOS gets the brew/cask entries).
+    #[serde(default)]
+    pub linux_npm: Vec<String>,
     /// Interactive commands (sign-in, TTY installers) run by `dotfiles setup`.
     #[serde(default)]
     pub setup: Vec<String>,
@@ -70,9 +83,26 @@ impl Package {
             linux.dedup();
             linux
         };
+        if !cfg!(target_os = "macos") {
+            names.extend(self.linux_npm.iter().map(|p| format!("{p} (npm)")));
+        }
         names.extend(self.npm.iter().map(|p| format!("{p} (npm)")));
         names.extend(self.uv.iter().map(|p| format!("{p} (uv)")));
+        if let Some(url) = &self.script {
+            names.push(format!("installer {url}"));
+        }
         names
+    }
+
+    /// Shell command that downloads the installer, refuses an empty download,
+    /// then runs it (never `curl | sh`, which "succeeds" on a failed download).
+    pub fn installer_command(&self) -> Option<String> {
+        let url = self.script.as_ref()?;
+        let shell = self.script_shell.as_deref().unwrap_or("sh");
+        let args: String = self.script_args.iter().map(|a| format!(" '{a}'")).collect();
+        Some(format!(
+            "t=$(mktemp) && curl -fsSL --retry 2 '{url}' -o \"$t\" && [ -s \"$t\" ] && {shell} \"$t\"{args}; rc=$?; rm -f \"$t\"; exit $rc"
+        ))
     }
 }
 

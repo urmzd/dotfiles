@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Install selected catalog packages that come from an installer script
+# (catalog field `script`, e.g. Claude Code, agy, OpenCode) rather than
+# Homebrew. Runs every apply and is silent when each package's `check` passes;
+# a missing one is installed through fetch_and_run (downloaded and checked
+# before it runs), and a failure only warns, so the next apply retries it.
+set -u
+{{ includeTemplate "ui.sh" . }}
+
+shown=0
+install_one() { # <name> <url> <shell> <check, base64> <post, base64> [installer args...]
+    local name="$1" url="$2" shell="$3" check post
+    check="$(printf '%s' "$4" | base64 --decode)"
+    post="$(printf '%s' "$5" | base64 --decode)"
+    shift 5
+    if [ -n "$check" ] && sh -c "$check" >/dev/null 2>&1; then
+        return 0
+    fi
+    if [ "$shown" -eq 0 ]; then
+        ui_section "Installer-based packages"
+        shown=1
+    fi
+    if ui_run "installed $name" fetch_and_run "$url" "$shell" "$@"; then
+        if [ -n "$post" ] && ! sh -c "$post" >/dev/null 2>&1; then
+            ui_warn "$name: post-install cleanup failed"
+        fi
+    else
+        ui_hint "retried on the next chezmoi apply"
+    fi
+}
+
+{{- $selected := get . "packages" | default list }}
+{{- range (include "catalog.toml" | fromToml).package }}
+{{-   if and (has .id $selected) (get . "script") }}
+install_one {{ .name | quote }} {{ .script | quote }} {{ get . "script_shell" | default "sh" | quote }} {{ get . "check" | default "" | b64enc | quote }} {{ get . "post" | default "" | b64enc | quote }}{{ range (get . "script_args" | default list) }} {{ . | quote }}{{ end }}
+{{-   end }}
+{{- end }}
+exit 0

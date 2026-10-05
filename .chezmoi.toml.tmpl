@@ -104,6 +104,18 @@
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
+{{- /* AI coding agents (catalog category "agents"): a multi-select on first */}}
+{{- /* init. Configs from before they joined the catalog get the set the old  */}}
+{{- /* install script always installed, once, with no question.               */}}
+{{- $agent_ids := list -}}
+{{- range $catalog.package }}{{ if eq .category "agents" }}{{ $agent_ids = append $agent_ids .id }}{{ end }}{{ end -}}
+{{- if not (hasKey . "agents_seeded") -}}
+{{-   if or (hasKey . "packages") (hasKey . "install_cloud") -}}
+{{-     $packages = concat $packages (list "claude-code" "codex" "copilot" "agy" "opencode") -}}
+{{-   else -}}
+{{-     $packages = concat $packages (promptMultichoice "AI coding CLIs to install (more later with `dotfiles packages`)" $agent_ids (list "claude-code" "codex")) -}}
+{{-   end -}}
+{{- end -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name; separate with commas (optional; e.g. k9s)" "" -}}
 
 {{- if $use_secrets }}
@@ -133,6 +145,7 @@ encryption = "age"
 
     # Optional packages: catalog.toml ids. Edit with `dotfiles packages`.
     packages = {{ $packages | uniq | sortAlpha | toToml }}
+    agents_seeded = true
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection

@@ -4,7 +4,7 @@
 # Source of truth on macOS for everything except:
 #   - gcloud / aws-cli   -> run_onchange_after_install-cloud-clis.sh.tmpl (pinned upstream)
 #   - cortex             -> run_onchange_after_install-cortex.sh.tmpl   (pinned upstream)
-#   - claude/agy/copilot -> run_once_after_install-ai-clis.sh.tmpl       (npm/curl)
+#   - AI coding CLIs     -> catalog.toml category "agents" (picked per machine)
 #   - company tools      -> <work pack>/Brewfile (optional work pack, appended at install time)
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
 #
@@ -32,8 +32,6 @@ brew "uv"
 brew "tealdeer"
 brew "coreutils"  # Provides gls/gdircolors used in dot_zshrc.tmpl color setup
 brew "reattach-to-user-namespace"  # tmux clipboard integration on macOS
-brew "opencode"  # vendor-neutral agent harness: Copilot/OpenAI/Anthropic-key providers
-cask "codex"     # OpenAI Codex CLI; brew-managed so it survives fnm Node switches (npm global did not)
 
 {{- if .use_secrets }}
 

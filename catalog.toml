@@ -18,8 +18,89 @@
 #                     sign-in or installers that need a TTY (never during apply)
 #   check             shell test that passes once setup is done; setup is
 #                     skipped while it passes
+#   script            installer URL run during apply (via fetch_and_run) when
+#                     `check` fails; script_shell (default sh) and script_args
+#                     control how; post runs after a successful install
+#   linux_npm         npm packages for Linux only (macOS uses brew/cask)
 #   presets           presets that select it on first init
 #   machines          machine types those presets apply to (default: both)
+
+# ---- AI coding agents ---------------------------------------------------------
+# Picked at first init (multi-select, default: Claude Code + Codex); change
+# later with `dotfiles packages`. Machines from before the catalog keep the set
+# they had (Claude Code, Codex, Copilot, agy, OpenCode).
+
+[[package]]
+id = "claude-code"
+name = "Claude Code"
+# Native installer: Anthropic's recommended path, updates itself in place.
+description = "claude: Anthropic's coding agent CLI"
+category = "agents"
+script = "https://claude.ai/install.sh"
+script_shell = "bash"
+check = "command -v claude >/dev/null || [ -x \"$HOME/.local/bin/claude\" ]"
+
+[[package]]
+id = "codex"
+name = "Codex"
+description = "codex: OpenAI's coding agent CLI"
+category = "agents"
+cask = ["codex"]
+linux_npm = ["@openai/codex"]
+
+[[package]]
+id = "copilot"
+name = "GitHub Copilot CLI"
+description = "copilot: GitHub's coding agent CLI"
+category = "agents"
+cask = ["copilot-cli"]
+linux_npm = ["@github/copilot"]
+
+[[package]]
+id = "agy"
+name = "Antigravity CLI"
+# The installer appends a PATH line to shell startup files (already on PATH
+# via ~/.zshenv); `post` removes it so chezmoi does not see ~/.zshrc changed.
+description = "agy: Google's coding agent CLI (replaces Gemini CLI)"
+category = "agents"
+script = "https://antigravity.google/cli/install.sh"
+script_shell = "bash"
+check = "command -v agy >/dev/null || [ -x \"$HOME/.local/bin/agy\" ]"
+post = "for f in \"$HOME/.zshrc\" \"$HOME/.zprofile\" \"$HOME/.profile\"; do [ -f \"$f\" ] && perl -i -0pe 's/\\n+# Added by Antigravity CLI installer\\nexport PATH=\"[^\"]*\\.local\\/bin:\\$PATH\"\\n?/\\n/g' \"$f\"; done; true"
+
+[[package]]
+id = "opencode"
+name = "OpenCode"
+# Native installer (updates itself); --no-modify-path keeps shell files intact.
+description = "opencode: provider-neutral coding agent (Copilot, OpenAI, Anthropic keys)"
+category = "agents"
+script = "https://opencode.ai/install"
+script_shell = "bash"
+script_args = ["--no-modify-path"]
+check = "command -v opencode >/dev/null || [ -x \"$HOME/.opencode/bin/opencode\" ]"
+
+[[package]]
+id = "gemini-cli"
+name = "Gemini CLI"
+description = "gemini: Google's earlier coding agent CLI (agy supersedes it)"
+category = "agents"
+brew = ["gemini-cli"]
+linux_npm = ["@google/gemini-cli"]
+
+[[package]]
+id = "cursor-cli"
+name = "Cursor Agent CLI"
+description = "cursor-agent: Cursor's coding agent in the terminal"
+category = "agents"
+cask = ["cursor-cli"]
+
+[[package]]
+id = "amp"
+name = "Amp"
+description = "amp: Sourcegraph's coding agent CLI"
+category = "agents"
+brew = ["amp"]
+linux_npm = ["@sourcegraph/amp"]
 
 # ---- Containers and cloud ---------------------------------------------------
 

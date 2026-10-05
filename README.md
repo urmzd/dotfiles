@@ -51,7 +51,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 The bootstrap does not depend on our releases being healthy. chezmoi comes from get.chezmoi.io, falling back to Homebrew. The `dotfiles` CLI comes from the newest release that has a binary for your platform (the latest can be mid-build or failed), falling back to building `cli/` from the checkout with cargo. If both fail, the apply still finishes: the CLI is optional. Re-running the bootstrap fast-forwards an existing checkout before applying, and every third-party installer is downloaded and checked before it runs, so a network failure warns instead of passing silently.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) (git URL or local folder), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, which AI coding CLIs to install, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) (git URL or local folder), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -118,7 +118,7 @@ On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + c
 
 The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI tools** (installed via [`run_once_after_install-ai-clis.sh.tmpl`](run_once_after_install-ai-clis.sh.tmpl), sentinel-gated): Claude Code, Codex (Homebrew cask on macOS, npm on Linux; workspace-write "Auto" default with `writer`/`reviewer`/`plan`/`guardian` profiles), Antigravity CLI (agy, self-updating), GitHub Copilot. OpenCode uses the separate native installer [`run_once_after_install-opencode.sh.tmpl`](run_once_after_install-opencode.sh.tmpl), so it installs on existing machines even when the AI sentinel is present. `dotfiles update ai` and `dotfiles update` also update OpenCode through that installer without changing managed shell profiles.
+**AI coding CLIs** are catalog packages (category **agents**): Claude Code, Codex, GitHub Copilot CLI, Antigravity (`agy`), OpenCode, Gemini CLI, Cursor Agent CLI, and Amp. The first `chezmoi init` asks which to install (multi-select, default Claude Code + Codex); change them any time with `dotfiles packages`. Claude Code, agy, and OpenCode use their own installers, which keep them updated ([`run_after_install-catalog-scripts.sh.tmpl`](run_after_install-catalog-scripts.sh.tmpl), retried every apply until present); the rest come from Homebrew (npm on Linux). Codex runs with a workspace-write "Auto" default and `writer`/`reviewer`/`plan`/`guardian` profiles. `dotfiles update ai` upgrades the selected ones.
 
 ### Adding a new tool
 
@@ -199,7 +199,9 @@ These scripts run automatically on `chezmoi apply`. The bootstrap and every `dot
 | `install-gh-extensions` | run (after) | Every apply; silent once installed. Waits for `gh` sign-in (`dotfiles identity`) instead of failing |
 | `install-catalog-linux` | run_onchange (after) | Linux only: the `packages` selection or `catalog.toml` changes |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
-| `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |
+| `setup-node` | run (after) | Every apply; silent unless it installs Node LTS (fnm) or runs a one-time npm migration |
+| `install-catalog-scripts` | run (after) | Every apply; installs selected installer-based packages (Claude Code, agy, OpenCode) that are missing |
+| `install-python` | run_onchange (before) | `PYTHON_VERSION` changes; installs the default Python with uv |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
 | `sync-agent-resources` | run (after) | Every apply (keeps new local skills and agents managed by `agentspec`) |
 | `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag`, and the `dotfiles` CLI) |

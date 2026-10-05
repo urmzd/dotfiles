@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Node for npm-based packages, plus one-time migrations from the old
+# hardcoded AI CLI installer. The AI CLIs themselves are catalog packages
+# (category "agents"): Homebrew casks/formulae via the Brewfile, installer
+# scripts via run_after_install-catalog-scripts, npm on Linux.
+#
+# Runs every apply and is silent unless something needs doing.
+set -u
+{{ includeTemplate "ui.sh" . }}
+
+shown=0
+say() { [ "$shown" -eq 1 ] || { ui_section "Node and npm"; shown=1; }; }
+
+# Node comes from fnm; npm globals live in fnm's default Node (on PATH in every
+# shell through `fnm env`, where `npm -g` and brew bundle's npm entries go).
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --shell bash --corepack-enabled 2>/dev/null)" || true
+    if ! fnm list 2>/dev/null | grep -q default; then
+        say
+        ui_run "installed Node LTS via fnm" sh -c 'fnm install --lts && fnm default lts-latest' ||
+            ui_hint "npm-based packages wait for Node; rerun: chezmoi apply"
+    fi
+    fnm use default >/dev/null 2>&1 || true
+fi
+
+# One-time migration: npm globals used to target ~/.local/npm, which was never
+# on PATH. Move what is still wanted into fnm's default Node, then remove it.
+# Skipped: Codex and Copilot (Homebrew casks on macOS) and the legacy Gemini CLI.
+legacy_npm="$HOME/.local/npm"
+if [ -d "$legacy_npm/lib/node_modules" ] && command -v npm >/dev/null 2>&1; then
+    say
+    migrated=1
+    for dir in "$legacy_npm"/lib/node_modules/* "$legacy_npm"/lib/node_modules/@*/*; do
+        [ -f "$dir/package.json" ] || continue
+        pkg="${dir#"$legacy_npm"/lib/node_modules/}"
+        case "$pkg" in
+            @openai/codex | @github/copilot | @google/gemini-cli) continue ;;
+        esac
+        npm ls -g "$pkg" >/dev/null 2>&1 && continue
+        ui_run "moved $pkg from ~/.local/npm to fnm's default Node" npm install -g "$pkg" || migrated=0
+    done
+    if [ "$migrated" -eq 1 ]; then
+        rm -rf "$legacy_npm"
+        ui_ok "removed ~/.local/npm (npm globals live in fnm's default Node)"
+    else
+        ui_hint "kept ~/.local/npm until the failed packages above install"
+    fi
+fi
+
+{{- if .is_macos }}
+
+# One-time migration: Codex and Copilot moved from npm to Homebrew casks. npm
+# copies in fnm's per-Node globals come first on PATH and shadow the casks (and
+# vanish on a Node switch), so remove them once the cask is installed.
+if command -v brew >/dev/null 2>&1; then
+    for pair in "@openai/codex:codex:codex" "@github/copilot:copilot-cli:copilot"; do
+        pkg="${pair%%:*}"
+        rest="${pair#*:}"
+        cask="${rest%%:*}"
+        bin="${rest#*:}"
+        brew list --cask "$cask" >/dev/null 2>&1 || continue
+        for prefix in "$HOME/.local/npm" "${FNM_DIR:-$HOME/.local/share/fnm}"/node-versions/*/installation; do
+            if [ -d "$prefix/lib/node_modules/$pkg" ]; then
+                say
+                rm -rf "$prefix/lib/node_modules/$pkg"
+                rm -f "$prefix/bin/$bin"
+                ui_ok "removed npm $pkg from ${prefix/#$HOME/~} (the $cask cask provides it)"
+            fi
+        done
+    done
+fi
+{{- end }}
+exit 0

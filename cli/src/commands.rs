@@ -19,11 +19,6 @@ pub struct Ctx {
 
 /// Release binaries (dotfiles-<target> + .sha256) are attached to dotfiles releases.
 const REPO: &str = "urmzd/dotfiles";
-const AI_SENTINEL: &str = ".local/state/ai-tools-installed";
-const OPENCODE_INSTALL: &str =
-    // Download first: `curl | bash` "succeeds" on an empty download.
-    "t=$(mktemp) && curl -fsSL --retry 2 https://opencode.ai/install -o \"$t\" && [ -s \"$t\" ] \
-     && bash \"$t\" --no-modify-path; rc=$?; rm -f \"$t\"; exit $rc";
 
 pub fn is_interrupt(err: &anyhow::Error) -> bool {
     matches!(
@@ -466,19 +461,39 @@ pub fn config(ctx: &Ctx) -> Result<Outcome> {
 }
 
 pub fn update(ctx: &Ctx, target: UpdateTarget) -> Result<Outcome> {
-    let mut steps: Vec<(&str, String)> = Vec::new();
+    let mut steps: Vec<(String, String)> = Vec::new();
     if matches!(target, UpdateTarget::All | UpdateTarget::Packages) {
-        steps.push(("brew update", "brew update".into()));
-        steps.push(("brew upgrade", "brew upgrade".into()));
+        steps.push(("brew update".into(), "brew update".into()));
+        steps.push(("brew upgrade".into(), "brew upgrade".into()));
     }
     if matches!(target, UpdateTarget::All | UpdateTarget::Ai) {
-        steps.push(("OpenCode", OPENCODE_INSTALL.into()));
-        // The AI CLI installer is sentinel-gated; clearing it makes apply rerun it.
-        let sentinel = home()?.join(AI_SENTINEL);
-        steps.push((
-            "re-arm AI CLI installer",
-            format!("rm -f '{}'", sentinel.display()),
-        ));
+        // The selected AI coding CLIs (catalog category "agents"): Homebrew
+        // ones are upgraded in place, installer-based ones re-run their
+        // installer, which updates them.
+        let (_, catalog, config) = load()?;
+        let selected = config.packages();
+        let agents: Vec<&Package> = catalog
+            .packages
+            .iter()
+            .filter(|p| p.category == "agents" && selected.contains(&p.id))
+            .collect();
+        let brewed: Vec<&str> = agents
+            .iter()
+            .flat_map(|p| p.brew.iter().chain(&p.cask))
+            .map(String::as_str)
+            .collect();
+        if cfg!(target_os = "macos") && !brewed.is_empty() && matches!(target, UpdateTarget::Ai) {
+            steps.push(("brew update".into(), "brew update".into()));
+            steps.push((
+                format!("upgrade {}", brewed.join(", ")),
+                format!("brew upgrade {}", brewed.join(" ")),
+            ));
+        }
+        for p in agents {
+            if let Some(cmd) = p.installer_command() {
+                steps.push((format!("update {}", p.name), cmd));
+            }
+        }
     }
 
     ui::section("Updating");
