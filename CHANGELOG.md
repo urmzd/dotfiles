@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.1 (2026-10-05)
+
+### Bug Fixes
+
+- **cli**: pending-change checks ignore always-run scripts; doctor flags stale config ([965464b](https://github.com/urmzd/dotfiles/commit/965464b2ec91b44b404b9fe9c2a4c5eb988962bf))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.9.0...v0.9.1)
+
+
 ## 0.9.0 (2026-10-05)
 
 ### Features
