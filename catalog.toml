@@ -203,6 +203,17 @@ cask = ["slack"]
 adopt = true
 
 [[package]]
+id = "slack-cli"
+name = "Slack CLI"
+# `slack auth list` exits 0 even when signed out, so the check matches its
+# "not logged in" message instead of trusting the exit code.
+description = "slack: create, run, and deploy Slack apps"
+category = "chat"
+cask = ["slack-cli"]
+setup = ["slack login"]
+check = "command -v slack >/dev/null && ! slack auth list 2>&1 | grep -qi 'not logged in'"
+
+[[package]]
 id = "discord"
 name = "Discord"
 description = "Community voice and text chat"

@@ -101,7 +101,7 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 | fonts | Nerd Fonts (MonaspiceNe, Iosevka) |
 | notes | Obsidian, Notion, Granola, Mintlify CLI (`mint`) |
 | editors | Cursor, Visual Studio Code |
-| chat | Slack, Discord, Zoom |
+| chat | Slack, Slack CLI (`slack`), Discord, Zoom |
 | productivity | 1Password, Raycast, Linear, Figma |
 | ai | Claude, ChatGPT (desktop apps), Warp Agent CLI (`warp`, runs in Ghostty), Hugging Face CLI (`hf`) |
 | media | Spotify |
