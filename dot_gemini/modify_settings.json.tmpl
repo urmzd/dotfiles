@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# chezmoi modify_ script for ~/.gemini/settings.json (Antigravity CLI migration
+# seed). Other tools write here too: agentspec and desktop apps register MCP
+# servers under mcpServers, and the CLI saves its own settings. A plain managed
+# file overwrote all of that and stopped `chezmoi apply` with a prompt. Merge
+# instead: live values win, the managed baseline (.chezmoitemplates/
+# gemini-settings.json) fills in missing keys, and tools.allowed is unioned so
+# new managed rules still reach every machine.
+set -euo pipefail
+
+current="$(cat)"
+# read -d '' rather than $(cat <<EOF): macOS /bin/bash 3.2 misparses a heredoc
+# inside $(...) when the text holds parentheses (run_shell_command(...) does).
+IFS= read -r -d '' managed <<'MANAGED_EOF' || true
+{{ include ".chezmoitemplates/gemini-settings.json" -}}
+MANAGED_EOF
+managed="${managed%$'\n'}"
+
+# First bootstrap: jq arrives via the Brewfile, after files apply. Seed an
+# empty target with the baseline; never touch a non-empty one without jq.
+if ! command -v jq >/dev/null 2>&1; then
+    if [ -z "${current//[[:space:]]/}" ]; then
+        printf '%s\n' "$managed"
+    else
+        printf '%s' "$current"
+    fi
+    exit 0
+fi
+
+if [ -z "${current//[[:space:]]/}" ]; then
+    current='{}'
+fi
+
+# A live file the CLI can't parse is already broken; leave it as-is.
+if ! jq -e . >/dev/null 2>&1 <<<"$current"; then
+    echo "modify_settings.json: live ~/.gemini/settings.json is not valid JSON; leaving it untouched" >&2
+    printf '%s' "$current"
+    exit 0
+fi
+
+jq -n --argjson managed "$managed" --argjson current "$current" '
+    ($managed * $current)
+    | .tools.allowed = (($current.tools.allowed // []) + ($managed.tools.allowed // [])
+        | reduce .[] as $rule ([]; if index([$rule]) then . else . + [$rule] end))
+'

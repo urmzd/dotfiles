@@ -9,10 +9,12 @@
 set -euo pipefail
 
 current="$(cat)"
-managed="$(cat <<'MANAGED_EOF'
+# read -d '' rather than $(cat <<EOF): macOS /bin/bash 3.2 misparses a heredoc
+# inside $(...) when the text holds parentheses (Bash(...) rules do).
+IFS= read -r -d '' managed <<'MANAGED_EOF' || true
 {{ include ".chezmoitemplates/claude-settings.json" -}}
 MANAGED_EOF
-)"
+managed="${managed%$'\n'}"
 
 # First bootstrap: jq arrives via the Brewfile, which installs after files
 # apply. Seed an empty target with the baseline; never touch a non-empty one
