@@ -9,6 +9,9 @@
 # Fields (only id, name, description, category are required):
 #   tap, brew, cask   Homebrew entries (macOS). `adopt = true` lets a cask take
 #                     over an app installed by hand.
+#   apt, dnf, pacman  Linux package names; run_onchange_after_install-catalog-linux
+#                     installs them. A package with none is macOS-only (setup
+#                     steps still run anywhere).
 #   setup             interactive commands run by `dotfiles setup <id>`, for
 #                     sign-in or installers that need a TTY (never during apply)
 #   check             shell test that passes once setup is done; setup is
@@ -24,6 +27,9 @@ name = "Docker + Colima"
 description = "docker CLI, buildx, compose, and the Colima VM runtime"
 category = "cloud"
 brew = ["colima", "docker", "docker-buildx", "docker-compose"]
+apt = ["docker.io", "docker-compose-plugin"]
+dnf = ["docker-compose-plugin"]
+pacman = ["docker", "docker-compose"]
 presets = ["standard", "full"]
 
 [[package]]
@@ -32,6 +38,9 @@ name = "Kubernetes"
 description = "kubectl, helm, and the k9s terminal UI"
 category = "cloud"
 brew = ["kubectl", "helm", "k9s"]
+apt = ["kubectl", "helm", "k9s"]
+dnf = ["kubectl", "helm", "k9s"]
+pacman = ["kubectl", "helm", "k9s"]
 presets = ["standard", "full"]
 
 [[package]]
@@ -42,6 +51,9 @@ description = "Terraform from the official HashiCorp tap"
 category = "cloud"
 tap = ["hashicorp/tap"]
 brew = ["hashicorp/tap/terraform"]
+apt = ["terraform"]
+dnf = ["terraform"]
+pacman = ["terraform"]
 presets = ["standard", "full"]
 
 [[package]]
@@ -74,6 +86,8 @@ name = "Zig"
 description = "Zig toolchain, including the zig cc cross-compiler"
 category = "languages"
 brew = ["zig"]
+dnf = ["zig"]
+pacman = ["zig"]
 
 [[package]]
 id = "scala"
@@ -90,6 +104,7 @@ name = "mise"
 description = "Per-project runtimes such as the JDK, pinned by .mise.toml"
 category = "languages"
 brew = ["mise"]
+pacman = ["mise"]
 
 # ---- Mobile -----------------------------------------------------------------
 

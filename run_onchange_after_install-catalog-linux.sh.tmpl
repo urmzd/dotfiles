@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Install the Linux packages of the catalog.toml entries selected at
+# [data].packages. macOS gets the same selection through Brewfile.tmpl.
+# Re-runs when the selection or the catalog changes:
+# Selection: {{ get . "packages" | default list | join "," }}
+# Catalog: {{ include "catalog.toml" | sha256sum }}
+{{- if .is_linux }}
+set -uo pipefail
+{{ includeTemplate "ui.sh" . }}
+ui_section "Optional packages (catalog)"
+
+{{- $selected := get . "packages" | default list }}
+{{- $apt := list }}{{ $dnf := list }}{{ $pacman := list }}
+{{- range (include "catalog.toml" | fromToml).package }}
+{{-   if has .id $selected }}
+{{-     $apt = concat $apt (get . "apt" | default list) }}
+{{-     $dnf = concat $dnf (get . "dnf" | default list) }}
+{{-     $pacman = concat $pacman (get . "pacman" | default list) }}
+{{-   end }}
+{{- end }}
+apt_pkgs=({{ range $apt }}{{ . | quote }} {{ end }})
+dnf_pkgs=({{ range $dnf }}{{ . | quote }} {{ end }})
+pacman_pkgs=({{ range $pacman }}{{ . | quote }} {{ end }})
+
+if command -v apt-get >/dev/null 2>&1; then
+    manager=apt; pkgs=(${apt_pkgs[@]+"${apt_pkgs[@]}"})
+    installed() { dpkg -s "$1" >/dev/null 2>&1; }
+    install() { sudo apt-get install -y "$1"; }
+elif command -v dnf >/dev/null 2>&1; then
+    manager=dnf; pkgs=(${dnf_pkgs[@]+"${dnf_pkgs[@]}"})
+    installed() { rpm -q "$1" >/dev/null 2>&1; }
+    install() { sudo dnf install -y "$1"; }
+elif command -v pacman >/dev/null 2>&1; then
+    manager=pacman; pkgs=(${pacman_pkgs[@]+"${pacman_pkgs[@]}"})
+    installed() { pacman -Q "$1" >/dev/null 2>&1; }
+    install() { sudo pacman -S --noconfirm "$1"; }
+else
+    ui_skip "no apt, dnf, or pacman; skipping"
+    exit 0
+fi
+
+if [ "${#pkgs[@]}" -eq 0 ]; then
+    ui_skip "nothing selected has a $manager package"
+    exit 0
+fi
+
+failed=()
+for pkg in "${pkgs[@]}"; do
+    if installed "$pkg"; then
+        ui_skip "$pkg already installed"
+    elif ui_run "installed $pkg" install "$pkg"; then
+        :
+    else
+        failed+=("$pkg")
+    fi
+done
+if [ "${#failed[@]}" -gt 0 ]; then
+    ui_warn "not installed: ${failed[*]} (may not exist in this distro's repos)"
+    ui_hint "check the name for $manager, then fix it in catalog.toml"
+fi
+{{- end }}

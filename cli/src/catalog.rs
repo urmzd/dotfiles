@@ -26,6 +26,13 @@ pub struct Package {
     pub cask: Vec<String>,
     #[serde(default)]
     pub adopt: bool,
+    /// Linux package names, per package manager.
+    #[serde(default)]
+    pub apt: Vec<String>,
+    #[serde(default)]
+    pub dnf: Vec<String>,
+    #[serde(default)]
+    pub pacman: Vec<String>,
     /// Interactive commands (sign-in, TTY installers) run by `dotfiles setup`.
     #[serde(default)]
     pub setup: Vec<String>,
@@ -39,9 +46,23 @@ pub struct Package {
 }
 
 impl Package {
-    /// Everything Homebrew installs for this package, for display.
+    /// What installs on this platform, for display: Homebrew formulae and
+    /// casks on macOS, otherwise every Linux package name the entry lists.
     pub fn installs(&self) -> Vec<String> {
-        self.brew.iter().chain(&self.cask).cloned().collect()
+        if cfg!(target_os = "macos") {
+            self.brew.iter().chain(&self.cask).cloned().collect()
+        } else {
+            let mut names: Vec<String> = self
+                .apt
+                .iter()
+                .chain(&self.dnf)
+                .chain(&self.pacman)
+                .cloned()
+                .collect();
+            names.sort();
+            names.dedup();
+            names
+        }
     }
 }
 
@@ -110,10 +131,25 @@ adopt = true
         assert_eq!(c.packages.len(), 2);
         let notion = c.get("notion").unwrap();
         assert!(notion.adopt && notion.setup.is_empty() && notion.tap.is_empty());
-        assert_eq!(
-            c.get("acli").unwrap().installs(),
-            vec!["atlassian/acli/acli"]
-        );
+        if cfg!(target_os = "macos") {
+            assert_eq!(
+                c.get("acli").unwrap().installs(),
+                vec!["atlassian/acli/acli"]
+            );
+        }
+    }
+
+    #[test]
+    fn reads_linux_names() {
+        let c = Catalog::parse(
+            "[[package]]\nid = \"k8s\"\nname = \"K\"\ndescription = \"d\"\ncategory = \"c\"\nbrew = [\"kubectl\"]\napt = [\"kubectl\", \"helm\"]\npacman = [\"helm\"]\n",
+        )
+        .unwrap();
+        let p = c.get("k8s").unwrap();
+        assert_eq!(p.apt, vec!["kubectl", "helm"]);
+        if !cfg!(target_os = "macos") {
+            assert_eq!(p.installs(), vec!["helm", "kubectl"]);
+        }
     }
 
     #[test]

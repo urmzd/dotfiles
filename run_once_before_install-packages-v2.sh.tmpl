@@ -160,7 +160,9 @@ else
 fi
 
 {{- else if .is_linux }}
-# Linux package installation: primary source of truth for dev tooling.
+# Linux package installation: primary source of truth for core dev tooling.
+# Optional tools (docker, kubernetes, terraform, ...) come from catalog.toml's
+# apt/dnf/pacman fields via run_onchange_after_install-catalog-linux.
 # Per-language runtime managers (fnm, uv, rustup) install below via curl.
 # gcloud / aws-cli / cortex install via run_onchange scripts with pinned versions.
 
@@ -171,7 +173,6 @@ if command -v apt >/dev/null 2>&1; then
         curl wget
         git gh fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
         build-essential coreutils tealdeer
-        terraform docker.io docker-compose-plugin kubectl helm k9s
         golang-go golangci-lint
         lua5.4 luarocks lua-check stylua
     )
@@ -188,7 +189,6 @@ elif command -v dnf >/dev/null 2>&1; then
         curl wget
         git gh fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
         coreutils tealdeer
-        terraform docker-compose-plugin kubectl helm k9s
         golang golangci-lint
         lua luarocks luacheck stylua
     )
@@ -205,7 +205,6 @@ elif command -v pacman >/dev/null 2>&1; then
         curl wget
         git github-cli fzf ripgrep tree jq yq just direnv chezmoi tmux gnupg tree-sitter
         coreutils tealdeer
-        terraform docker docker-compose kubectl helm k9s
         go golangci-lint
         lua luarocks luacheck stylua
     )
