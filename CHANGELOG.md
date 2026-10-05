@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.1 (2026-10-05)
+
+### Bug Fixes
+
+- **cli**: clearer plan, doctor, and list output ([18ad423](https://github.com/urmzd/dotfiles/commit/18ad4230f5281e438a75d9facab615a8932682df))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.12.0...v0.12.1)
+
+
 ## 0.12.0 (2026-10-05)
 
 ### Features
