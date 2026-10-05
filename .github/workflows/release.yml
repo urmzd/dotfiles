@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      released: ${{ steps.sr.outputs.released }}
+      tag: ${{ steps.sr.outputs.tag }}
     steps:
       # The sr-releaser GitHub App pushes the changelog commit to protected main.
       # Secrets are managed in urmzd/infra (managed_repos).
@@ -36,7 +39,83 @@ jobs:
           ref: main
           token: ${{ steps.app-token.outputs.token }}
 
+      # sr bumps cli/Cargo.toml and cli/Cargo.lock, so it needs the toolchain.
+      - uses: dtolnay/rust-toolchain@stable
+
       - name: Release
+        id: sr
         uses: urmzd/sr@v8
         with:
           github-token: ${{ steps.app-token.outputs.token }}
+
+  # Attach the dotfiles CLI to every release: `dotfiles self-update` and
+  # cli/install.sh read the latest release's dotfiles-<target> + .sha256.
+  build:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    name: Build CLI (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: cli
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+            cross: false
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-latest
+            cross: true
+          - target: x86_64-apple-darwin
+            runner: macos-15-intel
+            cross: false
+          - target: aarch64-apple-darwin
+            runner: macos-15
+            cross: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+          workspaces: cli
+
+      - name: Install musl tools
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Install cross
+        if: matrix.cross
+        run: cargo install cross --locked
+
+      # Embeds the dependency tree in the binary (cargo audit bin), as sr does.
+      - name: Install cargo-auditable
+        if: ${{ !matrix.cross }}
+        run: cargo install cargo-auditable --locked
+
+      - name: Build
+        run: |
+          if [ "${{ matrix.cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo auditable build --release --target ${{ matrix.target }}
+          fi
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          asset="dotfiles-${{ matrix.target }}"
+          cp "target/${{ matrix.target }}/release/dotfiles" "$asset"
+          chmod +x "$asset"
+          shasum -a 256 "$asset" > "$asset.sha256"
+          gh release upload "${{ needs.release.outputs.tag }}" "$asset" "$asset.sha256" --clobber

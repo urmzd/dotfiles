@@ -64,8 +64,10 @@ channels:
 # Monorepos add more entries with their own tag_prefix, version_files, etc.
 packages:
   - path: .
-    version_files: []
-    stage_files: []
+    # The dotfiles CLI (cli/) carries the repo version; release.yml builds it
+    # after sr tags and attaches the binaries. No registry publish.
+    version_files: [cli/Cargo.toml]
+    stage_files: [cli/Cargo.lock]
     artifacts: []
     # publish:
     #   type: cargo       # or npm, pypi, docker, go, custom

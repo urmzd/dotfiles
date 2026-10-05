@@ -64,7 +64,7 @@ chezmoi edit <file>   # Edit source, then apply
 
 ### Maintenance
 
-The `dotfiles` command is a separate Rust CLI, [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli), installed on first apply and updated with `dotfiles self-update`.
+The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Every release attaches its binaries for macOS and Linux (x86_64 and arm64) with `.sha256` checksums; the first apply installs it, and `dotfiles self-update` keeps it current. To install it by hand: `curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh`.
 
 ```bash
 dotfiles packages        # Search + toggle optional packages, then apply
@@ -160,10 +160,10 @@ Every script prints through [`.chezmoitemplates/ui.sh`](.chezmoitemplates/ui.sh)
 
 | Workflow | Runs on | What it does |
 | -------- | ------- | ------------ |
-| [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then syntax-checks every rendered `run_` script |
-| [`release.yml`](.github/workflows/release.yml) | push to `main` | After CI passes, [sr](https://github.com/urmzd/sr) tags the release and updates `CHANGELOG.md` from conventional commits |
+| [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then syntax-checks every rendered `run_` script; `cli/` gets rustfmt, clippy, and tests |
+| [`release.yml`](.github/workflows/release.yml) | push to `main` | After CI passes, [sr](https://github.com/urmzd/sr) tags the release, bumps `cli/Cargo.toml`, and updates `CHANGELOG.md` from conventional commits; a build matrix then attaches `dotfiles-<target>` binaries and `.sha256` files to the release |
 
-Run the same check locally before pushing: `.github/scripts/check.sh`. The `dotfiles` CLI releases separately from [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli) (GitHub release binaries with `.sha256` checksums; not on crates.io). Release secrets for both repos are managed in `urmzd/infra`.
+Run the same checks locally before pushing: `.github/scripts/check.sh`, plus `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings`, and `cargo test` in `cli/`. Release secrets are managed in `urmzd/infra`.
 
 ### AI tools
 

@@ -1,0 +1,33 @@
+[package]
+name = "dotfiles-cli"
+description = "Manage urmzd/dotfiles: pick optional packages, run setup, apply, and update"
+version = "0.2.0"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/urmzd/dotfiles"
+homepage = "https://github.com/urmzd/dotfiles"
+authors = ["urmzd"]
+# Lives in urmzd/dotfiles (cli/); shipped only as binaries on its GitHub releases.
+publish = false
+
+[[bin]]
+name = "dotfiles"
+path = "src/main.rs"
+
+[dependencies]
+agentspec-update = "0.8"
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+crossterm = "0.29"  # same version inquire uses; terminal width for the picker
+inquire = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "1"
+toml_edit = "0.25"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+strip = true
+lto = true

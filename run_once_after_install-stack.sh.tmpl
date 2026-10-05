@@ -18,4 +18,12 @@ install_if_missing() {
 install_if_missing sr    https://raw.githubusercontent.com/urmzd/sr/main/install.sh
 install_if_missing teasr https://raw.githubusercontent.com/urmzd/teasr/main/install.sh
 install_if_missing oag   https://raw.githubusercontent.com/urmzd/oag/main/install.sh
-install_if_missing dotfiles https://raw.githubusercontent.com/urmzd/dotfiles-cli/main/install.sh
+# The dotfiles CLI lives in this repo (cli/); its binaries ship on dotfiles releases.
+DOTFILES_CLI_INSTALL=https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh
+# One-time migration: 0.1.x binaries came from the retired urmzd/dotfiles-cli
+# repo and their self-update points there, so replace them.
+if command -v dotfiles >/dev/null 2>&1 && dotfiles version 2>/dev/null | grep -q '^dotfiles v0\.1\.'; then
+    ui_run "reinstalled dotfiles from urmzd/dotfiles releases" sh -c "curl -fsSL '$DOTFILES_CLI_INSTALL' | sh" \
+        || ui_hint "retry: curl -fsSL $DOTFILES_CLI_INSTALL | sh"
+fi
+install_if_missing dotfiles "$DOTFILES_CLI_INSTALL"

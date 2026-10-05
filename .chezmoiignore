@@ -13,4 +13,5 @@ LICENSE
 llms.txt
 sr.yaml
 catalog.toml
+cli/
 requirements-pipx.txt

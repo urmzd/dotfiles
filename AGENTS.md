@@ -40,7 +40,8 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_gemini/` | `~/.gemini/` | Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` |
 | `dot_config/opencode/` | `~/.config/opencode/` | OpenCode instructions; native install, update, and status managed by dotfiles; portable agents rendered by agentspec |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
-| `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI ([urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli)) |
+| `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI in `cli/` |
+| `cli/` | (not deployed) | Rust source for the `dotfiles` CLI; built and attached to every release by `release.yml` |
 | (not tracked) | `~/.config/work/` | Work pack: company overlay cloned from `work_pack_repo` via `.chezmoiexternal.toml.tmpl`; never add its files to this repo |
 
 ## Discovering Structure
@@ -74,7 +75,13 @@ chezmoi diff --use-builtin-diff # Dry-run before applying (diff.command is nvim;
 chezmoi verify                  # Verify source state
 ```
 
-CI (`.github/workflows/ci.yml`) runs `check.sh` on macOS and Linux for every PR; `release.yml` runs it again, then `sr` tags and writes `CHANGELOG.md` on push to `main`.
+The `dotfiles` CLI is a Rust crate in `cli/` (see `cli/README.md`):
+
+```bash
+cd cli && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings && cargo test
+```
+
+CI (`.github/workflows/ci.yml`) runs `check.sh` on macOS and Linux plus the `cli/` checks for every PR; `release.yml` runs CI again, then `sr` tags, bumps `cli/Cargo.toml`, writes `CHANGELOG.md`, and a matrix attaches `dotfiles-<target>` binaries with `.sha256` files to the release.
 
 ## Commit Guidelines
 

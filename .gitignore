@@ -243,3 +243,6 @@ core.*
 .bzr/
 
 node_modules
+
+# Rust build output for the dotfiles CLI (cli/)
+cli/target/

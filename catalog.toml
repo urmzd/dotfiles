@@ -2,7 +2,7 @@
 #
 # Selection is a list of ids at [data].packages in the local
 # ~/.config/chezmoi/chezmoi.toml (never committed). Three readers:
-#   - `dotfiles packages` (urmzd/dotfiles-cli): search-as-you-type picker
+#   - `dotfiles packages` (the CLI in cli/): search-as-you-type picker
 #   - Brewfile.tmpl: emits the Homebrew lines for selected packages
 #   - .chezmoi.toml.tmpl: seeds the selection on first init from `presets`
 #
