@@ -101,7 +101,9 @@ for f in $(printf '%s\n' $files | grep -E '(^|/)modify_'); do
     before=$failures
     if ! printf '' | DOTFILES_BASH_FLOOR=1 "$floor" "$script" >"$work/empty.out" 2>"$work/err"; then
         fail "$f: failed on an empty target under bash 3.2: $(head -1 "$work/err")"
-    elif ! valid "$work/empty.out"; then
+    elif [ -s "$work/empty.out" ] && ! valid "$work/empty.out"; then
+        # Empty output for an empty target is fine (chezmoi then writes no
+        # file; e.g. the Docker merge passes through on Linux without brew).
         fail "$f: invalid output on an empty target"
     fi
     if ! printf '%s' "$existing" | DOTFILES_BASH_FLOOR=1 "$floor" "$script" >"$work/live.out" 2>"$work/err"; then
