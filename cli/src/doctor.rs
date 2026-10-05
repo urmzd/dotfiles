@@ -262,6 +262,13 @@ fn newer(a: &str, b: &str) -> bool {
 }
 
 fn check_pending(r: &mut Report) {
+    if chezmoi::config_template_changed() {
+        r.warn(
+            "config",
+            "the setup questions changed since this machine's config was generated",
+            "chezmoi init (saved answers are kept), then dotfiles apply",
+        );
+    }
     match chezmoi::has_pending_changes() {
         Ok(true) => r.warn(
             "apply",

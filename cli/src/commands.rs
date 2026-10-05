@@ -432,7 +432,7 @@ pub fn apply(ctx: &Ctx, yes: bool) -> Result<Outcome> {
         return Ok(Outcome::NoChange);
     }
     ui::section("Pending changes");
-    chezmoi::run(&["status"])?;
+    chezmoi::run(&["status", "--exclude", "scripts"])?;
     if ctx.dry_run {
         ui::skip("dry run; nothing applied");
         return Ok(Outcome::Done);

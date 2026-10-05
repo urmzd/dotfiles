@@ -56,12 +56,29 @@ fn chezmoi_output(args: &[&str]) -> Result<String> {
 
 /// True when applying would change something. Uses the builtin diff: the
 /// configured diff.command (nvim) hangs when its output is captured.
+/// Scripts are excluded: run_after scripts run on every apply, so chezmoi
+/// always lists them and they would make every machine look out of date.
 pub fn has_pending_changes() -> Result<bool> {
-    Ok(
-        !chezmoi_output(&["diff", "--use-builtin-diff", "--no-pager"])?
-            .trim()
-            .is_empty(),
-    )
+    Ok(!chezmoi_output(&[
+        "diff",
+        "--use-builtin-diff",
+        "--no-pager",
+        "--exclude",
+        "scripts",
+    ])?
+    .trim()
+    .is_empty())
+}
+
+/// chezmoi's warning that .chezmoi.toml.tmpl changed since the config was
+/// generated, i.e. `chezmoi init` would pick up new or changed questions.
+pub fn config_template_changed() -> bool {
+    Command::new("chezmoi")
+        .args(["status", "--exclude", "scripts"])
+        .stdout(Stdio::null())
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stderr).contains("config file template has changed"))
+        .unwrap_or(false)
 }
 
 /// The local chezmoi config, edited in place with formatting and comments kept.
