@@ -1,0 +1,37 @@
+{{- /* Resolved packs, in order, as JSON: [{spec, dir, url, repo_dir, key}].   */ -}}
+{{- /* `packs` (a list) holds one entry per pack, stacked in order:           */ -}}
+{{- /*   ~/folder or /folder       -> that folder, used in place               */ -}}
+{{- /*   <git url>                 -> the repo, cloned to ~/.config/packs/<repo> */ -}}
+{{- /*   <git url>//<folder>       -> one folder of that repo (Terraform's      */ -}}
+{{- /*                                module syntax): acme.git//backend-engineer */ -}}
+{{- /* Configs from before keep working: a `work_pack` string becomes a       */ -}}
+{{- /* one-pack list, and an existing hand-made ~/.config/work on a work      */ -}}
+{{- /* machine with neither set is used as a pack.                            */ -}}
+{{- $home := .chezmoi.homeDir -}}
+{{- $specs := list -}}
+{{- if hasKey . "packs" -}}
+{{-   $specs = .packs -}}
+{{- else if (get . "work_pack" | default "") -}}
+{{-   $specs = list .work_pack -}}
+{{- else if and (get . "is_work") (stat (joinPath $home ".config/work")) -}}
+{{-   $specs = list "~/.config/work" -}}
+{{- end -}}
+{{- $out := list -}}
+{{- range $spec := $specs -}}
+{{-   $dir := "" -}}{{- $url := "" -}}{{- $repo_dir := "" -}}
+{{-   if hasPrefix "~" $spec -}}
+{{-     $dir = joinPath $home (trimPrefix "~" $spec) -}}
+{{-   else if hasPrefix "/" $spec -}}
+{{-     $dir = $spec -}}
+{{-   else -}}
+{{-     $scheme := regexFind "^[A-Za-z][A-Za-z0-9+.-]*://" $spec -}}
+{{-     $parts := splitList "//" (trimPrefix $scheme $spec) -}}
+{{-     $url = printf "%s%s" $scheme (first $parts) -}}
+{{-     $repo_dir = joinPath $home ".config/packs" (base (first $parts) | trimSuffix ".git") -}}
+{{-     $dir = $repo_dir -}}
+{{-     if gt (len $parts) 1 }}{{ $dir = joinPath $repo_dir (rest $parts | join "/") }}{{ end -}}
+{{-   end -}}
+{{-   $key := regexReplaceAll "[^A-Za-z0-9]+" (trimPrefix $home $dir) "-" | trimAll "-" -}}
+{{-   $out = append $out (dict "spec" $spec "dir" $dir "url" $url "repo_dir" $repo_dir "key" $key) -}}
+{{- end -}}
+{{- $out | toJson -}}

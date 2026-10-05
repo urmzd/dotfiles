@@ -6,14 +6,17 @@
 # (tap / permission / unknown formula / network / conflict) with next steps, and
 # soft-exits so the rest of the dotfiles still apply. brew bundle is idempotent,
 # so a later 'chezmoi apply' only reinstalls what is still missing.
-# Re-runs whenever the Brewfile, the package selection, or the work pack
-# Brewfile (<work pack>/Brewfile, appended when present) changes.
+# Re-runs whenever the Brewfile, the package selection, or the pack
+# Brewfiles (<pack>/Brewfile, appended in pack order) change.
 # Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
 # Selection: {{ get . "packages" | default list | join "," }} secrets={{ .use_secrets }} work={{ .is_work }}
 # Catalog: {{ includeTemplate "catalog" . | sha256sum }}
-{{- $work_brewfile := joinPath (includeTemplate "work-pack-dir" .) "Brewfile" }}
-{{- if stat $work_brewfile }}
-# Work pack: {{ include $work_brewfile | sha256sum }}
+{{- $pack_brewfiles := list }}
+{{- range (includeTemplate "packs" . | fromJson) }}
+{{-   $f := joinPath .dir "Brewfile" }}
+{{-   if stat $f }}{{ $pack_brewfiles = append $pack_brewfiles $f }}
+# Pack {{ .spec }}: {{ include $f | sha256sum }}
+{{-   end }}
 {{- end }}
 {{- if .is_macos }}
 set -uo pipefail
@@ -39,15 +42,15 @@ WORK_MERGED=''
 cleanup() { rm -f "$LOG" "$TMP_BREWFILE" "$WORK_MERGED"; }
 trap cleanup EXIT
 
-# --- work pack Brewfile -----------------------------------------------------
-# Appended to the personal Brewfile so excludes, tap trust, and the failure
-# report below cover company packages too.
-WORK_BREWFILE="{{ $work_brewfile }}"
-if [ -f "$WORK_BREWFILE" ]; then
-    WORK_MERGED="$(mktemp -t Brewfile-work.XXXXXX)"
-    cat "$BREWFILE" "$WORK_BREWFILE" > "$WORK_MERGED"
+# --- pack Brewfiles ---------------------------------------------------------
+# Appended, in pack order, to the personal Brewfile so excludes, tap trust,
+# and the failure report below cover pack packages too.
+PACK_BREWFILES=({{ range $pack_brewfiles }}{{ . | quote }} {{ end }})
+if [ "${#PACK_BREWFILES[@]}" -gt 0 ]; then
+    WORK_MERGED="$(mktemp -t Brewfile-packs.XXXXXX)"
+    cat "$BREWFILE" ${PACK_BREWFILES[@]+"${PACK_BREWFILES[@]}"} > "$WORK_MERGED"
     RUN_BREWFILE="$WORK_MERGED"
-    ui_ok "including work pack Brewfile"
+    ui_ok "including ${#PACK_BREWFILES[@]} pack Brewfile(s)"
 fi
 
 # --- optional exclude filter ("select all, deselect some") -----------------

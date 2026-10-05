@@ -51,7 +51,7 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 The bootstrap does not depend on our releases being healthy. chezmoi comes from get.chezmoi.io, falling back to Homebrew. The `dotfiles` CLI comes from the newest release that has a binary for your platform (the latest can be mid-build or failed), falling back to building `cli/` from the checkout with cargo. If both fail, the apply still finishes: the CLI is optional. Re-running the bootstrap fast-forwards an existing checkout before applying, and every third-party installer is downloaded and checked before it runs, so a network failure warns instead of passing silently.
 
-`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, which AI coding CLIs to install, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) (git URL or local folder), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
+`chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, which AI coding CLIs to install, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional list of [packs](#packs) (git URLs, `url//folder`, or local folders), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage
 
@@ -74,6 +74,7 @@ dotfiles package add acli twg    # Select by id; `package remove` deselects (--u
 dotfiles package list --selected # The catalog with this machine's selection
 dotfiles package setup           # Pending sign-in / interactive installers for selected packages
 dotfiles package update          # brew upgrade + AI CLIs, then apply (or: brew | ai)
+dotfiles pack add <url//folder>  # Stack a pack (company, role, personal); also: pack list, pack remove
 dotfiles identity                # This machine's GitHub identity: gh, SSH + GPG keys, signing check
 dotfiles doctor                  # Health check, each finding with the command that fixes it
 dotfiles plan                    # Desired vs installed: migrations, files, packages (+ missing, - deselected)
@@ -87,7 +88,7 @@ dotfiles edit                    # Open the dotfiles source in $EDITOR
 dotfiles clean                   # Prune build artifacts and caches under ~/github
 ```
 
-**Desired state, like Terraform.** The desired packages are the selection plus required work pack entries; what is installed is probed fresh every run (Homebrew, npm, uv, the Linux package manager, or a package's `check`), never remembered, so a failed install cannot be marked done. `dotfiles plan` shows the difference, `dotfiles apply` closes it, and `dotfiles update` runs both after pulling. Selection changes that ship in a release (for example, existing machines gaining Claude Code) run as migrations on the next apply instead of waiting for `chezmoi init`. Only packages the CLI has seen installed are offered for `--prune`; software installed by hand is listed, never removed. Ownership lives in `~/.local/state/dotfiles/managed.json`.
+**Desired state, like Terraform.** The desired packages are the selection plus required pack entries; what is installed is probed fresh every run (Homebrew, npm, uv, the Linux package manager, or a package's `check`), never remembered, so a failed install cannot be marked done. `dotfiles plan` shows the difference, `dotfiles apply` closes it, and `dotfiles update` runs both after pulling. Selection changes that ship in a release (for example, existing machines gaining Claude Code) run as migrations on the next apply instead of waiting for `chezmoi init`. Only packages the CLI has seen installed are offered for `--prune`; software installed by hand is listed, never removed. Ownership lives in `~/.local/state/dotfiles/managed.json`.
 
 `dotfiles doctor` checks chezmoi, the catalog and selection, whether the CLI is the latest release, unapplied changes, Python (3.12+, gcloud pinned), that `gh` is signed in as this machine's account, that the commit signing key exists, AI CLIs installed twice (the first on PATH wins), and the package plan: selected packages that are missing, deselected ones still installed, pending migrations, and pending sign-ins. `--format json` prints the findings for scripts.
 
@@ -130,7 +131,7 @@ The Brewfile installer continues past individual package failures, retries the r
 
 ### Adding a new tool
 
-Optional tools (apps, CLIs people pick per machine) go in [`catalog.toml`](catalog.toml) as a `[[package]]` entry; `dotfiles package add <id>` installs one. Company tools go in the work pack's `catalog.toml` instead ([Work pack](#work-pack)). The steps below are for tools every machine gets:
+Optional tools (apps, CLIs people pick per machine) go in [`catalog.toml`](catalog.toml) as a `[[package]]` entry; `dotfiles package add <id>` installs one. Company tools go in a pack's `catalog.toml` instead ([Packs](#packs)). The steps below are for tools every machine gets:
 
 1. Homebrew: add to [`Brewfile.tmpl`](Brewfile.tmpl). Linux: add to the apt/dnf/pacman list in [`run_once_before_install-packages-v2.sh.tmpl`](run_once_before_install-packages-v2.sh.tmpl).
 2. For tools needing version pinning: write a `run_onchange_after_install-<name>.sh.tmpl` mirroring the cortex / cloud-clis pattern.
@@ -148,28 +149,28 @@ Optional tools (apps, CLIs people pick per machine) go in [`catalog.toml`](catal
 
 ## Configuration
 
-### Work pack
+### Packs
 
-Company-specific setup lives in an optional **work pack**: a folder of plain files, usually a company git repo shareable with teammates whether or not they use these dotfiles. On a work machine `chezmoi init` asks for `work_pack`, which can be:
+Company, team, and personal setup lives in optional **packs**: folders of plain files, usually in a company git repo shareable with teammates whether or not they use these dotfiles. A machine stacks any number of them, in order, in `packs` (`dotfiles pack add|remove|list`; a work machine's `chezmoi init` also asks):
 
-| `work_pack` | Folder the hooks read | Fetching |
-| ----------- | --------------------- | -------- |
-| empty | `~/.config/work/` (create it by hand, or leave it absent) | none |
-| a git URL | `~/.config/work/` | cloned on apply, then fast-forwarded at most daily by [`run_after_sync-work-pack.sh.tmpl`](run_after_sync-work-pack.sh.tmpl) |
-| a local folder (`/path` or `~/path`) | that folder, in place | none |
+| Entry | Folder the hooks read | Fetching |
+| ----- | --------------------- | -------- |
+| `git@github.com:acme/dev-setup.git//backend-engineer` | that folder of the repo | repo cloned once to `~/.config/packs/dev-setup`, fast-forwarded at most daily |
+| `https://github.com/acme/team.git` | the whole repo | cloned to `~/.config/packs/team` |
+| `~/my-overrides` or `/path` | that folder, in place | none |
 
-Fetching never fails the apply: an unreachable or private repo (common on a new laptop before `dotfiles identity` adds its SSH key), a missing folder, or a non-git folder in the way only prints a warning with the next step. Only the setting is stored, in your local `chezmoi.toml`; nothing from the pack is tracked here. To start one, copy the [`work-pack/`](work-pack/) template into a new company repo; its README has the steps.
+`<url>//<folder>` is Terraform's module syntax: one company repo can hold `base/`, `engineer/`, `backend-engineer/`, and so on, and each person stacks the folders for their role. Fetching ([`run_after_sync-packs.sh.tmpl`](run_after_sync-packs.sh.tmpl)) never fails the apply: an unreachable or private repo (common on a new laptop before `dotfiles identity` adds its SSH key), a missing folder, or a non-git folder in the way only prints a warning with the next step. Only the list is stored, in your local `chezmoi.toml`; nothing from a pack is tracked here. Configs from before the list keep their single `work_pack` as a one-pack list. To start one, copy [`pack-template/`](pack-template/); its README has the steps.
 
 Every file is optional, and each hook is a no-op when its file is missing:
 
-| File | Loaded by |
-| ---- | --------- |
-| `env.zsh` | `~/.zshenv` (all shells, including agent tool calls) |
-| `gitconfig` | `[include]` in `~/.gitconfig` (company URL rewrites, extra settings) |
-| `ssh_config` | `Include` at the top of `~/.ssh/config` |
-| `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply |
-| `catalog.toml` | merged into the [package catalog](#adding-a-new-tool): entries show in `dotfiles package` tagged `[work pack]`, and `required = true` ones always install. Checked before use (valid TOML, required fields, no clashing ids); a bad file is ignored with a warning and `dotfiles doctor` names the problem |
-| `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` |
+| File | Loaded by | With several packs |
+| ---- | --------- | ------------------ |
+| `env.zsh` | `~/.zshenv` (all shells, including agent tool calls) | sourced in order; later packs win |
+| `gitconfig` | `[include]` in `~/.gitconfig` (company URL rewrites, extra settings) | one include per pack, in order |
+| `ssh_config` | `Include` at the top of `~/.ssh/config` | one Include per pack, in order |
+| `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply | all appended |
+| `catalog.toml` | merged into the [package catalog](#adding-a-new-tool): entries show in `dotfiles package` tagged with their pack, and `required = true` ones always install. Checked before use (valid TOML, required fields); a bad file is ignored with a warning and `dotfiles doctor` names the problem | an id already taken (dotfiles catalog or an earlier pack) is skipped and reported |
+| `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` | one block per pack |
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
@@ -204,7 +205,7 @@ These scripts run automatically on `chezmoi apply`. The bootstrap and every `dot
 | Script | Type | Trigger |
 | ------ | ---- | ------- |
 | `install-packages-v2` | run_once (before) | First apply (installs Homebrew + bootstrap Linux packages) |
-| `brewfile-install` | run_onchange (after) | Brewfile, `catalog.toml`, the `packages` selection, `pkg_exclude`, or the work pack Brewfile changes |
+| `brewfile-install` | run_onchange (after) | Brewfile, `catalog.toml`, the `packages` selection, `pkg_exclude`, or a pack Brewfile changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
 | `install-gh-extensions` | run (after) | Every apply; silent once installed. Waits for `gh` sign-in (`dotfiles identity`) instead of failing |
@@ -330,7 +331,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
-| manage-machine | Operate a dotfiles machine through the `dotfiles` CLI: install or remove catalog tools, `dotfiles doctor` fixes, updates, and company tools in a work pack catalog |
+| manage-machine | Operate a dotfiles machine through the `dotfiles` CLI: install or remove catalog tools, `dotfiles doctor` fixes, updates, and company tools in a pack catalog |
 | triage-dotfiles-env | Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs) with mandatory verification |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
 | repo-status | Scan a folder of git repos and report recent activity, branch divergence, and uncommitted state (renamed from `status`) |

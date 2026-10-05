@@ -1,12 +1,12 @@
-# Company packages, in the dotfiles catalog.toml format. They join the
-# `dotfiles package` picker on every work machine using this pack; entries
+# Pack packages, in the dotfiles catalog.toml format. They join the
+# `dotfiles package` picker on every machine using this pack; entries
 # with `required = true` install everywhere without being picked.
 #
 # Fields: id, name, description, category (required strings); install with
 # tap/brew/cask (macOS), apt/dnf/pacman (Linux), npm, uv, or script (an
 # installer URL, run when `check` fails); setup lists sign-in commands for
 # `dotfiles package setup`; check is a shell test that passes once installed.
-# Ids must not clash with the dotfiles catalog. A file that fails these checks
+# Ids already taken (dotfiles catalog or an earlier pack) are skipped. A file that fails these checks
 # is ignored (with a warning) and never breaks an apply.
 
 # [[package]]

@@ -4,9 +4,11 @@
 # Include colima SSH config
 Include {{ .chezmoi.homeDir }}/.colima/ssh_config
 
-# Work pack hosts (bastions, internal hosts); ssh skips a missing Include.
+# Pack hosts (bastions, internal hosts); ssh skips a missing Include.
 # Must stay above the first Host block or it only applies to that host.
-Include {{ includeTemplate "work-pack-dir" . }}/ssh_config
+{{- range (includeTemplate "packs" . | fromJson) }}
+Include {{ .dir }}/ssh_config
+{{- end }}
 
 # Global settings
 Host *

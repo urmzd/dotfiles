@@ -50,9 +50,22 @@
 {{- $work_email := get . "work_email" | default "" -}}
 {{- $gpg_signing_key := get . "gpg_signing_key" | default "" -}}
 {{- $work_signing_key := get . "work_signing_key" | default "" -}}
-{{- /* Work pack: optional; a git URL, a local folder, or empty. Configs  */}}
-{{- /* from before the rename keep their work_pack_repo value unasked.      */}}
-{{- $work_pack := get . "work_pack" | default (get . "work_pack_repo" | default "") -}}
+{{- /* Packs: an ordered list of overlays (see .chezmoitemplates/packs).    */}}
+{{- /* Configs from before the list keep their single work_pack (or older   */}}
+{{- /* work_pack_repo) as a one-pack list, unasked; a hand-made             */}}
+{{- /* ~/.config/work on a work machine with neither set becomes the pack.   */}}
+{{- $packs := list -}}
+{{- $legacy_pack := get . "work_pack" | default (get . "work_pack_repo" | default "") -}}
+{{- $ask_packs := false -}}
+{{- if hasKey . "packs" -}}
+{{-   $packs = .packs -}}
+{{- else if $legacy_pack -}}
+{{-   $packs = list $legacy_pack -}}
+{{- else if or (hasKey . "work_pack") (hasKey . "work_pack_repo") -}}
+{{-   if and $is_work (stat (joinPath .chezmoi.homeDir ".config/work")) }}{{ $packs = list "~/.config/work" }}{{ end -}}
+{{- else -}}
+{{-   $ask_packs = true -}}
+{{- end -}}
 {{- $use_secrets := false -}}
 {{- if $is_work -}}
 {{-   $work_email = promptStringOnce . "work_email" "Work email for git commits" -}}
@@ -64,8 +77,10 @@
 {{-   if and (not $work_signing_key) (not (hasKey . "work_signing_key")) -}}
 {{-     $work_signing_key = promptString "Work GPG signing key ID (optional)" "" -}}
 {{-   end -}}
-{{-   if not (or (hasKey . "work_pack") (hasKey . "work_pack_repo")) -}}
-{{-     $work_pack = promptString "Work pack: git URL to clone, or a local folder (optional)" "" -}}
+{{-   if $ask_packs -}}
+{{-     range (promptString "Packs, in order, comma-separated: git URL, URL//folder (one folder of a repo, e.g. acme.git//backend-engineer), or local folder (optional)" "" | splitList ",") -}}
+{{-       if trim . }}{{ $packs = append $packs (trim .) }}{{ end -}}
+{{-     end -}}
 {{-   end -}}
 {{- else -}}
 {{-   $email = promptStringOnce . "email" "Email for git commits" -}}
@@ -136,8 +151,9 @@ encryption = "age"
     machine = {{ $machine | quote }}
     is_personal = {{ not $is_work }}
     is_work = {{ $is_work }}
-    # Optional company overlay: git URL (cloned to ~/.config/work), local folder, or empty
-    work_pack = {{ $work_pack | quote }}
+    # Packs (company, team, personal overlays), stacked in order: git URL,
+    # URL//folder, or local folder. Edit with `dotfiles pack`.
+    packs = [{{ range $i, $p := $packs }}{{ if $i }}, {{ end }}{{ $p | quote }}{{ end }}]
 
     # Feature flags
     use_secrets = {{ $use_secrets }}

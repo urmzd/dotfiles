@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Fetch the packs (company, team, and personal overlays) and validate their
+# catalog.toml files. It never fails the apply: a missing, private, or
+# unreachable pack only warns, so a new laptop can apply everything before
+# its SSH key exists (`dotfiles identity`), then pick the packs up later.
+# Each git repo is cloned once to ~/.config/packs/<repo> and fast-forwarded
+# at most daily; `<url>//<folder>` packs then read one folder of it. Local
+# folders are used in place. See .chezmoitemplates/packs for the syntax.
+{{- $packs := includeTemplate "packs" . | fromJson }}
+set -u
+{{ includeTemplate "ui.sh" . }}
+shown=0
+section() { [ "$shown" -eq 1 ] || ui_section "Packs"; shown=1; }
+
+# Never stop to ask for credentials: fail fast and warn instead.
+export GIT_TERMINAL_PROMPT=0
+export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=10"
+err="$(mktemp "${TMPDIR:-/tmp}/packs.XXXXXX")"
+trap 'rm -f "$err"' EXIT
+fetched=" "
+
+fetch() { # <url> <repo dir>
+    local url="$1" repo="$2"
+    case "$fetched" in *" $repo "*) return 0 ;; esac
+    fetched="$fetched$repo "
+    if [ -d "$repo/.git" ]; then
+        # Fast-forward at most once a day; FETCH_HEAD records the last fetch.
+        if [ -f "$repo/.git/FETCH_HEAD" ] && [ -z "$(find "$repo/.git/FETCH_HEAD" -mmin +1440 2>/dev/null)" ]; then
+            return 0
+        fi
+        section
+        if git -C "$repo" pull --ff-only --quiet 2>"$err"; then
+            ui_ok "updated $repo"
+        else
+            ui_warn "could not update $repo; keeping the current copy"
+            ui_hint "$(head -1 "$err")"
+        fi
+    elif [ -e "$repo" ] && [ -n "$(ls -A "$repo" 2>/dev/null)" ]; then
+        section
+        ui_warn "$repo exists and is not a git checkout; leaving it alone"
+        ui_hint "move it aside to clone $url there"
+    else
+        section
+        mkdir -p "$(dirname "$repo")"
+        if git clone --quiet "$url" "$repo" 2>"$err"; then
+            touch "$repo/.git/FETCH_HEAD"  # counts as today's fetch
+            ui_ok "cloned $url into $repo"
+            ui_hint "its AGENTS.md, Brewfile, and catalog take effect on the next chezmoi apply"
+        else
+            ui_warn "could not clone $url; the rest of the apply is unaffected"
+            ui_hint "$(head -1 "$err")"
+            ui_hint "check access (dotfiles identity sets up this machine's SSH key), then rerun: chezmoi apply"
+        fi
+    fi
+}
+
+# The package templates read a validated copy of each pack's catalog.toml,
+# never the file itself, so a broken pack file cannot break every apply. Same
+# checks as the dotfiles CLI: valid TOML, required string fields, unique ids
+# within the file. A bad file keeps its last good copy. (Ids that clash with
+# the dotfiles catalog or an earlier pack are skipped by the templates.)
+copies="$HOME/.local/share/dotfiles/packs"
+keep=" "
+py="$HOME/.local/share/dotfiles/python/bin/python3"
+[ -x "$py" ] || py="$(command -v python3 2>/dev/null || true)"
+if [ -n "$py" ] && ! "$py" -c 'import tomllib' >/dev/null 2>&1; then
+    py=""
+fi
+
+validate() { # <spec> <pack dir> <key>
+    local spec="$1" src="$2/catalog.toml" copy="$copies/$3.toml"
+    [ -f "$src" ] || return 0
+    keep="$keep$3 "
+    cmp -s "$src" "$copy" 2>/dev/null && return 0
+    if [ -z "$py" ]; then
+        section
+        ui_warn "$spec: no Python 3.11+ to check its catalog; its packages wait"
+        ui_hint "dotfiles package list (the CLI checks and loads it too)"
+        return 0
+    fi
+    if "$py" - "$src" >/dev/null 2>"$err" <<'PY'
+import sys, tomllib
+seen = set()
+for i, p in enumerate(tomllib.load(open(sys.argv[1], "rb")).get("package", [])):
+    for key in ("id", "name", "description", "category"):
+        if not isinstance(p.get(key), str):
+            sys.exit(f"package #{i + 1}: missing string field `{key}`")
+    if p["id"] in seen:
+        sys.exit(f"id `{p['id']}` appears twice")
+    seen.add(p["id"])
+PY
+    then
+        mkdir -p "$copies"
+        cp "$src" "$copy"
+        section
+        ui_ok "$spec: catalog loaded"
+        ui_hint "its packages install on the next apply; see them: dotfiles package list"
+    else
+        section
+        ui_warn "$spec: catalog ignored: $(tail -1 "$err")"
+        ui_hint "fix $src, then: dotfiles doctor"
+    fi
+}
+
+check_dir() { # <spec> <pack dir>
+    [ -d "$2" ] && return 0
+    section
+    ui_warn "$1: folder $2 not found; this pack stays inactive"
+    ui_hint "create it, or fix the entry in packs (dotfiles pack list)"
+}
+
+{{- range $packs }}
+{{-   if .url }}
+fetch {{ .url | quote }} {{ .repo_dir | quote }}
+{{-   end }}
+{{- end }}
+{{- range $packs }}
+check_dir {{ .spec | quote }} {{ .dir | quote }}
+validate {{ .spec | quote }} {{ .dir | quote }} {{ .key | quote }}
+{{- end }}
+
+# Copies whose pack was removed or lost its catalog, and the single-pack
+# file from before packs were a list.
+rm -f "$HOME/.local/share/dotfiles/work-catalog.toml"
+for f in "$copies"/*.toml; do
+    [ -e "$f" ] || continue
+    case "$keep" in *" $(basename "$f" .toml) "*) ;; *) rm -f "$f" ;; esac
+done
+exit 0

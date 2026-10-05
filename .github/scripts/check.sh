@@ -57,3 +57,14 @@ for machine in personal work; do
 
     "$src/.github/scripts/lint-shell.sh" "$cfg"
 done
+
+# Packs: render once more with a stacked list (a repo folder, a whole repo,
+# and a local folder), so every pack loop in the templates is exercised.
+echo "==> work + packs"
+packs='{"packs":["git@github.com:acme/dev-setup.git//backend-engineer","https://github.com/acme/team.git","~/my-overrides"]}'
+chezmoi --config "$work/work.toml" --source "$src" --destination "$work/home-packs" \
+    --persistent-state "$work/work.boltdb" --no-tty --override-data "$packs" \
+    archive --format tar --output "$work/packs.tar"
+tar -xOf "$work/packs.tar" ./.gitconfig 2>/dev/null | grep -q 'packs/dev-setup/backend-engineer/gitconfig' ||
+    tar -xOf "$work/packs.tar" .gitconfig | grep -q 'packs/dev-setup/backend-engineer/gitconfig'
+echo "  ✓ rendered with 3 packs"

@@ -1,17 +1,66 @@
 {
   "skill": "manage-machine",
-  "description": "Routing evals: does the query ask to operate this machine through the dotfiles CLI (install/remove catalog tools, doctor, updates, work pack packages)? Near-misses route to dotfiles (editing the chezmoi repo), setup-devenv (project toolchains), and triage-dotfiles-env (known error signatures).",
+  "description": "Routing evals: does the query ask to operate this machine through the dotfiles CLI (install/remove catalog tools, doctor, updates, pack packages and stacking)? Near-misses route to dotfiles (editing the chezmoi repo), setup-devenv (project toolchains), and triage-dotfiles-env (known error signatures).",
   "queries": [
-    { "query": "install linear and notion", "should_trigger": true, "note": "Catalog ids; dotfiles package add." },
-    { "query": "what apps can I install with my dotfiles", "should_trigger": true, "note": "dotfiles package list." },
-    { "query": "is my machine set up correctly", "should_trigger": true, "note": "dotfiles doctor." },
-    { "query": "update everything", "should_trigger": true, "note": "dotfiles update." },
-    { "query": "add our internal deploy CLI for everyone at work", "should_trigger": true, "note": "Work pack catalog.toml, required = true." },
-    { "query": "remove discord from this laptop", "should_trigger": true, "note": "dotfiles package remove --uninstall." },
-    { "query": "python says command not found after setup", "should_trigger": true, "note": "doctor, then exec zsh." },
-    { "query": "add a new run_onchange script that installs zig", "should_trigger": false, "note": "Editing the chezmoi repo; use dotfiles." },
-    { "query": "set up a .envrc with uv for this project", "should_trigger": false, "note": "Project toolchain; use setup-devenv." },
-    { "query": "powerlevel10k instant prompt warning on startup", "should_trigger": false, "note": "Known signature; use triage-dotfiles-env." },
-    { "query": "rename dot_zshrc to a template", "should_trigger": false, "note": "Repo authoring; use dotfiles." }
+    {
+      "query": "install linear and notion",
+      "should_trigger": true,
+      "note": "Catalog ids; dotfiles package add."
+    },
+    {
+      "query": "what apps can I install with my dotfiles",
+      "should_trigger": true,
+      "note": "dotfiles package list."
+    },
+    {
+      "query": "is my machine set up correctly",
+      "should_trigger": true,
+      "note": "dotfiles doctor."
+    },
+    {
+      "query": "update everything",
+      "should_trigger": true,
+      "note": "dotfiles update."
+    },
+    {
+      "query": "add our internal deploy CLI for everyone at work",
+      "should_trigger": true,
+      "note": "Work pack catalog.toml, required = true."
+    },
+    {
+      "query": "add the backend-engineer pack from our dev-setup repo",
+      "should_trigger": true,
+      "note": "dotfiles pack add <url>//backend-engineer."
+    },
+    {
+      "query": "remove discord from this laptop",
+      "should_trigger": true,
+      "note": "dotfiles package remove --uninstall."
+    },
+    {
+      "query": "python says command not found after setup",
+      "should_trigger": true,
+      "note": "doctor, then exec zsh."
+    },
+    {
+      "query": "add a new run_onchange script that installs zig",
+      "should_trigger": false,
+      "note": "Editing the chezmoi repo; use dotfiles."
+    },
+    {
+      "query": "set up a .envrc with uv for this project",
+      "should_trigger": false,
+      "note": "Project toolchain; use setup-devenv."
+    },
+    {
+      "query": "powerlevel10k instant prompt warning on startup",
+      "should_trigger": false,
+      "note": "Known signature; use triage-dotfiles-env."
+    },
+    {
+      "query": "rename dot_zshrc to a template",
+      "should_trigger": false,
+      "note": "Repo authoring; use dotfiles."
+    }
   ]
 }

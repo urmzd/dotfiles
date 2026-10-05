@@ -17,10 +17,12 @@
     signingkey = {{ $signing_key | quote }}
 {{- end }}
 
-# Work pack (optional company overlay, see run_after_sync-work-pack.sh.tmpl).
-# Git silently skips a missing include, so this is a no-op until it exists.
+# Packs (company, team, personal overlays; see run_after_sync-packs.sh.tmpl),
+# in order so later packs win. Git silently skips a missing include.
+{{- range (includeTemplate "packs" . | fromJson) }}
 [include]
-    path = {{ includeTemplate "work-pack-dir" . }}/gitconfig
+    path = {{ .dir }}/gitconfig
+{{- end }}
 
 [github]
     user = {{ .github_username | quote }}

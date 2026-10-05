@@ -8,7 +8,7 @@ use anyhow::{Context, Result, bail};
 use inquire::{Confirm, InquireError, MultiSelect};
 use serde_json::json;
 
-use crate::catalog::{Catalog, Package, WorkCatalog};
+use crate::catalog::{Catalog, Package};
 use crate::chezmoi::{self, Config, Paths};
 use crate::migrate;
 use crate::state::{self, Inventory, Managed, Plan};
@@ -32,13 +32,12 @@ pub fn is_interrupt(err: &anyhow::Error) -> bool {
 fn load() -> Result<(Paths, Catalog, Config)> {
     let paths = Paths::discover()?;
     let config = Config::load(&paths.config)?;
-    let work = config.work_pack_dir(&paths.home);
-    let catalog = Catalog::load(&paths.source, work.as_deref(), &paths.home)?;
-    if let WorkCatalog::Invalid { path, error } = &catalog.work {
-        ui::warn(&format!(
-            "work catalog ignored ({}): {error}",
-            path.display()
-        ));
+    let packs = config.packs(&paths.home);
+    let catalog = Catalog::load(&paths.source, &packs, &paths.home)?;
+    for pack in &catalog.packs {
+        if let Some(error) = &pack.error {
+            ui::warn(&format!("{}: catalog ignored: {error}", pack.spec));
+        }
     }
     Ok((paths, catalog, config))
 }
@@ -117,8 +116,13 @@ impl fmt::Display for Choice<'_> {
         } else {
             "  [setup]"
         };
-        let work = if self.pkg.work { "  [work pack]" } else { "" };
-        let text = format!("{}{setup}{work}", self.pkg.description);
+        let pack = self
+            .pkg
+            .pack
+            .as_ref()
+            .map(|p| format!("  [pack: {p}]"))
+            .unwrap_or_default();
+        let text = format!("{}{setup}{pack}", self.pkg.description);
         let text = if text.chars().count() > self.room {
             let cut: String = text.chars().take(self.room.saturating_sub(1)).collect();
             format!("{cut}…")
@@ -172,7 +176,7 @@ fn pick(prompt: &str, pool: &[&Package], checked: &BTreeSet<String>) -> Result<V
 pub fn packages(ctx: &Ctx, no_apply: bool) -> Result<Outcome> {
     let (paths, catalog, mut config) = load()?;
     let current: BTreeSet<String> = config.packages().into_iter().collect();
-    // Required work pack entries always install; they are not a choice.
+    // Required pack entries always install; they are not a choice.
     let pool: Vec<&Package> = catalog.packages.iter().filter(|p| !p.required).collect();
     let next: BTreeSet<String> = pick("Optional packages", &pool, &current)?
         .into_iter()
@@ -202,7 +206,7 @@ pub fn add(ctx: &Ctx, ids: Vec<String>, no_apply: bool) -> Result<Outcome> {
     } else {
         not_required(
             catalog.resolve(&ids)?,
-            "already installs (required by the work pack)",
+            "already installs (required by its pack)",
         )
     };
     let next = current.iter().cloned().chain(ids).collect();
@@ -233,7 +237,7 @@ pub fn remove(ctx: &Ctx, ids: Vec<String>, uninstall: bool, no_apply: bool) -> R
     } else {
         not_required(
             catalog.resolve(&ids)?,
-            "is required by the work pack; remove it there",
+            "is required by its pack; change the pack or remove the pack",
         )
         .into_iter()
         .collect()
@@ -251,7 +255,7 @@ pub fn remove(ctx: &Ctx, ids: Vec<String>, uninstall: bool, no_apply: bool) -> R
     )
 }
 
-/// Ids of `pkgs`, skipping (with a note) the work pack's required entries.
+/// Ids of `pkgs`, skipping (with a note) packs' required entries.
 fn not_required(pkgs: Vec<&Package>, why: &str) -> Vec<String> {
     pkgs.into_iter()
         .filter(|p| {
@@ -368,7 +372,7 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
                     "id": p.id, "name": p.name, "category": p.category,
                     "description": p.description, "selected": selected.contains(&p.id),
                     "installs": p.installs(), "setup": p.setup,
-                    "work_pack": p.work, "required": p.required,
+                    "pack": p.pack, "required": p.required,
                 })
             })
             .collect();
@@ -379,7 +383,7 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
     let id_width = rows.iter().map(|p| p.id.len()).max().unwrap_or(0);
     let name_width = rows
         .iter()
-        .map(|p| p.name.chars().count() + tag(p).len())
+        .map(|p| p.name.chars().count() + tag(p).chars().count())
         .max()
         .unwrap_or(0);
     let mut category = "";
@@ -405,12 +409,128 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
     Ok(Outcome::Done)
 }
 
-fn tag(p: &Package) -> &'static str {
-    match (p.work, p.required) {
-        (true, true) => " (work pack, required)",
-        (true, false) => " (work pack)",
-        _ => "",
+fn tag(p: &Package) -> String {
+    match (&p.pack, p.required) {
+        (Some(pack), true) => format!(" (pack {pack}, required)"),
+        (Some(pack), false) => format!(" (pack {pack})"),
+        _ => String::new(),
     }
+}
+
+// ---- Packs ----------------------------------------------------------------------
+
+pub fn pack_list(ctx: &Ctx) -> Result<Outcome> {
+    let (paths, catalog, config) = load()?;
+    let packs = config.packs(&paths.home);
+    if ctx.format == Format::Json {
+        let data: Vec<_> = packs
+            .iter()
+            .map(|p| {
+                let cat = catalog.packs.iter().find(|c| c.spec == p.spec);
+                json!({
+                    "spec": p.spec, "dir": p.dir, "url": p.url, "present": p.dir.is_dir(),
+                    "packages": cat.map_or(0, |c| c.count),
+                    "skipped": cat.map(|c| c.skipped.clone()).unwrap_or_default(),
+                    "error": cat.and_then(|c| c.error.clone()),
+                })
+            })
+            .collect();
+        println!("{}", serde_json::to_string_pretty(&data)?);
+        return Ok(Outcome::Done);
+    }
+    ui::section("Packs (stacked in this order; later ones win)");
+    if packs.is_empty() {
+        ui::skip("none; add one: dotfiles pack add <git url | url//folder | ~/folder>");
+        return Ok(Outcome::NoChange);
+    }
+    for (i, p) in packs.iter().enumerate() {
+        let cat = catalog.packs.iter().find(|c| c.spec == p.spec);
+        let detail = match cat {
+            Some(c) if c.error.is_some() => {
+                format!("catalog ignored: {}", c.error.as_deref().unwrap_or(""))
+            }
+            Some(c) if !c.skipped.is_empty() => format!(
+                "{} packages; skipped taken ids: {}",
+                c.count,
+                c.skipped.join(", ")
+            ),
+            Some(c) => format!("{} packages", c.count),
+            None => "no catalog".into(),
+        };
+        let line = format!("{}. {}  {}", i + 1, p.spec, ui::dim(&detail));
+        if p.dir.is_dir() {
+            ui::ok(&line);
+        } else {
+            ui::warn(&format!("{line}  (not fetched yet: dotfiles apply)"));
+        }
+    }
+    Ok(Outcome::Done)
+}
+
+pub fn pack_add(ctx: &Ctx, specs: Vec<String>) -> Result<Outcome> {
+    let (paths, _, mut config) = load()?;
+    let mut list = config.pack_specs(&paths.home);
+    let new: Vec<String> = specs
+        .into_iter()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty() && !list.contains(s))
+        .collect();
+    if new.is_empty() {
+        ui::skip("already in the pack list");
+        return Ok(Outcome::NoChange);
+    }
+    ui::section("Packs");
+    for s in &new {
+        ui::change('+', s);
+    }
+    if ctx.dry_run {
+        ui::skip("dry run; nothing saved");
+        return Ok(Outcome::Done);
+    }
+    list.extend(new);
+    save_packs(&paths, &mut config, &list)
+}
+
+pub fn pack_remove(ctx: &Ctx, specs: Vec<String>) -> Result<Outcome> {
+    let (paths, _, mut config) = load()?;
+    let list = config.pack_specs(&paths.home);
+    let unknown: Vec<&String> = specs.iter().filter(|s| !list.contains(s)).collect();
+    if !unknown.is_empty() {
+        bail!(
+            "not in the pack list: {}; see: dotfiles pack list",
+            unknown
+                .iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
+    ui::section("Packs");
+    for s in &specs {
+        ui::change('-', s);
+    }
+    if ctx.dry_run {
+        ui::skip("dry run; nothing saved");
+        return Ok(Outcome::Done);
+    }
+    let next: Vec<String> = list.into_iter().filter(|s| !specs.contains(s)).collect();
+    save_packs(&paths, &mut config, &next)?;
+    ui::hint("its clone stays under ~/.config/packs; delete it by hand if unused");
+    Ok(Outcome::Done)
+}
+
+/// Save the list and apply twice: the first apply fetches new packs, the
+/// second renders what they contain (AGENTS.md, Brewfile, catalog).
+fn save_packs(paths: &Paths, config: &mut Config, list: &[String]) -> Result<Outcome> {
+    config.set_packs(list)?;
+    config.save()?;
+    ui::ok(&format!("saved to {}", paths.config.display()));
+    let first = chezmoi_apply();
+    let (paths, catalog, config) = load()?;
+    let second = chezmoi_apply();
+    let packages = converge(&paths, &catalog, &config, false);
+    first.and(second).and(packages)?;
+    Ok(Outcome::Done)
 }
 
 // ---- Setup ----------------------------------------------------------------------

@@ -4,9 +4,9 @@ description: >
   Operate a machine set up by urmzd/dotfiles through its `dotfiles` CLI:
   install or remove optional tools from the package catalog, diagnose a broken
   setup with `dotfiles doctor`, update the CLI, dotfiles, or packages, and add
-  company tools to a work pack's catalog.toml. Use when the user says "install
+  company tools to a pack's catalog.toml, and stack packs (company, team, role overlays). Use when the user says "install
   linear", "remove discord", "what can I install", "why is python broken",
-  "update everything", "add our VPN for everyone at work", or "is this machine
+  "update everything", "add our VPN for everyone at work", "add the backend-engineer pack", or "is this machine
   healthy". Do NOT use for editing the chezmoi source repo itself (templates,
   run_ scripts, naming; use dotfiles), for a project's own toolchain or .envrc
   (use setup-devenv), or for a known shell/nvim/gpg error signature (use
@@ -28,7 +28,7 @@ Check the CLI first: `command -v dotfiles`. If missing, tell the user to run
 
 | Need | Command |
 |---|---|
-| What is installable, and what is selected | `dotfiles package list --format json` (fields: id, name, category, selected, installs, setup, work_pack, required) |
+| What is installable, and what is selected | `dotfiles package list --format json` (fields: id, name, category, selected, installs, setup, pack, required) |
 | Machine health with fixes | `dotfiles doctor --format json` (fields: check, level ok/warn/fail, detail, fix) |
 | Machine type, versions, selection | `dotfiles status` |
 | Desired vs installed (missing, deselected, migrations, files) | `dotfiles plan --format json` (exit 2 = nothing to do) |
@@ -43,6 +43,8 @@ Check the CLI first: `command -v dotfiles`. If missing, tell the user to run
 | Fix what doctor reports | run each finding's `fix`, then rerun `dotfiles doctor` |
 | A selected tool is missing | `dotfiles plan`, then `dotfiles apply --yes` (installs are retried every apply; nothing is ever marked done) |
 | Update everything | `dotfiles update` (CLI, then pull dotfiles and apply) |
+| Stack a pack (company, team, role) | `dotfiles pack add <git url//folder | git url | ~/folder>` (confirm the spec with the user; it applies) |
+| See the packs and what each adds | `dotfiles pack list --format json` |
 | Update installed packages | `dotfiles package update` (`brew` or `ai` to narrow) |
 | Make the machine match the plan | `dotfiles apply --yes` |
 | Also uninstall deselected packages | `dotfiles apply --yes --prune` (only ones the CLI installed; confirm with the user first) |
@@ -65,9 +67,9 @@ command and say why:
   `catalog.toml` in the source repo (`chezmoi source-path`), following the
   entries around it, then `dotfiles package add <id>`. That edits the repo, so
   the `dotfiles` skill's conventions apply.
-- **Company-specific:** add it to the work pack's `catalog.toml` (folder:
-  `work_pack` in `chezmoi data`, default `~/.config/work`), never to this
-  repo. Same format. `required = true` installs it for everyone on the pack;
+- **Company, team, or role-specific:** add it to that pack's `catalog.toml`
+  (`dotfiles pack list --format json` gives each pack's folder), never to
+  this repo. Same format. `required = true` installs it for everyone on the pack;
   leave it off to make it opt-in. Then run `dotfiles doctor`: it reports a bad
   file (ids must be new; id, name, description, category are required). If the
   pack is a git repo, commit and push there so teammates get it.
@@ -91,7 +93,9 @@ setup = ["internal-cli login"]
 
 - A new shell is needed after PATH changes (`exec zsh`); an old terminal can
   report a stale Python or a missing command after a successful apply.
-- Work pack catalog changes reach templates on the apply after they are
+- Pack catalog changes reach templates on the apply after they are
   validated; `dotfiles package add` validates first, so it installs right away.
-- Required work pack packages cannot be removed with `dotfiles package remove`;
-  change the pack.
+- Required pack packages cannot be removed with `dotfiles package remove`;
+  change the pack, or `dotfiles pack remove` it.
+- Packs stack in list order: later env.zsh and gitconfig settings win, and a
+  catalog id already taken by the dotfiles catalog or an earlier pack is skipped.

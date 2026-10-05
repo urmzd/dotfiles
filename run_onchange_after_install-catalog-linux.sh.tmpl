@@ -12,7 +12,7 @@ ui_section "Optional packages (catalog)"
 
 {{- $selected := get . "packages" | default list }}
 {{- $apt := list }}{{ $dnf := list }}{{ $pacman := list }}{{ $npm := list }}{{ $uv := list }}
-{{- range (includeTemplate "catalog" . | fromToml).package }}
+{{- range (includeTemplate "catalog" . | fromJson).package }}
 {{-   if or (has .id $selected) (get . "required") }}
 {{-     $apt = concat $apt (get . "apt" | default list) }}
 {{-     $dnf = concat $dnf (get . "dnf" | default list) }}

@@ -7,8 +7,8 @@ use std::process::{Command, Stdio};
 use anyhow::Result;
 use serde::Serialize;
 
-use crate::catalog::{Catalog, WorkCatalog};
-use crate::chezmoi::{self, Config, Paths};
+use crate::catalog::Catalog;
+use crate::chezmoi::{self, Config, Pack, Paths};
 use crate::commands::Ctx;
 use crate::identity::{gh_login, output};
 use crate::migrate;
@@ -80,8 +80,12 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
 
     check_chezmoi(&mut r);
     let config = Config::load(&paths.config).ok();
-    let work = config.as_ref().and_then(|c| c.work_pack_dir(&paths.home));
-    let catalog = Catalog::load(&paths.source, work.as_deref(), &paths.home).ok();
+    let packs = config
+        .as_ref()
+        .map(|c| c.packs(&paths.home))
+        .unwrap_or_default();
+    let catalog = Catalog::load(&paths.source, &packs, &paths.home).ok();
+    check_packs(&mut r, &packs, catalog.as_ref());
     check_catalog(&mut r, catalog.as_ref(), config.as_ref());
     check_cli_version(&mut r);
     check_pending(&mut r);
@@ -200,18 +204,6 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
         .into_iter()
         .filter(|id| catalog.get(id).is_none())
         .collect();
-    match &catalog.work {
-        WorkCatalog::None => {}
-        WorkCatalog::Loaded { path, count } => r.ok(
-            "work catalog",
-            format!("{count} packages from {}", path.display()),
-        ),
-        WorkCatalog::Invalid { path, error } => r.fail(
-            "work catalog",
-            format!("{} is ignored: {error}", path.display()),
-            format!("fix {}, then: dotfiles doctor", path.display()),
-        ),
-    }
     if unknown.is_empty() {
         r.ok(
             "catalog",
@@ -221,8 +213,8 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
             ),
         );
     } else {
-        let fix = if matches!(catalog.work, WorkCatalog::Invalid { .. }) {
-            "fix the work catalog (above); its ids come back with it".to_string()
+        let fix = if catalog.packs.iter().any(|p| p.error.is_some()) {
+            "fix the pack catalog (above); its ids come back with it".to_string()
         } else {
             format!("dotfiles package remove {}", unknown.join(" "))
         };
@@ -231,6 +223,50 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
             format!("selected but not in the catalog: {}", unknown.join(", ")),
             fix,
         );
+    }
+}
+
+/// Each pack: fetched (or present), and its catalog usable.
+fn check_packs(r: &mut Report, packs: &[Pack], catalog: Option<&Catalog>) {
+    for pack in packs {
+        let name = pack.name();
+        if !pack.dir.is_dir() {
+            let fix = if pack.url.is_some() {
+                "dotfiles apply (clones it; check repo access with dotfiles identity)"
+            } else {
+                "create the folder, or: dotfiles pack remove <spec>"
+            };
+            r.warn(
+                "pack",
+                format!("{name}: {} is not on disk", pack.dir.display()),
+                fix,
+            );
+            continue;
+        }
+        match catalog.and_then(|c| c.packs.iter().find(|c| c.spec == pack.spec)) {
+            Some(c) if c.error.is_some() => r.fail(
+                "pack",
+                format!(
+                    "{name}: catalog ignored: {}",
+                    c.error.as_deref().unwrap_or("")
+                ),
+                format!("fix {}, then: dotfiles doctor", c.path.display()),
+            ),
+            Some(c) if !c.skipped.is_empty() => r.warn(
+                "pack",
+                format!(
+                    "{name}: {} packages; ids already taken (skipped): {}",
+                    c.count,
+                    c.skipped.join(", ")
+                ),
+                "rename them in the pack, or drop the duplicate pack",
+            ),
+            Some(c) => r.ok(
+                "pack",
+                format!("{name}: {} packages ({})", c.count, pack.spec),
+            ),
+            None => r.ok("pack", format!("{name}: {}", pack.spec)),
+        }
     }
 }
 

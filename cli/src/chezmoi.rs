@@ -7,6 +7,68 @@ use std::process::{Command, ExitStatus, Stdio};
 use anyhow::{Context, Result, bail};
 use toml_edit::{Array, DocumentMut, Item, Value};
 
+/// One pack entry, resolved like `.chezmoitemplates/packs` (keep in sync):
+///   `~/folder` or `/folder`  -> that folder, used in place
+///   `<git url>`              -> the repo, cloned to ~/.config/packs/<repo>
+///   `<git url>//<folder>`    -> one folder of that repo
+#[derive(Debug, Clone, PartialEq)]
+pub struct Pack {
+    pub spec: String,
+    /// The folder whose files are read.
+    pub dir: PathBuf,
+    /// Git URL to clone, for repo packs.
+    pub url: Option<String>,
+    /// Where the repo is cloned, for repo packs.
+    pub repo_dir: Option<PathBuf>,
+    /// File-name-safe id, the validated catalog copy's name.
+    pub key: String,
+}
+
+impl Pack {
+    pub fn parse(spec: &str, home: &Path) -> Self {
+        let (dir, url, repo_dir) = if let Some(rest) = spec.strip_prefix('~') {
+            (home.join(rest.trim_start_matches('/')), None, None)
+        } else if spec.starts_with('/') {
+            (PathBuf::from(spec), None, None)
+        } else {
+            // Split `//folder` off after the scheme's own `://`.
+            let scheme_end = spec.find("://").map_or(0, |i| i + 3);
+            let (scheme, rest) = spec.split_at(scheme_end);
+            let (repo, sub) = rest.split_once("//").unwrap_or((rest, ""));
+            let name = repo.rsplit(['/', ':']).next().unwrap_or(repo);
+            let repo_dir = home
+                .join(".config/packs")
+                .join(name.trim_end_matches(".git"));
+            let dir = if sub.is_empty() {
+                repo_dir.clone()
+            } else {
+                repo_dir.join(sub)
+            };
+            (dir, Some(format!("{scheme}{repo}")), Some(repo_dir))
+        };
+        let rel = dir.strip_prefix(home).unwrap_or(&dir).to_string_lossy();
+        let key = rel
+            .split(|c: char| !c.is_ascii_alphanumeric())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join("-");
+        Self {
+            spec: spec.to_string(),
+            dir,
+            url,
+            repo_dir,
+            key,
+        }
+    }
+
+    /// Short label: the pack folder's name (backend-engineer, acme-setup).
+    pub fn name(&self) -> String {
+        self.dir
+            .file_name()
+            .map_or_else(|| self.spec.clone(), |n| n.to_string_lossy().into_owned())
+    }
+}
+
 /// Resolved locations. Both can be overridden for tests and odd layouts.
 pub struct Paths {
     pub home: PathBuf,
@@ -136,9 +198,14 @@ impl Config {
 
     /// Selected package ids. Missing key means nothing selected yet.
     pub fn packages(&self) -> Vec<String> {
+        self.data_list("packages")
+    }
+
+    /// A list of strings under [data]; empty when missing.
+    pub fn data_list(&self, key: &str) -> Vec<String> {
         self.doc
             .get("data")
-            .and_then(|d| d.get("packages"))
+            .and_then(|d| d.get(key))
             .and_then(Item::as_array)
             .map(|a| {
                 a.iter()
@@ -148,21 +215,33 @@ impl Config {
             .unwrap_or_default()
     }
 
-    /// The work pack folder, resolved like `.chezmoitemplates/work-pack-dir`:
-    /// a path (absolute or `~/...`) is used in place; empty or a git URL means
-    /// ~/.config/work. None on a personal machine.
-    pub fn work_pack_dir(&self, home: &Path) -> Option<PathBuf> {
-        if self.machine().as_deref() != Some("work") {
-            return None;
+    /// Pack entries as written in the config. Configs from before the list
+    /// keep working like `.chezmoitemplates/packs`: a `work_pack` string is a
+    /// one-pack list, and a hand-made ~/.config/work on a work machine with
+    /// neither set is the pack.
+    pub fn pack_specs(&self, home: &Path) -> Vec<String> {
+        if self.has_data("packs") {
+            return self.data_list("packs");
         }
-        let pack = self.data_str("work_pack").unwrap_or_default();
-        Some(if let Some(rest) = pack.strip_prefix('~') {
-            home.join(rest.trim_start_matches('/'))
-        } else if pack.starts_with('/') {
-            PathBuf::from(pack)
-        } else {
-            home.join(".config/work")
-        })
+        if let Some(legacy) = self.data_str("work_pack") {
+            return vec![legacy];
+        }
+        if self.machine().as_deref() == Some("work") && home.join(".config/work").is_dir() {
+            return vec!["~/.config/work".into()];
+        }
+        Vec::new()
+    }
+
+    pub fn packs(&self, home: &Path) -> Vec<Pack> {
+        self.pack_specs(home)
+            .iter()
+            .map(|s| Pack::parse(s, home))
+            .collect()
+    }
+
+    /// Replace the pack list, keeping its order.
+    pub fn set_packs(&mut self, specs: &[String]) -> Result<()> {
+        self.set_data_list("packs", specs)
     }
 
     pub fn machine(&self) -> Option<String> {
@@ -204,9 +283,14 @@ impl Config {
 
     /// Replace the selection, sorted and de-duplicated.
     pub fn set_packages(&mut self, ids: &[String]) -> Result<()> {
-        let mut ids: Vec<&str> = ids.iter().map(String::as_str).collect();
+        let mut ids = ids.to_vec();
         ids.sort_unstable();
         ids.dedup();
+        self.set_data_list("packages", &ids)
+    }
+
+    /// Set a list of strings under [data], in the given order.
+    pub fn set_data_list(&mut self, key: &str, items: &[String]) -> Result<()> {
         let data = self
             .doc
             .get_mut("data")
@@ -217,11 +301,11 @@ impl Config {
                     self.path.display()
                 )
             })?;
-        let array: Array = ids.into_iter().collect();
-        match data.get_mut("packages") {
+        let array: Array = items.iter().map(String::as_str).collect();
+        match data.get_mut(key) {
             Some(item) => *item = Item::Value(Value::Array(array)),
             None => {
-                data.insert("packages", Item::Value(Value::Array(array)));
+                data.insert(key, Item::Value(Value::Array(array)));
             }
         }
         Ok(())
@@ -257,6 +341,41 @@ mod tests {
         let path = dir.path().join("chezmoi.toml");
         std::fs::write(&path, text).unwrap();
         (dir, path)
+    }
+
+    #[test]
+    fn parses_pack_specs_like_the_template() {
+        let home = Path::new("/h");
+        let p = Pack::parse(
+            "git@github.com:acme/dev-setup.git//teams/backend-engineer",
+            home,
+        );
+        assert_eq!(p.url.as_deref(), Some("git@github.com:acme/dev-setup.git"));
+        assert_eq!(
+            p.repo_dir,
+            Some(PathBuf::from("/h/.config/packs/dev-setup"))
+        );
+        assert_eq!(
+            p.dir,
+            PathBuf::from("/h/.config/packs/dev-setup/teams/backend-engineer")
+        );
+        assert_eq!(p.key, "config-packs-dev-setup-teams-backend-engineer");
+        assert_eq!(p.name(), "backend-engineer");
+        let p = Pack::parse("https://github.com/acme/dev-setup.git", home);
+        assert_eq!(
+            p.url.as_deref(),
+            Some("https://github.com/acme/dev-setup.git")
+        );
+        assert_eq!(p.dir, PathBuf::from("/h/.config/packs/dev-setup"));
+        let p = Pack::parse("~/my-overrides", home);
+        assert_eq!(
+            (p.dir, p.url, p.key),
+            (
+                PathBuf::from("/h/my-overrides"),
+                None,
+                "my-overrides".into()
+            )
+        );
     }
 
     #[test]

@@ -5,7 +5,7 @@
 #   - gcloud / aws-cli   -> run_onchange_after_install-cloud-clis.sh.tmpl (pinned upstream)
 #   - cortex             -> run_onchange_after_install-cortex.sh.tmpl   (pinned upstream)
 #   - AI coding CLIs     -> catalog.toml category "agents" (picked per machine)
-#   - company tools      -> <work pack>/Brewfile (optional work pack, appended at install time)
+#   - pack tools         -> <pack>/Brewfile (each optional pack, appended at install time)
 #   - Python / Rust      -> uv / rustup (curl-installed in run_once_before_install-packages-v2.sh.tmpl)
 #
 # Optional packages come from catalog.toml: the ids listed in [data].packages
@@ -59,9 +59,9 @@ brew "gettext"  # GNU internationalization and localization support
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)
 
-# Optional packages selected from catalog.toml, plus required work pack entries
+# Optional packages selected from catalog.toml, plus required pack entries
 {{- $selected := get . "packages" | default list }}
-{{- range (includeTemplate "catalog" . | fromToml).package }}
+{{- range (includeTemplate "catalog" . | fromJson).package }}
 {{-   if and (or (has .id $selected) (get . "required")) (or (get . "brew") (get . "cask") (get . "npm") (get . "uv")) }}
 
 # {{ .name }} ({{ .id }}): {{ .description }}

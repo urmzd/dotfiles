@@ -44,6 +44,11 @@ enum Command {
         #[arg(long)]
         no_apply: bool,
     },
+    /// Packs (company, team, personal overlays): list, add, remove
+    Pack {
+        #[command(subcommand)]
+        action: Option<PackCmd>,
+    },
     /// GitHub identity: gh sign-in, SSH and GPG keys, signed test commit
     Identity {
         /// GitHub account this machine pushes as; saved as github_username
@@ -161,6 +166,22 @@ struct SetupArgs {
     force: bool,
 }
 
+#[derive(Subcommand)]
+enum PackCmd {
+    /// The packs, in order, with what each contributes (default)
+    List,
+    /// Append packs: a git URL, URL//folder (one folder of a repo), or a local folder
+    Add {
+        #[arg(required = true)]
+        specs: Vec<String>,
+    },
+    /// Remove packs from the list (their clones are left on disk)
+    Remove {
+        #[arg(required = true)]
+        specs: Vec<String>,
+    },
+}
+
 #[derive(Clone, Copy, ValueEnum)]
 pub enum UpdateTarget {
     /// Homebrew packages, AI coding CLIs, then apply
@@ -198,6 +219,11 @@ fn main() -> ExitCode {
         Command::Remove(r) => commands::remove(&ctx, r.ids, r.uninstall, r.no_apply),
         Command::List(l) => commands::list(&ctx, l.selected),
         Command::Setup(s) => commands::setup(&ctx, s.ids, s.force),
+        Command::Pack { action } => match action {
+            None | Some(PackCmd::List) => commands::pack_list(&ctx),
+            Some(PackCmd::Add { specs }) => commands::pack_add(&ctx, specs),
+            Some(PackCmd::Remove { specs }) => commands::pack_remove(&ctx, specs),
+        },
         Command::Identity { account } => identity::run(&ctx, account),
         Command::Apply { yes, prune } => commands::apply(&ctx, yes, prune),
         Command::Plan { prune } => commands::plan(&ctx, prune),

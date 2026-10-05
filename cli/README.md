@@ -21,6 +21,9 @@ dotfiles package remove cursor       # deselect (--uninstall also brew-uninstall
 dotfiles package list --selected     # catalog with the current selection
 dotfiles package setup               # pending sign-in/installers, e.g. acli auth, twg
 dotfiles package update [all|brew|ai]
+dotfiles pack [list]                 # packs in stacking order, with what each adds
+dotfiles pack add <spec>...          # append: git URL, url//folder, or ~/folder (applies, fetches)
+dotfiles pack remove <spec>...       # drop from the list (clones stay on disk)
 dotfiles identity                    # gh sign-in, SSH + GPG keys created and uploaded, signing verified
 dotfiles identity --account <name>   # change the GitHub account this machine pushes as
 dotfiles doctor                      # health check; every finding comes with its fix
@@ -47,7 +50,7 @@ Global flags: `--format json|human` for data commands, `--dry-run` to show chang
 | Plan | [`src/state.rs`](src/state.rs) | Desired (selection + required work entries) vs observed (probed each run); installs what is missing, `--prune` removes deselected packages it owns (`~/.local/state/dotfiles/managed.json`) |
 | Migrations | [`src/migrate.rs`](src/migrate.rs) | Selection changes shipped in a release, applied on the next `apply`/`update`; each decides from the config whether it already ran |
 
-To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI change is needed. A work pack can carry its own `catalog.toml` in the same format: its entries join the picker, `required = true` ones install without being picked (and cannot be removed), and the templates read a validated copy at `~/.local/share/dotfiles/work-catalog.toml`, so a broken company file is reported, never fatal. `DOTFILES_SOURCE` and `DOTFILES_CHEZMOI_CONFIG` override the chezmoi source directory and config file.
+To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI change is needed. Each pack (`dotfiles pack add <git url | url//folder | ~/folder>`) can carry its own `catalog.toml` in the same format: its entries join the picker in pack order (an id already taken is skipped and reported), `required = true` ones install without being picked (and cannot be removed), and the templates read validated copies in `~/.local/share/dotfiles/packs/`, so a broken pack file is reported, never fatal. `DOTFILES_SOURCE` and `DOTFILES_CHEZMOI_CONFIG` override the chezmoi source directory and config file.
 
 ## Development
 

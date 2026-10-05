@@ -1,5 +1,5 @@
 //! Desired vs observed package state, the way Terraform plans: the desired
-//! set is the saved selection plus required work pack entries, the observed
+//! set is the saved selection plus required pack entries, the observed
 //! set is probed from the machine on every run (brew, npm, uv, the Linux
 //! package manager, or a package's `check`), and the plan is the difference.
 //! Nothing records "installed", so a failed install can never be marked done.

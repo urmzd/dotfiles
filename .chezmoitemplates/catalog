@@ -1,15 +1,26 @@
-{{- /* Catalog TOML for the package templates: catalog.toml, plus the work   */ -}}
-{{- /* pack's catalog on a work machine. Templates read the validated copy   */ -}}
-{{- /* (written by the dotfiles CLI and run_after_sync-work-pack once it     */ -}}
-{{- /* parses and its ids are new), never the pack's file itself: a broken   */ -}}
-{{- /* company file must not break every apply. The copy only counts while   */ -}}
-{{- /* the pack still has a catalog.toml.                                    */ -}}
-{{- include "catalog.toml" -}}
-{{- if .is_work -}}
-{{-   $copy := joinPath .chezmoi.homeDir ".local/share/dotfiles/work-catalog.toml" -}}
-{{-   if and (stat $copy) (stat (joinPath (includeTemplate "work-pack-dir" .) "catalog.toml")) }}
-
-# ---- work pack ----
-{{ include $copy -}}
+{{- /* The package catalog as JSON ({"package": [...]}) for the templates:  */ -}}
+{{- /* catalog.toml, then each pack's catalog in pack order. Packs are read  */ -}}
+{{- /* from validated copies (written by the dotfiles CLI and                */ -}}
+{{- /* run_after_sync-packs once they parse), never the pack's file itself:  */ -}}
+{{- /* a broken pack file must not break every apply. A copy only counts    */ -}}
+{{- /* while its pack still has a catalog.toml. An id already taken (by the  */ -}}
+{{- /* dotfiles catalog or an earlier pack) is skipped; the CLI reports it.  */ -}}
+{{- $home := .chezmoi.homeDir -}}
+{{- $seen := dict -}}
+{{- $out := list -}}
+{{- range (include "catalog.toml" | fromToml).package -}}
+{{-   $_ := set $seen .id true -}}
+{{-   $out = append $out . -}}
+{{- end -}}
+{{- range $pack := (includeTemplate "packs" . | fromJson) -}}
+{{-   $copy := joinPath $home ".local/share/dotfiles/packs" (printf "%s.toml" $pack.key) -}}
+{{-   if and (stat $copy) (stat (joinPath $pack.dir "catalog.toml")) -}}
+{{-     range (include $copy | fromToml).package -}}
+{{-       if not (hasKey $seen .id) -}}
+{{-         $_ := set $seen .id true -}}
+{{-         $out = append $out . -}}
+{{-       end -}}
+{{-     end -}}
 {{-   end -}}
 {{- end -}}
+{{- dict "package" $out | toJson -}}

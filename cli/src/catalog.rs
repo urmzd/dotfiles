@@ -1,5 +1,5 @@
 //! `catalog.toml` at the dotfiles repo root: every optional package,
-//! how it installs, and what setup it needs. A work pack can add its own
+//! how it installs, and what setup it needs. Each pack can add its own
 //! `catalog.toml` in the same format; its entries join the picker, and
 //! `required = true` ones install on every machine using that pack.
 
@@ -9,34 +9,35 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 
+use crate::chezmoi::Pack;
+
 #[derive(Debug, Deserialize)]
 pub struct Catalog {
     #[serde(rename = "package")]
     pub packages: Vec<Package>,
-    /// What happened to the work pack's catalog, if it has one.
+    /// What happened to each pack's catalog, in pack order.
     #[serde(skip)]
-    pub work: WorkCatalog,
+    pub packs: Vec<PackCatalog>,
 }
 
-#[derive(Debug, Default)]
-pub enum WorkCatalog {
-    #[default]
-    None,
-    Loaded {
-        path: PathBuf,
-        count: usize,
-    },
-    /// Present but unusable; its entries are ignored (the apply never sees
-    /// them either: templates read only the validated copy).
-    Invalid {
-        path: PathBuf,
-        error: String,
-    },
+/// One pack's catalog.toml, as loaded.
+#[derive(Debug)]
+pub struct PackCatalog {
+    pub spec: String,
+    pub path: PathBuf,
+    /// Entries added to the catalog.
+    pub count: usize,
+    /// Ids already taken by the dotfiles catalog or an earlier pack.
+    pub skipped: Vec<String>,
+    /// Present but unusable; all its entries are ignored (the templates never
+    /// see it either: they read only validated copies).
+    pub error: Option<String>,
 }
 
-/// Validated copy of the work pack's catalog that the chezmoi templates read.
-/// Written only after it parses, so a broken company file cannot break apply.
-pub const WORK_COPY: &str = ".local/share/dotfiles/work-catalog.toml";
+/// Validated copies of pack catalogs that the chezmoi templates read, one
+/// per pack, named by `Pack::key`. Written only after a file parses, so a
+/// broken pack file cannot break apply.
+pub const PACK_COPIES: &str = ".local/share/dotfiles/packs";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Package {
@@ -91,9 +92,9 @@ pub struct Package {
     /// Work pack only: installs on every machine using the pack, selected or not.
     #[serde(default)]
     pub required: bool,
-    /// Set for entries that came from the work pack.
+    /// The pack this entry came from (its folder name), if any.
     #[serde(skip)]
-    pub work: bool,
+    pub pack: Option<String>,
 }
 
 impl Package {
@@ -153,60 +154,74 @@ fn one_line(err: &str) -> String {
 }
 
 impl Catalog {
-    /// The dotfiles catalog plus, when `work_dir` holds one, the work pack's.
-    /// A bad work catalog never fails the load: it is recorded in `work` and
-    /// skipped. A good one is copied to `home/WORK_COPY` for the templates.
-    pub fn load(source_dir: &Path, work_dir: Option<&Path>, home: &Path) -> Result<Self> {
+    /// The dotfiles catalog plus each pack's, in pack order. A bad pack file
+    /// never fails the load: it is recorded in `packs` and skipped, and an id
+    /// that is already taken is skipped alone. Good files are copied to
+    /// `home/PACK_COPIES` for the templates; copies of removed packs go.
+    pub fn load(source_dir: &Path, packs: &[Pack], home: &Path) -> Result<Self> {
         let path = source_dir.join("catalog.toml");
         let text = std::fs::read_to_string(&path)
             .with_context(|| format!("reading {}", path.display()))?;
         let mut catalog =
             Self::parse(&text).with_context(|| format!("parsing {}", path.display()))?;
-        let copy = home.join(WORK_COPY);
-        let work_path = work_dir.map(|d| d.join("catalog.toml"));
-        match work_path.filter(|p| p.is_file()) {
-            Some(path) => match catalog.merge_work(&path) {
-                Ok(text) => {
-                    let count = catalog.packages.iter().filter(|p| p.work).count();
+        let copies = home.join(PACK_COPIES);
+        let mut keep = BTreeSet::new();
+        for pack in packs {
+            let path = pack.dir.join("catalog.toml");
+            if !path.is_file() {
+                continue;
+            }
+            keep.insert(format!("{}.toml", pack.key));
+            let loaded = std::fs::read_to_string(&path)
+                .map_err(anyhow::Error::from)
+                .and_then(|text| Self::parse(&text).map(|c| (text, c)));
+            let status = match loaded {
+                Ok((text, pack_catalog)) => {
+                    let copy = copies.join(format!("{}.toml", pack.key));
                     if std::fs::read_to_string(&copy).ok().as_deref() != Some(text.as_str()) {
-                        if let Some(dir) = copy.parent() {
-                            let _ = std::fs::create_dir_all(dir);
-                        }
+                        let _ = std::fs::create_dir_all(&copies);
                         let _ = std::fs::write(&copy, &text);
                     }
-                    catalog.work = WorkCatalog::Loaded { path, count };
-                }
-                Err(err) => {
-                    catalog.work = WorkCatalog::Invalid {
+                    let (mut count, mut skipped) = (0, Vec::new());
+                    for mut p in pack_catalog.packages {
+                        if catalog.get(&p.id).is_some() {
+                            skipped.push(p.id);
+                            continue;
+                        }
+                        p.pack = Some(pack.name());
+                        catalog.packages.push(p);
+                        count += 1;
+                    }
+                    PackCatalog {
+                        spec: pack.spec.clone(),
                         path,
-                        error: one_line(&format!("{err:#}")),
+                        count,
+                        skipped,
+                        error: None,
                     }
                 }
-            },
-            None => {
-                let _ = std::fs::remove_file(&copy);
+                Err(err) => PackCatalog {
+                    spec: pack.spec.clone(),
+                    path,
+                    count: 0,
+                    skipped: Vec::new(),
+                    error: Some(one_line(&format!("{err:#}"))),
+                },
+            };
+            catalog.packs.push(status);
+        }
+        if let Ok(entries) = std::fs::read_dir(&copies) {
+            for entry in entries.flatten() {
+                if !keep.contains(&entry.file_name().to_string_lossy().to_string()) {
+                    let _ = std::fs::remove_file(entry.path());
+                }
             }
         }
+        let _ = std::fs::remove_file(home.join(".local/share/dotfiles/work-catalog.toml"));
         Ok(catalog)
     }
 
-    /// Parse the work pack catalog and append its entries; returns its text.
-    fn merge_work(&mut self, path: &Path) -> Result<String> {
-        let text = std::fs::read_to_string(path)?;
-        let work = Self::parse(&text)?;
-        for pkg in &work.packages {
-            if self.get(&pkg.id).is_some() {
-                bail!("id `{}` is already in the dotfiles catalog", pkg.id);
-            }
-        }
-        self.packages.extend(work.packages.into_iter().map(|mut p| {
-            p.work = true;
-            p
-        }));
-        Ok(text)
-    }
-
-    /// Everything that installs: the saved selection plus required work entries.
+    /// Everything that installs: the saved selection plus required pack entries.
     pub fn effective(&self, selected: &[String]) -> BTreeSet<String> {
         self.packages
             .iter()
@@ -308,43 +323,60 @@ adopt = true
     }
 
     #[test]
-    fn work_catalog_merges_and_requires() {
+    fn pack_catalogs_stack_in_order() {
         let dir = std::env::temp_dir().join(format!("dotfiles-cat-{}", std::process::id()));
-        let (src, work, home) = (dir.join("src"), dir.join("work"), dir.join("home"));
-        for d in [&src, &work, &home] {
+        let _ = std::fs::remove_dir_all(&dir);
+        let (src, home) = (dir.join("src"), dir.join("home"));
+        let (eng, backend) = (home.join("eng"), home.join("backend"));
+        for d in [&src, &eng, &backend] {
             std::fs::create_dir_all(d).unwrap();
         }
         std::fs::write(src.join("catalog.toml"), SAMPLE).unwrap();
-        let entry = "[[package]]\nid = \"vpn\"\nname = \"VPN\"\ndescription = \"d\"\ncategory = \"work\"\nrequired = true\n";
-        std::fs::write(work.join("catalog.toml"), entry).unwrap();
-
-        let c = Catalog::load(&src, Some(&work), &home).unwrap();
-        assert!(matches!(c.work, WorkCatalog::Loaded { count: 1, .. }));
-        assert!(c.get("vpn").unwrap().work);
-        assert_eq!(
-            c.effective(&["notion".into()])
-                .into_iter()
-                .collect::<Vec<_>>(),
-            vec!["notion", "vpn"]
+        let entry = |id: &str, extra: &str| {
+            format!(
+                "[[package]]\nid = \"{id}\"\nname = \"{id}\"\ndescription = \"d\"\ncategory = \"work\"\n{extra}\n"
+            )
+        };
+        std::fs::write(eng.join("catalog.toml"), entry("vpn", "required = true")).unwrap();
+        // backend reuses `vpn` (taken by eng) and `notion` (dotfiles catalog).
+        let backend_text = format!(
+            "{}{}{}",
+            entry("vpn", ""),
+            entry("notion", ""),
+            entry("pg", "")
         );
+        std::fs::write(backend.join("catalog.toml"), &backend_text).unwrap();
+        let packs = vec![Pack::parse("~/eng", &home), Pack::parse("~/backend", &home)];
+
+        let c = Catalog::load(&src, &packs, &home).unwrap();
+        assert_eq!(c.packs[0].count, 1);
         assert_eq!(
-            std::fs::read_to_string(home.join(WORK_COPY)).unwrap(),
-            entry
+            (c.packs[1].count, c.packs[1].skipped.clone()),
+            (1, vec!["vpn".into(), "notion".into()])
+        );
+        assert_eq!(c.get("vpn").unwrap().pack.as_deref(), Some("eng"));
+        assert_eq!(
+            c.effective(&["pg".into()]).into_iter().collect::<Vec<_>>(),
+            vec!["pg", "vpn"]
+        );
+        let copy = |p: &Pack| home.join(PACK_COPIES).join(format!("{}.toml", p.key));
+        assert_eq!(
+            std::fs::read_to_string(copy(&packs[1])).unwrap(),
+            backend_text
         );
 
-        // A clash or a syntax error is reported, ignored, and keeps the last good copy.
-        std::fs::write(work.join("catalog.toml"), SAMPLE).unwrap();
-        let c = Catalog::load(&src, Some(&work), &home).unwrap();
-        assert!(matches!(c.work, WorkCatalog::Invalid { .. }) && c.get("vpn").is_none());
+        // A syntax error is reported, ignored, and keeps the last good copy.
+        std::fs::write(backend.join("catalog.toml"), "[[package]]\nid = 1").unwrap();
+        let c = Catalog::load(&src, &packs, &home).unwrap();
+        assert!(c.packs[1].error.is_some() && c.get("pg").is_none());
         assert_eq!(
-            std::fs::read_to_string(home.join(WORK_COPY)).unwrap(),
-            entry
+            std::fs::read_to_string(copy(&packs[1])).unwrap(),
+            backend_text
         );
 
-        // No work catalog: the copy goes too.
-        std::fs::remove_file(work.join("catalog.toml")).unwrap();
-        Catalog::load(&src, Some(&work), &home).unwrap();
-        assert!(!home.join(WORK_COPY).exists());
+        // A pack removed from the list loses its copy.
+        Catalog::load(&src, &packs[..1], &home).unwrap();
+        assert!(!copy(&packs[1]).exists() && copy(&packs[0]).exists());
         let _ = std::fs::remove_dir_all(&dir);
     }
 
