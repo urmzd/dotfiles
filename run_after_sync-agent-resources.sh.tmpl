@@ -40,7 +40,7 @@ if command -v jq >/dev/null 2>&1; then
     comm -12 "$tmp_status.source" "$tmp_status.unmanaged" |
         while IFS="$(printf '\t')" read -r _kind name; do
             [ -n "$name" ] || continue
-            agentspec manage add "$name" >/dev/null 2>&1 && ui_ok "adopted $name" || ui_warn "could not adopt $name"
+            agentspec manage add "$name" --all-tools >/dev/null 2>&1 && ui_ok "adopted $name" || ui_warn "could not adopt $name"
         done
 
     cut -f2 "$tmp_status.source" |
@@ -48,6 +48,22 @@ if command -v jq >/dev/null 2>&1; then
             [ -n "$name" ] || continue
             agentspec manage verify --accept --name "$name" >/dev/null 2>&1 || true
         done
+
+    # A resource adopted without links (older runs adopted without
+    # --all-tools) is managed but invisible to every tool. Link it the way the
+    # rest are: symlinks, except OpenCode, which gets copies.
+    if agentspec --format json status >"$tmp_status" 2>/dev/null; then
+        jq -r '.managed[] | select((.links | length) == 0) | .name' "$tmp_status" | sort |
+            comm -12 <(cut -f2 "$tmp_status.source" | sort) - |
+            while IFS= read -r name; do
+                [ -n "$name" ] || continue
+                for tool in claude-code github-copilot codex; do
+                    agentspec manage link "$name" "$tool" --symlink >/dev/null 2>&1 || true
+                done
+                agentspec manage link "$name" opencode >/dev/null 2>&1 || true
+                ui_ok "linked $name to the AI tools"
+            done
+    fi
 
     if agentspec --format json sync --fast >"$tmp_status.sync" 2>/dev/null; then
         read -r managed linked issues < <(jq -r '"\(.managed) \(.links_created + .links_reconciled) \(.integrity_issues)"' "$tmp_status.sync")
