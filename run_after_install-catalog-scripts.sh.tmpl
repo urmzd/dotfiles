@@ -31,8 +31,8 @@ install_one() { # <name> <url> <shell> <check, base64> <post, base64> [installer
 }
 
 {{- $selected := get . "packages" | default list }}
-{{- range (include "catalog.toml" | fromToml).package }}
-{{-   if and (has .id $selected) (get . "script") }}
+{{- range (includeTemplate "catalog" . | fromToml).package }}
+{{-   if and (or (has .id $selected) (get . "required")) (get . "script") }}
 install_one {{ .name | quote }} {{ .script | quote }} {{ get . "script_shell" | default "sh" | quote }} {{ get . "check" | default "" | b64enc | quote }} {{ get . "post" | default "" | b64enc | quote }}{{ range (get . "script_args" | default list) }} {{ . | quote }}{{ end }}
 {{-   end }}
 {{- end }}

@@ -9,6 +9,7 @@ use toml_edit::{Array, DocumentMut, Item, Value};
 
 /// Resolved locations. Both can be overridden for tests and odd layouts.
 pub struct Paths {
+    pub home: PathBuf,
     pub source: PathBuf,
     pub config: PathBuf,
 }
@@ -31,7 +32,11 @@ impl Paths {
                 .unwrap_or_else(|| home.join(".config"))
                 .join("chezmoi/chezmoi.toml"),
         };
-        Ok(Self { source, config })
+        Ok(Self {
+            home,
+            source,
+            config,
+        })
     }
 }
 
@@ -116,6 +121,23 @@ impl Config {
                     .collect()
             })
             .unwrap_or_default()
+    }
+
+    /// The work pack folder, resolved like `.chezmoitemplates/work-pack-dir`:
+    /// a path (absolute or `~/...`) is used in place; empty or a git URL means
+    /// ~/.config/work. None on a personal machine.
+    pub fn work_pack_dir(&self, home: &Path) -> Option<PathBuf> {
+        if self.machine().as_deref() != Some("work") {
+            return None;
+        }
+        let pack = self.data_str("work_pack").unwrap_or_default();
+        Some(if let Some(rest) = pack.strip_prefix('~') {
+            home.join(rest.trim_start_matches('/'))
+        } else if pack.starts_with('/') {
+            PathBuf::from(pack)
+        } else {
+            home.join(".config/work")
+        })
     }
 
     pub fn machine(&self) -> Option<String> {

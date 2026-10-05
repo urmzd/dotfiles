@@ -1,0 +1,15 @@
+{{- /* Catalog TOML for the package templates: catalog.toml, plus the work   */ -}}
+{{- /* pack's catalog on a work machine. Templates read the validated copy   */ -}}
+{{- /* (written by the dotfiles CLI and run_after_sync-work-pack once it     */ -}}
+{{- /* parses and its ids are new), never the pack's file itself: a broken   */ -}}
+{{- /* company file must not break every apply. The copy only counts while   */ -}}
+{{- /* the pack still has a catalog.toml.                                    */ -}}
+{{- include "catalog.toml" -}}
+{{- if .is_work -}}
+{{-   $copy := joinPath .chezmoi.homeDir ".local/share/dotfiles/work-catalog.toml" -}}
+{{-   if and (stat $copy) (stat (joinPath (includeTemplate "work-pack-dir" .) "catalog.toml")) }}
+
+# ---- work pack ----
+{{ include $copy -}}
+{{-   end -}}
+{{- end -}}

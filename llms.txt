@@ -74,6 +74,7 @@
 - [sync-ecosystem-to-chezmoi](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-ecosystem-to-chezmoi/SKILL.md): Apply a sync-ecosystem drift report back into the chezmoi source tree
 - [sync-release](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-release/SKILL.md): Release pipeline setup (sr.yaml v7)
 - [test-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/test-code/SKILL.md): Testing philosophy and per-language conventions
+- [manage-machine](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/manage-machine/SKILL.md): Operate a dotfiles machine through the `dotfiles` CLI (install or remove catalog tools, doctor fixes, updates, work pack catalog)
 - [triage-dotfiles-env](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/triage-dotfiles-env/SKILL.md): Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs)
 - [update-repo-meta](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/update-repo-meta/SKILL.md): Update GitHub repo topics, description, homepage
 - [write-code](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/write-code/SKILL.md): Operational tech-stack picks and coding patterns (portable)

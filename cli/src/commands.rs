@@ -8,7 +8,7 @@ use anyhow::{Context, Result, bail};
 use inquire::{Confirm, InquireError, MultiSelect};
 use serde_json::json;
 
-use crate::catalog::{Catalog, Package};
+use crate::catalog::{Catalog, Package, WorkCatalog};
 use crate::chezmoi::{self, Config, Paths};
 use crate::{Format, Outcome, UpdateTarget, ui};
 
@@ -29,8 +29,15 @@ pub fn is_interrupt(err: &anyhow::Error) -> bool {
 
 fn load() -> Result<(Paths, Catalog, Config)> {
     let paths = Paths::discover()?;
-    let catalog = Catalog::load(&paths.source)?;
     let config = Config::load(&paths.config)?;
+    let work = config.work_pack_dir(&paths.home);
+    let catalog = Catalog::load(&paths.source, work.as_deref(), &paths.home)?;
+    if let WorkCatalog::Invalid { path, error } = &catalog.work {
+        ui::warn(&format!(
+            "work catalog ignored ({}): {error}",
+            path.display()
+        ));
+    }
     Ok((paths, catalog, config))
 }
 
@@ -108,7 +115,8 @@ impl fmt::Display for Choice<'_> {
         } else {
             "  [setup]"
         };
-        let text = format!("{}{setup}", self.pkg.description);
+        let work = if self.pkg.work { "  [work pack]" } else { "" };
+        let text = format!("{}{setup}{work}", self.pkg.description);
         let text = if text.chars().count() > self.room {
             let cut: String = text.chars().take(self.room.saturating_sub(1)).collect();
             format!("{cut}…")
@@ -162,7 +170,8 @@ fn pick(prompt: &str, pool: &[&Package], checked: &BTreeSet<String>) -> Result<V
 pub fn packages(ctx: &Ctx, no_apply: bool) -> Result<Outcome> {
     let (paths, catalog, mut config) = load()?;
     let current: BTreeSet<String> = config.packages().into_iter().collect();
-    let pool: Vec<&Package> = catalog.packages.iter().collect();
+    // Required work pack entries always install; they are not a choice.
+    let pool: Vec<&Package> = catalog.packages.iter().filter(|p| !p.required).collect();
     let next: BTreeSet<String> = pick("Optional packages", &pool, &current)?
         .into_iter()
         .collect();
@@ -185,15 +194,14 @@ pub fn add(ctx: &Ctx, ids: Vec<String>, no_apply: bool) -> Result<Outcome> {
         let pool: Vec<&Package> = catalog
             .packages
             .iter()
-            .filter(|p| !current.contains(&p.id))
+            .filter(|p| !p.required && !current.contains(&p.id))
             .collect();
         pick("Add packages", &pool, &BTreeSet::new())?
     } else {
-        catalog
-            .resolve(&ids)?
-            .into_iter()
-            .map(|p| p.id.clone())
-            .collect()
+        not_required(
+            catalog.resolve(&ids)?,
+            "already installs (required by the work pack)",
+        )
     };
     let next = current.iter().cloned().chain(ids).collect();
     commit(
@@ -215,17 +223,18 @@ pub fn remove(ctx: &Ctx, ids: Vec<String>, uninstall: bool, no_apply: bool) -> R
         let pool: Vec<&Package> = catalog
             .packages
             .iter()
-            .filter(|p| current.contains(&p.id))
+            .filter(|p| !p.required && current.contains(&p.id))
             .collect();
         pick("Remove packages", &pool, &BTreeSet::new())?
             .into_iter()
             .collect()
     } else {
-        catalog
-            .resolve(&ids)?
-            .into_iter()
-            .map(|p| p.id.clone())
-            .collect()
+        not_required(
+            catalog.resolve(&ids)?,
+            "is required by the work pack; remove it there",
+        )
+        .into_iter()
+        .collect()
     };
     let next = current.difference(&ids).cloned().collect();
     commit(
@@ -238,6 +247,19 @@ pub fn remove(ctx: &Ctx, ids: Vec<String>, uninstall: bool, no_apply: bool) -> R
         uninstall,
         no_apply,
     )
+}
+
+/// Ids of `pkgs`, skipping (with a note) the work pack's required entries.
+fn not_required(pkgs: Vec<&Package>, why: &str) -> Vec<String> {
+    pkgs.into_iter()
+        .filter(|p| {
+            if p.required {
+                ui::skip(&format!("{} {why}", p.name));
+            }
+            !p.required
+        })
+        .map(|p| p.id.clone())
+        .collect()
 }
 
 /// Save a new selection, apply it, and offer setup for what was added.
@@ -328,7 +350,7 @@ fn commit(
 
 pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
     let (_, catalog, config) = load()?;
-    let selected: BTreeSet<String> = config.packages().into_iter().collect();
+    let selected = catalog.effective(&config.packages());
     let rows: Vec<&Package> = catalog
         .packages
         .iter()
@@ -343,6 +365,7 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
                     "id": p.id, "name": p.name, "category": p.category,
                     "description": p.description, "selected": selected.contains(&p.id),
                     "installs": p.installs(), "setup": p.setup,
+                    "work_pack": p.work, "required": p.required,
                 })
             })
             .collect();
@@ -356,7 +379,12 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
             category = &p.category;
             ui::section(category);
         }
-        let line = format!("{:<12} {}  {}", p.id, p.name, ui::dim(&p.description));
+        let tag = match (p.work, p.required) {
+            (true, true) => " (work pack, required)",
+            (true, false) => " (work pack)",
+            _ => "",
+        };
+        let line = format!("{:<12} {}{tag}  {}", p.id, p.name, ui::dim(&p.description));
         if selected.contains(&p.id) {
             ui::ok(&line)
         } else {
@@ -372,7 +400,7 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
 pub fn setup(ctx: &Ctx, ids: Vec<String>, force: bool) -> Result<Outcome> {
     let (_, catalog, config) = load()?;
     let targets: Vec<&Package> = if ids.is_empty() {
-        let selected = config.packages();
+        let selected = catalog.effective(&config.packages());
         catalog
             .packages
             .iter()

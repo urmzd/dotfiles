@@ -59,10 +59,10 @@ brew "gettext"  # GNU internationalization and localization support
 # Terminal
 # Terminal: ghostty (installed outside Homebrew)
 
-# Optional packages selected from catalog.toml
+# Optional packages selected from catalog.toml, plus required work pack entries
 {{- $selected := get . "packages" | default list }}
-{{- range (include "catalog.toml" | fromToml).package }}
-{{-   if and (has .id $selected) (or (get . "brew") (get . "cask") (get . "npm") (get . "uv")) }}
+{{- range (includeTemplate "catalog" . | fromToml).package }}
+{{-   if and (or (has .id $selected) (get . "required")) (or (get . "brew") (get . "cask") (get . "npm") (get . "uv")) }}
 
 # {{ .name }} ({{ .id }}): {{ .description }}
 {{-     range (get . "tap" | default list) }}

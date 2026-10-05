@@ -24,6 +24,7 @@ Every file is optional; delete the ones you do not need. Each is a no-op until i
 | `gitconfig` | `[include]` in `~/.gitconfig` | URL rewrites, company git settings |
 | `ssh_config` | `Include` at the top of `~/.ssh/config` | bastions, internal hosts |
 | `Brewfile` | appended to the dotfiles Brewfile at install time | VPN client, internal CLIs |
+| `catalog.toml` | merged into the `dotfiles package` picker | internal tools people opt into, or `required = true` for everyone, with installer scripts, sign-in steps, and checks |
 | `AGENTS.md` | appended to Claude Code, Codex, and OpenCode global instructions | company rules for AI coding tools |
 
 Keep secrets out: no tokens or keys in any of these files. Personal signing keys belong in each person's local `chezmoi.toml`, never here.

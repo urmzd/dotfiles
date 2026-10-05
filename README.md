@@ -127,6 +127,8 @@ The Brewfile installer continues past individual package failures, retries the r
 
 ### Adding a new tool
 
+Optional tools (apps, CLIs people pick per machine) go in [`catalog.toml`](catalog.toml) as a `[[package]]` entry; `dotfiles package add <id>` installs one. Company tools go in the work pack's `catalog.toml` instead ([Work pack](#work-pack)). The steps below are for tools every machine gets:
+
 1. Homebrew: add to [`Brewfile.tmpl`](Brewfile.tmpl). Linux: add to the apt/dnf/pacman list in [`run_once_before_install-packages-v2.sh.tmpl`](run_once_before_install-packages-v2.sh.tmpl).
 2. For tools needing version pinning: write a `run_onchange_after_install-<name>.sh.tmpl` mirroring the cortex / cloud-clis pattern.
 3. Run `chezmoi apply`. Completions regenerate automatically, but check which of the three shapes the tool needs first:
@@ -163,6 +165,7 @@ Every file is optional, and each hook is a no-op when its file is missing:
 | `gitconfig` | `[include]` in `~/.gitconfig` (company URL rewrites, extra settings) |
 | `ssh_config` | `Include` at the top of `~/.ssh/config` |
 | `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply |
+| `catalog.toml` | merged into the [package catalog](#adding-a-new-tool): entries show in `dotfiles package` tagged `[work pack]`, and `required = true` ones always install. Checked before use (valid TOML, required fields, no clashing ids); a bad file is ignored with a warning and `dotfiles doctor` names the problem |
 | `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` |
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
@@ -324,6 +327,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
+| manage-machine | Operate a dotfiles machine through the `dotfiles` CLI: install or remove catalog tools, `dotfiles doctor` fixes, updates, and company tools in a work pack catalog |
 | triage-dotfiles-env | Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs) with mandatory verification |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |
 | repo-status | Scan a folder of git repos and report recent activity, branch divergence, and uncommitted state (renamed from `status`) |

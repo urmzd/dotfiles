@@ -43,7 +43,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI in `cli/` |
 | `work-pack/` | (not deployed) | Starter template for a company work pack repo (cloned to `~/.config/work/` on work machines) |
 | `cli/` | (not deployed) | Rust source for the `dotfiles` CLI; built and attached to every release by `release.yml` |
-| (not tracked) | `~/.config/work/` or a local folder | Optional work pack: `work_pack` is empty, a git URL (cloned by `run_after_sync-work-pack.sh.tmpl`, never fatal), or a local path; `.chezmoitemplates/work-pack-dir` resolves the folder for every hook. Never add its files to this repo |
+| (not tracked) | `~/.config/work/` or a local folder | Optional work pack: `work_pack` is empty, a git URL (cloned by `run_after_sync-work-pack.sh.tmpl`, never fatal), or a local path; `.chezmoitemplates/work-pack-dir` resolves the folder for every hook. Its optional `catalog.toml` joins the package catalog through `.chezmoitemplates/catalog` (validated copy only). Never add its files to this repo |
 
 ## Discovering Structure
 

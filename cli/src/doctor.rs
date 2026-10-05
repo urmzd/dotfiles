@@ -6,7 +6,7 @@ use std::process::{Command, Stdio};
 use anyhow::Result;
 use serde::Serialize;
 
-use crate::catalog::Catalog;
+use crate::catalog::{Catalog, WorkCatalog};
 use crate::chezmoi::{self, Config, Paths};
 use crate::commands::Ctx;
 use crate::identity::{gh_login, output};
@@ -76,8 +76,9 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
     let paths = Paths::discover()?;
 
     check_chezmoi(&mut r);
-    let catalog = Catalog::load(&paths.source).ok();
     let config = Config::load(&paths.config).ok();
+    let work = config.as_ref().and_then(|c| c.work_pack_dir(&paths.home));
+    let catalog = Catalog::load(&paths.source, work.as_deref(), &paths.home).ok();
     check_catalog(&mut r, catalog.as_ref(), config.as_ref());
     check_cli_version(&mut r);
     check_pending(&mut r);
@@ -196,6 +197,18 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
         .into_iter()
         .filter(|id| catalog.get(id).is_none())
         .collect();
+    match &catalog.work {
+        WorkCatalog::None => {}
+        WorkCatalog::Loaded { path, count } => r.ok(
+            "work catalog",
+            format!("{count} packages from {}", path.display()),
+        ),
+        WorkCatalog::Invalid { path, error } => r.fail(
+            "work catalog",
+            format!("{} is ignored: {error}", path.display()),
+            format!("fix {}, then: dotfiles doctor", path.display()),
+        ),
+    }
     if unknown.is_empty() {
         r.ok(
             "catalog",
@@ -205,10 +218,15 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
             ),
         );
     } else {
+        let fix = if matches!(catalog.work, WorkCatalog::Invalid { .. }) {
+            "fix the work catalog (above); its ids come back with it".to_string()
+        } else {
+            format!("dotfiles package remove {}", unknown.join(" "))
+        };
         r.warn(
             "catalog",
             format!("selected but not in the catalog: {}", unknown.join(", ")),
-            format!("dotfiles package remove {}", unknown.join(" ")),
+            fix,
         );
     }
 }
@@ -414,7 +432,7 @@ fn check_shadowing(r: &mut Report) {
 }
 
 fn check_packages(r: &mut Report, catalog: &Catalog, config: &Config) {
-    let selected = config.packages();
+    let selected = catalog.effective(&config.packages());
     let passes = |check: &str| {
         Command::new("sh")
             .args(["-c", check])

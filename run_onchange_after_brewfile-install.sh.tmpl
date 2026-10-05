@@ -10,7 +10,7 @@
 # Brewfile (<work pack>/Brewfile, appended when present) changes.
 # Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
 # Selection: {{ get . "packages" | default list | join "," }} secrets={{ .use_secrets }} work={{ .is_work }}
-# Catalog: {{ include "catalog.toml" | sha256sum }}
+# Catalog: {{ includeTemplate "catalog" . | sha256sum }}
 {{- $work_brewfile := joinPath (includeTemplate "work-pack-dir" .) "Brewfile" }}
 {{- if stat $work_brewfile }}
 # Work pack: {{ include $work_brewfile | sha256sum }}

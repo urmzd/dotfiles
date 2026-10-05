@@ -4,7 +4,7 @@
 # [data].packages. macOS gets the same selection through Brewfile.tmpl.
 # Re-runs when the selection or the catalog changes:
 # Selection: {{ get . "packages" | default list | join "," }}
-# Catalog: {{ include "catalog.toml" | sha256sum }}
+# Catalog: {{ includeTemplate "catalog" . | sha256sum }}
 {{- if .is_linux }}
 set -uo pipefail
 {{ includeTemplate "ui.sh" . }}
@@ -12,8 +12,8 @@ ui_section "Optional packages (catalog)"
 
 {{- $selected := get . "packages" | default list }}
 {{- $apt := list }}{{ $dnf := list }}{{ $pacman := list }}{{ $npm := list }}{{ $uv := list }}
-{{- range (include "catalog.toml" | fromToml).package }}
-{{-   if has .id $selected }}
+{{- range (includeTemplate "catalog" . | fromToml).package }}
+{{-   if or (has .id $selected) (get . "required") }}
 {{-     $apt = concat $apt (get . "apt" | default list) }}
 {{-     $dnf = concat $dnf (get . "dnf" | default list) }}
 {{-     $pacman = concat $pacman (get . "pacman" | default list) }}

@@ -1,6 +1,6 @@
 ---
 name: dotfiles
-description: Chezmoi dotfiles conventions and patterns. Use when modifying dotfiles, adding new managed files, working with chezmoi templates, or syncing agent skills and subagents through agentspec.
+description: "Chezmoi dotfiles conventions and patterns. Use when modifying dotfiles, adding new managed files, working with chezmoi templates, or syncing agent skills and subagents through agentspec. Do NOT use for installing tools, running doctor, or updating a machine through the `dotfiles` CLI; use manage-machine."
 allowed-tools: Read, Grep, Glob, Bash(chezmoi *), Bash(agentspec *)
 ---
 

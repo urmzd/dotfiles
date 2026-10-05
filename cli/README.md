@@ -44,7 +44,7 @@ Global flags: `--format json|human` for data commands, `--dry-run` to show chang
 | Install | [`Brewfile.tmpl`](../Brewfile.tmpl) | Renders the selected packages; `chezmoi apply` runs `brew bundle` |
 | Setup | `setup` and `check` in the catalog | Interactive steps (browser sign-in, TTY installers) that never run during apply |
 
-To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI change is needed. `DOTFILES_SOURCE` and `DOTFILES_CHEZMOI_CONFIG` override the chezmoi source directory and config file.
+To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI change is needed. A work pack can carry its own `catalog.toml` in the same format: its entries join the picker, `required = true` ones install without being picked (and cannot be removed), and the templates read a validated copy at `~/.local/share/dotfiles/work-catalog.toml`, so a broken company file is reported, never fatal. `DOTFILES_SOURCE` and `DOTFILES_CHEZMOI_CONFIG` override the chezmoi source directory and config file.
 
 ## Development
 
