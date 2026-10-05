@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 (2026-10-05)
+
+### Breaking
+
+- **git**: one identity per machine; drop the personal email on work machines ([cb80f3f](https://github.com/urmzd/dotfiles/commit/cb80f3f9c7c758f7c079eb3e8842204e71d37580))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.1.0...v0.2.0)
+
+
 ## 0.1.0 (2026-10-05)
 
 ### Breaking
