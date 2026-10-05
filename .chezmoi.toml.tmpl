@@ -84,7 +84,7 @@
 
 {{- /* ---- Packages ------------------------------------------------------- */}}
 {{- /* Optional packages are catalog.toml ids in `packages`, edited later with  */}}
-{{- /* `dotfiles packages`. First init seeds them from a preset; configs from   */}}
+{{- /* `dotfiles package`. First init seeds them from a preset; configs from   */}}
 {{- /* before the catalog migrate from their install_* group flags instead.    */}}
 {{- $catalog := include "catalog.toml" | fromToml -}}
 {{- $packages := list -}}
@@ -97,7 +97,7 @@
 {{-   end -}}
 {{-   if not $is_work }}{{ $packages = append $packages "obsidian" }}{{ end -}}
 {{- else -}}
-{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles packages` (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
+{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles package` (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
 {{-   range $catalog.package -}}
 {{-     if and (has $preset (get . "presets" | default list)) (has $machine (get . "machines" | default (list "personal" "work"))) -}}
 {{-       $packages = append $packages .id -}}
@@ -113,7 +113,7 @@
 {{-   if or (hasKey . "packages") (hasKey . "install_cloud") -}}
 {{-     $packages = concat $packages (list "claude-code" "codex" "copilot" "agy" "opencode") -}}
 {{-   else -}}
-{{-     $packages = concat $packages (promptMultichoice "AI coding CLIs to install (more later with `dotfiles packages`)" $agent_ids (list "claude-code" "codex")) -}}
+{{-     $packages = concat $packages (promptMultichoice "AI coding CLIs to install (more later with `dotfiles package`)" $agent_ids (list "claude-code" "codex")) -}}
 {{-   end -}}
 {{- end -}}
 {{- $pkg_exclude := promptStringOnce . "pkg_exclude" "Packages to exclude by name; separate with commas (optional; e.g. k9s)" "" -}}
@@ -143,7 +143,7 @@ encryption = "age"
     use_secrets = {{ $use_secrets }}
     install_cortex = {{ $install_cortex }}
 
-    # Optional packages: catalog.toml ids. Edit with `dotfiles packages`.
+    # Optional packages: catalog.toml ids. Edit with `dotfiles package`.
     packages = {{ $packages | uniq | sortAlpha | toToml }}
     agents_seeded = true
     pkg_exclude = {{ $pkg_exclude | quote }}

@@ -66,22 +66,26 @@ chezmoi edit <file>   # Edit source, then apply
 
 ### Maintenance
 
-The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Every release attaches its binaries for macOS and Linux (x86_64 and arm64) with `.sha256` checksums; the first apply installs it, and `dotfiles self-update` keeps it current. To install it by hand: `curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh`.
+The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Every release attaches its binaries for macOS and Linux (x86_64 and arm64) with `.sha256` checksums; the first apply installs it, and `dotfiles update` keeps it current. To install it by hand: `curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh`.
 
 ```bash
-dotfiles packages        # Search + toggle optional packages, then apply
-dotfiles add acli twg    # Select by id; `remove` deselects (--uninstall to brew uninstall)
-dotfiles setup           # Pending sign-in / interactive installers for selected packages
-dotfiles identity        # This machine's GitHub identity: gh, SSH + GPG keys, signing check
-dotfiles apply           # Show pending changes, confirm, then apply (-y skips confirm)
-dotfiles diff            # Full diff of pending changes
-dotfiles config          # Re-run the setup questions (saved answers kept), then apply
-dotfiles update          # brew upgrade + AI CLIs, then apply (or: packages | ai)
-dotfiles status          # Machine, packages, pending setup, tool versions
-dotfiles doctor          # chezmoi doctor + catalog checks + documentation hygiene
-dotfiles edit            # Open the dotfiles source in $EDITOR
-dotfiles clean           # Prune build artifacts and caches under ~/github
+dotfiles package                 # Search + toggle optional packages, then apply
+dotfiles package add acli twg    # Select by id; `package remove` deselects (--uninstall to brew uninstall)
+dotfiles package list --selected # The catalog with this machine's selection
+dotfiles package setup           # Pending sign-in / interactive installers for selected packages
+dotfiles package update          # brew upgrade + AI CLIs, then apply (or: brew | ai)
+dotfiles identity                # This machine's GitHub identity: gh, SSH + GPG keys, signing check
+dotfiles doctor                  # Health check, each finding with the command that fixes it
+dotfiles apply                   # Show pending changes, confirm, then apply (-y skips confirm)
+dotfiles diff                    # Full diff of pending changes
+dotfiles config                  # Re-run the setup questions (saved answers kept), then apply
+dotfiles status                  # Machine, packages, pending setup, tool versions
+dotfiles update                  # Update the dotfiles CLI itself to the latest release
+dotfiles edit                    # Open the dotfiles source in $EDITOR
+dotfiles clean                   # Prune build artifacts and caches under ~/github
 ```
+
+`dotfiles doctor` checks chezmoi, the catalog and selection, whether the CLI is the latest release, unapplied changes, Python (3.12+, gcloud pinned), that `gh` is signed in as this machine's account, that the commit signing key exists, AI CLIs installed twice (the first on PATH wins), and selected packages that are missing or waiting for sign-in. `--format json` prints the findings for scripts.
 
 ### What's installed
 
@@ -112,13 +116,13 @@ dotfiles clean           # Prune build artifacts and caches under ~/github
 | media | Spotify |
 | work | Atlassian CLI (`acli`), Teamwork Graph CLI (`twg`) |
 
-Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles packages`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles setup`, never during apply.
+Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles package`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles package setup`, never during apply.
 
 On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev) seeds the selection from each entry's `presets`. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI release is needed.
 
 The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
-**AI coding CLIs** are catalog packages (category **agents**): Claude Code, Codex, GitHub Copilot CLI, Antigravity (`agy`), OpenCode, Gemini CLI, Cursor Agent CLI, and Amp. The first `chezmoi init` asks which to install (multi-select, default Claude Code + Codex); change them any time with `dotfiles packages`. Claude Code, agy, and OpenCode use their own installers, which keep them updated ([`run_after_install-catalog-scripts.sh.tmpl`](run_after_install-catalog-scripts.sh.tmpl), retried every apply until present); the rest come from Homebrew (npm on Linux). Codex runs with a workspace-write "Auto" default and `writer`/`reviewer`/`plan`/`guardian` profiles. `dotfiles update ai` upgrades the selected ones.
+**AI coding CLIs** are catalog packages (category **agents**): Claude Code, Codex, GitHub Copilot CLI, Antigravity (`agy`), OpenCode, Gemini CLI, Cursor Agent CLI, and Amp. The first `chezmoi init` asks which to install (multi-select, default Claude Code + Codex); change them any time with `dotfiles package`. Claude Code, agy, and OpenCode use their own installers, which keep them updated ([`run_after_install-catalog-scripts.sh.tmpl`](run_after_install-catalog-scripts.sh.tmpl), retried every apply until present); the rest come from Homebrew (npm on Linux). Codex runs with a workspace-write "Auto" default and `writer`/`reviewer`/`plan`/`guardian` profiles. `dotfiles package update ai` upgrades the selected ones.
 
 ### Adding a new tool
 

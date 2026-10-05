@@ -121,4 +121,4 @@ if [ "$apply_ok" -eq 0 ]; then
 fi
 
 ui_ok "done; open a new terminal to load the new shell config"
-ui_skip "next: dotfiles identity (GitHub sign-in, SSH + GPG keys), dotfiles packages (optional apps)"
+ui_skip "next: dotfiles identity (GitHub sign-in, SSH + GPG keys), dotfiles package (optional apps), dotfiles doctor"

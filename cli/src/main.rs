@@ -1,12 +1,13 @@
 mod catalog;
 mod chezmoi;
 mod commands;
+mod doctor;
 mod identity;
 mod ui;
 
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Manage urmzd/dotfiles: pick optional packages, run their setup, apply, update.
 #[derive(Parser)]
@@ -32,43 +33,14 @@ pub enum Format {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Search and toggle optional packages, then apply
-    #[command(visible_alias = "pkg")]
-    Packages {
-        /// Save the selection without running chezmoi apply
+    /// Optional packages: pick (default), add, remove, list, setup, update
+    #[command(visible_aliases = ["packages", "pkg"])]
+    Package {
+        #[command(subcommand)]
+        action: Option<PackageCmd>,
+        /// Picker only: save the selection without running chezmoi apply
         #[arg(long)]
         no_apply: bool,
-    },
-    /// Select packages by id (no ids: pick from the unselected ones)
-    Add {
-        ids: Vec<String>,
-        /// Save the selection without running chezmoi apply
-        #[arg(long)]
-        no_apply: bool,
-    },
-    /// Deselect packages by id (no ids: pick from the selected ones)
-    Remove {
-        ids: Vec<String>,
-        /// Also brew uninstall what the packages installed
-        #[arg(long)]
-        uninstall: bool,
-        /// Save the selection without running chezmoi apply
-        #[arg(long)]
-        no_apply: bool,
-    },
-    /// List the catalog with the current selection
-    List {
-        /// Only selected packages
-        #[arg(long)]
-        selected: bool,
-    },
-    /// Run pending setup (sign-in, interactive installers) for selected packages
-    Setup {
-        /// Limit to these ids (default: every selected package)
-        ids: Vec<String>,
-        /// Rerun setup even when its check already passes
-        #[arg(long)]
-        force: bool,
     },
     /// Set up this machine's GitHub identity: gh sign-in, SSH and GPG keys
     /// created and uploaded, signing key saved, then a signed test commit
@@ -87,14 +59,10 @@ enum Command {
     Diff,
     /// Re-run the setup questions (saved answers are kept), then apply
     Config,
-    /// Update installed software, then apply
-    Update {
-        #[arg(value_enum, default_value = "all")]
-        target: UpdateTarget,
-    },
     /// Selection, machine type, and installed tool versions
     Status,
-    /// chezmoi doctor plus catalog and selection checks
+    /// Health check: chezmoi, catalog, CLI version, pending changes, Python,
+    /// gh account, commit signing, shadowed CLIs, pending package setup
     Doctor,
     /// Open the dotfiles source in $EDITOR
     Edit,
@@ -104,19 +72,93 @@ enum Command {
         #[arg(short, long)]
         yes: bool,
     },
-    /// Update this binary to the latest release
-    SelfUpdate,
+    /// Update this dotfiles CLI to the latest release
+    #[command(alias = "self-update")]
+    Update {
+        /// Old `dotfiles update <target>` form; points at `dotfiles package update`
+        #[arg(hide = true)]
+        legacy_target: Option<String>,
+    },
     /// Print the version
     Version,
+
+    // Old top-level forms, kept working but hidden: use `dotfiles package ...`.
+    #[command(hide = true)]
+    Add(AddArgs),
+    #[command(hide = true)]
+    Remove(RemoveArgs),
+    #[command(hide = true)]
+    List(ListArgs),
+    #[command(hide = true)]
+    Setup(SetupArgs),
+}
+
+#[derive(Subcommand)]
+enum PackageCmd {
+    /// Search and toggle optional packages, then apply (same as `dotfiles package`)
+    Pick {
+        /// Save the selection without running chezmoi apply
+        #[arg(long)]
+        no_apply: bool,
+    },
+    /// Select packages by id (no ids: pick from the unselected ones)
+    Add(AddArgs),
+    /// Deselect packages by id (no ids: pick from the selected ones)
+    Remove(RemoveArgs),
+    /// List the catalog with the current selection
+    List(ListArgs),
+    /// Run pending setup (sign-in, interactive installers) for selected packages
+    Setup(SetupArgs),
+    /// Update installed packages, then apply
+    Update {
+        #[arg(value_enum, default_value = "all")]
+        target: UpdateTarget,
+    },
+}
+
+#[derive(Args)]
+struct AddArgs {
+    ids: Vec<String>,
+    /// Save the selection without running chezmoi apply
+    #[arg(long)]
+    no_apply: bool,
+}
+
+#[derive(Args)]
+struct RemoveArgs {
+    ids: Vec<String>,
+    /// Also brew uninstall what the packages installed
+    #[arg(long)]
+    uninstall: bool,
+    /// Save the selection without running chezmoi apply
+    #[arg(long)]
+    no_apply: bool,
+}
+
+#[derive(Args)]
+struct ListArgs {
+    /// Only selected packages
+    #[arg(long)]
+    selected: bool,
+}
+
+#[derive(Args)]
+struct SetupArgs {
+    /// Limit to these ids (default: every selected package)
+    ids: Vec<String>,
+    /// Rerun setup even when its check already passes
+    #[arg(long)]
+    force: bool,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
 pub enum UpdateTarget {
-    /// Homebrew packages, AI CLIs, then apply
+    /// Homebrew packages, AI coding CLIs, then apply
     All,
     /// brew update + upgrade, then apply
-    Packages,
-    /// Reinstall AI CLIs (Claude Code, agy, Copilot, OpenCode)
+    #[value(alias = "packages")]
+    Brew,
+    /// The selected AI coding CLIs (Homebrew ones upgraded, installers re-run)
     Ai,
 }
 
@@ -133,25 +175,35 @@ fn main() -> ExitCode {
         dry_run: cli.dry_run,
     };
     let result = match cli.command {
-        Command::Packages { no_apply } => commands::packages(&ctx, no_apply),
-        Command::Add { ids, no_apply } => commands::add(&ctx, ids, no_apply),
-        Command::Remove {
-            ids,
-            uninstall,
-            no_apply,
-        } => commands::remove(&ctx, ids, uninstall, no_apply),
-        Command::List { selected } => commands::list(&ctx, selected),
-        Command::Setup { ids, force } => commands::setup(&ctx, ids, force),
+        Command::Package { action, no_apply } => match action {
+            None => commands::packages(&ctx, no_apply),
+            Some(PackageCmd::Pick { no_apply }) => commands::packages(&ctx, no_apply),
+            Some(PackageCmd::Add(a)) => commands::add(&ctx, a.ids, a.no_apply),
+            Some(PackageCmd::Remove(r)) => commands::remove(&ctx, r.ids, r.uninstall, r.no_apply),
+            Some(PackageCmd::List(l)) => commands::list(&ctx, l.selected),
+            Some(PackageCmd::Setup(s)) => commands::setup(&ctx, s.ids, s.force),
+            Some(PackageCmd::Update { target }) => commands::update(&ctx, target),
+        },
+        Command::Add(a) => commands::add(&ctx, a.ids, a.no_apply),
+        Command::Remove(r) => commands::remove(&ctx, r.ids, r.uninstall, r.no_apply),
+        Command::List(l) => commands::list(&ctx, l.selected),
+        Command::Setup(s) => commands::setup(&ctx, s.ids, s.force),
         Command::Identity { account } => identity::run(&ctx, account),
         Command::Apply { yes } => commands::apply(&ctx, yes),
         Command::Diff => commands::diff(),
         Command::Config => commands::config(&ctx),
-        Command::Update { target } => commands::update(&ctx, target),
         Command::Status => commands::status(&ctx),
-        Command::Doctor => commands::doctor(),
+        Command::Doctor => doctor::run(&ctx),
         Command::Edit => commands::edit(),
         Command::Clean { yes } => commands::clean(&ctx, yes),
-        Command::SelfUpdate => commands::self_update(),
+        Command::Update {
+            legacy_target: Some(target),
+        } => Err(anyhow::anyhow!(
+            "`dotfiles update` now updates the dotfiles CLI itself; for packages run: dotfiles package update {target}"
+        )),
+        Command::Update {
+            legacy_target: None,
+        } => commands::self_update(),
         Command::Version => {
             println!("dotfiles v{}", env!("CARGO_PKG_VERSION"));
             Ok(Outcome::Done)

@@ -18,8 +18,9 @@ cd dotfiles
 | `.github/scripts/check.sh` | Render every template for personal and work machines (what CI runs) |
 | `chezmoi diff --use-builtin-diff` | Preview pending changes |
 | `chezmoi apply` | Apply dotfile changes |
-| `dotfiles packages` | Search + toggle optional packages from `catalog.toml`, then apply |
-| `dotfiles update` | `brew upgrade` + AI CLIs + `chezmoi apply` |
+| `dotfiles package` | Search + toggle optional packages from `catalog.toml`, then apply |
+| `dotfiles package update` | `brew upgrade` + AI CLIs + `chezmoi apply` |
+| `dotfiles doctor` | Health check with a fix for every finding |
 | `dotfiles status` | Machine, packages, pending setup, tool versions |
 
 For chezmoi file naming conventions (`dot_`, `private_`, `.tmpl`, `run_once_*`, `run_onchange_*`), see [AGENTS.md, File Naming Conventions](AGENTS.md#file-naming-conventions).

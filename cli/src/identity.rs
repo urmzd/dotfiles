@@ -337,7 +337,7 @@ fn gh_switch(account: &str) -> bool {
         .is_ok_and(|s| s.success())
 }
 
-fn gh_login() -> Option<String> {
+pub(crate) fn gh_login() -> Option<String> {
     output("gh", &["api", "user", "--jq", ".login"]).filter(|s| !s.is_empty())
 }
 
@@ -721,7 +721,7 @@ fn on_path(tool: &str) -> bool {
 }
 
 /// Trimmed stdout of a successful command, or None.
-fn output(cmd: &str, args: &[&str]) -> Option<String> {
+pub(crate) fn output(cmd: &str, args: &[&str]) -> Option<String> {
     let out = Command::new(cmd)
         .args(args)
         .stderr(Stdio::null())

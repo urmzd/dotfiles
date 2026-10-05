@@ -52,7 +52,7 @@ pub struct Package {
     /// npm packages for Linux only (macOS gets the brew/cask entries).
     #[serde(default)]
     pub linux_npm: Vec<String>,
-    /// Interactive commands (sign-in, TTY installers) run by `dotfiles setup`.
+    /// Interactive commands (sign-in, TTY installers) run by `dotfiles package setup`.
     #[serde(default)]
     pub setup: Vec<String>,
     /// Shell test that passes once setup is done.

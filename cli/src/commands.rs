@@ -126,7 +126,7 @@ impl fmt::Display for Choice<'_> {
 
 /// Search-as-you-type multi-select over `pool`, with `checked` pre-selected.
 fn pick(prompt: &str, pool: &[&Package], checked: &BTreeSet<String>) -> Result<Vec<String>> {
-    require_tty("the package picker (or pass ids: dotfiles add <id>...)")?;
+    require_tty("the package picker (or pass ids: dotfiles package add <id>...)")?;
     if pool.is_empty() {
         return Ok(Vec::new());
     }
@@ -318,7 +318,10 @@ fn commit(
         {
             return run_setup(ctx, &needs_setup, false);
         }
-        ui::hint(&format!("finish setup: dotfiles setup {}", ids.join(" ")));
+        ui::hint(&format!(
+            "finish setup: dotfiles package setup {}",
+            ids.join(" ")
+        ));
     }
     Ok(Outcome::Done)
 }
@@ -360,7 +363,7 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
             ui::skip(&line)
         }
     }
-    ui::hint("change: dotfiles packages");
+    ui::hint("change: dotfiles package");
     Ok(Outcome::Done)
 }
 
@@ -409,7 +412,7 @@ fn run_setup(ctx: &Ctx, targets: &[&Package], force: bool) -> Result<Outcome> {
     }
     if !failed.is_empty() {
         bail!(
-            "setup failed for {}; rerun: dotfiles setup {}",
+            "setup failed for {}; rerun: dotfiles package setup {}",
             failed.join(", "),
             failed.join(" ")
         );
@@ -462,7 +465,7 @@ pub fn config(ctx: &Ctx) -> Result<Outcome> {
 
 pub fn update(ctx: &Ctx, target: UpdateTarget) -> Result<Outcome> {
     let mut steps: Vec<(String, String)> = Vec::new();
-    if matches!(target, UpdateTarget::All | UpdateTarget::Packages) {
+    if matches!(target, UpdateTarget::All | UpdateTarget::Brew) {
         steps.push(("brew update".into(), "brew update".into()));
         steps.push(("brew upgrade".into(), "brew upgrade".into()));
     }
@@ -573,7 +576,7 @@ pub fn status(ctx: &Ctx) -> Result<Outcome> {
     ));
     if !pending.is_empty() {
         ui::warn(&format!("setup pending: {}", pending.join(", ")));
-        ui::hint("finish it: dotfiles setup");
+        ui::hint("finish it: dotfiles package setup");
     }
     ui::section("Tools");
     for (tool, version) in versions {
@@ -581,46 +584,6 @@ pub fn status(ctx: &Ctx) -> Result<Outcome> {
             Some(v) => ui::ok(&format!("{tool}: {v}")),
             None => ui::skip(&format!("{tool}: not installed")),
         }
-    }
-    Ok(Outcome::Done)
-}
-
-pub fn doctor() -> Result<Outcome> {
-    ui::section("chezmoi doctor");
-    chezmoi::run(&["doctor"])?;
-
-    ui::section("Catalog and selection");
-    let paths = Paths::discover()?;
-    let catalog = Catalog::load(&paths.source)?;
-    ui::ok(&format!(
-        "catalog: {} packages in {}",
-        catalog.packages.len(),
-        paths.source.join("catalog.toml").display()
-    ));
-    let config = Config::load(&paths.config)?;
-    let unknown: Vec<String> = config
-        .packages()
-        .into_iter()
-        .filter(|id| catalog.get(id).is_none())
-        .collect();
-    if unknown.is_empty() {
-        ui::ok("every selected id exists in the catalog");
-    } else {
-        ui::warn(&format!(
-            "selected but not in the catalog: {}",
-            unknown.join(", ")
-        ));
-        ui::hint(&format!("drop them: dotfiles remove {}", unknown.join(" ")));
-    }
-
-    // Prose checks for the dotfiles docs, shipped by the sync-docs skill.
-    let checker = home()?.join(".agents/skills/sync-docs/scripts/check-doc-hygiene.sh");
-    if checker.is_file() {
-        ui::section("Documentation hygiene");
-        Command::new(&checker)
-            .arg(&paths.source)
-            .status()
-            .with_context(|| format!("running {}", checker.display()))?;
     }
     Ok(Outcome::Done)
 }

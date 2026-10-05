@@ -10,25 +10,27 @@ The first `chezmoi apply` installs it. By hand:
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh
 ```
 
-The installer downloads the binary for your platform from the newest release that has one (the latest can still be building, or its build can have failed) and verifies it against that release's `.sha256` file. If no binary can be downloaded (no release yet, GitHub down), it builds `cli/` from the dotfiles checkout with cargo. A pinned `DOTFILES_VERSION` never falls back, and a checksum mismatch always stops. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles self-update` uses the same assets and checksums.
+The installer downloads the binary for your platform from the newest release that has one (the latest can still be building, or its build can have failed) and verifies it against that release's `.sha256` file. If no binary can be downloaded (no release yet, GitHub down), it builds `cli/` from the dotfiles checkout with cargo. A pinned `DOTFILES_VERSION` never falls back, and a checksum mismatch always stops. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles update` uses the same assets and checksums.
 
 ## Usage
 
 ```bash
-dotfiles packages            # search + toggle optional packages, then apply
-dotfiles add acli twg        # select by id (no ids: pick from the unselected)
-dotfiles remove cursor       # deselect (--uninstall also brew-uninstalls it)
-dotfiles list --selected     # catalog with the current selection
-dotfiles setup               # pending sign-in/installers, e.g. acli auth, twg
-dotfiles identity            # gh sign-in, SSH + GPG keys created and uploaded, signing verified
+dotfiles package                     # search + toggle optional packages, then apply
+dotfiles package add acli twg        # select by id (no ids: pick from the unselected)
+dotfiles package remove cursor       # deselect (--uninstall also brew-uninstalls it)
+dotfiles package list --selected     # catalog with the current selection
+dotfiles package setup               # pending sign-in/installers, e.g. acli auth, twg
+dotfiles package update [all|brew|ai]
+dotfiles identity                    # gh sign-in, SSH + GPG keys created and uploaded, signing verified
 dotfiles identity --account <name>   # change the GitHub account this machine pushes as
-dotfiles apply               # show pending changes, confirm, apply
-dotfiles update [all|packages|ai]
-dotfiles status              # machine, packages, pending setup, tool versions
-dotfiles doctor              # chezmoi doctor + catalog/selection checks
-dotfiles config              # re-run the setup questions, keep saved answers
-dotfiles self-update
+dotfiles doctor                      # health check; every finding comes with its fix
+dotfiles apply                       # show pending changes, confirm, apply
+dotfiles status                      # machine, packages, pending setup, tool versions
+dotfiles config                      # re-run the setup questions, keep saved answers
+dotfiles update                      # update this CLI to the latest release
 ```
+
+The old forms (`dotfiles packages`, `add`, `remove`, `list`, `setup`, `self-update`) still work as hidden aliases; `dotfiles update ai` now points at `dotfiles package update ai`.
 
 Global flags: `--format json|human` for data commands, `--dry-run` to show changes without writing. Exit codes: `0` ok, `1` error, `2` nothing changed, `130` cancelled.
 

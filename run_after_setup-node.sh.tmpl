@@ -70,5 +70,17 @@ if command -v brew >/dev/null 2>&1; then
         done
     done
 fi
+
+# One-time migration: OpenCode now comes from its native installer
+# (~/.opencode/bin); the Homebrew formula the core Brewfile used to install is
+# a second copy on PATH. Remove it once the native one is present.
+if [ -x "$HOME/.opencode/bin/opencode" ] && brew list --formula opencode >/dev/null 2>&1; then
+    say
+    if brew uninstall --formula opencode >/dev/null 2>&1; then
+        ui_ok "removed the Homebrew opencode (the native install in ~/.opencode/bin provides it)"
+    else
+        ui_warn "could not remove the Homebrew opencode; two copies stay on PATH"
+    fi
+fi
 {{- end }}
 exit 0

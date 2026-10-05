@@ -2,7 +2,7 @@
 #
 # Selection is a list of ids at [data].packages in the local
 # ~/.config/chezmoi/chezmoi.toml (never committed). Three readers:
-#   - `dotfiles packages` (the CLI in cli/): search-as-you-type picker
+#   - `dotfiles package` (the CLI in cli/): search-as-you-type picker
 #   - Brewfile.tmpl: emits the Homebrew lines for selected packages
 #   - .chezmoi.toml.tmpl: seeds the selection on first init from `presets`
 #
@@ -14,7 +14,7 @@
 #   apt, dnf, pacman  Linux package names; run_onchange_after_install-catalog-linux
 #                     installs them. A package with none is macOS-only (setup
 #                     steps still run anywhere).
-#   setup             interactive commands run by `dotfiles setup <id>`, for
+#   setup             interactive commands run by `dotfiles package setup <id>`, for
 #                     sign-in or installers that need a TTY (never during apply)
 #   check             shell test that passes once setup is done; setup is
 #                     skipped while it passes
@@ -27,7 +27,7 @@
 
 # ---- AI coding agents ---------------------------------------------------------
 # Picked at first init (multi-select, default: Claude Code + Codex); change
-# later with `dotfiles packages`. Machines from before the catalog keep the set
+# later with `dotfiles package`. Machines from before the catalog keep the set
 # they had (Claude Code, Codex, Copilot, agy, OpenCode).
 
 [[package]]
@@ -412,7 +412,7 @@ check = "acli jira auth status"
 id = "twg"
 name = "Teamwork Graph CLI"
 # The official installer signs in with OAuth in the browser and installs agent
-# skills, so it needs a TTY: it runs from `dotfiles setup`, never during apply.
+# skills, so it needs a TTY: it runs from `dotfiles package setup`, never during apply.
 description = "Gives coding agents your Jira, Confluence, and Bitbucket data"
 category = "work"
 setup = ["curl -fsSL --retry 2 https://teamwork-graph.atlassian.com/cli/install | bash"]
