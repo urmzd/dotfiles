@@ -171,8 +171,12 @@ encryption = "age"
     recipient = "age1g2gr4rddcar2335xdqu6l2t40dpmmulq9jh7ne5873wa03fcxsdqv5mrk2"  # pragma: allowlist secret
 {{- end }}
 
+{{- /* `chezmoi cd` opens VS Code when its `code` command exists at init;  */}}
+{{- /* otherwise chezmoi's default, a shell in the source directory.        */}}
+{{- if lookPath "code" }}
 [cd]
     command = "code"
+{{- end }}
 
 [edit]
     command = "nvim"
