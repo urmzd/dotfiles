@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 (2026-10-05)
+
+### Features
+
+- **cli**: move the dotfiles CLI into this repo ([e6276f9](https://github.com/urmzd/dotfiles/commit/e6276f9753d23621cf7745732060b3318d27b6b4))
+
+### Misc
+
+- **skills**: note headless diff and bash 3.2 gotchas in the dotfiles skill ([4d84eed](https://github.com/urmzd/dotfiles/commit/4d84eedbc5ee6847576c3a584d285dea345bae5b))
+- dotfiles-cli ships via GitHub releases only ([1a76d5d](https://github.com/urmzd/dotfiles/commit/1a76d5d1894d827ee0a9e7756214cd1a6f5e5bc3))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.2.0...v0.3.0)
+
+
 ## 0.2.0 (2026-10-05)
 
 ### Breaking
