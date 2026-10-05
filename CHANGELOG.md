@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.2 (2026-10-05)
+
+### Bug Fixes
+
+- **chezmoi**: chezmoi cd uses VS Code only when code is on PATH ([87181dd](https://github.com/urmzd/dotfiles/commit/87181ddbde23555b750f8d32dfc8dd9fdbac4778))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.11.1...v0.11.2)
+
+
 ## 0.11.1 (2026-10-05)
 
 ### Bug Fixes
