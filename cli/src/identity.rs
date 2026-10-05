@@ -61,9 +61,23 @@ impl Identity {
     }
 }
 
-pub fn run(ctx: &Ctx) -> Result<Outcome> {
+pub fn run(ctx: &Ctx, account: Option<String>) -> Result<Outcome> {
     let paths = Paths::discover()?;
     let mut config = Config::load(&paths.config)?;
+    // --account overrides github_username: in memory for a dry run (so the
+    // plan shows the new account), saved otherwise.
+    let mut account_changed = false;
+    if let Some(account) =
+        account.filter(|a| config.data_str("github_username").as_deref() != Some(a.as_str()))
+    {
+        config.set_data_str("github_username", &account)?;
+        if ctx.dry_run {
+            ui::skip(&format!("would set github_username = {account}"));
+        } else {
+            config.save()?;
+            account_changed = true;
+        }
+    }
     let mut id = Identity::from_config(&config)?;
     let home = std::env::var_os("HOME")
         .map(PathBuf::from)
@@ -87,7 +101,17 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
         require_tty("`dotfiles identity` (it may open a browser and ask for passphrases)")?;
     }
 
-    let mut changed = false;
+    let mut changed = account_changed;
+    if account_changed {
+        ui::ok(&format!(
+            "this machine now pushes as {} (saved as github_username)",
+            id.account
+        ));
+        let gitconfig = home.join(".gitconfig");
+        if !chezmoi::run(&["apply", "--no-tty", &gitconfig.to_string_lossy()])?.success() {
+            bail!("chezmoi apply ~/.gitconfig failed");
+        }
+    }
     changed |= ensure_gh(ctx, &mut id, &mut config, &paths)?;
     changed |= ensure_ssh(ctx, &id, &home)?;
     let fingerprint = ensure_gpg(ctx, &id)?;

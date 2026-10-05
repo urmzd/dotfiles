@@ -72,7 +72,11 @@ enum Command {
     },
     /// Set up this machine's GitHub identity: gh sign-in, SSH and GPG keys
     /// created and uploaded, signing key saved, then a signed test commit
-    Identity,
+    Identity {
+        /// GitHub account this machine pushes as; saved as github_username
+        #[arg(long)]
+        account: Option<String>,
+    },
     /// Show pending changes, confirm, then chezmoi apply
     Apply {
         /// Skip the confirmation
@@ -138,7 +142,7 @@ fn main() -> ExitCode {
         } => commands::remove(&ctx, ids, uninstall, no_apply),
         Command::List { selected } => commands::list(&ctx, selected),
         Command::Setup { ids, force } => commands::setup(&ctx, ids, force),
-        Command::Identity => identity::run(&ctx),
+        Command::Identity { account } => identity::run(&ctx, account),
         Command::Apply { yes } => commands::apply(&ctx, yes),
         Command::Diff => commands::diff(),
         Command::Config => commands::config(&ctx),

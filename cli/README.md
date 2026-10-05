@@ -21,6 +21,7 @@ dotfiles remove cursor       # deselect (--uninstall also brew-uninstalls it)
 dotfiles list --selected     # catalog with the current selection
 dotfiles setup               # pending sign-in/installers, e.g. acli auth, twg
 dotfiles identity            # gh sign-in, SSH + GPG keys created and uploaded, signing verified
+dotfiles identity --account <name>   # change the GitHub account this machine pushes as
 dotfiles apply               # show pending changes, confirm, apply
 dotfiles update [all|packages|ai]
 dotfiles status              # machine, packages, pending setup, tool versions

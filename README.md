@@ -168,6 +168,7 @@ One command, run on the machine itself, safe to re-run:
 
 ```bash
 dotfiles identity            # add --dry-run to see what it would do first
+dotfiles identity --account urmzd-fwai   # change which GitHub account this machine pushes as
 ```
 
 It reads the account and email from your chezmoi config (the work account and work email on a work laptop), then:
