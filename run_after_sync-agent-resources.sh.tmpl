@@ -10,7 +10,12 @@ if ! command -v agentspec >/dev/null 2>&1; then
     exit 0
 fi
 
-ui_run "registered dotfiles skills and agents" agentspec manage add "{{ .chezmoi.sourceDir }}/dot_agents" || true
+# Register from the deployed tree, never the chezmoi source: agentspec copies
+# files verbatim, so a source path re-introduces chezmoi attribute names
+# (executable_check-doc-hygiene.sh) into ~/.agents and chezmoi then flags the
+# real file as changed on every apply. chezmoi deploys ~/.agents before this
+# run_after script runs.
+ui_run "registered dotfiles skills and agents" agentspec manage add "$HOME/.agents" || true
 
 if command -v jq >/dev/null 2>&1; then
     tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"

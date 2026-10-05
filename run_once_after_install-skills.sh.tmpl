@@ -11,7 +11,7 @@ fi
 # Local skills and agents from dotfiles repo (dot_agents/ -> ~/.agents/), then
 # third-party skills. A failed source is reported and skipped, not fatal.
 SOURCES=(
-    "{{ .chezmoi.sourceDir }}/dot_agents"
+    "$HOME/.agents"   # deployed by chezmoi; see run_after_sync-agent-resources for why not the source
     vercel-labs/skills
     vercel/ai-elements
     vercel/streamdown
