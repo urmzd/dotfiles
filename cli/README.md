@@ -10,7 +10,7 @@ The first `chezmoi apply` installs it. By hand:
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh
 ```
 
-The installer downloads the binary for your platform from the newest release that has one (the latest can still be building, or its build can have failed) and verifies it against that release's `.sha256` file. If no binary can be downloaded (no release yet, GitHub down), it builds `cli/` from the dotfiles checkout with cargo. A pinned `DOTFILES_VERSION` never falls back, and a checksum mismatch always stops. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles update` uses the same assets and checksums.
+The installer downloads the binary for your platform from the newest release that has one (the latest can still be building, or its build can have failed) and verifies it against that release's `.sha256` file. If no binary can be downloaded (no release yet, GitHub down), it builds `cli/` from the dotfiles checkout with cargo. A pinned `DOTFILES_VERSION` never falls back, and a checksum mismatch always stops. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles update` and `dotfiles self-update` use the same assets and checksums.
 
 ## Usage
 
@@ -27,10 +27,11 @@ dotfiles doctor                      # health check; every finding comes with it
 dotfiles apply                       # show pending changes, confirm, apply
 dotfiles status                      # machine, packages, pending setup, tool versions
 dotfiles config                      # re-run the setup questions, keep saved answers
-dotfiles update                      # update this CLI to the latest release
+dotfiles update                      # update the CLI, then pull the dotfiles and apply (chezmoi update)
+dotfiles self-update                 # update only this CLI
 ```
 
-The old forms (`dotfiles packages`, `add`, `remove`, `list`, `setup`, `self-update`) still work as hidden aliases; `dotfiles update ai` now points at `dotfiles package update ai`.
+The old forms (`dotfiles packages`, `add`, `remove`, `list`, `setup`) still work as hidden aliases; `dotfiles update ai` now points at `dotfiles package update ai`.
 
 Global flags: `--format json|human` for data commands, `--dry-run` to show changes without writing. Exit codes: `0` ok, `1` error, `2` nothing changed, `130` cancelled.
 
@@ -63,4 +64,4 @@ cargo fmt --all -- --check
 | `src/chezmoi.rs` | paths, running chezmoi, selection edits via `toml_edit` |
 | `src/ui.rs` | human output; mirrors [`.chezmoitemplates/ui.sh`](../.chezmoitemplates/ui.sh) |
 
-Rules: human output goes to stderr through `ui`, stdout is only `--format json` data; package data belongs in `catalog.toml`, not in code; interactive setup never runs during `chezmoi apply`; `update` is taken by content updates, so self-update is `self-update`. Not published to crates.io (`publish = false`): it only works with this repo.
+Rules: human output goes to stderr through `ui`, stdout is only `--format json` data; package data belongs in `catalog.toml`, not in code; interactive setup never runs during `chezmoi apply`; `update` updates the CLI plus the dotfiles; `self-update` is the binary alone. Not published to crates.io (`publish = false`): it only works with this repo.

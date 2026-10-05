@@ -509,7 +509,7 @@ pub fn update(ctx: &Ctx, target: UpdateTarget) -> Result<Outcome> {
     }
     for (label, cmd) in &steps {
         if !sh(label, cmd)? {
-            bail!("{label} failed; fix it, then rerun: dotfiles update");
+            bail!("{label} failed; fix it, then rerun: dotfiles package update");
         }
     }
     chezmoi_apply()?;
@@ -643,6 +643,27 @@ pub fn clean(ctx: &Ctx, yes: bool) -> Result<Outcome> {
         "go clean -cache 2>/dev/null; pip cache purge 2>/dev/null; uv cache clean 2>/dev/null; brew cleanup --prune=all -s 2>/dev/null; true",
     )?;
     sh("disk after", "df -h / | awk 'NR==2 {print $4 \" free\"}'")?;
+    Ok(Outcome::Done)
+}
+
+/// `dotfiles update`: the CLI first (so the rest runs on the newest code
+/// paths next time), then `chezmoi update`, which pulls the source repo and
+/// applies. A failed CLI update only warns: the dotfiles still update.
+pub fn update_all(ctx: &Ctx) -> Result<Outcome> {
+    if ctx.dry_run {
+        ui::skip("dry run; would update the CLI, then run chezmoi update");
+        return Ok(Outcome::Done);
+    }
+    if let Err(err) = self_update() {
+        ui::warn(&format!("CLI update failed: {err:#}"));
+        ui::hint("retry later: dotfiles self-update");
+    }
+    ui::section("Dotfiles (pull + apply)");
+    if !chezmoi::run(&["update", "--keep-going"])?.success() {
+        bail!(
+            "some steps failed (listed above); everything else was applied. Retry with: dotfiles update"
+        );
+    }
     Ok(Outcome::Done)
 }
 

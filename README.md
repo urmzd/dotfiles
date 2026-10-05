@@ -66,7 +66,7 @@ chezmoi edit <file>   # Edit source, then apply
 
 ### Maintenance
 
-The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Every release attaches its binaries for macOS and Linux (x86_64 and arm64) with `.sha256` checksums; the first apply installs it, and `dotfiles update` keeps it current. To install it by hand: `curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh`.
+The `dotfiles` command is a Rust CLI built from [`cli/`](cli/) in this repo. Every release attaches its binaries for macOS and Linux (x86_64 and arm64) with `.sha256` checksums; the first apply installs it, and `dotfiles update` keeps it and the dotfiles current. To install it by hand: `curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh`.
 
 ```bash
 dotfiles package                 # Search + toggle optional packages, then apply
@@ -80,7 +80,8 @@ dotfiles apply                   # Show pending changes, confirm, then apply (-y
 dotfiles diff                    # Full diff of pending changes
 dotfiles config                  # Re-run the setup questions (saved answers kept), then apply
 dotfiles status                  # Machine, packages, pending setup, tool versions
-dotfiles update                  # Update the dotfiles CLI itself to the latest release
+dotfiles update                  # Update everything: the CLI, then pull the dotfiles and apply
+dotfiles self-update             # Update only the CLI
 dotfiles edit                    # Open the dotfiles source in $EDITOR
 dotfiles clean                   # Prune build artifacts and caches under ~/github
 ```

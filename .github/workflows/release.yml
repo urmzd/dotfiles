@@ -48,7 +48,7 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
 
-  # Attach the dotfiles CLI to every release: `dotfiles self-update` and
+  # Attach the dotfiles CLI to every release: `dotfiles update` and
   # cli/install.sh read the latest release's dotfiles-<target> + .sha256.
   build:
     needs: release

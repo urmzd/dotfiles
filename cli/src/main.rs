@@ -72,13 +72,14 @@ enum Command {
         #[arg(short, long)]
         yes: bool,
     },
-    /// Update this dotfiles CLI to the latest release
-    #[command(alias = "self-update")]
+    /// Update everything: this CLI, then pull the dotfiles and apply
     Update {
         /// Old `dotfiles update <target>` form; points at `dotfiles package update`
         #[arg(hide = true)]
         legacy_target: Option<String>,
     },
+    /// Update only this CLI to the latest release
+    SelfUpdate,
     /// Print the version
     Version,
 
@@ -199,11 +200,12 @@ fn main() -> ExitCode {
         Command::Update {
             legacy_target: Some(target),
         } => Err(anyhow::anyhow!(
-            "`dotfiles update` now updates the dotfiles CLI itself; for packages run: dotfiles package update {target}"
+            "`dotfiles update` updates the CLI and dotfiles; for packages run: dotfiles package update {target}"
         )),
         Command::Update {
             legacy_target: None,
-        } => commands::self_update(),
+        } => commands::update_all(&ctx),
+        Command::SelfUpdate => commands::self_update(),
         Command::Version => {
             println!("dotfiles v{}", env!("CARGO_PKG_VERSION"));
             Ok(Outcome::Done)
