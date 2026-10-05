@@ -7,11 +7,11 @@
 # soft-exits so the rest of the dotfiles still apply. brew bundle is idempotent,
 # so a later 'chezmoi apply' only reinstalls what is still missing.
 # Re-runs whenever the Brewfile, the package selection, or the work pack
-# Brewfile (~/.config/work/Brewfile, appended when present) changes.
+# Brewfile (<work pack>/Brewfile, appended when present) changes.
 # Triggered by: {{ include "Brewfile.tmpl" | sha256sum }} exclude={{ .pkg_exclude }}
 # Selection: {{ get . "packages" | default list | join "," }} secrets={{ .use_secrets }} work={{ .is_work }}
 # Catalog: {{ include "catalog.toml" | sha256sum }}
-{{- $work_brewfile := joinPath .chezmoi.homeDir ".config/work/Brewfile" }}
+{{- $work_brewfile := joinPath (includeTemplate "work-pack-dir" .) "Brewfile" }}
 {{- if stat $work_brewfile }}
 # Work pack: {{ include $work_brewfile | sha256sum }}
 {{- end }}

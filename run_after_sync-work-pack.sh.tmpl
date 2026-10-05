@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Fetch the optional work pack. It never fails the apply: a missing, private,
+# or unreachable pack only warns, so a new laptop can apply everything before
+# its work SSH key exists (`dotfiles identity`), then pick the pack up later.
+#   work_pack empty     -> nothing to do (a hand-made ~/.config/work still works)
+#   work_pack local     -> used in place; warn if the folder is missing
+#   work_pack git URL   -> clone into ~/.config/work, then fast-forward daily
+{{- $pack := get . "work_pack" | default "" }}
+{{- $dir := includeTemplate "work-pack-dir" . }}
+{{- if $pack }}
+set -u
+{{ includeTemplate "ui.sh" . }}
+pack={{ $pack | quote }}
+dir={{ $dir | quote }}
+{{- if or (hasPrefix "/" $pack) (hasPrefix "~" $pack) }}
+if [ ! -d "$dir" ]; then
+    ui_section "Work pack"
+    ui_warn "work pack folder $dir not found; its hooks stay inactive"
+    ui_hint "create it, or change work_pack in ~/.config/chezmoi/chezmoi.toml"
+fi
+{{- else }}
+# Never stop to ask for credentials: fail fast and warn instead.
+export GIT_TERMINAL_PROMPT=0
+export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=10"
+err="$(mktemp "${TMPDIR:-/tmp}/work-pack.XXXXXX")"
+trap 'rm -f "$err"' EXIT
+
+if [ -d "$dir/.git" ]; then
+    # Fast-forward at most once a day; FETCH_HEAD records the last fetch.
+    if [ -f "$dir/.git/FETCH_HEAD" ] && [ -z "$(find "$dir/.git/FETCH_HEAD" -mmin +1440 2>/dev/null)" ]; then
+        exit 0
+    fi
+    ui_section "Work pack"
+    if git -C "$dir" pull --ff-only --quiet 2>"$err"; then
+        ui_ok "updated $dir"
+    else
+        ui_warn "could not update $dir; keeping the current copy"
+        ui_hint "$(head -1 "$err")"
+    fi
+elif [ -e "$dir" ] && [ -n "$(ls -A "$dir" 2>/dev/null)" ]; then
+    ui_section "Work pack"
+    ui_warn "$dir exists and is not a git checkout; leaving it alone"
+    ui_hint "move it aside to clone $pack there, or set work_pack to its path"
+else
+    ui_section "Work pack"
+    if git clone --quiet "$pack" "$dir" 2>"$err"; then
+        touch "$dir/.git/FETCH_HEAD"  # counts as today's fetch
+        ui_ok "cloned $pack into $dir"
+        ui_hint "its AGENTS.md and Brewfile take effect on the next chezmoi apply"
+    else
+        ui_warn "could not clone $pack; the rest of the apply is unaffected"
+        ui_hint "$(head -1 "$err")"
+        ui_hint "check access (dotfiles identity sets up this machine's SSH key), then rerun: chezmoi apply"
+    fi
+fi
+{{- end }}
+exit 0
+{{- end }}

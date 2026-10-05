@@ -10,7 +10,9 @@ git init && git add -A && git commit -m "feat: initial work pack"
 gh repo create <company>/dev-setup --private --source . --push
 ```
 
-Then on the work machine, give `chezmoi init` the repo URL when it asks for the work pack (or set `work_pack_repo` in `~/.config/chezmoi/chezmoi.toml` and run `chezmoi apply`). It is cloned to `~/.config/work/` and refreshed every 24h.
+Then on the work machine, give `chezmoi init` the repo URL when it asks for the work pack (or set `work_pack` in `~/.config/chezmoi/chezmoi.toml` and run `chezmoi apply`). It is cloned to `~/.config/work/` and fast-forwarded at most once a day. A clone that fails (for example a private repo before the machine's SSH key is on GitHub; run `dotfiles identity`) only warns; the next apply retries.
+
+No repo? Set `work_pack` to a local folder (`~/acme-pack`) to use it in place, or leave it empty and put the files in `~/.config/work/` by hand.
 
 ## Files
 

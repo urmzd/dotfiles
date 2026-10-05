@@ -33,6 +33,6 @@ fi
 
 # Work pack env (proxies, registries, PATH). Sourced here rather than in
 # .zshrc so non-interactive shells, including agent tool calls, see it too.
-if [ -r "$HOME/.config/work/env.zsh" ]; then
-    . "$HOME/.config/work/env.zsh"
+if [ -r {{ printf "%s/env.zsh" (includeTemplate "work-pack-dir" .) | quote }} ]; then
+    . {{ printf "%s/env.zsh" (includeTemplate "work-pack-dir" .) | quote }}
 fi

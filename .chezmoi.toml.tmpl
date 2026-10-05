@@ -50,7 +50,9 @@
 {{- $work_email := get . "work_email" | default "" -}}
 {{- $gpg_signing_key := get . "gpg_signing_key" | default "" -}}
 {{- $work_signing_key := get . "work_signing_key" | default "" -}}
-{{- $work_pack_repo := "" -}}
+{{- /* Work pack: optional; a git URL, a local folder, or empty. Configs  */}}
+{{- /* from before the rename keep their work_pack_repo value unasked.      */}}
+{{- $work_pack := get . "work_pack" | default (get . "work_pack_repo" | default "") -}}
 {{- $use_secrets := false -}}
 {{- if $is_work -}}
 {{-   $work_email = promptStringOnce . "work_email" "Work email for git commits" -}}
@@ -62,7 +64,9 @@
 {{-   if and (not $work_signing_key) (not (hasKey . "work_signing_key")) -}}
 {{-     $work_signing_key = promptString "Work GPG signing key ID (optional)" "" -}}
 {{-   end -}}
-{{-   $work_pack_repo = promptStringOnce . "work_pack_repo" "Work pack git URL to clone into ~/.config/work (optional)" "" -}}
+{{-   if not (or (hasKey . "work_pack") (hasKey . "work_pack_repo")) -}}
+{{-     $work_pack = promptString "Work pack: git URL to clone, or a local folder (optional)" "" -}}
+{{-   end -}}
 {{- else -}}
 {{-   $email = promptStringOnce . "email" "Email for git commits" -}}
 {{-   if and (not $gpg_signing_key) $has_gpg -}}
@@ -120,8 +124,8 @@ encryption = "age"
     machine = {{ $machine | quote }}
     is_personal = {{ not $is_work }}
     is_work = {{ $is_work }}
-    # Shareable company overlay cloned to ~/.config/work (see .chezmoiexternal.toml.tmpl)
-    work_pack_repo = {{ $work_pack_repo | quote }}
+    # Optional company overlay: git URL (cloned to ~/.config/work), local folder, or empty
+    work_pack = {{ $work_pack | quote }}
 
     # Feature flags
     use_secrets = {{ $use_secrets }}

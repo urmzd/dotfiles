@@ -17,10 +17,10 @@
     signingkey = {{ $signing_key | quote }}
 {{- end }}
 
-# Work pack (shareable company overlay, see .chezmoiexternal.toml.tmpl).
+# Work pack (optional company overlay, see run_after_sync-work-pack.sh.tmpl).
 # Git silently skips a missing include, so this is a no-op until it exists.
 [include]
-    path = ~/.config/work/gitconfig
+    path = {{ includeTemplate "work-pack-dir" . }}/gitconfig
 
 [github]
     user = {{ .github_username | quote }}
