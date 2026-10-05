@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.4.0 (2026-10-05)
+
+### Features
+
+- **cli**: add dotfiles identity to automate GitHub keys ([e7d57af](https://github.com/urmzd/dotfiles/commit/e7d57af8ba4b1e86e682dd3ace347e9f29b71812))
+- **packages**: add the Slack CLI to the catalog ([a4479cd](https://github.com/urmzd/dotfiles/commit/a4479cd5f2af49b57610c4d423dca9ae7f350ea4))
+- **packages**: add the Hugging Face CLI (hf) via uv ([11dc650](https://github.com/urmzd/dotfiles/commit/11dc6508620adafb804c2134d32066adcb36ec1d))
+- **git**: work GitHub account, managed pinentry, and key setup docs ([9869868](https://github.com/urmzd/dotfiles/commit/9869868df41c3e3668e3df7704db007af64398e4))
+- **packages**: keep only the Warp Agent CLI; it runs inside Ghostty ([9ab57fc](https://github.com/urmzd/dotfiles/commit/9ab57fc6bd62ca9b4e6c9e2e28208e172f982841))
+- **packages**: add the Warp Agent CLI and Warp terminal to the catalog ([099e85f](https://github.com/urmzd/dotfiles/commit/099e85f470d1c4a5343705e4122c8a9f20d4532e))
+- **packages**: add apps, Mintlify, and npm/uv installs to the catalog ([7532fa6](https://github.com/urmzd/dotfiles/commit/7532fa63b9a1bd6d7e594f3d83e4ae8a8a141ab0))
+- **work**: add a work pack starter template ([a504f11](https://github.com/urmzd/dotfiles/commit/a504f1143681c2238b32d362abbdd05fc4b02539))
+- **packages**: install selected catalog packages on Linux ([789f00c](https://github.com/urmzd/dotfiles/commit/789f00ca2474bf8e2e0c48779bb78bd4a17a18c1))
+
+### Bug Fixes
+
+- **install**: keep bootstrapping when releases or downloads fail ([a55bda9](https://github.com/urmzd/dotfiles/commit/a55bda9034ab0ae287e058a5c99317a3f0281bf7))
+- **ci**: allow empty modify_ output for an empty target ([e26edfd](https://github.com/urmzd/dotfiles/commit/e26edfde22a73e39e0bc41e439f39e97503f4d63))
+- **work**: make the work pack optional and never fatal ([ab0bc4a](https://github.com/urmzd/dotfiles/commit/ab0bc4a9c20e5a952c0b9484e9fa25edb99cc063))
+- **shell**: guard empty array expansions that crash bash 3.2 ([accee66](https://github.com/urmzd/dotfiles/commit/accee666b8efe31af8d228613d3a4ea4f1571f9b))
+- **install**: update an existing checkout before applying ([9896860](https://github.com/urmzd/dotfiles/commit/9896860bca15c0e7c2b2c474a17d5386a4c31aeb))
+- **zsh**: prune fnm's per-shell links on startup ([9006e9f](https://github.com/urmzd/dotfiles/commit/9006e9fd8737c03aaa5a4b53b87a87552e01e6e0))
+- **shell**: enforce a bash 3.2 floor and prefer a modern bash at runtime ([79a3cd7](https://github.com/urmzd/dotfiles/commit/79a3cd73dbe1aeb1ca7a5ee3cca7156af4008318))
+- **codex**: replace retired models and the removed untrusted policy ([80a7a45](https://github.com/urmzd/dotfiles/commit/80a7a45a9b1dd5c0d3739011303b68ab2d298604))
+- **node**: keep npm globals in fnm's default Node; retire ~/.local/npm ([eabb764](https://github.com/urmzd/dotfiles/commit/eabb764f4eb4272ff223c5c08d1a36c6cf60adf4))
+- **brew**: migrate temporal-cloud kegs from the prerelease tap ([e07d2e5](https://github.com/urmzd/dotfiles/commit/e07d2e58758ed5fefaf22e3aaccd19b4dd3e4314))
+- **agents**: register skills from the deployed ~/.agents tree ([7987d28](https://github.com/urmzd/dotfiles/commit/7987d28ebb8b63b643d2d2d772c551d6cdf0446d))
+- **ai**: merge ~/.gemini/settings.json instead of overwriting it ([b9fcef3](https://github.com/urmzd/dotfiles/commit/b9fcef33390c121318ed05a6954ed3049c8f5077))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.3.0...v0.4.0)
+
+
 ## 0.3.0 (2026-10-05)
 
 ### Features
