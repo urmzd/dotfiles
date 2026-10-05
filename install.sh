@@ -42,7 +42,23 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     fi
 fi
 
-# ---- 2. chezmoi + apply (single shot via chezmoi's own installer) ---------
+# ---- 2. Bring an existing checkout up to date --------------------------------
+# `chezmoi init --apply` reuses an existing source directory as-is and does not
+# pull, so re-running this on a machine bootstrapped earlier applied stale
+# scripts (an old Codex merge script failed under bash 3.2 with "line 207:
+# unexpected EOF"). Fast-forward first; stop rather than apply stale code.
+SOURCE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi"
+if [ -d "$SOURCE_DIR/.git" ]; then
+    if git -C "$SOURCE_DIR" -c advice.diverging=false pull --ff-only --quiet; then
+        ui_ok "updated the existing dotfiles checkout to $(git -C "$SOURCE_DIR" rev-parse --short HEAD)"
+    else
+        printf '  ✗ could not fast-forward %s (local changes or diverged history)\n' "$SOURCE_DIR" >&2
+        printf '    resolve it with: git -C %s status, then rerun this installer\n' "$SOURCE_DIR" >&2
+        exit 1
+    fi
+fi
+
+# ---- 3. chezmoi + apply (single shot via chezmoi's own installer) ---------
 # Install the chezmoi binary somewhere stable instead of ./bin in a random cwd;
 # the Brewfile later installs the brew-managed copy, which takes over on PATH.
 CHEZMOI_BIN_DIR="${HOME}/.local/bin"
