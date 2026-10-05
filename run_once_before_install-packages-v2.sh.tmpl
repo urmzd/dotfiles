@@ -112,7 +112,7 @@ fi
 
 # Wait for all parallel clones to finish
 _clone_failed=0
-for pid in "${_clone_pids[@]}"; do
+for pid in ${_clone_pids[@]+"${_clone_pids[@]}"}; do
     if ! wait "$pid"; then
         _clone_failed=1
     fi
@@ -177,7 +177,7 @@ if command -v apt >/dev/null 2>&1; then
         golang-go golangci-lint
         lua5.4 luarocks lua-check stylua
     )
-    for package in "${apt_packages[@]}"; do
+    for package in ${apt_packages[@]+"${apt_packages[@]}"}; do
         if ! dpkg -l "$package" >/dev/null 2>&1; then
             ui_step "installing $package"
             sudo apt install -y "$package" || ui_warn "failed to install $package (may not be in this Ubuntu/Debian release)"
@@ -193,7 +193,7 @@ elif command -v dnf >/dev/null 2>&1; then
         golang golangci-lint
         lua luarocks luacheck stylua
     )
-    for package in "${dnf_packages[@]}"; do
+    for package in ${dnf_packages[@]+"${dnf_packages[@]}"}; do
         if ! rpm -q "$package" >/dev/null 2>&1; then
             ui_step "installing $package"
             sudo dnf install -y "$package" || ui_warn "failed to install $package"
@@ -209,7 +209,7 @@ elif command -v pacman >/dev/null 2>&1; then
         go golangci-lint
         lua luarocks luacheck stylua
     )
-    for package in "${pacman_packages[@]}"; do
+    for package in ${pacman_packages[@]+"${pacman_packages[@]}"}; do
         if ! pacman -Q "$package" >/dev/null 2>&1; then
             ui_step "installing $package"
             sudo pacman -S --noconfirm "$package" || ui_warn "failed to install $package"

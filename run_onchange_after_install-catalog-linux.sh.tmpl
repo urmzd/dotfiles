@@ -69,7 +69,7 @@ if [ "${#pkgs[@]}" -eq 0 ]; then
 fi
 
 failed=()
-for pkg in "${pkgs[@]}"; do
+for pkg in ${pkgs[@]+"${pkgs[@]}"}; do
     if installed "$pkg"; then
         ui_skip "$pkg already installed"
     elif ui_run "installed $pkg" install "$pkg"; then

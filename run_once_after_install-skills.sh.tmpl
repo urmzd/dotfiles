@@ -22,7 +22,7 @@ SOURCES=(
     fastapi/fastapi@fastapi/.agents/skills/fastapi
     github/gh-stack@skills/gh-stack
 )
-for src in "${SOURCES[@]}"; do
+for src in ${SOURCES[@]+"${SOURCES[@]}"}; do
     label="$src"
     [[ "$src" == /* ]] && label="dotfiles skills and agents"
     ui_run "added $label" agentspec manage add "$src" --all-tools || true

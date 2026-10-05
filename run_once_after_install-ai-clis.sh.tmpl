@@ -107,7 +107,7 @@ else
 fi
 
 if command -v npm >/dev/null 2>&1; then
-    for pkg in "${NPM_PACKAGES[@]}"; do
+    for pkg in ${NPM_PACKAGES[@]+"${NPM_PACKAGES[@]}"}; do
         name="${pkg%@*}"
         [[ -n "$name" ]] || name="$pkg"  # unpinned scoped name: "@scope/pkg" has no version suffix
         if npm list -g "$name" >/dev/null 2>&1; then

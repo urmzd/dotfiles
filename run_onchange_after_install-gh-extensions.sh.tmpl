@@ -22,7 +22,7 @@ if ! command -v gh >/dev/null 2>&1; then
     exit 0
 fi
 
-for entry in "${EXTENSIONS[@]}"; do
+for entry in ${EXTENSIONS[@]+"${EXTENSIONS[@]}"}; do
     repo="${entry%% *}"
     pin="${entry##* }"
     name="${repo##*/}"

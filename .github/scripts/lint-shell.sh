@@ -9,7 +9,8 @@
 # must still work on 3.2 itself. This script enforces that:
 #   1. parse each rendered script with the shell that will run it
 #      (bash 3.2 floor + current bash, sh + dash, zsh)
-#   2. reject bash-4-only constructs and $(...) heredocs, which 3.2 misparses
+#   2. reject bash-4-only constructs, $(...) heredocs (3.2 misparses them),
+#      and unguarded "${arr[@]}" (3.2 aborts on an empty array under set -u)
 #   3. run every modify_ script under the floor (DOTFILES_BASH_FLOOR=1) on an
 #      empty and an existing target, and require valid, key-preserving output
 set -euo pipefail
@@ -57,6 +58,12 @@ for f in $files; do
             bash -n "$out" 2>"$out.err" || fail "$f: bash cannot parse: $(head -1 "$out.err")"
             if hits=$(grep -nE "$bash4" "$out" | grep -vE '^[0-9]+:[[:space:]]*#'); then
                 fail "$f: bash-4-only construct (3.2 floor): $(printf '%s' "$hits" | head -1)"
+            fi
+            # Under `set -u`, bash 3.2 treats "${arr[@]}" / "${arr[*]}" of an
+            # EMPTY array as unbound and aborts the script (bash 4.4+ does not).
+            # Require the guarded form: ${arr[@]+"${arr[@]}"}.
+            if hits=$(grep -nE '"\$\{[A-Za-z_][A-Za-z0-9_]*\[[@*]\]\}"' "$out" | grep -vE '\[[@*]\]\+"' | grep -vE '^[0-9]+:[[:space:]]*#'); then
+                fail "$f: unguarded array expansion (empty array aborts under set -u on bash 3.2; use \${a[@]+\"\${a[@]}\"}): $(printf '%s' "$hits" | head -1)"
             fi
             ;;
         sh)

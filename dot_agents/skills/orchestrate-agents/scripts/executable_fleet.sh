@@ -48,7 +48,7 @@ resolve_tool() {
   if [[ "$want" != "auto" ]] && ! have "$want"; then
     echo "fleet: '$want' not on PATH, falling back" >&2
   fi
-  for t in "${PREF_ORDER[@]}"; do
+  for t in ${PREF_ORDER[@]+"${PREF_ORDER[@]}"}; do
     if have "$t"; then echo "$t"; return 0; fi
   done
   die "no agent CLI found on PATH (looked for: ${PREF_ORDER[*]})"
@@ -71,7 +71,7 @@ control_pane() {
 
 cmd_doctor() {
   echo "tmux=$(have tmux && tmux -V | awk '{print $2}' || echo MISSING)"
-  for t in "${PREF_ORDER[@]}"; do echo "$t=$(have "$t" && echo ok || echo MISSING)"; done
+  for t in ${PREF_ORDER[@]+"${PREF_ORDER[@]}"}; do echo "$t=$(have "$t" && echo ok || echo MISSING)"; done
   echo "agentspec=$(have agentspec && echo ok || echo MISSING)"
   local notifier=none
   if have osascript; then notifier=osascript; elif have notify-send; then notifier=notify-send; fi
@@ -99,7 +99,7 @@ cmd_survey() {
   # show as "node"; `capture` the pane to confirm). ROLE/NAME are fleet tags
   # left by a previous run; "-" means untagged.
   local filter="${1:-}"
-  local agent_re; agent_re="^($(IFS='|'; echo "${PREF_ORDER[*]}"))$"
+  local agent_re; agent_re="^($(IFS='|'; echo ${PREF_ORDER[*]+"${PREF_ORDER[*]}"}))$"
   printf 'SESSION\tWINDOW\tPANE\tCOMMAND\tAGENT\tROLE\tNAME\tCWD\n'
   # Conditional placeholders: empty tmux fields would collapse under tab-IFS
   # read (tabs are IFS whitespace), shifting every column after them.
