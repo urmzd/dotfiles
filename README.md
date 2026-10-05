@@ -93,7 +93,7 @@ dotfiles clean                   # Prune build artifacts and caches under ~/gith
 
 **Version managers** (per-language, best-in-class): fnm (Node), uv (Python), rustup (Rust).
 
-**Default Python** is a uv-managed CPython 3.12 ([`run_onchange_before_install-python.sh.tmpl`](run_onchange_before_install-python.sh.tmpl)): `python`/`python3` link to it from `~/.local/share/dotfiles/python/bin`, which zsh puts ahead of Homebrew and `/usr/bin`, and gcloud uses it through `CLOUDSDK_PYTHON`. Without it, `python3` falls back to macOS's 3.9 (which breaks gcloud components) or to whatever `python@3.x` Homebrew pulled in. Bump `PYTHON_VERSION` in that script to change it.
+**Default Python** is a uv-managed CPython 3.12 ([`run_before_install-python.sh.tmpl`](run_before_install-python.sh.tmpl)): `python`/`python3` link to it from `~/.local/share/dotfiles/python/bin`, which zsh puts ahead of Homebrew and `/usr/bin`, and gcloud uses it through `CLOUDSDK_PYTHON`. Without it, `python3` falls back to macOS's 3.9 (which breaks gcloud components) or to whatever `python@3.x` Homebrew pulled in. Bump `PYTHON_VERSION` in that script to change it; it re-checks on every apply, so a failed first install heals on the next.
 
 **Upstream-pinned installers** (security/auth fixes ship faster than distro repos):
 - gcloud + aws-cli, [`run_onchange_after_install-cloud-clis.sh.tmpl`](run_onchange_after_install-cloud-clis.sh.tmpl)
@@ -205,7 +205,7 @@ These scripts run automatically on `chezmoi apply`. The bootstrap and every `dot
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
 | `setup-node` | run (after) | Every apply; silent unless it installs Node LTS (fnm) or runs a one-time npm migration |
 | `install-catalog-scripts` | run (after) | Every apply; installs selected installer-based packages (Claude Code, agy, OpenCode) that are missing |
-| `install-python` | run_onchange (before) | `PYTHON_VERSION` changes; installs the default Python with uv |
+| `install-python` | run (before) | every apply, silent once linked; installs the default Python with uv |
 | `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
 | `sync-agent-resources` | run (after) | Every apply (keeps new local skills and agents managed by `agentspec`) |
 | `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag`, and the `dotfiles` CLI) |

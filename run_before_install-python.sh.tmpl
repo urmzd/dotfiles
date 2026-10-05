@@ -7,19 +7,25 @@
 # which breaks gcloud components; or a Homebrew python@3.x pulled in as a
 # dependency, newer than gcloud supports.
 #
-# Bump PYTHON_VERSION to change the default; this script re-runs when it does.
-# Runs before files are applied, after install-packages-v2 installs uv.
+# Runs on every apply (silent when the links already resolve to
+# PYTHON_VERSION), so a first apply where uv was missing or its download
+# failed heals on the next one instead of being recorded as done.
 set -u
 {{ includeTemplate "ui.sh" . }}
 
 PYTHON_VERSION="3.12"
 LINK_DIR="$HOME/.local/share/dotfiles/python/bin"
 
+case "$("$LINK_DIR/python3" --version 2>/dev/null)" in
+    "Python $PYTHON_VERSION".*) [ -x "$LINK_DIR/python" ] && exit 0 ;;
+esac
+
 uv_bin="$(command -v uv 2>/dev/null || true)"
 [ -n "$uv_bin" ] || [ ! -x "$HOME/.local/bin/uv" ] || uv_bin="$HOME/.local/bin/uv"
 if [ -z "$uv_bin" ]; then
     ui_section "Python $PYTHON_VERSION"
-    ui_warn "uv is not installed yet; the default Python is set on the next apply"
+    ui_warn "uv is not installed yet; python stays unset until it is"
+    ui_hint "next: brew install uv && dotfiles apply"
     exit 0
 fi
 

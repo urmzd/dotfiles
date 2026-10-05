@@ -16,7 +16,7 @@ if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Default Python (uv-managed, see run_onchange_before_install-python): first on
+# Default Python (uv-managed, see run_before_install-python): first on
 # PATH so python/python3 never fall back to macOS's 3.9; ~/.zprofile repeats
 # this after Homebrew. gcloud reads CLOUDSDK_PYTHON instead of PATH.
 if [ -x "$HOME/.local/share/dotfiles/python/bin/python3" ]; then
