@@ -10,6 +10,41 @@ set -euo pipefail
 SENTINEL="$HOME/.local/state/ai-tools-installed"
 mkdir -p "$(dirname "$SENTINEL")"
 
+# Node comes from fnm. npm globals live in fnm's default Node: on PATH in every
+# shell through `fnm env`, and the same place `npm -g` and brew bundle's npm
+# entries use. (fnm comes from the Brewfile/apt; without this, npm is not on
+# PATH in the non-interactive chezmoi-apply context.)
+if command -v fnm >/dev/null 2>&1; then
+    eval "$(fnm env --shell bash --corepack-enabled 2>/dev/null)" || true
+    fnm use default >/dev/null 2>&1 || true
+fi
+
+# One-time migration: npm globals used to target ~/.local/npm, which was never
+# on PATH, so anything there was unreachable. Move what is still wanted into
+# fnm's default Node, then remove the directory. Skipped: Codex (Homebrew cask
+# on macOS) and the legacy Gemini CLI (replaced by Antigravity, agy).
+legacy_npm="$HOME/.local/npm"
+if [[ -d "$legacy_npm/lib/node_modules" ]] && command -v npm >/dev/null 2>&1; then
+    migrated=1
+    for dir in "$legacy_npm"/lib/node_modules/* "$legacy_npm"/lib/node_modules/@*/*; do
+        [[ -f "$dir/package.json" ]] || continue
+        pkg="${dir#"$legacy_npm"/lib/node_modules/}"
+        case "$pkg" in
+            @openai/codex | @google/gemini-cli) continue ;;
+        esac
+        if npm ls -g "$pkg" >/dev/null 2>&1; then
+            continue
+        fi
+        ui_run "moved $pkg from ~/.local/npm to fnm's default Node" npm install -g "$pkg" || migrated=0
+    done
+    if [[ "$migrated" -eq 1 ]]; then
+        rm -rf "$legacy_npm"
+        ui_ok "removed ~/.local/npm (npm globals live in fnm's default Node)"
+    else
+        ui_hint "kept ~/.local/npm until the failed packages above install"
+    fi
+fi
+
 {{- if .is_macos }}
 
 # One-time migration: Codex moved from npm to the Homebrew cask. npm copies in
@@ -43,15 +78,10 @@ NPM_PACKAGES=(
     "@github/copilot@1.0.73"
 )
 
-# Make fnm-managed Node available if installed (fnm comes from Brewfile/apt).
-# Without this, npm won't be on PATH in non-interactive chezmoi-apply context.
-if command -v fnm >/dev/null 2>&1; then
-    export PATH="$HOME/.local/npm/bin:$PATH"
-    export NPM_CONFIG_PREFIX="$HOME/.local/npm"
-    eval "$(fnm env --use-on-cd --corepack-enabled 2>/dev/null)" || true
-    if ! fnm list 2>/dev/null | grep -q default; then
-        ui_run "installed Node LTS via fnm" sh -c 'fnm install --lts && fnm default lts-latest' || failed=1
-    fi
+# First run: no default Node yet, so install the LTS and make it the default.
+if command -v fnm >/dev/null 2>&1 && ! fnm list 2>/dev/null | grep -q default; then
+    ui_run "installed Node LTS via fnm" sh -c 'fnm install --lts && fnm default lts-latest' || failed=1
+    fnm use default >/dev/null 2>&1 || true
 fi
 
 if command -v claude >/dev/null 2>&1; then

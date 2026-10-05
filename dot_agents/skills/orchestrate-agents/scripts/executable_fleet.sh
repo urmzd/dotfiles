@@ -16,10 +16,11 @@
 
 set -euo pipefail
 
-# Agent CLIs install to these dirs (claude -> ~/.local/bin, npm CLIs ->
-# ~/.local/npm/bin). Add them so tool resolution works even when invoked from a
-# non-interactive shell whose PATH lacks them.
-export PATH="$HOME/.local/bin:$HOME/.local/npm/bin:$PATH"
+# Agent CLIs install to these dirs (claude -> ~/.local/bin, npm CLIs -> the
+# default Node's bin, via fnm's stable alias when fnm manages Node). Add them
+# so tool resolution works even when invoked from a non-interactive shell
+# whose PATH lacks them; a missing dir is harmless.
+export PATH="$HOME/.local/bin:${FNM_DIR:-$HOME/.local/share/fnm}/aliases/default/bin:$PATH"
 
 # --- config -----------------------------------------------------------------
 # Tool preference when a requested tool is missing or "auto" is asked for.
