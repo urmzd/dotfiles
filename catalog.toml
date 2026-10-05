@@ -282,6 +282,18 @@ description = "warp: Warp's coding agent in any terminal (e.g. Ghostty)"
 category = "ai"
 cask = ["warp-agent-cli"]
 
+[[package]]
+id = "hf"
+name = "Hugging Face CLI"
+# `hf` ships with huggingface_hub; installed with uv (uv tool install) rather
+# than the Homebrew formula, which pulls in its own Python 3.14 and git-lfs.
+# Package name in uv's normalized form so `uv tool list` matches it.
+description = "hf: download and upload models, datasets, and Spaces"
+category = "ai"
+uv = ["huggingface-hub"]
+setup = ["hf auth login"]
+check = "hf auth whoami"
+
 # ---- Media --------------------------------------------------------------------
 
 [[package]]
