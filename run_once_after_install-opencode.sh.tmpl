@@ -5,6 +5,6 @@ set -euo pipefail
 {{ includeTemplate "ui.sh" . }}
 if ! command -v opencode >/dev/null 2>&1 && [[ ! -x "$HOME/.opencode/bin/opencode" ]]; then
     ui_section "OpenCode"
-    ui_run "installed OpenCode" bash -c 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path' \
+    ui_run "installed OpenCode" fetch_and_run https://opencode.ai/install bash --no-modify-path \
         || ui_hint "retry: dotfiles update ai"
 fi

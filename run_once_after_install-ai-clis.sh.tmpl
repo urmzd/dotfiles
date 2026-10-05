@@ -88,14 +88,14 @@ fi
 if command -v claude >/dev/null 2>&1; then
     ui_skip "claude already installed"
 else
-    ui_run "installed Claude Code" bash -c 'curl -fsSL https://claude.ai/install.sh | bash' || failed=1
+    ui_run "installed Claude Code" fetch_and_run https://claude.ai/install.sh bash || failed=1
 fi
 
 # Antigravity CLI (agy) replaces legacy Gemini CLI. Self-updates in the
 # background, so no version pin. Installs to ~/.local/bin/agy.
 if command -v agy >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/agy" ]]; then
     ui_skip "agy already installed"
-elif ui_run "installed Antigravity CLI" bash -c 'curl -fsSL https://antigravity.google/cli/install.sh | bash'; then
+elif ui_run "installed Antigravity CLI" fetch_and_run https://antigravity.google/cli/install.sh bash; then
     # The installer appends PATH exports to ~/.zshrc/~/.zprofile/~/.profile;
     # redundant (zshenv already adds ~/.local/bin) and clobbered by chezmoi apply.
     for profile in "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.profile"; do

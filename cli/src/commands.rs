@@ -21,7 +21,9 @@ pub struct Ctx {
 const REPO: &str = "urmzd/dotfiles";
 const AI_SENTINEL: &str = ".local/state/ai-tools-installed";
 const OPENCODE_INSTALL: &str =
-    "curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path";
+    // Download first: `curl | bash` "succeeds" on an empty download.
+    "t=$(mktemp) && curl -fsSL --retry 2 https://opencode.ai/install -o \"$t\" && [ -s \"$t\" ] \
+     && bash \"$t\" --no-modify-path; rc=$?; rm -f \"$t\"; exit $rc";
 
 pub fn is_interrupt(err: &anyhow::Error) -> bool {
     matches!(

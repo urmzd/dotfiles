@@ -29,7 +29,22 @@ ui_section "Bootstrapping dotfiles"
 if [[ "$(uname -s)" == "Darwin" ]]; then
     if ! command -v brew >/dev/null 2>&1; then
         ui_step "installing Homebrew"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Download first (`bash -c "$(curl ...)"` runs an empty script when the
+        # download fails) and give it the terminal: under `curl | bash` our
+        # stdin is the rest of this script, which the installer must not read.
+        brew_installer="$(mktemp)"
+        if curl -fsSL --retry 2 https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$brew_installer" &&
+            [ -s "$brew_installer" ]; then
+            if { exec 3</dev/tty; } 2>/dev/null; then
+                exec 3<&-
+                /bin/bash "$brew_installer" </dev/tty || ui_skip "Homebrew install failed; chezmoi falls back to its own installer"
+            else
+                NONINTERACTIVE=1 /bin/bash "$brew_installer" </dev/null || ui_skip "Homebrew install failed; chezmoi falls back to its own installer"
+            fi
+        else
+            ui_skip "could not download the Homebrew installer; continuing without it"
+        fi
+        rm -f "$brew_installer"
     else
         ui_skip "Homebrew already installed"
     fi
@@ -58,25 +73,41 @@ if [ -d "$SOURCE_DIR/.git" ]; then
     fi
 fi
 
-# ---- 3. chezmoi + apply (single shot via chezmoi's own installer) ---------
-# Install the chezmoi binary somewhere stable instead of ./bin in a random cwd;
-# the Brewfile later installs the brew-managed copy, which takes over on PATH.
+# ---- 3. chezmoi: chezmoi's own installer, else Homebrew ----------------------
+# Reuse a chezmoi already on PATH. Otherwise download chezmoi's installer
+# (checked separately: `sh -c "$(curl ...)"` succeeds on an EMPTY script when
+# the download fails) and fall back to Homebrew if get.chezmoi.io or its
+# GitHub release is unavailable.
 CHEZMOI_BIN_DIR="${HOME}/.local/bin"
 mkdir -p "$CHEZMOI_BIN_DIR"
+export PATH="$CHEZMOI_BIN_DIR:$PATH"
+if command -v chezmoi >/dev/null 2>&1; then
+    ui_skip "chezmoi already installed ($(command -v chezmoi))"
+elif chezmoi_installer="$(curl -fsLS https://get.chezmoi.io)" && [ -n "$chezmoi_installer" ] &&
+    sh -c "$chezmoi_installer" -- -b "$CHEZMOI_BIN_DIR" >/dev/null; then
+    ui_ok "installed chezmoi into $CHEZMOI_BIN_DIR"
+elif command -v brew >/dev/null 2>&1 && brew install chezmoi; then
+    ui_ok "installed chezmoi with Homebrew (get.chezmoi.io unavailable)"
+else
+    printf '  ✗ could not install chezmoi (get.chezmoi.io and Homebrew both failed)\n' >&2
+    printf '    check the network, then rerun this installer\n' >&2
+    exit 1
+fi
 
-ui_step "installing chezmoi, then applying github.com/${GITHUB_USER}/dotfiles"
+# ---- 4. apply ---------------------------------------------------------------
+ui_step "applying github.com/${GITHUB_USER}/dotfiles"
 # When this script is piped (curl | bash), stdin is the script itself, so
 # chezmoi's first-run prompts would read garbage. Reattach stdin to the
 # terminal when one exists; otherwise run headless (promptOnce values are
 # skipped anyway once a config exists).
 if [ -t 0 ]; then
-    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER"
+    chezmoi init --apply "$GITHUB_USER"
 elif { exec 3</dev/tty; } 2>/dev/null; then
     exec 3<&-
-    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER" </dev/tty
+    chezmoi init --apply "$GITHUB_USER" </dev/tty
 else
     ui_skip "no TTY; running without prompts"
-    sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$CHEZMOI_BIN_DIR" init --apply "$GITHUB_USER"
+    chezmoi init --apply --no-tty "$GITHUB_USER" </dev/null
 fi
 
 ui_ok "done; open a new terminal to load the new shell config"

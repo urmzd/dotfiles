@@ -49,6 +49,8 @@ sh -c "$(curl -fsLS https://get.chezmoi.io)" -- init --apply urmzd
 
 `chezmoi apply` installs Brewfile/apt packages, sets up gcloud/aws/cortex from upstream, and installs the AI CLIs. Open a new terminal afterwards.
 
+The bootstrap does not depend on our releases being healthy. chezmoi comes from get.chezmoi.io, falling back to Homebrew. The `dotfiles` CLI comes from the newest release that has a binary for your platform (the latest can be mid-build or failed), falling back to building `cli/` from the checkout with cargo. If both fail, the apply still finishes: the CLI is optional. Re-running the bootstrap fast-forwards an existing checkout before applying, and every third-party installer is downloaded and checked before it runs, so a network failure warns instead of passing silently.
+
 `chezmoi init` asks only what it cannot derive: name (prefilled on macOS), machine type (`personal` or `work`), one email for commits, Cortex, package preset, and excludes. On a personal machine the GitHub user comes from the repo remote; the GPG key always comes from your keyring. A personal machine is asked for its email and about secrets management; a work machine is asked for its work email, its work GitHub account, and an optional [work pack](#work-pack) (git URL or local folder), and never for personal details. See [Setting up a machine's GitHub identity](#setting-up-a-machines-github-identity) for keys. Re-running `chezmoi init` reuses every saved answer.
 
 ## Usage

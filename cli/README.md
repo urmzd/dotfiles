@@ -10,7 +10,7 @@ The first `chezmoi apply` installs it. By hand:
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh | sh
 ```
 
-The installer downloads the binary for your platform from the latest release and verifies it against the release's `.sha256` file. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles self-update` uses the same assets and checksums.
+The installer downloads the binary for your platform from the newest release that has one (the latest can still be building, or its build can have failed) and verifies it against that release's `.sha256` file. If no binary can be downloaded (no release yet, GitHub down), it builds `cli/` from the dotfiles checkout with cargo. A pinned `DOTFILES_VERSION` never falls back, and a checksum mismatch always stops. `DOTFILES_VERSION` pins a release, `DOTFILES_INSTALL_DIR` changes the target (default `~/.local/bin`), and `DOTFILES_SHA256` overrides the expected checksum. `dotfiles self-update` uses the same assets and checksums.
 
 ## Usage
 

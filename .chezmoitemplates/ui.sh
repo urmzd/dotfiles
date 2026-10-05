@@ -40,4 +40,21 @@ ui_run() {
     rm -f "$log"
     return "$rc"
 }
+
+# fetch_and_run <url> <interpreter> [args...]: download an installer to a temp
+# file (with retries) and run it. Unlike `curl ... | sh`, a failed or empty
+# download returns non-zero instead of running an empty script that "succeeds".
+fetch_and_run() {
+    local url="$1" interp="$2" tmp rc=0
+    shift 2
+    tmp="$(mktemp "${TMPDIR:-/tmp}/installer.XXXXXX")"
+    if ! curl -fsSL --retry 2 --connect-timeout 15 "$url" -o "$tmp" || [ ! -s "$tmp" ]; then
+        rm -f "$tmp"
+        echo "download failed: $url" >&2
+        return 1
+    fi
+    "$interp" "$tmp" "$@" || rc=$?
+    rm -f "$tmp"
+    return "$rc"
+}
 # ---------------------------------------------------------------------------

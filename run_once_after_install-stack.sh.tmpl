@@ -13,7 +13,7 @@ install_if_missing() {
         ui_skip "$name already installed"
         return 0
     fi
-    ui_run "installed $name" sh -c "curl -fsSL '$url' | sh" || ui_hint "retry: curl -fsSL $url | sh"
+    ui_run "installed $name" fetch_and_run "$url" sh || ui_hint "retry: chezmoi apply (installer: $url)"
 }
 
 install_if_missing sr    https://raw.githubusercontent.com/urmzd/sr/main/install.sh
@@ -24,7 +24,7 @@ DOTFILES_CLI_INSTALL=https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/i
 # One-time migration: 0.1.x binaries came from the retired urmzd/dotfiles-cli
 # repo and their self-update points there, so replace them.
 if command -v dotfiles >/dev/null 2>&1 && dotfiles version 2>/dev/null | grep -q '^dotfiles v0\.1\.'; then
-    ui_run "reinstalled dotfiles from urmzd/dotfiles releases" sh -c "curl -fsSL '$DOTFILES_CLI_INSTALL' | sh" \
-        || ui_hint "retry: curl -fsSL $DOTFILES_CLI_INSTALL | sh"
+    ui_run "reinstalled dotfiles from urmzd/dotfiles releases" fetch_and_run "$DOTFILES_CLI_INSTALL" sh \
+        || ui_hint "retry: chezmoi apply (installer: $DOTFILES_CLI_INSTALL)"
 fi
 install_if_missing dotfiles "$DOTFILES_CLI_INSTALL"

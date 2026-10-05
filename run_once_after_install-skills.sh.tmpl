@@ -6,7 +6,10 @@ set -euo pipefail
 ui_section "Agent skills"
 
 if ! command -v agentspec &>/dev/null; then
-    ui_run "installed agentspec" sh -c 'curl -fsSL https://raw.githubusercontent.com/urmzd/agentspec/main/install.sh | sh' || exit 1
+    if ! ui_run "installed agentspec" fetch_and_run https://raw.githubusercontent.com/urmzd/agentspec/main/install.sh sh; then
+        ui_hint "skills sync skipped; rerun chezmoi apply once the network is back"
+        exit 0
+    fi
 fi
 
 # Local skills and agents from dotfiles repo (dot_agents/ -> ~/.agents/), then

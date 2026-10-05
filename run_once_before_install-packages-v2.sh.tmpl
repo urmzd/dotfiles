@@ -35,7 +35,8 @@ fi
 
 if ! command -v brew >/dev/null 2>&1; then
     ui_step "installing Homebrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fetch_and_run https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh /bin/bash \
+        || ui_warn "Homebrew install failed; packages are skipped until a rerun of chezmoi apply"
     # Make brew available in this shell for any subsequent steps.
     if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -50,7 +51,8 @@ fi
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     ui_step "installing Oh My Zsh"
-    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    RUNZSH=no CHSH=no fetch_and_run https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh sh \
+        || ui_warn "Oh My Zsh install failed; rerun chezmoi apply to retry"
 else
     ui_skip "Oh My Zsh already installed"
 fi
@@ -224,14 +226,14 @@ fi
 # Install uv (Python package manager) if not present
 if ! command -v uv >/dev/null 2>&1; then
     ui_step "installing uv"
-    curl -LsSf https://astral.sh/uv/install.sh | sh \
+    fetch_and_run https://astral.sh/uv/install.sh sh \
         || ui_warn "uv install failed; rerun chezmoi apply to retry"
 fi
 
 # Install rustup (Rust toolchain manager) if not present
 if ! command -v rustup >/dev/null 2>&1; then
     ui_step "installing rustup"
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+    if fetch_and_run https://sh.rustup.rs sh -y; then
         . "$HOME/.cargo/env"
         rustup component add rust-analyzer rust-src \
             || ui_warn "rustup component add failed; run it once rustup is on PATH"

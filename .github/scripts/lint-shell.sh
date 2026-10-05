@@ -59,6 +59,11 @@ for f in $files; do
             if hits=$(grep -nE "$bash4" "$out" | grep -vE '^[0-9]+:[[:space:]]*#'); then
                 fail "$f: bash-4-only construct (3.2 floor): $(printf '%s' "$hits" | head -1)"
             fi
+            # `curl ... | sh` and `sh -c "$(curl ...)"` "succeed" when the
+            # download fails (the shell runs an empty script). Use fetch_and_run.
+            if hits=$(grep -nE 'curl [^|#]*\|[[:space:]]*(ba)?sh\b|-c "\$\(curl' "$out" | grep -vE '^[0-9]+:[[:space:]]*#'); then
+                fail "$f: piped installer hides download failures (use fetch_and_run from ui.sh): $(printf '%s' "$hits" | head -1)"
+            fi
             # Under `set -u`, bash 3.2 treats "${arr[@]}" / "${arr[*]}" of an
             # EMPTY array as unbound and aborts the script (bash 4.4+ does not).
             # Require the guarded form: ${arr[@]+"${arr[@]}"}.
