@@ -163,7 +163,7 @@ Every script prints through [`.chezmoitemplates/ui.sh`](.chezmoitemplates/ui.sh)
 | [`ci.yml`](.github/workflows/ci.yml) | pull requests, and before every release | [`.github/scripts/check.sh`](.github/scripts/check.sh) renders the full source state for a personal and a work machine on macOS and Linux, then syntax-checks every rendered `run_` script |
 | [`release.yml`](.github/workflows/release.yml) | push to `main` | After CI passes, [sr](https://github.com/urmzd/sr) tags the release and updates `CHANGELOG.md` from conventional commits |
 
-Run the same check locally before pushing: `.github/scripts/check.sh`. The `dotfiles` CLI releases separately from [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli) (binaries plus crates.io via trusted publishing). Release secrets for both repos are managed in `urmzd/infra`.
+Run the same check locally before pushing: `.github/scripts/check.sh`. The `dotfiles` CLI releases separately from [urmzd/dotfiles-cli](https://github.com/urmzd/dotfiles-cli) (GitHub release binaries with `.sha256` checksums; not on crates.io). Release secrets for both repos are managed in `urmzd/infra`.
 
 ### AI tools
 
