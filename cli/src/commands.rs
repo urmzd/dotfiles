@@ -84,8 +84,13 @@ fn passes(check: &str) -> bool {
 
 fn chezmoi_apply() -> Result<()> {
     ui::section("Applying");
-    if !chezmoi::run(&["apply"])?.success() {
-        bail!("chezmoi apply failed; fix the error above, then: dotfiles apply");
+    // --keep-going: without it chezmoi stops at the first failing script and
+    // skips the rest; with it every step runs and failed one-time scripts are
+    // not recorded, so the next apply retries them.
+    if !chezmoi::run(&["apply", "--keep-going"])?.success() {
+        bail!(
+            "some steps failed (listed above); everything else was applied. Retry with: dotfiles apply"
+        );
     }
     Ok(())
 }

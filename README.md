@@ -185,7 +185,7 @@ Passphrases are asked by `ssh-keygen` and by `pinentry-mac`'s dialog (managed on
 
 ### Chezmoi automation
 
-These scripts run automatically on `chezmoi apply`:
+These scripts run automatically on `chezmoi apply`. The bootstrap and every `dotfiles` command apply with `--keep-going`: a failing step no longer skips the steps after it, failures are listed at the end, and a failed one-time script is retried on the next apply. Run plain `chezmoi apply` as `chezmoi apply --keep-going` for the same behavior.
 
 | Script | Type | Trigger |
 | ------ | ---- | ------- |
@@ -193,7 +193,7 @@ These scripts run automatically on `chezmoi apply`:
 | `brewfile-install` | run_onchange (after) | Brewfile, `catalog.toml`, the `packages` selection, `pkg_exclude`, or the work pack Brewfile changes |
 | `install-cloud-clis` | run_onchange (after) | Script changes (re-pin gcloud/aws version) |
 | `install-cortex` | run_onchange (after) | Script changes (gated on `install_cortex` flag) |
-| `install-gh-extensions` | run_onchange (after) | Script changes (re-pin a gh extension version) |
+| `install-gh-extensions` | run (after) | Every apply; silent once installed. Waits for `gh` sign-in (`dotfiles identity`) instead of failing |
 | `install-catalog-linux` | run_onchange (after) | Linux only: the `packages` selection or `catalog.toml` changes |
 | `generate-completions` | run_onchange (after) | zshrc, Brewfile, or cloud-clis script changes |
 | `install-ai-clis` | run_once (after) | First apply (sentinel-gated; clear via `dotfiles update ai`) |

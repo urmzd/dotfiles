@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Install gh CLI extensions pinned to specific upstream releases.
+#
+# Why pin? gh extensions auto-install the latest release, so an unpinned
+# install drifts silently between machines. Bump a pin below and
+# `chezmoi apply` to upgrade.
+#
+# Runs on every apply (run_after, not run_onchange) and stays silent when
+# everything is installed: on a new machine gh is not signed in yet, so the
+# install has to happen on a later apply, after `dotfiles identity`. It never
+# fails the apply; problems only warn.
+set -u
+{{ includeTemplate "ui.sh" . }}
+
+# "OWNER/REPO TAG" pairs. One line per extension.
+EXTENSIONS=(
+    # Stacked PRs: gh stack init/add/push/submit/rebase.
+    "github/gh-stack v0.1.0"
+)
+
+command -v gh >/dev/null 2>&1 || exit 0
+
+# `gh extension list` reads "NAME REPO VERSION"; signed out, it exits 4 and
+# prints nothing, which reads as "nothing installed".
+listing="$(gh extension list 2>/dev/null || true)"
+installed_pin() {
+    printf '%s\n' "$listing" |
+        awk -v r="$1" '{ for (i = 1; i <= NF; i++) if (tolower($i) == tolower(r)) { print $(i + 1); exit } }'
+}
+
+pending=()
+for entry in ${EXTENSIONS[@]+"${EXTENSIONS[@]}"}; do
+    [ "$(installed_pin "${entry%% *}")" = "${entry##* }" ] || pending+=("$entry")
+done
+[ "${#pending[@]}" -eq 0 ] && exit 0
+
+ui_section "gh extensions"
+if ! gh auth status >/dev/null 2>&1; then
+    ui_skip "gh is not signed in; ${#pending[@]} extension(s) install on the next apply after: dotfiles identity"
+    exit 0
+fi
+
+for entry in ${pending[@]+"${pending[@]}"}; do
+    repo="${entry%% *}"
+    pin="${entry##* }"
+    name="${repo##*/}"
+    installed="$(installed_pin "$repo")"
+    if [ -n "$installed" ]; then
+        # No re-pin in place: remove, then install at the new tag.
+        ui_step "updating $repo (${installed} -> ${pin})"
+        gh extension remove "$name" >/dev/null 2>&1 || true
+    fi
+    if gh extension install "$repo" --pin "$pin" >/dev/null 2>&1; then
+        ui_ok "installed $repo $pin"
+    else
+        ui_warn "could not install $repo $pin"
+        ui_hint "check network and gh auth status, then rerun: chezmoi apply"
+    fi
+done
+exit 0

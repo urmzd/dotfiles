@@ -22,7 +22,11 @@ if command -v jq >/dev/null 2>&1; then
     tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"
     trap 'rm -f "$tmp_status" "$tmp_status.source" "$tmp_status.unmanaged" "$tmp_status.sync"' EXIT
 
-    agentspec --format json status >"$tmp_status"
+    if ! agentspec --format json status >"$tmp_status" 2>/dev/null; then
+        ui_warn "agentspec status failed; skipping the registry sync this time"
+        ui_hint "inspect: agentspec status (the next chezmoi apply retries)"
+        exit 0
+    fi
     {
         find "{{ .chezmoi.sourceDir }}/dot_agents/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print 2>/dev/null |
             sed 's#.*/dot_agents/skills/##; s#/SKILL.md##; s#^#skill\t#'

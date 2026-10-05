@@ -95,19 +95,29 @@ else
 fi
 
 # ---- 4. apply ---------------------------------------------------------------
+# --keep-going: chezmoi otherwise stops at the first failing script and skips
+# every later one. With it, all steps run, failures are listed at the end, and
+# a failed run_once/run_onchange script is not recorded, so the next apply
+# retries it.
 ui_step "applying github.com/${GITHUB_USER}/dotfiles"
+apply_ok=1
 # When this script is piped (curl | bash), stdin is the script itself, so
 # chezmoi's first-run prompts would read garbage. Reattach stdin to the
 # terminal when one exists; otherwise run headless (promptOnce values are
 # skipped anyway once a config exists).
 if [ -t 0 ]; then
-    chezmoi init --apply "$GITHUB_USER"
+    chezmoi init --apply --keep-going "$GITHUB_USER" || apply_ok=0
 elif { exec 3</dev/tty; } 2>/dev/null; then
     exec 3<&-
-    chezmoi init --apply "$GITHUB_USER" </dev/tty
+    chezmoi init --apply --keep-going "$GITHUB_USER" </dev/tty || apply_ok=0
 else
     ui_skip "no TTY; running without prompts"
-    chezmoi init --apply --no-tty "$GITHUB_USER" </dev/null
+    chezmoi init --apply --keep-going --no-tty "$GITHUB_USER" </dev/null || apply_ok=0
+fi
+
+if [ "$apply_ok" -eq 0 ]; then
+    ui_skip "some steps failed (listed above); everything else was applied"
+    ui_skip "they retry on the next: chezmoi apply --keep-going"
 fi
 
 ui_ok "done; open a new terminal to load the new shell config"
