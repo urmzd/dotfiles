@@ -130,6 +130,22 @@ fi
 # fnm (Fast Node Manager) adds node/npm shims to PATH, auto-switches on cd.
 {{ if lookPath "fnm" -}}
 eval "$(fnm env --use-on-cd --shell zsh)"
+
+# fnm links one dir per shell into ~/.local/state/fnm_multishells and never
+# removes them (1,400+ had piled up by 2026-10). Prune links whose process is
+# no longer a shell, in the background so startup stays fast. Checking the
+# command, not just the pid, matters: pids get reused by unrelated processes.
+_fnm_prune_multishells() {
+  local dir=${FNM_MULTISHELL_PATH:h} link pid comm
+  [[ -n $FNM_MULTISHELL_PATH && -d $dir ]] || return 0
+  for link in $dir/*(N@); do
+    [[ $link == $FNM_MULTISHELL_PATH ]] && continue
+    pid=${${link:t}%%_*}
+    comm=$(ps -o comm= -p $pid 2>/dev/null)
+    [[ $comm == *zsh* || $comm == *bash* || $comm == *fish* ]] || rm -f -- $link
+  done
+}
+_fnm_prune_multishells &!
 {{- end }}
 
 {{ if lookPath "mise" -}}
