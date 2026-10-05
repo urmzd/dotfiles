@@ -64,7 +64,7 @@ impl Identity {
 pub fn run(ctx: &Ctx) -> Result<Outcome> {
     let paths = Paths::discover()?;
     let mut config = Config::load(&paths.config)?;
-    let id = Identity::from_config(&config)?;
+    let mut id = Identity::from_config(&config)?;
     let home = std::env::var_os("HOME")
         .map(PathBuf::from)
         .context("HOME is not set")?;
@@ -88,7 +88,7 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
     }
 
     let mut changed = false;
-    changed |= ensure_gh(ctx, &id)?;
+    changed |= ensure_gh(ctx, &mut id, &mut config, &paths)?;
     changed |= ensure_ssh(ctx, &id, &home)?;
     let fingerprint = ensure_gpg(ctx, &id)?;
     check_email_verified(&id);
@@ -134,68 +134,27 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
 // ---- gh -------------------------------------------------------------------------
 
 /// Signed in as the machine's account, with the scopes the later steps need.
-fn ensure_gh(ctx: &Ctx, id: &Identity) -> Result<bool> {
+fn ensure_gh(ctx: &Ctx, id: &mut Identity, config: &mut Config, paths: &Paths) -> Result<bool> {
     let mut changed = false;
     let login = gh_login();
-    if login.as_deref() != Some(id.account.as_str()) {
-        if ctx.dry_run {
-            ui::skip(&format!(
-                "would sign gh in as {} (now: {})",
-                id.account,
-                login.as_deref().unwrap_or("signed out")
-            ));
-            return Ok(false);
-        }
-        // Another account may already be signed in alongside; try switching first.
-        let switched = Command::new("gh")
-            .args([
-                "auth",
-                "switch",
-                "--hostname",
-                "github.com",
-                "--user",
-                &id.account,
-            ])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|s| s.success());
-        if !switched {
-            ui::step(&format!(
-                "signing gh in as {} (pick that account in the browser)",
-                id.account
-            ));
-            let scopes: Vec<&str> = SCOPES.iter().map(|(s, _)| *s).collect();
-            let status = Command::new("gh")
-                .args([
-                    "auth",
-                    "login",
-                    "--hostname",
-                    "github.com",
-                    "--git-protocol",
-                    "ssh",
-                    "--skip-ssh-key",
-                    "--web",
-                ])
-                .args(["--scopes", &scopes.join(",")])
-                .status()
-                .context("running gh auth login")?;
-            if !status.success() {
-                bail!("gh auth login failed");
-            }
-        }
-        match gh_login() {
-            Some(now) if now == id.account => ui::ok(&format!("gh signed in as {now}")),
-            other => bail!(
-                "gh is signed in as {} but this machine pushes as {}; run `gh auth login` and choose {}",
-                other.as_deref().unwrap_or("nobody"),
-                id.account,
-                id.account
-            ),
-        }
+    if login.as_deref() == Some(id.account.as_str()) {
+        ui::skip(&format!("gh already signed in as {}", id.account));
+    } else if ctx.dry_run {
+        ui::skip(&format!(
+            "would switch or sign gh in as {} (now: {})",
+            id.account,
+            login.as_deref().unwrap_or("signed out")
+        ));
+        return Ok(false);
+    } else if gh_accounts().contains(&id.account) && gh_switch(&id.account) {
+        // gh keeps several accounts per host; this one was signed in already.
+        ui::ok(&format!("switched gh to {}", id.account));
         changed = true;
     } else {
-        ui::skip(&format!("gh already signed in as {}", id.account));
+        changed |= resolve_account(id, login, config, paths)?;
+    }
+    if !changed && !ctx.dry_run && gh_login().as_deref() != Some(id.account.as_str()) {
+        bail!("gh is not signed in as {}", id.account);
     }
 
     let missing = missing_scopes(&gh_scopes());
@@ -223,6 +182,135 @@ fn ensure_gh(ctx: &Ctx, id: &Identity) -> Result<bool> {
         changed = true;
     }
     Ok(changed)
+}
+
+/// gh signed in as some other account (or nobody) than this machine's. Ask
+/// which side is right: sign gh in as the configured account, or adopt gh's
+/// account as this machine's (rewrites github_username, re-applies gitconfig).
+fn resolve_account(
+    id: &mut Identity,
+    login: Option<String>,
+    config: &mut Config,
+    paths: &Paths,
+) -> Result<bool> {
+    let sign_in = format!(
+        "Sign gh in as {} (this machine's configured account)",
+        id.account
+    );
+    let mut options = vec![sign_in.clone()];
+    let adopt = login
+        .as_ref()
+        .map(|l| format!("Use {l} for this machine instead (updates github_username)"));
+    if let Some(a) = &adopt {
+        options.push(a.clone());
+    }
+    let question = match &login {
+        Some(l) => format!(
+            "gh is signed in as {l}, but this machine pushes as {}. Which is right?",
+            id.account
+        ),
+        None => format!("gh is signed out; this machine pushes as {}.", id.account),
+    };
+    let choice = inquire::Select::new(&question, options).prompt()?;
+
+    if Some(&choice) == adopt.as_ref() {
+        let new_account = login.expect("adopt implies a login");
+        config.set_data_str("github_username", &new_account)?;
+        config.save()?;
+        ui::ok(&format!(
+            "this machine now pushes as {new_account} (saved in {})",
+            paths.config.display()
+        ));
+        let home = std::env::var_os("HOME")
+            .map(PathBuf::from)
+            .context("HOME is not set")?;
+        let gitconfig = home.join(".gitconfig");
+        if !chezmoi::run(&["apply", "--no-tty", &gitconfig.to_string_lossy()])?.success() {
+            bail!("chezmoi apply ~/.gitconfig failed");
+        }
+        id.account = new_account;
+        return Ok(true);
+    }
+
+    // The browser signs in whoever it is already signed in as, which is why a
+    // plain `gh auth login` kept returning the other account.
+    ui::hint(&format!(
+        "in the browser, switch to {} first (avatar menu > Switch account, or a private window)",
+        id.account
+    ));
+    let scopes: Vec<&str> = SCOPES.iter().map(|(s, _)| *s).collect();
+    for attempt in 1..=2 {
+        ui::step(&format!(
+            "signing gh in as {} (attempt {attempt} of 2)",
+            id.account
+        ));
+        let status = Command::new("gh")
+            .args([
+                "auth",
+                "login",
+                "--hostname",
+                "github.com",
+                "--git-protocol",
+                "ssh",
+                "--skip-ssh-key",
+                "--web",
+            ])
+            .args(["--scopes", &scopes.join(",")])
+            .status()
+            .context("running gh auth login")?;
+        let now = gh_login();
+        if status.success() && now.as_deref() == Some(id.account.as_str()) {
+            ui::ok(&format!("gh signed in as {}", id.account));
+            return Ok(true);
+        }
+        // gh keeps the extra account; make sure the right one ends up active.
+        if gh_accounts().contains(&id.account) && gh_switch(&id.account) {
+            ui::ok(&format!(
+                "gh signed in as {} and switched to it",
+                id.account
+            ));
+            return Ok(true);
+        }
+        ui::warn(&format!(
+            "the browser authorized {}, not {}",
+            now.as_deref().unwrap_or("nobody"),
+            id.account
+        ));
+    }
+    bail!(
+        "could not sign gh in as {}; switch accounts in the browser (or use a private window), then rerun: dotfiles identity",
+        id.account
+    )
+}
+
+/// Accounts gh is signed in to on github.com, from `gh auth status`.
+fn gh_accounts() -> Vec<String> {
+    parse_accounts(&gh_scopes())
+}
+
+fn parse_accounts(status: &str) -> Vec<String> {
+    status
+        .lines()
+        .filter_map(|l| l.split(" account ").nth(1))
+        .filter_map(|rest| rest.split_whitespace().next())
+        .map(String::from)
+        .collect()
+}
+
+fn gh_switch(account: &str) -> bool {
+    Command::new("gh")
+        .args([
+            "auth",
+            "switch",
+            "--hostname",
+            "github.com",
+            "--user",
+            account,
+        ])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|s| s.success())
 }
 
 fn gh_login() -> Option<String> {
@@ -591,6 +679,13 @@ fpr:::::::::3333333333333333333333333333333333333333:
         ));
         assert!(!ssh_key_listed(local, "ssh-ed25519 DIFFERENT"));
         assert!(!ssh_key_listed("", "ssh-ed25519 AAAAC3NzaKEY"));
+    }
+
+    #[test]
+    fn lists_signed_in_accounts() {
+        let status = "github.com\n  ✓ Logged in to github.com account urmzd (keyring)\n  - Active account: true\n  ✓ Logged in to github.com account urmzd-acme (keyring)\n  - Active account: false\n";
+        assert_eq!(parse_accounts(status), vec!["urmzd", "urmzd-acme"]);
+        assert!(parse_accounts("You are not logged into any GitHub hosts.").is_empty());
     }
 
     #[test]
