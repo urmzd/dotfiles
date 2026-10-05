@@ -97,10 +97,15 @@ fi
 # when some fail; it just exits non-zero afterwards. We capture that and decide.
 # Satisfied entries ("Using <pkg>") stay in the log only; the terminal shows
 # what is actually being installed or upgraded.
+# The index is refreshed once, quietly, up front; bundle's own auto-update
+# would otherwise print every new formula and cask in Homebrew.
 run_bundle() {
-    brew bundle --file="$RUN_BREWFILE" 2>&1 | tee -a "$LOG" | grep -vE '^Using |brew bundle complete' | sed 's/^/    /'
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1 brew bundle --file="$RUN_BREWFILE" 2>&1 |
+        tee -a "$LOG" | grep -vE '^Using |bundle` complete' | sed 's/^/    /'
     return "${PIPESTATUS[0]}"
 }
+
+ui_run "refreshed the Homebrew index" brew update --quiet || true
 
 ui_step "brew bundle (only changes are shown)"
 if run_bundle; then
@@ -119,7 +124,10 @@ fi
 # --- still failing: report what broke and how to fix it --------------------
 ui_fail "these packages did not install:"
 
-failed_pkgs="$(grep -Eo 'Installing [^ ]+ has failed' "$LOG" | awk '{print $2}' | sort -u)"
+failed_pkgs="$({
+    grep -Eo 'Installing [^ ]+ has failed' "$LOG" | awk '{print $2}'
+    grep -Eo 'No available (formula|cask)[a-z ]* with the name "[^"]+"' "$LOG" | sed 's/.*"\(.*\)"/\1/'
+} | sort -u)"
 if [ -n "$failed_pkgs" ]; then
     while IFS= read -r pkg; do ui_fail "$pkg"; done <<< "$failed_pkgs"
 fi

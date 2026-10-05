@@ -56,13 +56,14 @@ presets = ["standard", "full"]
 [[package]]
 id = "temporal"
 name = "Temporal"
-# ~153MB and a pre-release tap, so no preset selects it. temporal-cloud is a
+# ~153MB, so no preset selects it. temporal-cloud moved from the
+# temporalio/prerelease tap to temporalio/brew (2026-10). It is a
 # separate binary the base CLI shells out to; completions are patched in
 # run_onchange_after_z-generate-completions.
-description = "Temporal CLI plus the pre-release Cloud extension"
+description = "Temporal CLI plus the Cloud extension"
 category = "cloud"
-tap = ["temporalio/prerelease"]
-brew = ["temporal", "temporalio/prerelease/temporal-cloud"]
+tap = ["temporalio/brew"]
+brew = ["temporal", "temporalio/brew/temporal-cloud"]
 
 # ---- Languages (heavy; no preset selects them) -----------------------------
 
