@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.0 (2026-10-06)
+
+### Features
+
+- **theme**: one theme for Ghostty, Neovim, tmux, and dotfiles output; manage-theme skill ([5bd700d](https://github.com/urmzd/dotfiles/commit/5bd700d29a1f7a9f7f2ebf825bb7519256947620))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.13.2...v0.14.0)
+
+
 ## 0.13.2 (2026-10-06)
 
 ### Bug Fixes
