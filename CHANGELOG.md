@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.13.2 (2026-10-06)
+
+### Bug Fixes
+
+- **cli**: plan states its verdict first; status shows packs and short versions; doctor pluralizes ([b4c2a9e](https://github.com/urmzd/dotfiles/commit/b4c2a9e01638b0c2b5e850f5e6b2138dfd873c5c))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.13.1...v0.13.2)
+
+
 ## 0.13.1 (2026-10-06)
 
 ### Bug Fixes
