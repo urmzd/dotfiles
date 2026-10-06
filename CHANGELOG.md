@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.15.1 (2026-10-06)
+
+### Bug Fixes
+
+- **cli**: migrate configs to skill packs on dotfiles update ([8f648dd](https://github.com/urmzd/dotfiles/commit/8f648dd3d25df6aa763f69a8a72e337f9a9fe83e))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.15.0...v0.15.1)
+
+
 ## 0.15.0 (2026-10-06)
 
 ### Features
