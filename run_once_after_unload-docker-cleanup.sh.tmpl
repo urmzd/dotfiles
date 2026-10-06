@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+{{ includeTemplate "bash-modern.sh" . }}
+# Unload the retired Docker cleanup launchd agent (its plist is deleted through
+# .chezmoiremove). Silent when it is not loaded.
+{{- if .is_macos }}
+set -u
+{{ includeTemplate "ui.sh" . }}
+
+if launchctl list com.docker.cleanup >/dev/null 2>&1; then
+    ui_section "Docker cleanup"
+    ui_run "unloaded the retired docker-cleanup agent" launchctl bootout "gui/$(id -u)/com.docker.cleanup" \
+        || ui_hint "unload by hand: launchctl bootout gui/$(id -u)/com.docker.cleanup"
+fi
+{{- end }}
+exit 0

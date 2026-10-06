@@ -1,3 +1,8 @@
 # Targets that are no longer managed and should be deleted on apply.
 # .gitconfig-personal: replaced by one identity per machine (2026-10).
 .gitconfig-personal
+# Docker cleanup launchd agent: its script (~/.local/bin/docker-cleanup.sh)
+# was never managed, so it failed daily (2026-10). Unloaded by
+# run_once_after_unload-docker-cleanup.
+Library/LaunchAgents/com.docker.cleanup.plist
+Library/Logs/docker-cleanup.log
