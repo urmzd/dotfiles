@@ -122,7 +122,7 @@
 {{-     range $catalog.bundle }}{{ if has $preset (get . "presets" | default list) }}{{ $bundles = append $bundles .id }}{{ end }}{{ end -}}
 {{-   end -}}
 {{-   range $catalog.bundle }}{{ if has .id $bundles }}{{ $packages = concat $packages .packages }}{{ end }}{{ end -}}
-{{-   /* Package-level presets (fonts, notes): custom gets the standard ones. */ -}}
+{{- /* Package-level presets (fonts, notes): custom gets the standard ones. */ -}}
 {{-   $preset_pkgs := ternary "standard" $preset (eq $preset "custom") -}}
 {{-   range $catalog.package -}}
 {{-     if and (has $preset_pkgs (get . "presets" | default list)) (has $machine (get . "machines" | default (list "personal" "work"))) -}}
