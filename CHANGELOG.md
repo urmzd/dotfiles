@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.1 (2026-10-06)
+
+### Bug Fixes
+
+- **catalog**: skip a cask whose app is already installed (1Password and other self-updating apps) ([739f7a8](https://github.com/urmzd/dotfiles/commit/739f7a8a368c30a1f63bcfedcb25f25e9970ce62))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.14.0...v0.14.1)
+
+
 ## 0.14.0 (2026-10-06)
 
 ### Features
