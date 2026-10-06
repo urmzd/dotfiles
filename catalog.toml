@@ -8,7 +8,12 @@
 #
 # Fields (only id, name, description, category are required):
 #   tap, brew, cask   Homebrew entries (macOS). `adopt = true` lets a cask take
-#                     over an app installed by hand.
+#                     over an app installed by hand when the versions match.
+#   apps              cask -> app bundle, e.g. { "1password" = "1Password.app" }.
+#                     When that app is already in /Applications or
+#                     ~/Applications (installed by hand, the App Store, or an
+#                     old cask, and often self-updated past the cask version),
+#                     the cask is skipped and counted as installed.
 #   npm, uv           Node CLIs (npm -g into fnm's default Node) and Python CLIs
 #                     (uv tool install). Same on macOS (via brew bundle) and Linux.
 #   apt, dnf, pacman  Linux package names; run_onchange_after_install-catalog-linux
@@ -197,6 +202,7 @@ name = "Android"
 description = "Android Studio and the SDK command-line tools"
 category = "mobile"
 cask = ["android-studio", "android-commandlinetools"]
+apps = { "android-studio" = "Android Studio.app" }
 presets = ["full"]
 
 [[package]]
@@ -226,6 +232,7 @@ name = "Obsidian"
 description = "Markdown notes app"
 category = "notes"
 cask = ["obsidian"]
+apps = { obsidian = "Obsidian.app" }
 adopt = true
 presets = ["minimal", "standard", "full"]
 machines = ["personal"]
@@ -236,6 +243,7 @@ name = "Notion"
 description = "Docs and wiki workspace app"
 category = "notes"
 cask = ["notion"]
+apps = { notion = "Notion.app" }
 adopt = true
 
 [[package]]
@@ -244,6 +252,7 @@ name = "Granola"
 description = "AI meeting notes from your calls"
 category = "notes"
 cask = ["granola"]
+apps = { granola = "Granola.app" }
 adopt = true
 
 [[package]]
@@ -263,6 +272,7 @@ name = "Cursor"
 description = "AI code editor (VS Code based)"
 category = "editors"
 cask = ["cursor"]
+apps = { cursor = "Cursor.app" }
 adopt = true
 
 [[package]]
@@ -271,6 +281,7 @@ name = "Visual Studio Code"
 description = "Microsoft's code editor"
 category = "editors"
 cask = ["visual-studio-code"]
+apps = { "visual-studio-code" = "Visual Studio Code.app" }
 adopt = true
 
 # ---- Communication ----------------------------------------------------------
@@ -281,6 +292,7 @@ name = "Slack"
 description = "Team chat"
 category = "chat"
 cask = ["slack"]
+apps = { slack = "Slack.app" }
 adopt = true
 
 [[package]]
@@ -300,6 +312,7 @@ name = "Discord"
 description = "Community voice and text chat"
 category = "chat"
 cask = ["discord"]
+apps = { discord = "Discord.app" }
 adopt = true
 
 [[package]]
@@ -308,6 +321,7 @@ name = "Zoom"
 description = "Video meetings"
 category = "chat"
 cask = ["zoom"]
+apps = { zoom = "zoom.us.app" }
 adopt = true
 
 # ---- Productivity -------------------------------------------------------------
@@ -320,6 +334,7 @@ name = "1Password"
 description = "Password manager desktop app"
 category = "productivity"
 cask = ["1password"]
+apps = { "1password" = "1Password.app" }
 adopt = true
 
 [[package]]
@@ -328,6 +343,7 @@ name = "Raycast"
 description = "Launcher and command palette (Spotlight replacement)"
 category = "productivity"
 cask = ["raycast"]
+apps = { raycast = "Raycast.app" }
 adopt = true
 
 [[package]]
@@ -336,6 +352,7 @@ name = "Linear"
 description = "Linear issue tracker desktop app"
 category = "productivity"
 cask = ["linear"]
+apps = { linear = "Linear.app" }
 adopt = true
 
 [[package]]
@@ -344,6 +361,7 @@ name = "Figma"
 description = "Design and prototyping desktop app"
 category = "productivity"
 cask = ["figma"]
+apps = { figma = "Figma.app" }
 adopt = true
 
 # ---- AI apps ------------------------------------------------------------------
@@ -354,6 +372,7 @@ name = "Claude"
 description = "Anthropic's Claude desktop app"
 category = "ai"
 cask = ["claude"]
+apps = { claude = "Claude.app" }
 adopt = true
 
 [[package]]
@@ -362,6 +381,7 @@ name = "ChatGPT"
 description = "OpenAI's ChatGPT desktop app (also hosts Codex computer use)"
 category = "ai"
 cask = ["chatgpt"]
+apps = { chatgpt = "ChatGPT.app" }
 adopt = true
 
 [[package]]
@@ -394,6 +414,7 @@ name = "Spotify"
 description = "Music streaming"
 category = "media"
 cask = ["spotify"]
+apps = { spotify = "Spotify.app" }
 adopt = true
 
 # ---- Work tools -------------------------------------------------------------

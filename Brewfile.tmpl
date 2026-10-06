@@ -72,8 +72,14 @@ tap {{ . | quote }}
 brew {{ . | quote }}
 {{-     end }}
 {{-     $adopt := get . "adopt" }}
+{{-     $apps := get . "apps" | default dict }}
 {{-     range (get . "cask" | default list) }}
+{{-       $app := get $apps . | default "" }}
+{{-       if and $app (or (stat (joinPath "/Applications" $app)) (stat (joinPath $.chezmoi.homeDir "Applications" $app))) }}
+# cask {{ . | quote }}: {{ $app }} is already installed (outside Homebrew); skipped
+{{-       else }}
 cask {{ . | quote }}{{ if $adopt }}, args: { adopt: true }{{ end }}
+{{-       end }}
 {{-     end }}
 {{-     range (get . "npm" | default list) }}
 npm {{ . | quote }}

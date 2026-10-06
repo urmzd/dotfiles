@@ -4,6 +4,7 @@
 //! `required = true` ones install on every machine using that pack.
 
 use std::collections::BTreeSet;
+use std::path::PathBuf as AppPath;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
@@ -54,6 +55,11 @@ pub struct Package {
     pub cask: Vec<String>,
     #[serde(default)]
     pub adopt: bool,
+    /// Cask -> app bundle ("1Password.app"). When the app already exists in
+    /// /Applications or ~/Applications, the cask is skipped and counted as
+    /// installed (it was installed by hand, or has self-updated past the cask).
+    #[serde(default)]
+    pub apps: std::collections::BTreeMap<String, String>,
     /// Linux package names, per package manager.
     #[serde(default)]
     pub apt: Vec<String>,
@@ -99,6 +105,22 @@ pub struct Package {
 }
 
 impl Package {
+    /// The app bundle for `cask`, when it is already on this machine
+    /// (/Applications or ~/Applications).
+    pub fn existing_app(&self, cask: &str) -> Option<AppPath> {
+        let home = std::env::var_os("HOME").map(AppPath::from);
+        let dirs: Vec<AppPath> = std::iter::once(AppPath::from("/Applications"))
+            .chain(home.map(|h| h.join("Applications")))
+            .collect();
+        self.existing_app_in(cask, &dirs)
+    }
+
+    /// `existing_app`, searching `dirs`.
+    pub fn existing_app_in(&self, cask: &str, dirs: &[AppPath]) -> Option<AppPath> {
+        let app = self.apps.get(cask)?;
+        dirs.iter().map(|dir| dir.join(app)).find(|p| p.exists())
+    }
+
     /// What installs on this platform, for display: Homebrew formulae and
     /// casks on macOS, otherwise every Linux package name the entry lists,
     /// plus npm and uv tools on both.

@@ -184,7 +184,11 @@ pub fn presence(p: &Package, inv: &Inventory, exclude: &BTreeSet<String>) -> Pre
             need(inv.formulae.contains(short(&n)) || brew_has("--formula", &n));
         }
         for n in kept(&p.cask) {
-            need(inv.casks.contains(short(&n)) || brew_has("--cask", &n));
+            need(
+                inv.casks.contains(short(&n))
+                    || p.existing_app(&n).is_some()
+                    || brew_has("--cask", &n),
+            );
         }
     } else {
         for n in kept(inv.linux_names(p)) {
@@ -277,7 +281,13 @@ pub fn install_command(p: &Package, inv: &Inventory, exclude: &BTreeSet<String>)
         if !brew.is_empty() {
             steps.push(format!("brew install {}", brew.join(" ")));
         }
-        let cask = kept(&p.cask);
+        // An app already in /Applications would make the cask install fail.
+        let cask: Vec<String> = p
+            .cask
+            .iter()
+            .filter(|n| !exclude.contains(short(n)) && p.existing_app(n).is_none())
+            .map(|n| quote(n))
+            .collect();
         if !cask.is_empty() {
             let adopt = if p.adopt { " --adopt" } else { "" };
             steps.push(format!("brew install --cask{adopt} {}", cask.join(" ")));
@@ -320,7 +330,13 @@ pub fn uninstall_command(p: &Package, inv: &Inventory) -> Option<String> {
         if !brew.is_empty() {
             steps.push(format!("brew uninstall {}", brew.join(" ")));
         }
-        let cask = q(&p.cask);
+        // Only casks Homebrew installed; an app installed by hand is left alone.
+        let cask: Vec<String> = p
+            .cask
+            .iter()
+            .filter(|n| inv.casks.contains(short(n)))
+            .map(|n| quote(n))
+            .collect();
         if !cask.is_empty() {
             steps.push(format!("brew uninstall --cask {}", cask.join(" ")));
         }
@@ -486,6 +502,38 @@ npm = ["mint"]
             m.ids.into_iter().collect::<Vec<_>>(),
             vec!["mint", "notion"]
         );
+    }
+
+    #[test]
+    fn existing_apps_are_found_in_the_app_folders() {
+        let dir = std::env::temp_dir().join(format!("dotfiles-apps-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join("Pass.app")).unwrap();
+        let c = Catalog::parse(
+            "[[package]]\nid = \"pass\"\nname = \"P\"\ndescription = \"d\"\ncategory = \"c\"\ncask = [\"pass\", \"pass-cli\"]\napps = { pass = \"Pass.app\" }\n",
+        )
+        .unwrap();
+        let p = c.get("pass").unwrap();
+        assert!(
+            p.existing_app_in("pass", std::slice::from_ref(&dir))
+                .is_some()
+        );
+        assert!(
+            p.existing_app_in("pass-cli", std::slice::from_ref(&dir))
+                .is_none()
+        );
+        assert!(
+            p.existing_app_in("pass", &[dir.join("elsewhere")])
+                .is_none()
+        );
+        // Uninstall touches only casks Homebrew has; Pass.app is left alone.
+        let i = inv(&[], &["pass-cli"], &[]);
+        if cfg!(target_os = "macos") {
+            assert_eq!(
+                uninstall_command(p, &i).as_deref(),
+                Some("brew uninstall --cask 'pass-cli'")
+            );
+        }
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

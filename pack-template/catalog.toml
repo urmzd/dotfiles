@@ -3,7 +3,8 @@
 # with `required = true` install everywhere without being picked.
 #
 # Fields: id, name, description, category (required strings); install with
-# tap/brew/cask (macOS), apt/dnf/pacman (Linux), npm, uv, or script (an
+# tap/brew/cask (macOS; apps = { cask = "App.app" } skips a cask whose app is
+# already installed), apt/dnf/pacman (Linux), npm, uv, or script (an
 # installer URL, run when `check` fails); setup lists sign-in commands for
 # `dotfiles package setup`; check is a shell test that passes once installed.
 # Ids already taken (dotfiles catalog or an earlier pack) are skipped. A file that fails these checks
