@@ -13,6 +13,10 @@ use anyhow::Result;
 /// that script installed, once (marked by `agents_seeded`).
 const LEGACY_AGENTS: [&str; 5] = ["claude-code", "codex", "copilot", "agy", "opencode"];
 
+/// Skill packs, teasr, and oag became catalog packages in v0.15.0. Configs
+/// from before got all of them unasked; keep that, once (`skills_seeded`).
+const LEGACY_STACK: [&str; 2] = ["teasr", "oag"];
+
 /// Apply pending migrations to `config` in memory; returns what changed.
 /// The caller saves.
 pub fn run(config: &mut Config, catalog: &Catalog) -> Result<Vec<String>> {
@@ -28,6 +32,25 @@ pub fn run(config: &mut Config, catalog: &Catalog) -> Result<Vec<String>> {
         config.set_data_bool("agents_seeded", true)?;
         if !added.is_empty() {
             changes.push(format!("selected AI coding CLIs: {}", added.join(", ")));
+        }
+    }
+    if !config.has_data("skills_seeded") {
+        let mut ids = config.packages();
+        let added: Vec<String> = catalog
+            .packages
+            .iter()
+            .filter(|p| !p.skills.is_empty() || LEGACY_STACK.contains(&p.id.as_str()))
+            .filter(|p| p.pack.is_none() && !ids.contains(&p.id))
+            .map(|p| p.id.clone())
+            .collect();
+        ids.extend(added.iter().cloned());
+        config.set_packages(&ids)?;
+        config.set_data_bool("skills_seeded", true)?;
+        if !added.is_empty() {
+            changes.push(format!(
+                "kept skill packs and stack CLIs: {}",
+                added.join(", ")
+            ));
         }
     }
     Ok(changes)
@@ -47,6 +70,19 @@ mod tests {
         let changes = run(&mut config, &catalog).unwrap();
         assert_eq!(changes, vec!["selected AI coding CLIs: claude-code"]);
         assert_eq!(config.packages(), vec!["claude-code", "codex"]);
+        assert!(run(&mut config, &catalog).unwrap().is_empty());
+    }
+
+    #[test]
+    fn seeds_skill_packs_once() {
+        let catalog = Catalog::parse(
+            "[[package]]\nid = \"oag\"\nname = \"O\"\ndescription = \"d\"\ncategory = \"stack\"\n\n[[package]]\nid = \"skills-x\"\nname = \"S\"\ndescription = \"d\"\ncategory = \"skills\"\nskills = [\"a\"]\n\n[[package]]\nid = \"zig\"\nname = \"Z\"\ndescription = \"d\"\ncategory = \"languages\"\n",
+        )
+        .unwrap();
+        let mut config =
+            Config::parse("[data]\n    agents_seeded = true\n    packages = []\n").unwrap();
+        run(&mut config, &catalog).unwrap();
+        assert_eq!(config.packages(), vec!["oag", "skills-x"]);
         assert!(run(&mut config, &catalog).unwrap().is_empty());
     }
 }
