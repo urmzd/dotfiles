@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.15.0 (2026-10-06)
+
+### Features
+
+- **catalog**: bundles, presets, and opt-in skill packs ([a4e1f30](https://github.com/urmzd/dotfiles/commit/a4e1f3015012024e56fdf7aeb1df382d32af8eb7))
+
+### Bug Fixes
+
+- **chezmoi**: template comment broke the config render ([6062473](https://github.com/urmzd/dotfiles/commit/60624739820bd0e3fcfe926640748dbac00efe1a))
+- **catalog**: keep the mobile bundle out of every preset ([a3c5176](https://github.com/urmzd/dotfiles/commit/a3c51766efe5c36b2cdfb18ee75256f650021ff4))
+- **macos**: retire the docker-cleanup launchd agent ([e609e88](https://github.com/urmzd/dotfiles/commit/e609e885c2acb9e64eda103e8e7255c30deddfc7))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.14.1...v0.15.0)
+
+
 ## 0.14.1 (2026-10-06)
 
 ### Bug Fixes
