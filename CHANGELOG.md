@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.1 (2026-10-06)
+
+### Bug Fixes
+
+- **brew**: skip pack casks whose app is installed, never retry app conflicts ([9418007](https://github.com/urmzd/dotfiles/commit/94180079174a40042ca304657d2815a78a35f580))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.16.0...v0.16.1)
+
+
 ## 0.16.0 (2026-10-06)
 
 ### Features
