@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.0 (2026-10-06)
+
+### Features
+
+- **tmux**: pass OSC 8 hyperlinks through so links are clickable ([44f3860](https://github.com/urmzd/dotfiles/commit/44f3860185d89b46002119887296cc3ce7376d41))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.15.1...v0.16.0)
+
+
 ## 0.15.1 (2026-10-06)
 
 ### Bug Fixes
