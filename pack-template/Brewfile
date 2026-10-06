@@ -1,5 +1,7 @@
 # Company tools, appended to the dotfiles Brewfile on macOS. Same syntax as any
 # Brewfile; failures are reported but never stop the rest of the apply.
+# A cask whose app is already in /Applications is skipped. GUI apps people
+# pick per machine belong in catalog.toml (with `apps`) instead.
 
 # cask "example-vpn"
 # tap "example-org/tools"

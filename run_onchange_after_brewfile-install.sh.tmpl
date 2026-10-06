@@ -39,38 +39,74 @@ LOG="$(mktemp -t brew-bundle.XXXXXX.log)"
 RUN_BREWFILE="$BREWFILE"
 TMP_BREWFILE=''
 WORK_MERGED=''
-cleanup() { rm -f "$LOG" "$TMP_BREWFILE" "$WORK_MERGED"; }
+RETRY_BREWFILE=''
+cleanup() { rm -f "$LOG" "$TMP_BREWFILE" "$WORK_MERGED" "$RETRY_BREWFILE"; }
 trap cleanup EXIT
+
+# drop_entries <names> <file>: print <file> without the brew/cask/tap lines
+# whose quoted target is in the space- or comma-separated <names>.
+drop_entries() {
+    awk -v list="$1" '
+        BEGIN { n = split(list, a, /[ ,]+/); for (i = 1; i <= n; i++) if (a[i] != "") skip[a[i]] = 1 }
+        {
+            name = ""
+            if (match($0, /"[^"]+"/)) name = substr($0, RSTART + 1, RLENGTH - 2)
+            base = name
+            sub(/^.*\//, "", base)  # tap-qualified entries (hashicorp/tap/terraform) match by basename too
+            if (name != "" && ((name in skip) || (base in skip))) next
+            print
+        }
+    ' "$2"
+}
+
+# installed_app_casks <file>...: print "<cask> <App.app>" for each cask whose
+# app is already in /Applications or ~/Applications. Catalog entries get this
+# from their `apps` map in Brewfile.tmpl; pack Brewfiles have none, so ask
+# Homebrew which app each cask installs.
+installed_app_casks() {
+    awk '/^[[:space:]]*cask[[:space:]]/ { if (match($0, /"[^"]+"/)) print substr($0, RSTART + 1, RLENGTH - 2) }' "$@" |
+        sort -u | while IFS= read -r cask; do
+            HOMEBREW_NO_AUTO_UPDATE=1 brew info --cask "$cask" 2>/dev/null |
+                awk '/^==> Artifacts/ { on = 1; next } /^==> / { on = 0 } on && / \(App\)$/ {
+                    sub(/ \(App\)$/, ""); sub(/^.* -> /, ""); sub(/^.*\//, ""); print }' |
+                while IFS= read -r app; do
+                    if [ -e "/Applications/$app" ] || [ -e "$HOME/Applications/$app" ]; then
+                        printf '%s %s\n' "$cask" "$app"
+                        break
+                    fi
+                done
+        done
+}
 
 # --- pack Brewfiles ---------------------------------------------------------
 # Appended, in pack order, to the personal Brewfile so excludes, tap trust,
 # and the failure report below cover pack packages too.
+PKG_EXCLUDE="{{ .pkg_exclude }}"
+EXCLUDE="$PKG_EXCLUDE"
 PACK_BREWFILES=({{ range $pack_brewfiles }}{{ . | quote }} {{ end }})
 if [ "${#PACK_BREWFILES[@]}" -gt 0 ]; then
     WORK_MERGED="$(mktemp -t Brewfile-packs.XXXXXX)"
     cat "$BREWFILE" ${PACK_BREWFILES[@]+"${PACK_BREWFILES[@]}"} > "$WORK_MERGED"
     RUN_BREWFILE="$WORK_MERGED"
     ui_ok "including ${#PACK_BREWFILES[@]} pack Brewfile(s)"
+
+    # A cask whose app is already on disk (installed by hand, the App Store, or
+    # self-updated past the cask version) fails to install, and adopt fails on
+    # any version mismatch, so skip it like Brewfile.tmpl does.
+    while read -r cask app; do
+        [ -n "$cask" ] || continue
+        EXCLUDE="${EXCLUDE},${cask}"
+        ui_skip "${cask}: ${app} is already installed (outside Homebrew)"
+    done <<< "$(installed_app_casks ${PACK_BREWFILES[@]+"${PACK_BREWFILES[@]}"})"
 fi
 
 # --- optional exclude filter ("select all, deselect some") -----------------
 # Drop any brew/cask/tap line whose quoted target matches an excluded name.
-EXCLUDE="{{ .pkg_exclude }}"
-if [ -n "${EXCLUDE//[[:space:]]/}" ]; then
+if [ -n "${EXCLUDE//[[:space:],]/}" ]; then
     TMP_BREWFILE="$(mktemp -t Brewfile.XXXXXX)"
-    awk -v list="$EXCLUDE" '
-        BEGIN { n = split(list, a, /[ ,]+/); for (i = 1; i <= n; i++) if (a[i] != "") skip[a[i]] = 1 }
-        {
-            name = ""
-            if (match($0, /"[^"]+"/)) name = substr($0, RSTART + 1, RLENGTH - 2)
-            base = name
-            sub(/^.*\//, "", base)  # tap-qualified entries (hashicorp/tap/terraform) exclude by basename too
-            if (name != "" && ((name in skip) || (base in skip))) next
-            print
-        }
-    ' "$RUN_BREWFILE" > "$TMP_BREWFILE"
+    drop_entries "$EXCLUDE" "$RUN_BREWFILE" > "$TMP_BREWFILE"
     RUN_BREWFILE="$TMP_BREWFILE"
-    ui_ok "excluding: ${EXCLUDE}"
+    [ -n "${PKG_EXCLUDE//[[:space:]]/}" ] && ui_ok "excluding: ${PKG_EXCLUDE}"
 fi
 
 # --- trust declared taps ----------------------------------------------------
@@ -136,13 +172,41 @@ if run_bundle; then
     exit 0
 fi
 
+# A cask that failed against an app already on disk (no adopt, or adopt with a
+# version mismatch) fails the same way every time, and each attempt can prompt
+# for sudo while Homebrew rolls it back. Leave those out of the retry.
+conflicts="$(awk '
+    { gsub(/\033\[[0-9;]*m/, "") }
+    /^(Installing|Upgrading) [^ ]+$/ { pkg = $2 }
+    /^==> Installing Cask [^ ]+$/ { pkg = $4 }
+    /It seems there is already an App at|is different from the one being installed/ { if (pkg != "") print pkg }
+' "$LOG" | sort -u | tr '\n' ' ')"
+report_conflicts() {
+    [ -n "${conflicts// /}" ] || return 0
+    ui_fail "an app is already installed outside Homebrew; skipped: ${conflicts% }"
+    ui_hint "keep the existing app: list the cask in pkg_exclude, or add apps = { <cask> = \"<App>.app\" } to its catalog entry"
+    ui_hint "or let Homebrew manage it: quit and delete the app, then rerun chezmoi apply"
+}
+
 ui_warn "some packages failed; refreshing Homebrew and retrying the rest"
+if [ -n "${conflicts// /}" ]; then
+    RETRY_BREWFILE="$(mktemp -t Brewfile-retry.XXXXXX)"
+    drop_entries "$conflicts" "$RUN_BREWFILE" > "$RETRY_BREWFILE"
+    RUN_BREWFILE="$RETRY_BREWFILE"
+fi
 brew update >/dev/null 2>&1 || true
 : > "$LOG"  # keep only the retry output for diagnosis
 if run_bundle; then
-    ui_ok "all Brewfile packages installed after retry"
+    if [ -n "${conflicts// /}" ]; then
+        ui_ok "the other Brewfile packages installed after retry"
+        report_conflicts
+        ui_warn "continuing so the rest of your dotfiles still apply"
+    else
+        ui_ok "all Brewfile packages installed after retry"
+    fi
     exit 0
 fi
+report_conflicts
 
 # --- still failing: report what broke and how to fix it --------------------
 ui_fail "these packages did not install:"

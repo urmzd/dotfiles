@@ -47,6 +47,6 @@ A clone that fails (for example a private repo before the machine's SSH key is o
 | `AGENTS.md` | appended to Claude Code, Codex, and OpenCode global instructions | concatenated, one block per pack |
 | `theme.toml` | the color theme for Ghostty, Neovim, tmux, and dotfiles output ([format](../themes/README.md)) | the last pack with a theme applies when the machine sets none; any pack theme can be picked by name |
 
-Every file is optional; delete the ones a pack does not need. Each is a no-op until it has content. In `catalog.toml`, `required = true` installs a package for everyone on that pack; without it, people opt in with `dotfiles package add <id>`.
+Every file is optional; delete the ones a pack does not need. Each is a no-op until it has content. In `catalog.toml`, `required = true` installs a package for everyone on that pack; without it, people opt in with `dotfiles package add <id>`. Every entry needs a `category` (free text that groups the picker; reuse `productivity`, `chat`, `editors`, `notes`, `ai`, or `media` for apps). For a GUI app, map each cask to its app bundle with `apps = { "<cask>" = "<App>.app" }`: an app already in `/Applications` is then skipped instead of failing the install. Casks in the pack `Brewfile` get the same check from Homebrew's metadata.
 
 Keep secrets out: no tokens or keys in any of these files. Personal signing keys belong in each person's local `chezmoi.toml`, never here.

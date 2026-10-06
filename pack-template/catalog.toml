@@ -3,10 +3,16 @@
 # with `required = true` install everywhere without being picked.
 #
 # Fields: id, name, description, category (required strings); install with
-# tap/brew/cask (macOS; apps = { cask = "App.app" } skips a cask whose app is
-# already installed), apt/dnf/pacman (Linux), npm, uv, or script (an
+# tap/brew/cask (macOS), apt/dnf/pacman (Linux), npm, uv, or script (an
 # installer URL, run when `check` fails); setup lists sign-in commands for
 # `dotfiles package setup`; check is a shell test that passes once installed.
+#
+# GUI apps: give every cask an `apps` entry (cask -> app bundle in
+# /Applications). When that app is already installed (by hand, the App Store,
+# or self-updated past the cask version) the cask is skipped and counted as
+# installed instead of failing. Reuse a dotfiles category where one fits
+# (productivity, chat, editors, notes, ai, media); category is free text and
+# groups the `dotfiles package` picker.
 # Ids already taken (dotfiles catalog or an earlier pack) are skipped. A file that fails these checks
 # is ignored (with a warning) and never breaks an apply.
 
@@ -16,6 +22,7 @@
 # description = "Required for internal hosts"
 # category = "work"
 # cask = ["example-vpn"]
+# apps = { "example-vpn" = "Example VPN.app" }
 # required = true
 
 # [[package]]
@@ -26,3 +33,11 @@
 # script = "https://tools.example.com/internal-cli/install.sh"
 # check = "command -v internal-cli"
 # setup = ["internal-cli login"]
+
+# [[package]]
+# id = "company-chat"
+# name = "Example Chat"
+# description = "Company chat desktop app"
+# category = "chat"
+# cask = ["example-chat"]
+# apps = { "example-chat" = "Example Chat.app" }
