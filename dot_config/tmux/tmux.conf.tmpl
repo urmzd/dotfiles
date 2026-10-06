@@ -41,6 +41,10 @@ set-option -ga terminal-overrides ",xterm-256color:Tc"
 set-option -ga terminal-overrides ",*256col*:Tc"
 {{- end }}
 
+# Pass OSC 8 hyperlinks (ls --hyperlink, gh, cargo, delta) through to the
+# outer terminal so they are clickable (cmd+click in Ghostty). tmux 3.4+.
+set -as terminal-features ",*:hyperlinks"
+
 # Vim-style pane selection
 bind h select-pane -L
 bind j select-pane -D
