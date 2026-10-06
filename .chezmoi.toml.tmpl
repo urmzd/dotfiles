@@ -112,7 +112,7 @@
 {{-   end -}}
 {{-   if not $is_work }}{{ $packages = append $packages "obsidian" }}{{ end -}}
 {{- else -}}
-{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles package` (minimal: core CLI, editor, core agent skills; standard: + cloud, fonts, developer skills; full: + mobile, framework skills; custom: pick bundles)" (list "minimal" "standard" "full" "custom") "standard" -}}
+{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles package` (minimal: core CLI, editor, core agent skills; standard: + cloud, fonts, developer skills; full: + framework skills; custom: pick bundles)" (list "minimal" "standard" "full" "custom") "standard" -}}
 {{-   $bundles := list -}}
 {{-   if eq $preset "custom" -}}
 {{-     $names := list -}}

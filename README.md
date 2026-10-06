@@ -131,7 +131,7 @@ dotfiles clean                   # Prune build artifacts and caches under ~/gith
 | `cloud` | docker, kubernetes, terraform, runpod | standard, full |
 | `dev-skills` | skills-scaffold, skills-review, skills-agent-dev | standard, full |
 | `framework-skills` | skills-vercel, skills-gemini, skills-fastapi, skills-better-auth, skills-gh-stack | full |
-| `mobile` | android, cocoapods | full |
+| `mobile` | android, cocoapods | none |
 | `languages` | zig, scala, mise | none |
 | `ecosystem` | teasr, oag, skills-ecosystem | none |
 
@@ -139,7 +139,7 @@ dotfiles clean                   # Prune build artifacts and caches under ~/gith
 
 Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles package`: first a bundle list (space to toggle a whole bundle), then the search-as-you-type package list to refine. `dotfiles package add cloud` takes bundle ids too. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles package setup`, never during apply.
 
-On first init, `package_preset` seeds the selection: `minimal` = always-installed only (plus Obsidian), `standard` = + `cloud`, `dev-skills`, Nerd Fonts, `full` = + `mobile`, `framework-skills`, and `custom` opens the bundle multi-select. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. Machines set up before skill packs existed keep every skill pack plus teasr and oag, once, unasked (`skills_seeded`). `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml` (and to a `[[bundle]]` if it belongs to one); no CLI release is needed.
+On first init, `package_preset` seeds the selection: `minimal` = always-installed only (plus Obsidian), `standard` = + `cloud`, `dev-skills`, Nerd Fonts, `full` = + `framework-skills`, and `custom` opens the bundle multi-select. Heavy toolchains (`mobile`, Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. Machines set up before skill packs existed keep every skill pack plus teasr and oag, once, unasked (`skills_seeded`). `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml` (and to a `[[bundle]]` if it belongs to one); no CLI release is needed.
 
 The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 

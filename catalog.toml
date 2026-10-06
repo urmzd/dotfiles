@@ -566,9 +566,8 @@ presets = ["full"]
 [[bundle]]
 id = "mobile"
 name = "Mobile"
-description = "Android SDK tools and CocoaPods"
+description = "Android SDK tools and CocoaPods (large; no preset selects it)"
 packages = ["android", "cocoapods"]
-presets = ["full"]
 
 [[bundle]]
 id = "languages"
