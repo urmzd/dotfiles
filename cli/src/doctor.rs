@@ -120,7 +120,8 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
             ui::ok("everything looks healthy");
         } else {
             ui::hint(&format!(
-                "{fails} failing, {warns} warning; full chezmoi report: chezmoi doctor"
+                "{fails} failing, {}; full chezmoi report: chezmoi doctor",
+                ui::count(warns, "warning")
             ));
         }
     }

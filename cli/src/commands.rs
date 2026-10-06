@@ -734,8 +734,10 @@ pub fn plan(ctx: &Ctx, prune: bool) -> Result<Outcome> {
         pending.show(&catalog, prune);
         ui::hint("apply: dotfiles apply");
     } else {
+        // Verdict first, then the informational extras.
+        ui::section("Plan");
+        ui::ok("up to date: files applied, every selected package installed");
         pending.show(&catalog, prune);
-        ui::ok("up to date: every selected package is installed");
     }
     Ok(if pending.has_work(prune) {
         Outcome::Done
@@ -750,8 +752,9 @@ pub fn apply(ctx: &Ctx, yes: bool, prune: bool) -> Result<Outcome> {
     let (paths, catalog, mut config) = load()?;
     let pending = Pending::compute(&paths, &catalog, &mut config)?;
     if !pending.has_work(prune) {
-        pending.show(&catalog, prune);
+        ui::section("Apply");
         ui::ok("already up to date");
+        pending.show(&catalog, prune);
         // Still record ownership, so a later deselect can be pruned.
         if !ctx.dry_run {
             let mut managed = Managed::load(&paths.home);
@@ -907,22 +910,37 @@ pub fn update(ctx: &Ctx, target: UpdateTarget) -> Result<Outcome> {
 fn version_of(bin: &str) -> Option<String> {
     let out = Command::new(bin).arg("--version").output().ok()?;
     out.status.success().then(|| {
-        String::from_utf8_lossy(&out.stdout)
-            .lines()
-            .next()
-            .unwrap_or("")
-            .trim()
-            .to_string()
+        short_version(
+            String::from_utf8_lossy(&out.stdout)
+                .lines()
+                .next()
+                .unwrap_or(""),
+        )
     })
 }
 
+/// The version number from a `--version` line, with the tool's own
+/// decoration (product name, commit, build date) kept only when there is no
+/// recognizable number: `chezmoi version v2.70.5, commit ...` -> `v2.70.5`.
+fn short_version(line: &str) -> String {
+    line.split(|c: char| c.is_whitespace() || c == ',')
+        .find(|w| {
+            let w = w.trim_start_matches('v');
+            w.contains('.') && w.chars().next().is_some_and(|c| c.is_ascii_digit())
+        })
+        .map(|w| w.trim_end_matches('.').to_string())
+        .unwrap_or_else(|| line.trim().to_string())
+}
+
 pub fn status(ctx: &Ctx) -> Result<Outcome> {
-    let (_, catalog, config) = load()?;
+    let (paths, catalog, config) = load()?;
     let selected = config.packages();
+    let packs = config.pack_specs(&paths.home);
+    let effective = catalog.effective(&selected);
     let pending: Vec<&str> = catalog
         .packages
         .iter()
-        .filter(|p| selected.contains(&p.id) && !p.setup.is_empty())
+        .filter(|p| effective.contains(&p.id) && !p.setup.is_empty())
         .filter(|p| !p.check.as_deref().is_some_and(passes))
         .map(|p| p.id.as_str())
         .collect();
@@ -940,6 +958,7 @@ pub fn status(ctx: &Ctx) -> Result<Outcome> {
             "version": env!("CARGO_PKG_VERSION"),
             "machine": config.machine(),
             "packages": selected,
+            "packs": packs,
             "setup_pending": pending,
             "tools": tools,
         });
@@ -958,6 +977,14 @@ pub fn status(ctx: &Ctx) -> Result<Outcome> {
             "none".into()
         } else {
             selected.join(", ")
+        }
+    ));
+    ui::ok(&format!(
+        "packs: {}",
+        if packs.is_empty() {
+            "none".into()
+        } else {
+            packs.join(", ")
         }
     ));
     if !pending.is_empty() {
@@ -1065,5 +1092,21 @@ pub fn self_update() -> Result<Outcome> {
             ui::ok(&format!("updated: {from} → {to}"));
             Ok(Outcome::Done)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn short_versions() {
+        use super::short_version;
+        assert_eq!(
+            short_version("chezmoi version v2.70.5, commit b81bd8d, built at 2026-06-03T21:59:37Z"),
+            "v2.70.5"
+        );
+        assert_eq!(short_version("2.1.289 (Claude Code)"), "2.1.289");
+        assert_eq!(short_version("GitHub Copilot CLI 1.0.91."), "1.0.91");
+        assert_eq!(short_version("codex-cli 0.160.1"), "0.160.1");
+        assert_eq!(short_version("nightly"), "nightly");
     }
 }
