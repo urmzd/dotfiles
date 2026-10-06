@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.13.1 (2026-10-06)
+
+### Bug Fixes
+
+- **cli**: clearer pack output ([84f52f6](https://github.com/urmzd/dotfiles/commit/84f52f61109c6e27231000bdd4db705bbce2407e))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.13.0...v0.13.1)
+
+
 ## 0.13.0 (2026-10-06)
 
 ### Features
