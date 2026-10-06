@@ -255,19 +255,32 @@ fn check_packs(r: &mut Report, packs: &[Pack], catalog: Option<&Catalog>) {
             Some(c) if !c.skipped.is_empty() => r.warn(
                 "pack",
                 format!(
-                    "{name}: {} packages; ids already taken (skipped): {}",
-                    c.count,
-                    c.skipped.join(", ")
+                    "{name}: {}; skipped ids already taken: {}",
+                    ui::count(c.added.len(), "package"),
+                    taken(&c.skipped)
                 ),
                 "rename them in the pack, or drop the duplicate pack",
             ),
             Some(c) => r.ok(
                 "pack",
-                format!("{name}: {} packages ({})", c.count, pack.spec),
+                format!(
+                    "{name}: {} ({})",
+                    ui::count(c.added.len(), "package"),
+                    pack.spec
+                ),
             ),
             None => r.ok("pack", format!("{name}: {}", pack.spec)),
         }
     }
+}
+
+/// `eng-cli (taken by engineer), notion (taken by the dotfiles catalog)`.
+pub fn taken(skipped: &[(String, String)]) -> String {
+    skipped
+        .iter()
+        .map(|(id, owner)| format!("{id} (taken by {owner})"))
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 fn check_cli_version(r: &mut Report) {

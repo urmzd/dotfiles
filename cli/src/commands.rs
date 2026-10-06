@@ -422,16 +422,25 @@ fn tag(p: &Package) -> String {
 pub fn pack_list(ctx: &Ctx) -> Result<Outcome> {
     let (paths, catalog, config) = load()?;
     let packs = config.packs(&paths.home);
+    let status = |spec: &str| catalog.packs.iter().find(|c| c.spec == spec);
     if ctx.format == Format::Json {
         let data: Vec<_> = packs
             .iter()
             .map(|p| {
-                let cat = catalog.packs.iter().find(|c| c.spec == p.spec);
+                let c = status(&p.spec);
+                let skipped: Vec<_> = c
+                    .map(|c| {
+                        c.skipped
+                            .iter()
+                            .map(|(id, owner)| json!({"id": id, "taken_by": owner}))
+                            .collect()
+                    })
+                    .unwrap_or_default();
                 json!({
                     "spec": p.spec, "dir": p.dir, "url": p.url, "present": p.dir.is_dir(),
-                    "packages": cat.map_or(0, |c| c.count),
-                    "skipped": cat.map(|c| c.skipped.clone()).unwrap_or_default(),
-                    "error": cat.and_then(|c| c.error.clone()),
+                    "adds": c.map(|c| c.added.clone()).unwrap_or_default(),
+                    "skipped": skipped,
+                    "error": c.and_then(|c| c.error.clone()),
                 })
             })
             .collect();
@@ -444,24 +453,41 @@ pub fn pack_list(ctx: &Ctx) -> Result<Outcome> {
         return Ok(Outcome::NoChange);
     }
     for (i, p) in packs.iter().enumerate() {
-        let cat = catalog.packs.iter().find(|c| c.spec == p.spec);
-        let detail = match cat {
-            Some(c) if c.error.is_some() => {
-                format!("catalog ignored: {}", c.error.as_deref().unwrap_or(""))
-            }
-            Some(c) if !c.skipped.is_empty() => format!(
-                "{} packages; skipped taken ids: {}",
-                c.count,
-                c.skipped.join(", ")
-            ),
-            Some(c) => format!("{} packages", c.count),
-            None => "no catalog".into(),
+        let head = format!("{}. {}", i + 1, p.spec);
+        if !p.dir.is_dir() {
+            ui::warn(&format!("{head}  not fetched yet"));
+            ui::hint(if p.url.is_some() {
+                "dotfiles apply clones it (repo access: dotfiles identity)"
+            } else {
+                "create the folder, or: dotfiles pack remove <spec>"
+            });
+            continue;
+        }
+        let Some(c) = status(&p.spec) else {
+            ui::ok(&format!("{head}  {}", ui::dim("no catalog")));
+            continue;
         };
-        let line = format!("{}. {}  {}", i + 1, p.spec, ui::dim(&detail));
-        if p.dir.is_dir() {
-            ui::ok(&line);
+        if let Some(error) = &c.error {
+            ui::warn(&format!("{head}  catalog ignored"));
+            ui::hint(&format!("{error}; fix {}", c.path.display()));
+            continue;
+        }
+        let adds: Vec<String> = c
+            .added
+            .iter()
+            .map(|id| match catalog.get(id) {
+                Some(pkg) if pkg.required => format!("{id} (required)"),
+                _ => id.clone(),
+            })
+            .collect();
+        let detail = if adds.is_empty() {
+            "adds no packages".to_string()
         } else {
-            ui::warn(&format!("{line}  (not fetched yet: dotfiles apply)"));
+            format!("adds {}", adds.join(", "))
+        };
+        ui::ok(&format!("{head}  {}", ui::dim(&detail)));
+        if !c.skipped.is_empty() {
+            ui::hint(&format!("skipped: {}", crate::doctor::taken(&c.skipped)));
         }
     }
     Ok(Outcome::Done)
@@ -633,13 +659,21 @@ impl Pending {
         }
         if !self.files.is_empty() {
             ui::section(&format!(
-                "Files ({} to update; details: dotfiles diff)",
-                self.files.len()
+                "Files ({} to update)",
+                ui::count(self.files.len(), "file")
             ));
-            for f in &self.files {
+            // A fresh machine changes every file; the full list is `dotfiles diff`.
+            const SHOWN: usize = 10;
+            for f in self.files.iter().take(SHOWN) {
                 // `chezmoi status` lines are "<2 status columns> <path>".
                 let path = f.get(3..).unwrap_or(f).trim();
                 ui::change('~', &format!("~/{path}"));
+            }
+            if self.files.len() > SHOWN {
+                ui::skip(&format!(
+                    "and {} more (dotfiles diff)",
+                    self.files.len() - SHOWN
+                ));
             }
         }
         let plan = &self.plan;

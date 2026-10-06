@@ -25,10 +25,11 @@ pub struct Catalog {
 pub struct PackCatalog {
     pub spec: String,
     pub path: PathBuf,
-    /// Entries added to the catalog.
-    pub count: usize,
-    /// Ids already taken by the dotfiles catalog or an earlier pack.
-    pub skipped: Vec<String>,
+    /// Ids this pack added to the catalog.
+    pub added: Vec<String>,
+    /// Ids already taken, with who has them ("the dotfiles catalog" or the
+    /// earlier pack's name).
+    pub skipped: Vec<(String, String)>,
     /// Present but unusable; all its entries are ignored (the templates never
     /// see it either: they read only validated copies).
     pub error: Option<String>,
@@ -182,20 +183,24 @@ impl Catalog {
                         let _ = std::fs::create_dir_all(&copies);
                         let _ = std::fs::write(&copy, &text);
                     }
-                    let (mut count, mut skipped) = (0, Vec::new());
+                    let (mut added, mut skipped) = (Vec::new(), Vec::new());
                     for mut p in pack_catalog.packages {
-                        if catalog.get(&p.id).is_some() {
-                            skipped.push(p.id);
+                        if let Some(taken) = catalog.get(&p.id) {
+                            let owner = taken
+                                .pack
+                                .clone()
+                                .unwrap_or_else(|| "the dotfiles catalog".into());
+                            skipped.push((p.id, owner));
                             continue;
                         }
                         p.pack = Some(pack.name());
+                        added.push(p.id.clone());
                         catalog.packages.push(p);
-                        count += 1;
                     }
                     PackCatalog {
                         spec: pack.spec.clone(),
                         path,
-                        count,
+                        added,
                         skipped,
                         error: None,
                     }
@@ -203,7 +208,7 @@ impl Catalog {
                 Err(err) => PackCatalog {
                     spec: pack.spec.clone(),
                     path,
-                    count: 0,
+                    added: Vec::new(),
                     skipped: Vec::new(),
                     error: Some(one_line(&format!("{err:#}"))),
                 },
@@ -349,10 +354,14 @@ adopt = true
         let packs = vec![Pack::parse("~/eng", &home), Pack::parse("~/backend", &home)];
 
         let c = Catalog::load(&src, &packs, &home).unwrap();
-        assert_eq!(c.packs[0].count, 1);
+        assert_eq!(c.packs[0].added, vec!["vpn"]);
+        assert_eq!(c.packs[1].added, vec!["pg"]);
         assert_eq!(
-            (c.packs[1].count, c.packs[1].skipped.clone()),
-            (1, vec!["vpn".into(), "notion".into()])
+            c.packs[1].skipped,
+            vec![
+                ("vpn".to_string(), "eng".to_string()),
+                ("notion".to_string(), "the dotfiles catalog".to_string())
+            ]
         );
         assert_eq!(c.get("vpn").unwrap().pack.as_deref(), Some("eng"));
         assert_eq!(

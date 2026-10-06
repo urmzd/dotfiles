@@ -64,6 +64,15 @@ pub fn hint(msg: &str) {
     eprintln!("    {}", paint("2", msg));
 }
 
+/// `1 package`, `3 packages`.
+pub fn count(n: usize, noun: &str) -> String {
+    if n == 1 {
+        format!("1 {noun}")
+    } else {
+        format!("{n} {noun}s")
+    }
+}
+
 /// Dimmed text for inline detail, e.g. picker descriptions.
 pub fn dim(text: &str) -> String {
     paint("2", text)
