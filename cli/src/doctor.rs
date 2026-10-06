@@ -86,6 +86,9 @@ pub fn run(ctx: &Ctx) -> Result<Outcome> {
         .unwrap_or_default();
     let catalog = Catalog::load(&paths.source, &packs, &paths.home).ok();
     check_packs(&mut r, &packs, catalog.as_ref());
+    if let Some(config) = &config {
+        check_theme(&mut r, &paths, config, &packs);
+    }
     check_catalog(&mut r, catalog.as_ref(), config.as_ref());
     check_cli_version(&mut r);
     check_pending(&mut r);
@@ -224,6 +227,31 @@ fn check_catalog(r: &mut Report, catalog: Option<&Catalog>, config: Option<&Conf
             format!("selected but not in the catalog: {}", unknown.join(", ")),
             fix,
         );
+    }
+}
+
+/// The theme in effect, an unknown `theme` setting, and broken pack themes.
+fn check_theme(r: &mut Report, paths: &Paths, config: &Config, packs: &[Pack]) {
+    let (themes, errors) = crate::theme::discover(&paths.source, packs, &paths.home);
+    for (spec, error) in errors {
+        r.fail(
+            "theme",
+            format!("{spec}: theme.toml ignored: {error}"),
+            "fix the pack's theme.toml, then: dotfiles doctor",
+        );
+    }
+    let setting = config.data_str("theme");
+    match crate::theme::resolve(setting.as_deref(), &themes) {
+        (_, _, false) => r.warn(
+            "theme",
+            format!(
+                "`{}` is not a known theme; using the default",
+                setting.unwrap_or_default()
+            ),
+            "dotfiles theme (lists them), then: dotfiles theme set <name>",
+        ),
+        (Some(t), why, true) => r.ok("theme", format!("{} ({why})", t.name)),
+        (None, _, true) => {}
     }
 }
 

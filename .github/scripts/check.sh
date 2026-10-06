@@ -68,3 +68,16 @@ chezmoi --config "$work/work.toml" --source "$src" --destination "$work/home-pac
 tar -xOf "$work/packs.tar" ./.gitconfig 2>/dev/null | grep -q 'packs/dev-setup/backend-engineer/gitconfig' ||
     tar -xOf "$work/packs.tar" .gitconfig | grep -q 'packs/dev-setup/backend-engineer/gitconfig'
 echo "  ✓ rendered with 3 packs"
+
+# Themes: render every built-in theme, so a theme file that breaks a template
+# (Ghostty, tmux, Neovim, ui.sh) fails here instead of on a machine.
+echo "==> themes"
+for theme_file in "$src"/themes/*.toml; do
+    theme="$(basename "$theme_file" .toml)"
+    chezmoi --config "$work/personal.toml" --source "$src" --destination "$work/home-theme" \
+        --persistent-state "$work/personal.boltdb" --no-tty --override-data "{\"theme\":\"$theme\"}" \
+        archive --format tar --output "$work/theme.tar"
+    tar -xOf "$work/theme.tar" .config/dotfiles/theme.toml 2>/dev/null | grep -q "name = \"$theme\"" ||
+        tar -xOf "$work/theme.tar" ./.config/dotfiles/theme.toml | grep -q "name = \"$theme\""
+    echo "  ✓ $theme renders"
+done

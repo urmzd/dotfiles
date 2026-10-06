@@ -5,6 +5,7 @@ mod doctor;
 mod identity;
 mod migrate;
 mod state;
+mod theme;
 mod ui;
 
 use std::process::ExitCode;
@@ -48,6 +49,11 @@ enum Command {
     Pack {
         #[command(subcommand)]
         action: Option<PackCmd>,
+    },
+    /// Color theme for Ghostty, Neovim, tmux, and dotfiles output: list, set
+    Theme {
+        #[command(subcommand)]
+        action: Option<ThemeCmd>,
     },
     /// GitHub identity: gh sign-in, SSH and GPG keys, signed test commit
     Identity {
@@ -167,6 +173,14 @@ struct SetupArgs {
 }
 
 #[derive(Subcommand)]
+enum ThemeCmd {
+    /// Available themes (built-in and from packs), marking the one in effect (default)
+    List,
+    /// Switch theme and apply; `auto` follows the last pack theme, else cyberdream
+    Set { name: String },
+}
+
+#[derive(Subcommand)]
 enum PackCmd {
     /// The packs, in order, with what each contributes (default)
     List,
@@ -223,6 +237,10 @@ fn main() -> ExitCode {
             None | Some(PackCmd::List) => commands::pack_list(&ctx),
             Some(PackCmd::Add { specs }) => commands::pack_add(&ctx, specs),
             Some(PackCmd::Remove { specs }) => commands::pack_remove(&ctx, specs),
+        },
+        Command::Theme { action } => match action {
+            None | Some(ThemeCmd::List) => theme::list(&ctx),
+            Some(ThemeCmd::Set { name }) => theme::set(&ctx, &name),
         },
         Command::Identity { account } => identity::run(&ctx, account),
         Command::Apply { yes, prune } => commands::apply(&ctx, yes, prune),

@@ -1,0 +1,16 @@
+{
+  "skill": "manage-theme",
+  "description": "Routing evals: does the query ask to switch, create, or debug the dotfiles machine theme (Ghostty, Neovim, tmux, dotfiles output)? Near-misses route to style-brand (project brand identity), manage-machine (installs and upkeep), and dotfiles (repo template edits).",
+  "queries": [
+    { "query": "switch my terminal and nvim to tokyonight", "should_trigger": true, "note": "dotfiles theme set tokyonight." },
+    { "query": "what themes do I have", "should_trigger": true, "note": "dotfiles theme." },
+    { "query": "make a theme with our company colors for everyone on the team", "should_trigger": true, "note": "theme.toml in the team pack." },
+    { "query": "my neovim colors didn't change after switching themes", "should_trigger": true, "note": "Debug: restart, check theme.lua." },
+    { "query": "use plain ASCII output for dotfiles in CI", "should_trigger": true, "note": "DOTFILES_UI_THEME=plain." },
+    { "query": "change the tmux status bar colors", "should_trigger": true, "note": "[tmux.colors] in a theme." },
+    { "query": "set up the brand font and demo GIF style for my project README", "should_trigger": false, "note": "Project identity; use style-brand." },
+    { "query": "install ghostty and raycast", "should_trigger": false, "note": "Installs; use manage-machine." },
+    { "query": "add a new nvim plugin for git blame", "should_trigger": false, "note": "Editing nvim config; use dotfiles." },
+    { "query": "add a run_onchange script for zig", "should_trigger": false, "note": "Repo authoring; use dotfiles." }
+  ]
+}

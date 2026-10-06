@@ -97,8 +97,9 @@ set -g @continuum-restore 'off'
 # Autosave interval in minutes (default 15)
 set -g @continuum-save-interval '5'
 
-# Catppuccin theme configuration - using cyberdream
-set -g @catppuccin_flavour 'cyberdream'
+# Catppuccin status theme: flavour and color overrides come from the
+# machine's dotfiles theme (`dotfiles theme`) via ~/.config/tmux/theme.conf.
+source-file -q ~/.config/tmux/theme.conf
 
 # Show the window NAME (#W) in the status line instead of the pane title (#T),
 # which defaults to the hostname

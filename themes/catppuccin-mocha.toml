@@ -1,0 +1,29 @@
+name = "catppuccin-mocha"
+description = "Catppuccin Mocha: soothing pastel dark theme"
+
+ghostty = "Catppuccin Mocha"
+
+[nvim]
+plugin = "catppuccin/nvim"
+colorscheme = "catppuccin-mocha"
+module = "catppuccin"
+lualine = "catppuccin"
+
+[nvim.setup]
+flavour = "mocha"
+transparent_background = true
+
+[tmux]
+flavour = "mocha"
+
+[ui]
+section = { color = "#89b4fa" }
+step = { color = "#89dceb" }
+ok = { color = "#a6e3a1" }
+skip = { color = "#6c7086" }
+warn = { color = "#f9e2af" }
+fail = { color = "#f38ba8" }
+add = { color = "#a6e3a1" }
+remove = { color = "#f38ba8" }
+change = { color = "#f9e2af" }
+dim = { color = "#6c7086" }

@@ -1,0 +1,43 @@
+# The default theme, and the base every other theme is merged onto: a theme
+# only needs the keys it changes. Format reference: themes/README.md.
+name = "cyberdream"
+description = "High-contrast futuristic dark theme (the default)"
+
+# Ghostty `theme` name: a built-in Ghostty theme, or one installed under
+# ~/.config/ghostty/themes (bootstrap installs cyberdream there).
+ghostty = "cyberdream"
+
+[nvim]
+plugin = "scottmckendry/cyberdream.nvim"
+colorscheme = "cyberdream"
+module = "cyberdream"            # require(module).setup(setup) before loading
+background = "dark"
+lualine = "cyberdream"
+
+[nvim.setup]
+transparent = true
+italic_comments = true
+hide_fillchars = true
+borderless_telescope = true
+
+[tmux]
+# A catppuccin-tmux flavour (mocha, macchiato, frappe, latte, or cyberdream,
+# which bootstrap installs). [tmux.colors] overrides single @thm_* colors.
+flavour = "cyberdream"
+
+[tmux.colors]
+
+# dotfiles' own output (apply scripts and the CLI). color is an ANSI SGR code
+# ("32", "1;36") or a hex color ("#5ea1ff"). preset: default | ascii | plain.
+[ui]
+preset = "default"
+section = { symbol = "==>", color = "36" }
+step = { symbol = "→", color = "36" }
+ok = { symbol = "✓", color = "32" }
+skip = { symbol = "·", color = "2" }
+warn = { symbol = "!", color = "33" }
+fail = { symbol = "✗", color = "31" }
+add = { symbol = "+", color = "32" }
+remove = { symbol = "-", color = "31" }
+change = { symbol = "~", color = "33" }
+dim = { color = "2" }

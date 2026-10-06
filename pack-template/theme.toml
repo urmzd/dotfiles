@@ -1,0 +1,21 @@
+# Optional color theme for machines using this pack: Ghostty, Neovim, tmux,
+# and dotfiles output. It applies when the machine has no `theme` set (the
+# last pack with a theme wins), or by name: dotfiles theme set acme.
+# Merged onto the default theme, so list only what changes. Format reference:
+# https://github.com/urmzd/dotfiles/blob/main/themes/README.md
+
+# name = "acme"
+# description = "Acme brand colors"
+# ghostty = "TokyoNight Night"
+#
+# [nvim]
+# plugin = "folke/tokyonight.nvim"
+# colorscheme = "tokyonight-night"
+# module = "tokyonight"
+# lualine = "tokyonight"
+#
+# [tmux]
+# flavour = "mocha"
+#
+# [ui]
+# ok = { color = "#ff6600" }

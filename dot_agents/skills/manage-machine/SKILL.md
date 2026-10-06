@@ -9,7 +9,7 @@ description: >
   "update everything", "add our VPN for everyone at work", "add the backend-engineer pack", or "is this machine
   healthy". Do NOT use for editing the chezmoi source repo itself (templates,
   run_ scripts, naming; use dotfiles), for a project's own toolchain or .envrc
-  (use setup-devenv), or for a known shell/nvim/gpg error signature (use
+  (use setup-devenv), for colors and themes (use manage-theme), or for a known shell/nvim/gpg error signature (use
   triage-dotfiles-env).
 allowed-tools: Read, Edit, Write, Bash(dotfiles *), Bash(command -v *), Bash(chezmoi source-path), Bash(chezmoi data *), Bash(git -C *)
 ---

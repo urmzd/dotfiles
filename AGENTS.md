@@ -41,6 +41,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_config/opencode/` | `~/.config/opencode/` | OpenCode instructions; native install, update, and status managed by dotfiles; portable agents rendered by agentspec |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
 | `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI in `cli/` |
+| `themes/` | (not deployed) | Color themes (Ghostty, Neovim, tmux, dotfiles output); `cyberdream.toml` is the default and the base others merge onto; resolved by `.chezmoitemplates/theme` (mirrored by `theme::resolve` in `cli/src/theme.rs`); format in `themes/README.md` |
 | `pack-template/` | (not deployed) | Starter template for a pack (company, team, or role overlay); one repo can hold a folder per role |
 | `cli/` | (not deployed) | Rust source for the `dotfiles` CLI; built and attached to every release by `release.yml` |
 | (not tracked) | `~/.config/packs/<repo>/` or local folders | Optional packs, stacked in order from `packs` (git URL, `url//folder`, or local path); fetched by `run_after_sync-packs.sh.tmpl` (never fatal) and resolved for every hook by `.chezmoitemplates/packs` (mirrored by `Pack::parse` in `cli/src/chezmoi.rs`). Each pack's optional `catalog.toml` joins the package catalog through `.chezmoitemplates/catalog` (validated copies only). Never add pack files to this repo |

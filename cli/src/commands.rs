@@ -85,7 +85,7 @@ fn passes(check: &str) -> bool {
         .is_ok_and(|s| s.success())
 }
 
-fn chezmoi_apply() -> Result<()> {
+pub fn chezmoi_apply() -> Result<()> {
     ui::section("Applying");
     // --keep-going: without it chezmoi stops at the first failing script and
     // skips the rest; with it every step runs and failed one-time scripts are

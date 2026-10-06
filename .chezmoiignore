@@ -15,6 +15,7 @@ CHANGELOG.md
 sr.yaml
 catalog.toml
 pack-template/
+themes/
 cli/
 requirements-pipx.txt
 

@@ -10,8 +10,10 @@ adjust-cell-width = 0
 window-padding-x = 4
 window-padding-y = 4
 
-# Theme (installed by bootstrap from cyberdream.nvim extras/ghostty)
-theme = cyberdream
+# Theme: from the machine's dotfiles theme (`dotfiles theme`). A built-in
+# Ghostty theme name, or one under ~/.config/ghostty/themes (bootstrap
+# installs cyberdream there from cyberdream.nvim extras/ghostty).
+theme = {{ (includeTemplate "theme" . | fromJson).ghostty }}
 # Opacity high enough that text stays readable over white backgrounds;
 # blur flattens whatever still bleeds through.
 background-opacity = 0.92

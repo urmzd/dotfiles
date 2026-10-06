@@ -154,6 +154,10 @@ encryption = "age"
     # Packs (company, team, personal overlays), stacked in order: git URL,
     # URL//folder, or local folder. Edit with `dotfiles pack`.
     packs = [{{ range $i, $p := $packs }}{{ if $i }}, {{ end }}{{ $p | quote }}{{ end }}]
+    # Color theme for Ghostty, Neovim, tmux, and dotfiles output: a name from
+    # themes/ or a pack; empty follows the last pack theme, else cyberdream.
+    # Change with `dotfiles theme set <name>`.
+    theme = {{ get . "theme" | default "" | quote }}
 
     # Feature flags
     use_secrets = {{ $use_secrets }}

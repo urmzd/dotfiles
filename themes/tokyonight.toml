@@ -1,0 +1,58 @@
+name = "tokyonight"
+description = "Tokyo Night (night): deep navy with soft neon accents"
+
+ghostty = "TokyoNight Night"
+
+[nvim]
+plugin = "folke/tokyonight.nvim"
+colorscheme = "tokyonight-night"
+module = "tokyonight"
+lualine = "tokyonight"
+
+[nvim.setup]
+style = "night"
+transparent = true
+styles = { comments = { italic = true } }
+
+[tmux]
+flavour = "mocha"
+
+[tmux.colors]
+bg = "#1a1b26"
+fg = "#c0caf5"
+rosewater = "#f7768e"
+flamingo = "#ff9e64"
+pink = "#bb9af7"
+mauve = "#bb9af7"
+red = "#f7768e"
+maroon = "#db4b4b"
+peach = "#ff9e64"
+yellow = "#e0af68"
+green = "#9ece6a"
+teal = "#73daca"
+sky = "#7dcfff"
+sapphire = "#2ac3de"
+blue = "#7aa2f7"
+lavender = "#b4f9f8"
+subtext_1 = "#a9b1d6"
+subtext_0 = "#9aa5ce"
+overlay_2 = "#737aa2"
+overlay_1 = "#565f89"
+overlay_0 = "#545c7e"
+surface_2 = "#414868"
+surface_1 = "#3b4261"
+surface_0 = "#292e42"
+mantle = "#16161e"
+crust = "#0c0e14"
+
+[ui]
+section = { color = "#7aa2f7" }
+step = { color = "#7dcfff" }
+ok = { color = "#9ece6a" }
+skip = { color = "#565f89" }
+warn = { color = "#e0af68" }
+fail = { color = "#f7768e" }
+add = { color = "#9ece6a" }
+remove = { color = "#f7768e" }
+change = { color = "#e0af68" }
+dim = { color = "#565f89" }

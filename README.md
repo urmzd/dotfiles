@@ -74,6 +74,7 @@ dotfiles package add acli twg    # Select by id; `package remove` deselects (--u
 dotfiles package list --selected # The catalog with this machine's selection
 dotfiles package setup           # Pending sign-in / interactive installers for selected packages
 dotfiles package update          # brew upgrade + AI CLIs, then apply (or: brew | ai)
+dotfiles theme set tokyonight    # Color theme for Ghostty, Neovim, tmux, and dotfiles output; `dotfiles theme` lists
 dotfiles pack add <url//folder>  # Stack a pack (company, role, personal); also: pack list, pack remove
 dotfiles identity                # This machine's GitHub identity: gh, SSH + GPG keys, signing check
 dotfiles doctor                  # Health check, each finding with the command that fixes it
@@ -149,6 +150,10 @@ Optional tools (apps, CLIs people pick per machine) go in [`catalog.toml`](catal
 
 ## Configuration
 
+### Themes
+
+One theme colors Ghostty, Neovim (colorscheme and lualine), tmux (catppuccin flavour and colors), and the dotfiles' own output. Built-ins live in [`themes/`](themes/) (`cyberdream`, the default; `tokyonight`; `catppuccin-mocha`), and any pack can ship a `theme.toml`. `dotfiles theme` lists them and marks the one in effect; `dotfiles theme set <name>` switches and applies (`auto` follows the last pack theme). The machine's choice is `theme` in your local `chezmoi.toml`. [`themes/README.md`](themes/README.md) has the format and where each app picks it up.
+
 ### Packs
 
 Company, team, and personal setup lives in optional **packs**: folders of plain files, usually in a company git repo shareable with teammates whether or not they use these dotfiles. A machine stacks any number of them, in order, in `packs` (`dotfiles pack add|remove|list`; a work machine's `chezmoi init` also asks):
@@ -171,6 +176,7 @@ Every file is optional, and each hook is a no-op when its file is missing:
 | `Brewfile` | appended to the Brewfile at install time; excludes and failure reporting apply | all appended |
 | `catalog.toml` | merged into the [package catalog](#adding-a-new-tool): entries show in `dotfiles package` tagged with their pack, and `required = true` ones always install. Checked before use (valid TOML, required fields); a bad file is ignored with a warning and `dotfiles doctor` names the problem | an id already taken (dotfiles catalog or an earlier pack) is skipped and reported |
 | `AGENTS.md` | appended to the global Claude Code, Codex, and OpenCode instructions on the next `chezmoi apply` | one block per pack |
+| `theme.toml` | the [theme](#themes) for Ghostty, Neovim, tmux, and dotfiles output | the last pack with a theme applies when the machine sets none |
 
 A work machine also defaults git to the work email, skips personal apps (Obsidian) and secrets tooling, and leaves Codex on the default service tier.
 
@@ -331,6 +337,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
+| manage-theme | Switch, create, or debug the machine theme (Ghostty, Neovim, tmux, dotfiles output) via `dotfiles theme` and theme files |
 | manage-machine | Operate a dotfiles machine through the `dotfiles` CLI: install or remove catalog tools, `dotfiles doctor` fixes, updates, and company tools in a pack catalog |
 | triage-dotfiles-env | Playbook of known dotfiles-stack failure modes (pipx shims, gpg signing, nix shellHook, P10k, nvim Lua APIs) with mandatory verification |
 | fix-and-retry | Diagnose CI failure, apply fix, commit, push, re-run |

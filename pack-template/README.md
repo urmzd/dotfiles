@@ -45,6 +45,7 @@ A clone that fails (for example a private repo before the machine's SSH key is o
 | `Brewfile` | appended to the dotfiles Brewfile at install time | all appended |
 | `catalog.toml` | merged into the `dotfiles package` picker | merged; an id already taken (dotfiles catalog or an earlier pack) is skipped and reported by `dotfiles doctor` |
 | `AGENTS.md` | appended to Claude Code, Codex, and OpenCode global instructions | concatenated, one block per pack |
+| `theme.toml` | the color theme for Ghostty, Neovim, tmux, and dotfiles output ([format](../themes/README.md)) | the last pack with a theme applies when the machine sets none; any pack theme can be picked by name |
 
 Every file is optional; delete the ones a pack does not need. Each is a no-op until it has content. In `catalog.toml`, `required = true` installs a package for everyone on that pack; without it, people opt in with `dotfiles package add <id>`.
 

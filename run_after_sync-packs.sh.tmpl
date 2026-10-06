@@ -103,6 +103,38 @@ PY
     fi
 }
 
+# A pack's theme.toml (see `dotfiles theme`) gets the same treatment: the
+# theme template reads a validated copy, keyed like the catalog copies.
+theme_copies="$HOME/.local/share/dotfiles/pack-themes"
+theme_keep=" "
+validate_theme() { # <spec> <pack dir> <key>
+    local spec="$1" src="$2/theme.toml" copy="$theme_copies/$3.toml"
+    [ -f "$src" ] || return 0
+    theme_keep="$theme_keep$3 "
+    cmp -s "$src" "$copy" 2>/dev/null && return 0
+    [ -n "$py" ] || return 0
+    if "$py" - "$src" >/dev/null 2>"$err" <<'PY'
+import sys, tomllib
+t = tomllib.load(open(sys.argv[1], "rb"))
+if not isinstance(t.get("name"), str) or not t["name"]:
+    sys.exit("missing string field `name`")
+for table in ("nvim", "tmux", "ui"):
+    if table in t and not isinstance(t[table], dict):
+        sys.exit(f"`{table}` must be a table")
+PY
+    then
+        mkdir -p "$theme_copies"
+        cp "$src" "$copy"
+        section
+        ui_ok "$spec: theme loaded"
+        ui_hint "use it: dotfiles theme set <name> (or it applies when no theme is set)"
+    else
+        section
+        ui_warn "$spec: theme ignored: $(tail -1 "$err")"
+        ui_hint "fix $src, then: dotfiles doctor"
+    fi
+}
+
 check_dir() { # <spec> <pack dir>
     [ -d "$2" ] && return 0
     section
@@ -118,6 +150,7 @@ fetch {{ .url | quote }} {{ .repo_dir | quote }}
 {{- range $packs }}
 check_dir {{ .spec | quote }} {{ .dir | quote }}
 validate {{ .spec | quote }} {{ .dir | quote }} {{ .key | quote }}
+validate_theme {{ .spec | quote }} {{ .dir | quote }} {{ .key | quote }}
 {{- end }}
 
 # Copies whose pack was removed or lost its catalog, and the single-pack
@@ -126,5 +159,9 @@ rm -f "$HOME/.local/share/dotfiles/work-catalog.toml"
 for f in "$copies"/*.toml; do
     [ -e "$f" ] || continue
     case "$keep" in *" $(basename "$f" .toml) "*) ;; *) rm -f "$f" ;; esac
+done
+for f in "$theme_copies"/*.toml; do
+    [ -e "$f" ] || continue
+    case "$theme_keep" in *" $(basename "$f" .toml) "*) ;; *) rm -f "$f" ;; esac
 done
 exit 0

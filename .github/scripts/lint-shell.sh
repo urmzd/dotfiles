@@ -27,7 +27,7 @@ fail() { printf '  ✗ %s\n' "$*" >&2; failures=$((failures + 1)); }
 
 render() { # <source file> <output>
     case "$1" in
-        *.tmpl | run_*) chezmoi --config "$cfg" --source "$src" execute-template <"$src/$1" >"$2" ;;
+        *.tmpl | run_* | .chezmoitemplates/*) chezmoi --config "$cfg" --source "$src" execute-template <"$src/$1" >"$2" ;;
         *) cp "$src/$1" "$2" ;;
     esac
 }

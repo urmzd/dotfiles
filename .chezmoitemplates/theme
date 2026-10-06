@@ -1,0 +1,33 @@
+{{- /* The machine's theme as JSON: themes/cyberdream.toml (the base) with   */ -}}
+{{- /* the chosen theme merged over it, so a theme lists only what changes   */ -}}
+{{- /* (an [nvim] or [tmux] section replaces the base's whole section).      */ -}}
+{{- /* Chosen: the `theme` setting (a themes/<name>.toml here, or a pack     */ -}}
+{{- /* theme with that name), else the last pack that ships a theme.toml,    */ -}}
+{{- /* else the base. Pack themes are read from validated copies (written by */ -}}
+{{- /* the dotfiles CLI and run_after_sync-packs), never the pack's file.     */ -}}
+{{- $base := include "themes/cyberdream.toml" | fromToml -}}
+{{- $name := get . "theme" | default "" -}}
+{{- $copies := joinPath .chezmoi.homeDir ".local/share/dotfiles/pack-themes" -}}
+{{- $chosen := dict -}}
+{{- $builtin := joinPath .chezmoi.sourceDir "themes" (printf "%s.toml" $name) -}}
+{{- if and $name (stat $builtin) -}}
+{{-   $chosen = include $builtin | fromToml -}}
+{{- else -}}
+{{-   range $pack := (includeTemplate "packs" . | fromJson) -}}
+{{-     $copy := joinPath $copies (printf "%s.toml" $pack.key) -}}
+{{-     if and (stat $copy) (stat (joinPath $pack.dir "theme.toml")) -}}
+{{-       $t := include $copy | fromToml -}}
+{{-       if or (not $name) (eq (get $t "name" | default "") $name) }}{{ $chosen = $t }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- /* Sections tied to one plugin replace the base instead of merging:      */ -}}
+{{- /* tokyonight must not inherit cyberdream's setup options or module.     */ -}}
+{{- $theme := mergeOverwrite (deepCopy $base) $chosen -}}
+{{- if hasKey $chosen "nvim" -}}
+{{-   $_ := set $theme "nvim" (merge (deepCopy $chosen.nvim) (dict "background" "dark" "setup" dict)) -}}
+{{- end -}}
+{{- if hasKey $chosen "tmux" -}}
+{{-   $_ := set $theme "tmux" (merge (deepCopy $chosen.tmux) (dict "colors" dict)) -}}
+{{- end -}}
+{{- $theme | toJson -}}

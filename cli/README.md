@@ -21,6 +21,8 @@ dotfiles package remove cursor       # deselect (--uninstall also brew-uninstall
 dotfiles package list --selected     # catalog with the current selection
 dotfiles package setup               # pending sign-in/installers, e.g. acli auth, twg
 dotfiles package update [all|brew|ai]
+dotfiles theme [list]                # themes (built-in and from packs), marking the one in effect
+dotfiles theme set <name|auto>       # switch Ghostty, Neovim, tmux, and dotfiles output colors, then apply
 dotfiles pack [list]                 # packs in stacking order, with what each adds
 dotfiles pack add <spec>...          # append: git URL, url//folder, or ~/folder (applies, fetches)
 dotfiles pack remove <spec>...       # drop from the list (clones stay on disk)
