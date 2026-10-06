@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 {{ includeTemplate "bash-modern.sh" . }}
-# Install urmzd/* stack CLIs (sr, teasr, oag, dotfiles) via their upstream installers.
+# Install the always-on urmzd/* CLIs (sr for releases, the dotfiles CLI) via
+# their upstream installers. agentspec installs with the skills
+# (run_onchange_after_install-skills); teasr and oag are catalog packages.
 set -euo pipefail
 {{ includeTemplate "ui.sh" . }}
 ui_section "Stack CLIs"
@@ -16,9 +18,7 @@ install_if_missing() {
     ui_run "installed $name" fetch_and_run "$url" sh || ui_hint "retry: chezmoi apply (installer: $url)"
 }
 
-install_if_missing sr    https://raw.githubusercontent.com/urmzd/sr/main/install.sh
-install_if_missing teasr https://raw.githubusercontent.com/urmzd/teasr/main/install.sh
-install_if_missing oag   https://raw.githubusercontent.com/urmzd/oag/main/install.sh
+install_if_missing sr https://raw.githubusercontent.com/urmzd/sr/main/install.sh
 # The dotfiles CLI lives in this repo (cli/); its binaries ship on dotfiles releases.
 DOTFILES_CLI_INSTALL=https://raw.githubusercontent.com/urmzd/dotfiles/main/cli/install.sh
 # One-time migration: 0.1.x binaries came from the retired urmzd/dotfiles-cli

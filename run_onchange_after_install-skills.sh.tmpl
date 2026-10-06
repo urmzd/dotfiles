@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 {{ includeTemplate "bash-modern.sh" . }}
-# Install agent skills and agents via agentspec CLI
+# Install agentspec, register the dotfiles skills and agents, then add the
+# agentspec sources of the selected skill packs (catalog.toml `skills`).
+# Re-runs when that list changes; agentspec skips what it already has.
 set -euo pipefail
 {{ includeTemplate "ui.sh" . }}
 ui_section "Agent skills"
@@ -12,18 +14,14 @@ if ! command -v agentspec &>/dev/null; then
     fi
 fi
 
-# Local skills and agents from dotfiles repo (dot_agents/ -> ~/.agents/), then
-# third-party skills. A failed source is reported and skipped, not fatal.
+# Local skills and agents first (deployed by chezmoi; see
+# run_after_sync-agent-resources for why not the source), then each selected
+# pack's sources. A failed source is reported and skipped, not fatal.
 SOURCES=(
-    "$HOME/.agents"   # deployed by chezmoi; see run_after_sync-agent-resources for why not the source
-    vercel-labs/skills
-    vercel/ai-elements
-    vercel/streamdown
-    google-gemini/gemini-skills
-    better-auth/skills@better-auth/best-practices
-    vercel/ai@skills/use-ai-sdk
-    fastapi/fastapi@fastapi/.agents/skills/fastapi
-    github/gh-stack@skills/gh-stack
+    "$HOME/.agents"
+{{- range (includeTemplate "skills" . | fromJson).sources }}
+    {{ . | quote }}
+{{- end }}
 )
 for src in ${SOURCES[@]+"${SOURCES[@]}"}; do
     label="$src"
@@ -31,5 +29,7 @@ for src in ${SOURCES[@]+"${SOURCES[@]}"}; do
     ui_run "added $label" agentspec manage add "$src" --all-tools || true
 done
 
-# Sync: discover, link, and verify all resources
 ui_run "linked into every installed AI tool" agentspec sync --fast || true
+{{- if not (includeTemplate "skills" . | fromJson).packs }}
+ui_hint "more skill packs (scaffolding, review, frameworks): dotfiles package"
+{{- end }}

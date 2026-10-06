@@ -40,7 +40,7 @@ These paths are **chezmoi source paths** inside this repo. After `chezmoi apply`
 | `dot_gemini/` | `~/.gemini/` | Legacy Gemini CLI settings, kept as Antigravity CLI (agy) first-run migration seed; agy config lives in `~/.gemini/antigravity-cli/` |
 | `dot_config/opencode/` | `~/.config/opencode/` | OpenCode instructions; native install, update, and status managed by dotfiles; portable agents rendered by agentspec |
 | `dot_copilot/` | `~/.copilot/` | GitHub Copilot CLI config (`settings.json`: model, effort, theme) |
-| `catalog.toml` | (not deployed) | Optional packages. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; managed with the `dotfiles` CLI in `cli/` |
+| `catalog.toml` | (not deployed) | Optional packages, skill packs (`skills`), and `[[bundle]]` groups with their presets. Selected per machine at `[data].packages`; rendered by `Brewfile.tmpl`; skill packs gated by `.chezmoitemplates/skills`; managed with the `dotfiles` CLI in `cli/` |
 | `themes/` | (not deployed) | Color themes (Ghostty, Neovim, tmux, dotfiles output); `cyberdream.toml` is the default and the base others merge onto; resolved by `.chezmoitemplates/theme` (mirrored by `theme::resolve` in `cli/src/theme.rs`); format in `themes/README.md` |
 | `pack-template/` | (not deployed) | Starter template for a pack (company, team, or role overlay); one repo can hold a folder per role |
 | `cli/` | (not deployed) | Rust source for the `dotfiles` CLI; built and attached to every release by `release.yml` |

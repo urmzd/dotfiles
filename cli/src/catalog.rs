@@ -2,6 +2,7 @@
 //! how it installs, and what setup it needs. Each pack can add its own
 //! `catalog.toml` in the same format; its entries join the picker, and
 //! `required = true` ones install on every machine using that pack.
+//! Bundles (`[[bundle]]`) group packages; selecting one selects its packages.
 
 use std::collections::BTreeSet;
 use std::path::PathBuf as AppPath;
@@ -16,6 +17,8 @@ use crate::chezmoi::Pack;
 pub struct Catalog {
     #[serde(rename = "package")]
     pub packages: Vec<Package>,
+    #[serde(rename = "bundle", default)]
+    pub bundles: Vec<Bundle>,
     /// What happened to each pack's catalog, in pack order.
     #[serde(skip)]
     pub packs: Vec<PackCatalog>,
@@ -40,6 +43,23 @@ pub struct PackCatalog {
 /// per pack, named by `Pack::key`. Written only after a file parses, so a
 /// broken pack file cannot break apply.
 pub const PACK_COPIES: &str = ".local/share/dotfiles/packs";
+
+/// A named group of packages. Selecting it selects every member. Its
+/// `presets` field is read only by .chezmoi.toml.tmpl on first init.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Bundle {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub packages: Vec<String>,
+}
+
+impl Bundle {
+    /// Every member selected.
+    pub fn is_selected(&self, selected: &BTreeSet<String>) -> bool {
+        self.packages.iter().all(|id| selected.contains(id))
+    }
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Package {
@@ -96,6 +116,10 @@ pub struct Package {
     pub presets: Vec<String>,
     #[serde(default)]
     pub machines: Vec<String>,
+    /// Agent skills: a bare name is a dotfiles skill (dot_agents/skills), an
+    /// `owner/repo[@path]` an agentspec source.
+    #[serde(default)]
+    pub skills: Vec<String>,
     /// Work pack only: installs on every machine using the pack, selected or not.
     #[serde(default)]
     pub required: bool,
@@ -147,7 +171,16 @@ impl Package {
         if let Some(url) = &self.script {
             names.push(format!("installer {url}"));
         }
+        names.extend(self.skills.iter().map(|s| format!("{s} (skill)")));
         names
+    }
+
+    /// What `installs` lists that Homebrew can uninstall (no skills).
+    pub fn brew_names(&self) -> Vec<String> {
+        self.installs()
+            .into_iter()
+            .filter(|n| !n.ends_with(" (skill)"))
+            .collect()
     }
 
     /// Shell command that downloads the installer, refuses an empty download,
@@ -219,6 +252,14 @@ impl Catalog {
                         added.push(p.id.clone());
                         catalog.packages.push(p);
                     }
+                    for b in pack_catalog.bundles {
+                        if catalog.get(&b.id).is_some() || catalog.bundle(&b.id).is_some() {
+                            skipped.push((b.id, "the dotfiles catalog".into()));
+                            continue;
+                        }
+                        added.push(b.id.clone());
+                        catalog.bundles.push(b);
+                    }
                     PackCatalog {
                         spec: pack.spec.clone(),
                         path,
@@ -260,9 +301,14 @@ impl Catalog {
     pub fn parse(text: &str) -> Result<Self> {
         let catalog: Catalog = toml::from_str(text)?;
         let mut seen = std::collections::HashSet::new();
-        for pkg in &catalog.packages {
-            if !seen.insert(pkg.id.as_str()) {
-                bail!("duplicate package id `{}`", pkg.id);
+        for id in catalog
+            .packages
+            .iter()
+            .map(|p| &p.id)
+            .chain(catalog.bundles.iter().map(|b| &b.id))
+        {
+            if !seen.insert(id.as_str()) {
+                bail!("duplicate package or bundle id `{id}`");
             }
         }
         Ok(catalog)
@@ -272,16 +318,35 @@ impl Catalog {
         self.packages.iter().find(|p| p.id == id)
     }
 
-    /// Resolve ids, failing on the first unknown one with a suggestion list.
+    pub fn bundle(&self, id: &str) -> Option<&Bundle> {
+        self.bundles.iter().find(|b| b.id == id)
+    }
+
+    /// Resolve package or bundle ids (a bundle becomes its packages), failing
+    /// on the first unknown one with a suggestion list.
     pub fn resolve<'a>(&'a self, ids: &[String]) -> Result<Vec<&'a Package>> {
-        ids.iter()
-            .map(|id| {
-                self.get(id).ok_or_else(|| {
-                    let known: Vec<&str> = self.packages.iter().map(|p| p.id.as_str()).collect();
-                    anyhow::anyhow!("unknown package `{id}`; known: {}", known.join(", "))
-                })
-            })
-            .collect()
+        let mut out: Vec<&Package> = Vec::new();
+        for id in ids {
+            let members: Vec<&String> = match self.bundle(id) {
+                Some(b) => b.packages.iter().collect(),
+                None => vec![id],
+            };
+            for m in members {
+                let p = self.get(m).ok_or_else(|| {
+                    let known: Vec<&str> = self
+                        .bundles
+                        .iter()
+                        .map(|b| b.id.as_str())
+                        .chain(self.packages.iter().map(|p| p.id.as_str()))
+                        .collect();
+                    anyhow::anyhow!("unknown package `{m}`; known: {}", known.join(", "))
+                })?;
+                if !out.iter().any(|q| q.id == p.id) {
+                    out.push(p);
+                }
+            }
+        }
+        Ok(out)
     }
 }
 
@@ -416,5 +481,54 @@ adopt = true
         let c = Catalog::parse(SAMPLE).unwrap();
         let err = c.resolve(&["nope".into()]).unwrap_err().to_string();
         assert!(err.contains("unknown package `nope`") && err.contains("acli"));
+    }
+
+    #[test]
+    fn resolve_expands_bundles() {
+        let text = format!(
+            "{SAMPLE}\n[[bundle]]\nid = \"apps\"\nname = \"Apps\"\ndescription = \"d\"\npackages = [\"notion\", \"acli\"]\n"
+        );
+        let c = Catalog::parse(&text).unwrap();
+        let ids: Vec<&str> = c
+            .resolve(&["acli".into(), "apps".into()])
+            .unwrap()
+            .iter()
+            .map(|p| p.id.as_str())
+            .collect();
+        assert_eq!(ids, vec!["acli", "notion"]);
+        let selected: BTreeSet<String> = ["notion".to_string()].into();
+        assert!(!c.bundle("apps").unwrap().is_selected(&selected));
+        let clash = format!(
+            "{text}\n[[bundle]]\nid = \"notion\"\nname = \"x\"\ndescription = \"x\"\npackages = []\n"
+        );
+        assert!(Catalog::parse(&clash).is_err());
+    }
+
+    /// The repo's catalog.toml: bundle members exist, and every bare skill
+    /// name is a dot_agents/skills directory listed by one package only.
+    #[test]
+    fn repo_catalog_is_consistent() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let c =
+            Catalog::parse(&std::fs::read_to_string(root.join("catalog.toml")).unwrap()).unwrap();
+        for b in &c.bundles {
+            for id in &b.packages {
+                assert!(c.get(id).is_some(), "bundle {}: unknown package {id}", b.id);
+            }
+        }
+        let mut seen = BTreeSet::new();
+        for p in &c.packages {
+            for s in p.skills.iter().filter(|s| !s.contains('/')) {
+                assert!(
+                    root.join("dot_agents/skills")
+                        .join(s)
+                        .join("SKILL.md")
+                        .is_file(),
+                    "{}: no skill {s}",
+                    p.id
+                );
+                assert!(seen.insert(s.clone()), "skill {s} is in two packages");
+            }
+        }
     }
 }

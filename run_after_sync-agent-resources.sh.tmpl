@@ -11,6 +11,21 @@ if ! command -v agentspec >/dev/null 2>&1; then
     exit 0
 fi
 
+# Skills of deselected skill packs: .chezmoiignore stops deploying them, but
+# chezmoi leaves the old copies, so unregister and delete them here.
+HIDDEN=(
+{{- range (includeTemplate "skills" . | fromJson).hidden }}
+    {{ . | quote }}
+{{- end }}
+)
+for name in ${HIDDEN[@]+"${HIDDEN[@]}"}; do
+    dir="$HOME/.agents/skills/$name"
+    [ -f "$dir/SKILL.md" ] || continue
+    agentspec manage remove "$name" >/dev/null 2>&1 || true
+    rm -rf "$dir"
+    ui_ok "removed $name (its skill pack is not selected)"
+done
+
 # Register from the deployed tree, never the chezmoi source: agentspec copies
 # files verbatim, so a source path re-introduces chezmoi attribute names
 # (executable_check-doc-hygiene.sh) into ~/.agents and chezmoi then flags the
@@ -27,9 +42,12 @@ if command -v jq >/dev/null 2>&1; then
         ui_hint "inspect: agentspec status (the next chezmoi apply retries)"
         exit 0
     fi
+    hidden_list="${HIDDEN[*]+${HIDDEN[*]}}"
     {
         find "{{ .chezmoi.sourceDir }}/dot_agents/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print 2>/dev/null |
-            sed 's#.*/dot_agents/skills/##; s#/SKILL.md##; s#^#skill\t#'
+            sed 's#.*/dot_agents/skills/##; s#/SKILL.md##' |
+            awk -v hidden="$hidden_list" 'BEGIN { n = split(hidden, h, " "); for (i = 1; i <= n; i++) skip[h[i]] = 1 }
+                !($0 in skip) { print "skill\t" $0 }'
         find "{{ .chezmoi.sourceDir }}/dot_agents/agents" -maxdepth 1 -name '*.md' -print 2>/dev/null |
             sed 's#.*/dot_agents/agents/##; s#.md$##; s#^#agent\t#'
     } | sort >"$tmp_status.source"

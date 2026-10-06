@@ -4,7 +4,7 @@
 # ~/.config/chezmoi/chezmoi.toml (never committed). Three readers:
 #   - `dotfiles package` (the CLI in cli/): search-as-you-type picker
 #   - Brewfile.tmpl: emits the Homebrew lines for selected packages
-#   - .chezmoi.toml.tmpl: seeds the selection on first init from `presets`
+#   - .chezmoi.toml.tmpl: seeds the selection on first init from `presets` (packages and bundles)
 #
 # Fields (only id, name, description, category are required):
 #   tap, brew, cask   Homebrew entries (macOS). `adopt = true` lets a cask take
@@ -27,8 +27,19 @@
 #                     `check` fails; script_shell (default sh) and script_args
 #                     control how; post runs after a successful install
 #   linux_npm         npm packages for Linux only (macOS uses brew/cask)
+#   skills            agent skills it adds: a bare name is a skill in
+#                     dot_agents/skills (deployed only while selected), an
+#                     owner/repo[@path] is an agentspec source (dotfiles catalog
+#                     only for bare names; packs may list sources)
 #   presets           presets that select it on first init
 #   machines          machine types those presets apply to (default: both)
+#
+# Bundles ([[bundle]], at the end) group packages: selecting a bundle selects
+# all of its packages, and a preset selects bundles. `packages` stays the one
+# saved selection, so a package can still be dropped from a bundle by hand.
+#
+# Always installed, never in the catalog: the core Brewfile, agentspec, sr, the
+# dotfiles CLI, every subagent, and every dotfiles skill no package lists.
 
 # ---- AI coding agents ---------------------------------------------------------
 # Picked at first init (multi-select, default: Claude Code + Codex); change
@@ -118,7 +129,6 @@ brew = ["colima", "docker", "docker-buildx", "docker-compose"]
 apt = ["docker.io", "docker-compose-plugin"]
 dnf = ["docker-compose-plugin"]
 pacman = ["docker", "docker-compose"]
-presets = ["standard", "full"]
 
 [[package]]
 id = "kubernetes"
@@ -129,7 +139,6 @@ brew = ["kubectl", "helm", "k9s"]
 apt = ["kubectl", "helm", "k9s"]
 dnf = ["kubectl", "helm", "k9s"]
 pacman = ["kubectl", "helm", "k9s"]
-presets = ["standard", "full"]
 
 [[package]]
 id = "terraform"
@@ -142,7 +151,6 @@ brew = ["hashicorp/tap/terraform"]
 apt = ["terraform"]
 dnf = ["terraform"]
 pacman = ["terraform"]
-presets = ["standard", "full"]
 
 [[package]]
 id = "runpod"
@@ -151,12 +159,11 @@ description = "runpodctl for RunPod GPU cloud"
 category = "cloud"
 tap = ["runpod/runpodctl"]
 brew = ["runpodctl"]
-presets = ["standard", "full"]
 
 [[package]]
 id = "temporal"
 name = "Temporal"
-# ~153MB, so no preset selects it. temporal-cloud moved from the
+# ~153MB, so it is not in the cloud bundle. temporal-cloud moved from the
 # temporalio/prerelease tap to temporalio/brew (2026-10). It is a
 # separate binary the base CLI shells out to; completions are patched in
 # run_onchange_after_z-generate-completions.
@@ -203,7 +210,6 @@ description = "Android Studio and the SDK command-line tools"
 category = "mobile"
 cask = ["android-studio", "android-commandlinetools"]
 apps = { "android-studio" = "Android Studio.app" }
-presets = ["full"]
 
 [[package]]
 id = "cocoapods"
@@ -211,7 +217,6 @@ name = "CocoaPods"
 description = "Dependency manager for Swift and Objective-C projects"
 category = "mobile"
 brew = ["cocoapods"]
-presets = ["full"]
 
 # ---- Fonts ------------------------------------------------------------------
 
@@ -438,3 +443,141 @@ description = "Gives coding agents your Jira, Confluence, and Bitbucket data"
 category = "work"
 setup = ["curl -fsSL --retry 2 https://teamwork-graph.atlassian.com/cli/install | bash"]
 check = "command -v twg >/dev/null && twg doctor >/dev/null 2>&1"
+
+# ---- urmzd stack CLIs -------------------------------------------------------
+# sr (releases) and the dotfiles CLI are always installed; these are extras.
+
+[[package]]
+id = "teasr"
+name = "teasr"
+description = "teasr: capture screenshots and GIFs of web apps and terminals for READMEs"
+category = "stack"
+script = "https://raw.githubusercontent.com/urmzd/teasr/main/install.sh"
+check = "command -v teasr >/dev/null"
+
+[[package]]
+id = "oag"
+name = "oag"
+description = "oag: generate typed API clients from OpenAPI specs"
+category = "stack"
+script = "https://raw.githubusercontent.com/urmzd/oag/main/install.sh"
+check = "command -v oag >/dev/null"
+
+# ---- Agent skill packs --------------------------------------------------------
+# Core skills (commit, PR, CI triage, worktrees, code and test standards, docs
+# hygiene, security, releases with sr, managing these dotfiles) always install.
+
+[[package]]
+id = "skills-scaffold"
+name = "Scaffolding skills"
+description = "New repos and projects: scaffold-<lang>, repo-init, setup-ci, README, AGENTS.md, llms.txt"
+category = "skills"
+skills = [
+    "scaffold-project", "scaffold-go", "scaffold-node", "scaffold-python",
+    "scaffold-rust", "scaffold-terraform", "repo-init", "check-project",
+    "community-health", "setup-ci", "setup-devenv", "choose-stack", "build-cli",
+    "write-readme", "create-llms-txt", "configure-ai", "update-repo-meta",
+]
+
+[[package]]
+id = "skills-review"
+name = "Review skills"
+description = "Design and quality review, release and multi-repo audits, Simplified Technical English"
+category = "skills"
+skills = ["assess-quality", "review-design", "release-audit", "repo-status", "asd-ste100"]
+
+[[package]]
+id = "skills-agent-dev"
+name = "Agent authoring skills"
+description = "Write agent skills and agent systems: skill spec, Claude extensions, eval harnesses"
+category = "skills"
+skills = ["agent-design-doctrine", "create-oss-skill", "extend-oss-skills-to-claude", "run-eval-harness"]
+
+[[package]]
+id = "skills-ecosystem"
+name = "urmzd ecosystem skills"
+description = "urmzd/* conventions: brand and demos, ecosystem drift audits, portfolio machine setup"
+category = "skills"
+skills = [
+    "write-code-portfolio", "style-brand", "sync-ecosystem",
+    "sync-ecosystem-to-chezmoi", "setup-devenv-with-chezmoi",
+]
+
+[[package]]
+id = "skills-vercel"
+name = "Vercel skills"
+description = "Vercel platform, AI SDK, AI Elements, and Streamdown skills"
+category = "skills"
+skills = ["vercel-labs/skills", "vercel/ai-elements", "vercel/streamdown", "vercel/ai@skills/use-ai-sdk"]
+
+[[package]]
+id = "skills-gemini"
+name = "Gemini API skills"
+description = "Google's Gemini API, Live API, and Vertex AI skills"
+category = "skills"
+skills = ["google-gemini/gemini-skills"]
+
+[[package]]
+id = "skills-fastapi"
+name = "FastAPI skill"
+description = "FastAPI and Pydantic conventions from the FastAPI repo"
+category = "skills"
+skills = ["fastapi/fastapi@fastapi/.agents/skills/fastapi"]
+
+[[package]]
+id = "skills-better-auth"
+name = "Better Auth skill"
+description = "Better Auth best practices"
+category = "skills"
+skills = ["better-auth/skills@better-auth/best-practices"]
+
+[[package]]
+id = "skills-gh-stack"
+name = "gh-stack skill"
+description = "Stacked pull requests with gh-stack"
+category = "skills"
+skills = ["github/gh-stack@skills/gh-stack"]
+
+# ---- Bundles ------------------------------------------------------------------
+# Fields: id, name, description, packages (ids above), presets. Ids share one
+# namespace with packages, so `dotfiles package add cloud` works.
+
+[[bundle]]
+id = "cloud"
+name = "Cloud and containers"
+description = "Docker + Colima, Kubernetes, Terraform, RunPod"
+packages = ["docker", "kubernetes", "terraform", "runpod"]
+presets = ["standard", "full"]
+
+[[bundle]]
+id = "dev-skills"
+name = "Developer skills"
+description = "Scaffolding, review, and agent authoring skill packs"
+packages = ["skills-scaffold", "skills-review", "skills-agent-dev"]
+presets = ["standard", "full"]
+
+[[bundle]]
+id = "framework-skills"
+name = "Framework skills"
+description = "Third-party skills: Vercel, Gemini, FastAPI, Better Auth, gh-stack"
+packages = ["skills-vercel", "skills-gemini", "skills-fastapi", "skills-better-auth", "skills-gh-stack"]
+presets = ["full"]
+
+[[bundle]]
+id = "mobile"
+name = "Mobile"
+description = "Android SDK tools and CocoaPods"
+packages = ["android", "cocoapods"]
+presets = ["full"]
+
+[[bundle]]
+id = "languages"
+name = "Extra languages"
+description = "Zig, Scala, and mise (heavy downloads)"
+packages = ["zig", "scala", "mise"]
+
+[[bundle]]
+id = "ecosystem"
+name = "urmzd ecosystem"
+description = "teasr, oag, and the urmzd ecosystem skills"
+packages = ["teasr", "oag", "skills-ecosystem"]

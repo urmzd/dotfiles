@@ -1,0 +1,35 @@
+{{- /* Skill packs (catalog packages with `skills`) as JSON:                 */ -}}
+{{- /*   hidden:  dotfiles skills (bare names, dot_agents/skills) of packs    */ -}}
+{{- /*            not selected; .chezmoiignore skips them and               */ -}}
+{{- /*            run_after_sync-agent-resources unlinks any left behind.    */ -}}
+{{- /*   sources: agentspec sources (owner/repo[@path]) of selected packs,    */ -}}
+{{- /*            from the dotfiles catalog and every pack's catalog.        */ -}}
+{{- /*   packs:   ids of the selected skill packs.                           */ -}}
+{{- /* Bare names count only from catalog.toml: a pack cannot hide them.     */ -}}
+{{- $selected := get . "packages" | default list -}}
+{{- /* A config from before skill packs (no skills_seeded) keeps every pack  */ -}}
+{{- /* until `chezmoi init` migrates it, so a plain apply never removes them. */ -}}
+{{- if not (hasKey . "skills_seeded") -}}
+{{-   range (include "catalog.toml" | fromToml).package -}}
+{{-     if get . "skills" }}{{ $selected = append $selected .id }}{{ end -}}
+{{-   end -}}
+{{- end -}}
+{{- $hidden := list -}}
+{{- range (include "catalog.toml" | fromToml).package -}}
+{{-   if not (or (has .id $selected) (get . "required")) -}}
+{{-     range (get . "skills" | default list) -}}
+{{-       if not (contains "/" .) }}{{ $hidden = append $hidden . }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- $sources := list -}}
+{{- $packs := list -}}
+{{- range (includeTemplate "catalog" . | fromJson).package -}}
+{{-   if and (or (has .id $selected) (get . "required")) (get . "skills") -}}
+{{-     $packs = append $packs .id -}}
+{{-     range (get . "skills" | default list) -}}
+{{-       if contains "/" . }}{{ $sources = append $sources . }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- dict "hidden" ($hidden | uniq) "sources" ($sources | uniq) "packs" $packs | toJson -}}

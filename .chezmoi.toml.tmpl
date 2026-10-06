@@ -112,12 +112,29 @@
 {{-   end -}}
 {{-   if not $is_work }}{{ $packages = append $packages "obsidian" }}{{ end -}}
 {{- else -}}
-{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles package` (minimal: core CLI + editor; standard: + cloud/infra + fonts; full: + mobile dev)" (list "minimal" "standard" "full") "standard" -}}
+{{-   $preset := promptChoiceOnce . "package_preset" "Package preset; refine later with `dotfiles package` (minimal: core CLI, editor, core agent skills; standard: + cloud, fonts, developer skills; full: + mobile, framework skills; custom: pick bundles)" (list "minimal" "standard" "full" "custom") "standard" -}}
+{{-   $bundles := list -}}
+{{-   if eq $preset "custom" -}}
+{{-     $names := list -}}
+{{-     range $catalog.bundle }}{{ $names = append $names .id }}{{ end -}}
+{{-     $bundles = promptMultichoice "Bundles (space to toggle)" $names (list "cloud" "dev-skills") -}}
+{{-   else -}}
+{{-     range $catalog.bundle }}{{ if has $preset (get . "presets" | default list) }}{{ $bundles = append $bundles .id }}{{ end }}{{ end -}}
+{{-   end -}}
+{{-   range $catalog.bundle }}{{ if has .id $bundles }}{{ $packages = concat $packages .packages }}{{ end }}{{ end -}}
+{{-   /* Package-level presets (fonts, notes): custom gets the standard ones. */ -}}
+{{-   $preset_pkgs := ternary "standard" $preset (eq $preset "custom") -}}
 {{-   range $catalog.package -}}
-{{-     if and (has $preset (get . "presets" | default list)) (has $machine (get . "machines" | default (list "personal" "work"))) -}}
+{{-     if and (has $preset_pkgs (get . "presets" | default list)) (has $machine (get . "machines" | default (list "personal" "work"))) -}}
 {{-       $packages = append $packages .id -}}
 {{-     end -}}
 {{-   end -}}
+{{- end -}}
+{{- /* Skill packs and teasr/oag joined the catalog later; configs from       */}}
+{{- /* before keep what the old scripts always installed, once, unasked.      */}}
+{{- if and (not (hasKey . "skills_seeded")) (or (hasKey . "packages") (hasKey . "install_cloud")) -}}
+{{-   $packages = concat $packages (list "teasr" "oag") -}}
+{{-   range $catalog.package }}{{ if get . "skills" }}{{ $packages = append $packages .id }}{{ end }}{{ end -}}
 {{- end -}}
 {{- /* AI coding agents (catalog category "agents"): a multi-select on first */}}
 {{- /* init. Configs from before they joined the catalog get the set the old  */}}
@@ -166,6 +183,7 @@ encryption = "age"
     # Optional packages: catalog.toml ids. Edit with `dotfiles package`.
     packages = {{ $packages | uniq | sortAlpha | toToml }}
     agents_seeded = true
+    skills_seeded = true
     pkg_exclude = {{ $pkg_exclude | quote }}
 
     # System detection

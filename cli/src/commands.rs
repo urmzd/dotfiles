@@ -8,7 +8,7 @@ use anyhow::{Context, Result, bail};
 use inquire::{Confirm, InquireError, MultiSelect};
 use serde_json::json;
 
-use crate::catalog::{Catalog, Package};
+use crate::catalog::{Bundle, Catalog, Package};
 use crate::chezmoi::{self, Config, Paths};
 use crate::migrate;
 use crate::state::{self, Inventory, Managed, Plan};
@@ -173,12 +173,79 @@ fn pick(prompt: &str, pool: &[&Package], checked: &BTreeSet<String>) -> Result<V
     Ok(picked.into_iter().map(|c| c.pkg.id.clone()).collect())
 }
 
+/// One bundle row: checked when every member is selected.
+struct BundleChoice<'a> {
+    bundle: &'a Bundle,
+    width: usize,
+}
+
+impl fmt::Display for BundleChoice<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let label = format!("{} ({})", self.bundle.name, self.bundle.id);
+        write!(
+            f,
+            "{label:<width$}  {}",
+            self.bundle.description,
+            width = self.width
+        )
+    }
+}
+
+/// Toggle whole bundles: a bundle turned on adds its packages, one turned
+/// off removes them; untouched bundles change nothing.
+fn pick_bundles(catalog: &Catalog, current: &BTreeSet<String>) -> Result<BTreeSet<String>> {
+    let mut next = current.clone();
+    if catalog.bundles.is_empty() {
+        return Ok(next);
+    }
+    let width = catalog
+        .bundles
+        .iter()
+        .map(|b| b.name.len() + b.id.len() + 3)
+        .max()
+        .unwrap_or(0);
+    let choices: Vec<BundleChoice> = catalog
+        .bundles
+        .iter()
+        .map(|bundle| BundleChoice { bundle, width })
+        .collect();
+    let was: Vec<usize> = catalog
+        .bundles
+        .iter()
+        .enumerate()
+        .filter(|(_, b)| b.is_selected(current))
+        .map(|(i, _)| i)
+        .collect();
+    let picked: BTreeSet<String> = MultiSelect::new("Bundles", choices)
+        .with_default(&was)
+        .with_formatter(&|picked| format!("{} selected", picked.len()))
+        .with_help_message(
+            "space to toggle, enter for the package list (refine there), esc to cancel",
+        )
+        .prompt()?
+        .into_iter()
+        .map(|c| c.bundle.id.clone())
+        .collect();
+    for (i, b) in catalog.bundles.iter().enumerate() {
+        match (was.contains(&i), picked.contains(&b.id)) {
+            (false, true) => next.extend(b.packages.iter().cloned()),
+            (true, false) => b.packages.iter().for_each(|id| {
+                next.remove(id);
+            }),
+            _ => {}
+        }
+    }
+    Ok(next)
+}
+
 pub fn packages(ctx: &Ctx, no_apply: bool) -> Result<Outcome> {
     let (paths, catalog, mut config) = load()?;
     let current: BTreeSet<String> = config.packages().into_iter().collect();
+    require_tty("the package picker (or pass ids: dotfiles package add <id>...)")?;
+    let bundled = pick_bundles(&catalog, &current)?;
     // Required pack entries always install; they are not a choice.
     let pool: Vec<&Package> = catalog.packages.iter().filter(|p| !p.required).collect();
-    let next: BTreeSet<String> = pick("Optional packages", &pool, &current)?
+    let next: BTreeSet<String> = pick("Optional packages", &pool, &bundled)?
         .into_iter()
         .collect();
     commit(
@@ -316,7 +383,7 @@ fn commit(
     ui::ok(&format!("saved to {}", paths.config.display()));
 
     // brew bundle never uninstalls, so deselecting alone leaves software behind.
-    let leftovers: Vec<String> = removed.iter().flat_map(|p| p.installs()).collect();
+    let leftovers: Vec<String> = removed.iter().flat_map(|p| p.brew_names()).collect();
     if !leftovers.is_empty() {
         if uninstall {
             sh(
@@ -380,7 +447,39 @@ pub fn list(ctx: &Ctx, selected_only: bool) -> Result<Outcome> {
         return Ok(Outcome::Done);
     }
 
-    let id_width = rows.iter().map(|p| p.id.len()).max().unwrap_or(0);
+    let id_width = rows
+        .iter()
+        .map(|p| p.id.len())
+        .chain(catalog.bundles.iter().map(|b| b.id.len()))
+        .max()
+        .unwrap_or(0);
+    let bundles: Vec<&Bundle> = catalog
+        .bundles
+        .iter()
+        .filter(|b| !selected_only || b.packages.iter().any(|id| selected.contains(id)))
+        .collect();
+    if !bundles.is_empty() {
+        ui::section("bundles");
+        for b in bundles {
+            let have = b
+                .packages
+                .iter()
+                .filter(|id| selected.contains(*id))
+                .count();
+            let line = format!(
+                "{:<id_width$}  {} ({have}/{})  {}",
+                b.id,
+                b.name,
+                b.packages.len(),
+                ui::dim(&b.packages.join(", "))
+            );
+            if have == b.packages.len() {
+                ui::ok(&line)
+            } else {
+                ui::skip(&line)
+            }
+        }
+    }
     let name_width = rows
         .iter()
         .map(|p| p.name.chars().count() + tag(p).chars().count())

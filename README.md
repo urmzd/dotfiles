@@ -121,10 +121,25 @@ dotfiles clean                   # Prune build artifacts and caches under ~/gith
 | ai | Claude, ChatGPT (desktop apps), Warp Agent CLI (`warp`, runs in Ghostty), Hugging Face CLI (`hf`) |
 | media | Spotify |
 | work | Atlassian CLI (`acli`), Teamwork Graph CLI (`twg`) |
+| stack | teasr (README screenshots and GIFs), oag (OpenAPI client codegen) |
+| skills | Agent skill packs: scaffolding, review, agent authoring, urmzd ecosystem, Vercel, Gemini, FastAPI, Better Auth, gh-stack |
 
-Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles package`, a search-as-you-type multi-select list. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles package setup`, never during apply.
+**Bundles** group packages so you pick a toolchain, not ten ids. Selecting a bundle selects all of its packages; drop any one afterwards in the package list.
 
-On first init, `package_preset` (`minimal` = core CLI + editor, `standard` = + cloud/infra + fonts, `full` = + mobile dev) seeds the selection from each entry's `presets`. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml`; no CLI release is needed.
+| Bundle | Packages | Presets |
+| ------ | -------- | ------- |
+| `cloud` | docker, kubernetes, terraform, runpod | standard, full |
+| `dev-skills` | skills-scaffold, skills-review, skills-agent-dev | standard, full |
+| `framework-skills` | skills-vercel, skills-gemini, skills-fastapi, skills-better-auth, skills-gh-stack | full |
+| `mobile` | android, cocoapods | full |
+| `languages` | zig, scala, mise | none |
+| `ecosystem` | teasr, oag, skills-ecosystem | none |
+
+**Always installed**, whatever the selection: the core Brewfile, `agentspec`, `sr`, the `dotfiles` CLI, every subagent, and the core skills (every skill in `dot_agents/skills/` that no skill pack lists).
+
+Entries install through Homebrew (formulae and casks), `npm -g` into fnm's default Node, or `uv tool install` for Python CLIs. Each machine's selection is the list of ids at `packages` in its local `chezmoi.toml`. Change it with `dotfiles package`: first a bundle list (space to toggle a whole bundle), then the search-as-you-type package list to refine. `dotfiles package add cloud` takes bundle ids too. [`Brewfile.tmpl`](Brewfile.tmpl) renders the selected entries on macOS; on Linux, [`run_onchange_after_install-catalog-linux.sh.tmpl`](run_onchange_after_install-catalog-linux.sh.tmpl) installs their `apt`/`dnf`/`pacman` names (entries without any are macOS-only). Packages that need sign-in (acli, twg) finish with `dotfiles package setup`, never during apply.
+
+On first init, `package_preset` seeds the selection: `minimal` = always-installed only (plus Obsidian), `standard` = + `cloud`, `dev-skills`, Nerd Fonts, `full` = + `mobile`, `framework-skills`, and `custom` opens the bundle multi-select. Heavy toolchains (Temporal, Zig, Scala, mise) and the apps beyond Obsidian are never preset; pick them explicitly. Machines set up before skill packs existed keep every skill pack plus teasr and oag, once, unasked (`skills_seeded`). `pkg_exclude` still drops individual core packages by name. To offer a new package, add a `[[package]]` entry to `catalog.toml` (and to a `[[bundle]]` if it belongs to one); no CLI release is needed.
 
 The Brewfile installer continues past individual package failures, retries the remainder once, and prints categorized next steps (tap, permission, unknown formula, network, conflict) rather than aborting the whole apply.
 
@@ -220,11 +235,11 @@ These scripts run automatically on `chezmoi apply`. The bootstrap and every `dot
 | `setup-node` | run (after) | Every apply; silent unless it installs Node LTS (fnm) or runs a one-time npm migration |
 | `install-catalog-scripts` | run (after) | Every apply; installs selected installer-based packages (Claude Code, agy, OpenCode) that are missing |
 | `install-python` | run (before) | every apply, silent once linked; installs the default Python with uv |
-| `install-skills` | run_once (after) | First apply only (bootstraps `agentspec`, syncs skills to `~/.agents/skills/`) |
-| `sync-agent-resources` | run (after) | Every apply (keeps new local skills and agents managed by `agentspec`) |
-| `install-stack` | run_once (after) | First apply only (installs `sr`, `teasr`, `oag`, and the `dotfiles` CLI) |
+| `install-skills` | run_onchange (after) | Selected skill packs change (bootstraps `agentspec`, adds each pack's agentspec sources) |
+| `sync-agent-resources` | run (after) | Every apply (keeps local skills and agents managed by `agentspec`; removes skills of deselected packs) |
+| `install-stack` | run_once (after) | First apply only (installs `sr` and the `dotfiles` CLI) |
 | `configure-terminal` | run_once (after) | First apply only |
-| `load-docker-cleanup` | run_once (after) | First apply only |
+| `unload-docker-cleanup` | run_once (after) | First apply only (macOS: unloads the retired `com.docker.cleanup` launchd agent) |
 
 Every script prints through [`.chezmoitemplates/ui.sh`](.chezmoitemplates/ui.sh): one `==>` header per script, quiet when nothing changed, and a next step under every warning or failure.
 
@@ -265,19 +280,22 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 
 ### Managing skills
 
-All skills are installed automatically via `chezmoi apply`. The [`install-skills`](run_once_after_install-skills.sh.tmpl) script uses [`agentspec`](https://github.com/urmzd/agentspec) to install both local skills from [`dot_agents/skills/`](dot_agents/skills/) and third-party skills globally to all agents:
+`chezmoi apply` installs the core skills and every subagent on every machine. The rest come in **skill packs**, catalog packages (category **skills**) picked with `dotfiles package` or the `dev-skills` and `framework-skills` bundles (see [Usage](#usage)). A pack's `skills` list holds dotfiles skill names (deployed to `~/.agents/skills/` only while the pack is selected) and agentspec sources. The [`install-skills`](run_onchange_after_install-skills.sh.tmpl) script uses [`agentspec`](https://github.com/urmzd/agentspec) to link them into every installed agent.
 
-| Source | Skills |
-| ------ | ------ |
-| This repo (`dot_agents/skills/`) | All local skills |
-| [vercel-labs/skills](https://github.com/vercel-labs/skills) | All |
-| [vercel/ai-elements](https://github.com/vercel/ai-elements) | All |
-| [vercel/streamdown](https://github.com/vercel/streamdown) | All |
-| [google-gemini/gemini-skills](https://github.com/google-gemini/gemini-skills) | All |
-| [better-auth/skills](https://github.com/better-auth/skills) | better-auth-best-practices |
-| [vercel/ai](https://github.com/vercel/ai) | ai-sdk |
-| [fastapi/fastapi](https://github.com/fastapi/fastapi) | fastapi |
-| [github/gh-stack](https://github.com/github/gh-stack) | gh-stack |
+| Pack | Skills |
+| ---- | ------ |
+| (core, always) | ship, pr, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
+| `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
+| `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
+| `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
+| `skills-ecosystem` | write-code-portfolio, style-brand, sync-ecosystem, sync-ecosystem-to-chezmoi, setup-devenv-with-chezmoi |
+| `skills-vercel` | [vercel-labs/skills](https://github.com/vercel-labs/skills), [vercel/ai-elements](https://github.com/vercel/ai-elements), [vercel/streamdown](https://github.com/vercel/streamdown), [vercel/ai](https://github.com/vercel/ai) (ai-sdk) |
+| `skills-gemini` | [google-gemini/gemini-skills](https://github.com/google-gemini/gemini-skills) |
+| `skills-fastapi` | [fastapi/fastapi](https://github.com/fastapi/fastapi) (fastapi) |
+| `skills-better-auth` | [better-auth/skills](https://github.com/better-auth/skills) (better-auth-best-practices) |
+| `skills-gh-stack` | [github/gh-stack](https://github.com/github/gh-stack) (gh-stack) |
+
+Deselecting a pack removes its dotfiles skills on the next apply. Skills from an agentspec source stay until removed: `agentspec manage remove <name>`.
 
 To manage skills and agents manually:
 

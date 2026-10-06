@@ -1,5 +1,11 @@
 skills/
 
+# Dotfiles skills in skill packs that are not selected (catalog.toml `skills`;
+# change with `dotfiles package`).
+{{- range (includeTemplate "skills" . | fromJson).hidden }}
+.agents/skills/{{ . }}
+{{- end }}
+
 # Repo metadata: lives in the repo only, never applied into $HOME.
 # install.sh is the single-file bootstrap fetched via curl; the rest are docs
 # and release config for the dotfiles repo itself.
