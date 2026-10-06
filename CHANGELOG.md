@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.13.0 (2026-10-06)
+
+### Features
+
+- **packs**: stack any number of packs, including one folder of a repo (url//folder) ([e11aef5](https://github.com/urmzd/dotfiles/commit/e11aef5faeffba2ab578ce071e455cdb8a150f32))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.12.1...v0.13.0)
+
+
 ## 0.12.1 (2026-10-05)
 
 ### Bug Fixes
