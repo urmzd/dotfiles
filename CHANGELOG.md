@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.2 (2026-10-09)
+
+### Bug Fixes
+
+- **zsh**: stop fnm prune from deleting live shells' node links ([79f34ae](https://github.com/urmzd/dotfiles/commit/79f34ae9fa769763d3425c3f6e6ba250aac8232b))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.16.1...v0.16.2)
+
+
 ## 0.16.1 (2026-10-06)
 
 ### Bug Fixes
