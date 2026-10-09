@@ -44,7 +44,7 @@ jobs:
 
       - name: Release
         id: sr
-        uses: urmzd/sr@v8
+        uses: urmzd/sr@v9
         with:
           github-token: ${{ steps.app-token.outputs.token }}
 
