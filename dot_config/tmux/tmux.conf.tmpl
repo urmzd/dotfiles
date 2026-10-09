@@ -42,8 +42,16 @@ set-option -ga terminal-overrides ",*256col*:Tc"
 {{- end }}
 
 # Pass OSC 8 hyperlinks (ls --hyperlink, gh, cargo, delta) through to the
-# outer terminal so they are clickable (cmd+click in Ghostty). tmux 3.4+.
+# outer terminal so they are clickable. With mouse on, tmux takes plain
+# clicks, so use cmd+shift+click in Ghostty. tmux 3.4+.
 set -as terminal-features ",*:hyperlinks"
+
+# prefix + u: fuzzy-pick a URL from the pane's scrollback and open it
+{{- if .is_macos }}
+bind-key u run-shell -b "tmux capture-pane -J -p -S -3000 | grep -oE 'https?://[^[:space:]\"<>]+' | sort -u | fzf-tmux -p 80%,40% --tac | xargs -I{} open {}"
+{{- else }}
+bind-key u run-shell -b "tmux capture-pane -J -p -S -3000 | grep -oE 'https?://[^[:space:]\"<>]+' | sort -u | fzf-tmux -p 80%,40% --tac | xargs -I{} xdg-open {}"
+{{- end }}
 
 # Vim-style pane selection
 bind h select-pane -L
