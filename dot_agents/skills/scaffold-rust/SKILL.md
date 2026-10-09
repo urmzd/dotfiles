@@ -126,7 +126,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: urmzd/sr@v8
+      - uses: urmzd/sr@v9
         id: sr
         with:
           github-token: ${{ steps.app-token.outputs.token }}
