@@ -258,14 +258,12 @@ packages:
   - path: .
     version_files:
       - Cargo.toml
-    stage_files:
-      - Cargo.lock
     publish:
       type: cargo
       workspace: true    # iterate [workspace].members in declaration order
 ```
 
-For workspaces, sr auto-discovers member `Cargo.toml` files from the root. List `[workspace].members` in dependency order (leaf crates first) so `cargo publish` reaches crates.io in the right order.
+sr v9 rewrites the workspace entries in `Cargo.lock` (and retargets path deps that carry a `version`) and stages it in the release commit, so `Cargo.lock` needs no `stage_files` entry and no post-release `cargo update -w` step. For workspaces, sr auto-discovers member `Cargo.toml` files from the root. List `[workspace].members` in dependency order (leaf crates first) so `cargo publish` reaches crates.io in the right order.
 
 ### Common Commands
 

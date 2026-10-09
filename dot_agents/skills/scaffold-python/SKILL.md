@@ -158,7 +158,6 @@ channels:
 packages:
   - path: .
     version_files: [pyproject.toml]
-    stage_files:   [uv.lock]
     # Uncomment to publish to PyPI (requires wheels to be built in CI between
     # `sr prepare` and `sr release` so they embed the bumped version):
     # publish:
@@ -265,4 +264,4 @@ uv.lock
 - Python version comes from `pyproject.toml` `requires-python` field; `uv python install` resolves it
 - `astral-sh/setup-uv@v5` handles caching automatically
 - For PyPI publishing, `uv publish` uses trusted publishers (OIDC). Configure on pypi.org first
-- `stage_files: [uv.lock]` ensures lockfile stays in sync after version bumps
+- sr v9 rewrites the project's own entries in `uv.lock` (sources `editable`, `virtual`, `directory`) during the bump and stages it in the release commit. Do not list `uv.lock` in `stage_files` or add a post-release `uv lock` commit. Keep `uv.lock` beside `pyproject.toml` (or in a parent directory) so sr discovers it

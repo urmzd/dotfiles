@@ -154,6 +154,8 @@ jobs:
 
 To enable npm publishing, add `publish: { type: npm, workspace: true, access: public }` to `sr.yaml` (below). The sr npm publisher auto-detects pnpm/npm/yarn from the lockfile.
 
+`pnpm-lock.yaml` records workspace deps as `link:` and stores no member versions, so a bump never makes it stale: no `stage_files` entry and no post-release `pnpm install` commit. sr v9 does rewrite workspace sibling ranges (such as `^1.0.0`) in member `package.json` files, and, for npm projects, the root and member entries in `package-lock.json`.
+
 ### `sr.yaml`
 
 See `sync-release` skill for full sr.yaml reference.
@@ -176,8 +178,6 @@ packages:
   - path: .
     version_files:
       - package.json
-    stage_files:
-      - pnpm-lock.yaml
     # Uncomment to publish to npm (the npm publisher auto-detects pnpm/yarn
     # from the lockfile and runs the tool's native recursive publish):
     # publish:

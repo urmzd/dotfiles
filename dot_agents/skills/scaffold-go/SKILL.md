@@ -195,7 +195,7 @@ jobs:
 
 ### `sr.yaml`
 
-Generate with `sr init`. Go uses git tags only, so packages need no `version_files` or `stage_files`:
+Generate with `sr init`. Go uses git tags only, so packages need no `version_files` or `stage_files`. sr never touches `go.sum` (it records module hashes, not this module's version):
 
 ```yaml
 git:
