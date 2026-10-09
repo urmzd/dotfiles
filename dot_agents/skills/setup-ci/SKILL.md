@@ -35,8 +35,10 @@ Universal conventions that apply across all languages. For language-specific CI 
 ```text
 PR -> ci.yml (fmt -> lint -> test)
 Push main -> release.yml:
-  fsrc -> ci -> sr release -> build -> publish -> teasr -> lock sync
+  fsrc -> ci -> sr release -> build -> publish -> teasr
 ```
+
+sr v9+ syncs lock files (`Cargo.lock`, `uv.lock`, `poetry.lock`, `package-lock.json`) during the version bump and commits them in the release commit, so `release.yml` needs no separate lock sync step or `[skip ci]` lock commit. See `sync-release` for details.
 
 ## Release Config
 
