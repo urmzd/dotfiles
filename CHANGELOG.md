@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.17.0 (2026-10-09)
+
+### Features
+
+- **tmux**: add prefix+u fzf picker to open URLs from scrollback ([41c111c](https://github.com/urmzd/dotfiles/commit/41c111c213823a3a0ceb6b856d57a6eff003470f))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.16.2...v0.17.0)
+
+
 ## 0.16.2 (2026-10-09)
 
 ### Bug Fixes
