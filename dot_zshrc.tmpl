@@ -132,17 +132,30 @@ fi
 eval "$(fnm env --use-on-cd --shell zsh)"
 
 # fnm links one dir per shell into ~/.local/state/fnm_multishells and never
-# removes them (1,400+ had piled up by 2026-10). Prune links whose process is
-# no longer a shell, in the background so startup stays fast. Checking the
-# command, not just the pid, matters: pids get reused by unrelated processes.
+# removes them (1,400+ had piled up by 2026-10). The pid in a link's name is
+# fnm's own short-lived process, not the shell's, so each shell records its pid
+# in <link>.pid. Prune links whose recorded process is no longer a shell, in
+# the background so startup stays fast. Checking the command, not just the pid,
+# matters: pids get reused by unrelated processes. Links with no .pid file
+# (older shells, or one still starting up) are only pruned after a day.
+[[ -n $FNM_MULTISHELL_PATH ]] && print -r -- $$ >| $FNM_MULTISHELL_PATH.pid
 _fnm_prune_multishells() {
-  local dir=${FNM_MULTISHELL_PATH:h} link pid comm
+  local dir=${FNM_MULTISHELL_PATH:h} link pid comm pidfile
+  local -a stale
   [[ -n $FNM_MULTISHELL_PATH && -d $dir ]] || return 0
   for link in $dir/*(N@); do
     [[ $link == $FNM_MULTISHELL_PATH ]] && continue
-    pid=${${link:t}%%_*}
-    comm=$(ps -o comm= -p $pid 2>/dev/null)
-    [[ $comm == *zsh* || $comm == *bash* || $comm == *fish* ]] || rm -f -- $link
+    if [[ -f $link.pid ]]; then
+      pid=$(<$link.pid)
+      comm=$(ps -o comm= -p $pid 2>/dev/null)
+      [[ $comm == *zsh* || $comm == *bash* || $comm == *fish* ]] || rm -f -- $link $link.pid
+    else
+      stale=($link(N@mh+24))
+      (( $#stale )) && rm -f -- $link
+    fi
+  done
+  for pidfile in $dir/*.pid(N); do
+    [[ -L ${pidfile%.pid} ]] || rm -f -- $pidfile
   done
 }
 _fnm_prune_multishells &!
