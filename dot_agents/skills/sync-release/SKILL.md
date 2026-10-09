@@ -75,7 +75,26 @@ packages:
 
 ## Version Files
 
-`version_files` (bumped by sr) and `stage_files` (committed alongside the bump, e.g. lockfiles) are language-specific. See the relevant `scaffold-<lang>` skill for the canonical values for that ecosystem. sr auto-discovers workspace members where the ecosystem supports it (Cargo, uv, pnpm/npm).
+`version_files` (bumped by sr) are language-specific. See the relevant `scaffold-<lang>` skill for the canonical values for that ecosystem. sr auto-discovers workspace members where the ecosystem supports it (Cargo, uv, pnpm/npm).
+
+### Lock files (sr v9+)
+
+When sr bumps a manifest, it also rewrites the matching lock file and stages it in the same `chore(release)` commit. The rewrite edits the lock as TOML/JSON: no `cargo update`, `uv lock`, `poetry lock` or `npm install`, and no network access.
+
+| Lock | What sr rewrites |
+|------|------------------|
+| `Cargo.lock` | `[[package]]` entries with no `source` (workspace crates) |
+| `uv.lock` | `[[package]]` entries whose `source` is `editable`, `virtual` or `directory` |
+| `poetry.lock` | `[[package]]` entries with `[package.source] type = "directory"` |
+| `package-lock.json` | root `version` plus `packages` entries for workspace members |
+| `pnpm-lock.yaml`, `yarn.lock` | nothing (they store no member versions); staged unchanged |
+
+Registry entries and hashes are never touched. Intra-workspace requirements also follow the bump: Cargo path deps that carry a `version`, and npm sibling ranges such as `^1.0.0`.
+
+- **Discovery.** A lock is synced only when it is discovered from a bumped manifest: sr looks for the ecosystem's lock names in the manifest's directory and each parent up to the repo root. The manifest must therefore be bumped (listed in `version_files` or auto-discovered as a workspace member), and the lock must sit beside it or in an ancestor directory. A lock anywhere else is not synced.
+- **`stage_files`.** It only stages paths; it never syncs them. Discovered locks are staged automatically, so listing them in `stage_files` is redundant. Keep `stage_files` for other generated files that must ride in the release commit.
+- **Format pins.** Each rewrite is pinned to a verified format (`Cargo.lock` v4, `uv.lock` v1 rev 2, `poetry.lock` 2.x, `package-lock.json` v3). A newer format fails the release instead of committing a half-updated lock: upgrade sr or relock with an older tool.
+- **No post-release lock commit.** Do not add a CI step that re-runs `cargo update -w`, `uv lock`, `npm install --package-lock-only` or similar after `sr prepare`/`sr release` and commits the result. sr's release commit already carries the synced lock.
 
 ## CLI Commands
 
@@ -96,7 +115,7 @@ AI-assisted commit, PR, and review authoring live in dedicated agent skills (`sh
 
 ### Upgrading sr
 
-Run `sr migrate` for the full breaking-change guide. v8 turned sr into a release-state reconciler: shell hooks removed (builds live in CI), typed publishers (`cargo`/`npm`/`docker`/`pypi`/`go`/`custom`) replace `hooks.post_release`, literal paths replace globs in `artifacts`/`stage_files`, and monorepos collapse to one global version (no more `-p <pkg>`).
+Run `sr migrate` for the full breaking-change guide. v8 turned sr into a release-state reconciler: shell hooks removed (builds live in CI), typed publishers (`cargo`/`npm`/`docker`/`pypi`/`go`/`custom`) replace `hooks.post_release`, literal paths replace globs in `artifacts`/`stage_files`, and monorepos collapse to one global version (no more `-p <pkg>`). v9 made lock sync mandatory (see [Lock files](#lock-files-sr-v9)); action inputs, outputs, CLI verbs and the `sr.yaml` schema are unchanged. From v9.0.1, publisher output (`cargo publish`, `npm publish`, `uv publish`, etc.) goes to stderr so the action's JSON outputs stay parseable.
 
 ## Release Pipeline
 
@@ -105,10 +124,9 @@ push to main
   → ci.yml (fmt → lint → test)
   → release.yml:
       fsrc (sync embedded sources) [if markers exist]
-      → sr release (bump → changelog → tag → GitHub release)
+      → sr release (bump + lock sync → changelog → commit → tag → GitHub release)
       → build / publish [language and registry specific; see scaffold-* skills]
       → teasr (post-release demo capture) [if teasr.toml exists]
-      → lockfile sync commit [skip ci; if the ecosystem has a lockfile]
 ```
 
 ## sr Action Usage
@@ -126,7 +144,6 @@ push to main
 
 ## Post-Release Patterns
 
-- **Lockfile sync** language-specific lock update then commit `[skip ci]`
 - **Demo capture** teasr then commit generated assets
 - **File embedding** fsrc then commit
 
@@ -167,7 +184,7 @@ Run tests, lints, and pre-flight scripts as ordinary CI steps before `sr release
 | Single-platform binary | build then `sr release` in one job | literal path(s) to the built binary |
 | Multi-platform binaries | `sr prepare` → build matrix → `sr release` (three jobs, artifacts flow via `actions/upload-artifact`) | literal paths for every target |
 
-Multi-platform: `sr prepare` bumps version files so matrix builds embed the right version; the final `release` job downloads all matrix artifacts, commits, tags, uploads, and publishes.
+Multi-platform: `sr prepare` bumps version files and syncs lock files so matrix builds embed the right version (carry the bumped manifests and locks to the build jobs together); the final `release` job downloads all matrix artifacts, commits, tags, uploads, and publishes.
 
 ## Monorepo Support
 
