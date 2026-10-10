@@ -20,10 +20,9 @@ local M = {}
 ---@type string[]
 M.servers = {
 	"lua_ls",
-	-- ty type-checks; basedpyright supplies the completion, hover and
-	-- signature help ty still lacks.
+	-- ty alone: its server now covers completion, hover and signature help,
+	-- which is what basedpyright used to be here for.
 	"ty",
-	"basedpyright",
 	"rust_analyzer",
 	"gopls",
 	"clangd",

@@ -83,7 +83,7 @@ Formatters follow the same path, derived from conform's own `formatters_by_ft`.
 | Language | Server | Why this one |
 |---|---|---|
 | Lua | `lua_ls` | |
-| Python | `ty` + `basedpyright` | ty type-checks; basedpyright has the completion and hover ty still lacks |
+| Python | `ty` | Astral's type checker and language server; `ruff` formats |
 | Rust | `rust_analyzer` | |
 | Go | `gopls` | |
 | C / C++ | `clangd` | |
