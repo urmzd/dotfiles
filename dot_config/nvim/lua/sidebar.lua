@@ -17,6 +17,11 @@ local M = {}
 
 local NEOTREE_FT = "neo-tree"
 local NEOTEST_FT = "neotest-summary"
+-- A panel with nothing to show still owns its tab. Its slot is filled by a
+-- placeholder buffer of this filetype that says why, so the strip never
+-- changes shape between projects and `3` always means Tests.
+local EMPTY_FT = "sidebar-empty"
+local WIDTH = 40
 
 -- The `%!` form (rather than `%{%…%}`) is what sets `g:statusline_winid`, which
 -- is how render() knows which window it is drawing into. Both forms re-parse
@@ -30,45 +35,77 @@ M.winbar = "%!v:lua.require'sidebar'.render()"
 ---@field filetype string Filetype of the buffer this panel renders into.
 ---@field source string|nil neo-tree source name; nil means the panel is neotest.
 ---@field available fun(): boolean
+---@field empty (fun(): string[])|nil Paragraphs for the placeholder shown when not available.
 
 -- `available` is asked on every winbar redraw, so anything that shells out or
 -- walks the filesystem is answered from this cache and recomputed only when the
--- working directory changes.
-local probe = { cwd = nil, git = false, tests = false }
+-- working directory, or the directory of the file being edited, changes.
+local probe = { cwd = nil, file_dir = nil, probed_dir = nil, git = false, tests = false, claimed = {} }
 
 local function has_git()
 	local found = vim.fs.find(".git", { upward = true, path = vim.fn.getcwd(), limit = 1 })
 	return #found > 0
 end
 
----True when at least one configured neotest adapter claims this project.
----Adapters expose `root(dir)`, which is how neotest itself decides whether it
----has anything to say about a directory.
-local function has_tests()
-	local ok, config = pcall(require, "neotest.config")
-	if not ok or type(config.adapters) ~= "table" then
-		return false
+---True when at least one configured neotest adapter claims `dir`. Adapters
+---expose `root(dir)`, which is how neotest itself decides whether it has
+---anything to say about a directory. Some shell out to answer (cargo
+---metadata), hence the memo.
+---@param dir string
+local function claimed(dir)
+	if probe.claimed[dir] ~= nil then
+		return probe.claimed[dir]
 	end
-	local cwd = vim.fn.getcwd()
-	for _, adapter in ipairs(config.adapters) do
-		if type(adapter) == "table" and type(adapter.root) == "function" then
-			local called, root = pcall(adapter.root, cwd)
-			if called and root then
-				return true
+	local found = false
+	local ok, config = pcall(require, "neotest.config")
+	if ok and type(config.adapters) == "table" then
+		for _, adapter in ipairs(config.adapters) do
+			if type(adapter) == "table" and type(adapter.root) == "function" then
+				local called, root = pcall(adapter.root, dir)
+				if called and root then
+					found = true
+					break
+				end
 			end
 		end
 	end
-	return false
+	probe.claimed[dir] = found
+	return found
 end
 
+---The working directory is usually the repository root, and in a repository
+---that keeps its code a level down (a crate in `cli/`, a package in `web/`)
+---no adapter claims that. The file being edited is asked as well, so the
+---Tests tab follows the code rather than the checkout.
 local function probe_cwd()
 	local cwd = vim.fn.getcwd()
-	if probe.cwd == cwd then
+	if probe.cwd == cwd and probe.probed_dir == probe.file_dir then
 		return
 	end
+	if probe.cwd ~= cwd then
+		probe.git = has_git()
+		probe.tests = false
+	end
 	probe.cwd = cwd
-	probe.git = has_git()
-	probe.tests = has_tests()
+	probe.probed_dir = probe.file_dir
+	-- Sticky until the working directory changes: stepping from a test file
+	-- to the README should not take the tab away again.
+	probe.tests = probe.tests or claimed(cwd) or (probe.file_dir ~= nil and claimed(probe.file_dir))
+end
+
+---Names of the configured neotest adapters, without the `neotest-` prefix.
+---@return string[]
+local function adapter_names()
+	local names = {}
+	local ok, config = pcall(require, "neotest.config")
+	if ok and type(config.adapters) == "table" then
+		for _, adapter in ipairs(config.adapters) do
+			if type(adapter) == "table" and type(adapter.name) == "string" then
+				names[#names + 1] = (adapter.name:gsub("^neotest%-", ""))
+			end
+		end
+	end
+	return names
 end
 
 ---Panel order is tab order; the index doubles as the mouse click id.
@@ -93,6 +130,12 @@ local panels = {
 		available = function()
 			return probe.git
 		end,
+		empty = function()
+			return {
+				"Not inside a git repository.",
+				"Changed files list here once this directory, or one above it, has a .git.",
+			}
+		end,
 	},
 	{
 		key = "tests",
@@ -102,6 +145,16 @@ local panels = {
 		source = nil,
 		available = function()
 			return probe.tests
+		end,
+		empty = function()
+			local names = adapter_names()
+			local configured = #names > 0 and ("Configured adapters: " .. table.concat(names, ", ") .. ".")
+				or "No neotest adapters are configured."
+			return {
+				"No test adapter claims this project.",
+				configured,
+				"Tests list here when the working directory is a project one of them recognises.",
+			}
 		end,
 	},
 }
@@ -118,6 +171,9 @@ local function panel_for_buf(buf)
 		return nil
 	end
 	local filetype = vim.bo[buf].filetype
+	if filetype == EMPTY_FT then
+		return by_key[vim.b[buf].sidebar_panel]
+	end
 	for _, panel in ipairs(panels) do
 		if filetype == panel.filetype then
 			-- Every neo-tree panel shares a filetype, so the source decides.
@@ -187,6 +243,69 @@ local function close_panel(panel)
 	end
 end
 
+---@return integer|nil
+local function empty_win()
+	for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+		if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == EMPTY_FT then
+			return win
+		end
+	end
+	return nil
+end
+
+local function close_empty()
+	local win = empty_win()
+	if win then
+		pcall(vim.api.nvim_win_close, win, true)
+	end
+end
+
+local empty_ns = vim.api.nvim_create_namespace("sidebar-empty")
+
+---Fill the sidebar slot with a note saying why `panel` has nothing to show.
+---@param panel SidebarPanel
+local function show_empty(panel)
+	local lines = { "", "  " .. panel.icon .. "  " .. panel.label, "" }
+	for _, paragraph in ipairs(panel.empty and panel.empty() or {}) do
+		lines[#lines + 1] = "  " .. paragraph
+		lines[#lines + 1] = ""
+	end
+
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	vim.api.nvim_buf_set_extmark(buf, empty_ns, 1, 0, { end_row = 2, hl_group = "SidebarTabActive" })
+	vim.api.nvim_buf_set_extmark(buf, empty_ns, 3, 0, { end_row = #lines, hl_group = "Comment" })
+	vim.bo[buf].modifiable = false
+	vim.bo[buf].bufhidden = "wipe"
+	vim.b[buf].sidebar_panel = panel.key
+
+	local win = empty_win()
+	if win then
+		vim.api.nvim_win_set_buf(win, buf)
+		vim.api.nvim_set_current_win(win)
+	else
+		win = vim.api.nvim_open_win(buf, true, { split = "left", win = -1, width = WIDTH })
+	end
+	local wo = vim.wo[win]
+	wo.number = false
+	wo.relativenumber = false
+	wo.signcolumn = "no"
+	wo.foldcolumn = "0"
+	wo.cursorline = false
+	wo.list = false
+	wo.spell = false
+	wo.winfixwidth = true
+	-- Paragraphs are single lines; wrapping them here keeps the text right
+	-- at any sidebar width, and breakindent carries the left margin down.
+	wo.wrap = true
+	wo.linebreak = true
+	wo.breakindent = true
+
+	vim.keymap.set("n", "q", M.close, { buffer = buf, nowait = true, desc = "Sidebar: Close" })
+	-- Last, so the FileType autocmd decorates a window that is already set up.
+	vim.bo[buf].filetype = EMPTY_FT
+end
+
 ---Show `key`, closing whichever panel currently owns the slot.
 ---@param key string
 function M.open(key)
@@ -196,10 +315,15 @@ function M.open(key)
 		return
 	end
 	probe_cwd()
+	M.last = key
 	if not target.available() then
-		vim.notify(("Sidebar: no %s panel in this project"):format(target.label), vim.log.levels.WARN)
+		for _, panel in ipairs(panels) do
+			close_panel(panel)
+		end
+		show_empty(target)
 		return
 	end
+	close_empty()
 	for _, panel in ipairs(panels) do
 		-- Panels sharing a filetype share the window, and neo-tree swaps the
 		-- source in place; closing first would only make it flicker.
@@ -208,10 +332,10 @@ function M.open(key)
 		end
 	end
 	open_panel(target)
-	M.last = key
 end
 
 function M.close()
+	close_empty()
 	for _, panel in ipairs(panels) do
 		close_panel(panel)
 	end
@@ -225,6 +349,24 @@ function M.toggle(key)
 	else
 		M.open(key)
 	end
+end
+
+---Step to the next (or, with a negative `step`, previous) panel, wrapping at
+---either end.
+---@param step integer
+function M.cycle(step)
+	local active = M.active()
+	local current = 0
+	for index, panel in ipairs(panels) do
+		if active and panel.key == active.key then
+			current = index
+		end
+	end
+	if current == 0 then
+		M.open(panels[1].key)
+		return
+	end
+	M.open(panels[(current - 1 + step) % #panels + 1].key)
 end
 
 -- Statusline click handlers have to be reachable from Vimscript, so this is
@@ -284,30 +426,18 @@ function M.render()
 	local width = valid and vim.api.nvim_win_get_width(winid) or 40
 	local active = panel_for_buf(buf)
 
-	local visible = {}
-	for index, panel in ipairs(panels) do
-		if panel.available() then
-			visible[#visible + 1] = { panel = panel, index = index }
-		end
-	end
-
-	local flat = {}
-	for _, entry in ipairs(visible) do
-		flat[#flat + 1] = entry.panel
-	end
-	local all_labelled, active_labelled = fit(flat, active, width)
+	local all_labelled, active_labelled = fit(panels, active, width)
 
 	local out = {}
-	for _, entry in ipairs(visible) do
-		local panel = entry.panel
+	for index, panel in ipairs(panels) do
 		local is_active = active ~= nil and panel.key == active.key
 		local labelled = all_labelled or (is_active and active_labelled)
-		local group = is_active and "SidebarTabActive" or "SidebarTabInactive"
-		out[#out + 1] = ("%%%d@v:lua.___sidebar_click@%%#%s#%s%%X"):format(
-			entry.index,
-			group,
-			tab_text(panel, labelled)
-		)
+		-- Every tab is always drawn; one with nothing to show is dimmed
+		-- rather than dropped, so the strip keeps its shape.
+		local group = is_active and "SidebarTabActive"
+			or panel.available() and "SidebarTabInactive"
+			or "SidebarTabUnavailable"
+		out[#out + 1] = ("%%%d@v:lua.___sidebar_click@%%#%s#%s%%X"):format(index, group, tab_text(panel, labelled))
 	end
 	return table.concat(out) .. "%*"
 end
@@ -329,6 +459,7 @@ local function set_highlights()
 	end
 	vim.api.nvim_set_hl(0, "SidebarTabActive", { fg = fg("Function") or fg("Title"), bold = true, underline = true })
 	vim.api.nvim_set_hl(0, "SidebarTabInactive", { fg = fg("Comment") })
+	vim.api.nvim_set_hl(0, "SidebarTabUnavailable", { fg = fg("NonText") or fg("Comment") })
 end
 
 ---Attach the tab strip (and its keyboard equivalents) to a panel window.
@@ -344,7 +475,7 @@ local function decorate_win(win)
 	end
 	local buf = vim.api.nvim_win_get_buf(win)
 	local filetype = vim.bo[buf].filetype
-	if filetype ~= NEOTREE_FT and filetype ~= NEOTEST_FT then
+	if filetype ~= NEOTREE_FT and filetype ~= NEOTEST_FT and filetype ~= EMPTY_FT then
 		return
 	end
 	if vim.wo[win].winbar ~= M.winbar then
@@ -357,6 +488,14 @@ local function decorate_win(win)
 			M.open(panel.key)
 		end, { buffer = buf, nowait = true, desc = "Sidebar: " .. panel.label })
 	end
+	-- Globally <Tab> cycles buffers, which means nothing in a panel; here it
+	-- walks the tab strip instead.
+	vim.keymap.set("n", "<Tab>", function()
+		M.cycle(1)
+	end, { buffer = buf, nowait = true, desc = "Sidebar: Next panel" })
+	vim.keymap.set("n", "<S-Tab>", function()
+		M.cycle(-1)
+	end, { buffer = buf, nowait = true, desc = "Sidebar: Previous panel" })
 end
 
 local function decorate()
@@ -371,10 +510,42 @@ function M.setup()
 	set_highlights()
 	vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = set_highlights })
 
+	-- A placeholder describes the place just left; redraw it, or swap in the
+	-- real panel if the new place has one.
+	local function refresh_empty()
+		local win = empty_win()
+		local panel = win and panel_for_buf(vim.api.nvim_win_get_buf(win))
+		if not panel then
+			return
+		end
+		local focused = vim.api.nvim_get_current_win()
+		M.open(panel.key)
+		if focused ~= win and vim.api.nvim_win_is_valid(focused) then
+			vim.api.nvim_set_current_win(focused)
+		end
+	end
+
 	vim.api.nvim_create_autocmd("DirChanged", {
 		group = group,
 		callback = function()
 			probe.cwd = nil
+			probe.claimed = {}
+			vim.schedule(refresh_empty)
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("BufEnter", {
+		group = group,
+		callback = function(args)
+			local name = vim.api.nvim_buf_get_name(args.buf)
+			if vim.bo[args.buf].buftype ~= "" or name == "" then
+				return
+			end
+			local dir = vim.fs.dirname(name)
+			if dir ~= probe.file_dir then
+				probe.file_dir = dir
+				vim.schedule(refresh_empty)
+			end
 		end,
 	})
 

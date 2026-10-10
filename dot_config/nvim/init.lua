@@ -522,6 +522,16 @@ require("lazy").setup({
 						text_align = "center",
 						separator = true,
 					},
+					{
+						-- Placeholder for a panel with nothing to show.
+						filetype = "sidebar-empty",
+						text = function()
+							local ok, sidebar = pcall(require, "sidebar")
+							return ok and sidebar.title() or ""
+						end,
+						text_align = "center",
+						separator = true,
+					},
 				},
 				color_icons = true,
 				show_buffer_icons = true,

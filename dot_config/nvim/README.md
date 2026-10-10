@@ -11,16 +11,18 @@ One window on the left, three panels, one tab strip drawn in its `winbar`. The
 tabs are clickable with the mouse and reachable by key, so no panel is hidden
 behind a command you have to remember.
 
-| Tab | Panel | Shown when |
+| Tab | Panel | Has content when |
 |---|---|---|
 | `󰉋 Files` | neo-tree filesystem | always |
 | `󰊢 Changes` | neo-tree git status, the VS Code Source Control list | inside a git repository |
-| `󰙨 Tests` | neotest summary | a neotest adapter claims the project |
+| `󰙨 Tests` | neotest summary | a neotest adapter claims the working directory or the file being edited |
 
 | Key | Action |
 |---|---|
 | `<leader>1` / `<leader>2` / `<leader>3` | Files / Changes / Tests |
 | `1` / `2` / `3` (inside a panel) | same, because `<leader>` is taken by neo-tree |
+| `<Tab>` / `<S-Tab>` (inside a panel) | next / previous panel, wrapping |
+| `q` (inside an empty panel) | close the sidebar |
 | `<leader>sf` / `<leader>sc` / `<leader>st` | same, spelled out |
 | `<leader>ss` | reopen the last panel |
 | `<leader>sq` | close the sidebar |
@@ -28,7 +30,9 @@ behind a command you have to remember.
 | click a tab | switch to it; clicking the active tab closes the sidebar |
 
 The strip drops labels for inactive tabs, then for all tabs, as the window
-narrows, so it never truncates.
+narrows, so it never truncates. All three tabs are always drawn: a panel with
+nothing to show is dimmed in the strip and opens a short note saying why, so
+the keys mean the same thing in every project.
 
 ## Worktrees
 
