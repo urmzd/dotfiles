@@ -225,33 +225,6 @@ vim.lsp.config("mdx_analyzer", {
 require("lazy").setup({
 	{ "neovim/nvim-lspconfig" },
 	{
-		"milanglacier/minuet-ai.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			require("minuet").setup({
-				provider = "openai_fim_compatible",
-				n_completions = 1,
-				-- Local models need a small context window to keep latency usable.
-				context_window = 2048,
-				provider_options = {
-					openai_fim_compatible = {
-						name = "Ollama",
-						end_point = "http://localhost:11434/v1/completions",
-						-- Must be a FIM-capable model (qwen2.5-coder family);
-						-- chat models silently produce garbage completions.
-						model = "qwen2.5-coder:3b",
-						-- Ollama ignores auth but minuet requires a non-empty env var name.
-						api_key = "TERM",
-						optional = {
-							max_tokens = 64,
-							top_p = 0.9,
-						},
-					},
-				},
-			})
-		end,
-	},
-	{
 		"mason-org/mason.nvim",
 		opts = {},
 	},
@@ -483,7 +456,7 @@ require("lazy").setup({
 			vim.cmd.colorscheme(theme.colorscheme)
 
 			-- cyberdream's default BlinkCmpGhostText (#474d57) sits at ~2.2:1 against
-			-- the background, dimmer than Comment. Link it to Comment so LLM
+			-- the background, dimmer than Comment. Link it to Comment so ghost
 			-- completions are actually readable inline.
 			local ghost_hl = vim.api.nvim_create_augroup("GhostTextContrast", { clear = true })
 			local function set_ghost_hl()
@@ -1080,7 +1053,6 @@ require("lazy").setup({
 		"saghen/blink.cmp",
 		dependencies = {
 			"rafamadriz/friendly-snippets",
-			"milanglacier/minuet-ai.nvim",
 		},
 		version = "1.*",
 		opts = {
@@ -1094,21 +1066,11 @@ require("lazy").setup({
 			completion = {
 				documentation = { auto_show = false },
 				ghost_text = { enabled = true },
-				-- minuet: LLM requests are too slow to fire on every insert entry.
-				trigger = { prefetch_on_insert = false },
 			},
 			snippets = { preset = "luasnip" },
 			sources = {
-				default = { "minuet", "lsp", "snippets", "buffer", "path", "lazydev" },
+				default = { "lsp", "snippets", "buffer", "path", "lazydev" },
 				providers = {
-					minuet = {
-						name = "minuet",
-						module = "minuet.blink",
-						async = true,
-						-- Local LLM completions take seconds, not blink's 2s default.
-						timeout_ms = 3000,
-						score_offset = 75,
-					},
 					lazydev = {
 						name = "LazyDev",
 						module = "lazydev.integrations.blink",
