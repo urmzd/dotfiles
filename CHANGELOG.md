@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.19.0 (2026-10-10)
+
+### Features
+
+- **nvim**: cycle sidebar panels with Tab and keep every tab visible ([4866565](https://github.com/urmzd/dotfiles/commit/486656582cd59b743077777babea4d4bde57b8b8))
+- **nvim**: run ty alone for Python and give yamlls the SchemaStore catalog ([ce9ae86](https://github.com/urmzd/dotfiles/commit/ce9ae86c13ed1d452f2c189402722de3dcc3551d))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.18.0...v0.19.0)
+
+
 ## 0.18.0 (2026-10-10)
 
 ### Features
