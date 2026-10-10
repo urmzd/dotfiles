@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.18.0 (2026-10-10)
+
+### Features
+
+- **nvim**: remove minuet-ai Ollama completion ([0deb3ec](https://github.com/urmzd/dotfiles/commit/0deb3ecad492fc95532f5ba07bb2b9f55e7d48af))
+
+### Misc
+
+- **release**: read the sr-releaser key from the release environment (#9) ([ba5c725](https://github.com/urmzd/dotfiles/commit/ba5c7258171f5e717b65c117a09dff7114960f4a))
+- **skills**: describe sr v9 lock sync and drop lockfile commit step (#8) ([9dd80f8](https://github.com/urmzd/dotfiles/commit/9dd80f8d2c739837113df51261087794c02836ad))
+- upgrade urmzd/sr action to v9 in workflow and skills (#7) ([ed50758](https://github.com/urmzd/dotfiles/commit/ed50758cf8045d703b579ee57b62aa7c31523314))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.17.0...v0.18.0)
+
+
 ## 0.17.0 (2026-10-09)
 
 ### Features
