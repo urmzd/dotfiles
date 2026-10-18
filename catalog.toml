@@ -413,14 +413,16 @@ check = "hf auth whoami"
 
 # ---- Remote access ------------------------------------------------------------
 # Reach this machine (and its tmux sessions) from a phone or another laptop.
-# Keep it awake with the lid closed via `lidawake on` (~/.zsh/functions).
+# Experimental: opt-in only, no preset selects these, until the approach is
+# settled. Selecting tailscale also deploys `lidawake` (keep awake with the lid
+# closed; see .chezmoiignore).
 
 [[package]]
 id = "tailscale"
 name = "Tailscale"
 # Private WireGuard mesh: SSH over the tailnet, no ports opened to the internet.
 # Setup signs in through the app and turns on macOS Remote Login (sshd).
-description = "Private network to reach this machine over SSH from anywhere"
+description = "(experimental) Private network to reach this machine over SSH, plus lidawake"
 category = "remote"
 cask = ["tailscale-app"]
 apps = { "tailscale-app" = "Tailscale.app" }
@@ -437,7 +439,7 @@ name = "mosh"
 # SSH replacement that survives roaming and sleep on the client side; pairs
 # with Blink Shell on iOS. Needs mosh-server on this machine, hence installed
 # here too.
-description = "mosh: SSH that survives network changes (phone, Wi-Fi hops)"
+description = "(experimental) mosh: SSH that survives network changes (phone, Wi-Fi hops)"
 category = "remote"
 brew = ["mosh"]
 apt = ["mosh"]
@@ -616,6 +618,6 @@ packages = ["teasr", "oag", "skills-ecosystem"]
 
 [[bundle]]
 id = "remote"
-name = "Remote access"
-description = "Tailscale and mosh: attach to this machine's tmux from anywhere"
+name = "Remote access (experimental)"
+description = "Opt-in: Tailscale and mosh: attach to this machine's tmux from anywhere"
 packages = ["tailscale", "mosh"]
