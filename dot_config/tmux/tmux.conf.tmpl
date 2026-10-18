@@ -115,8 +115,10 @@ source-file -q ~/.config/tmux/theme.conf
 
 # Show the window NAME (#W) in the status line instead of the pane title (#T),
 # which defaults to the hostname
-set -g @catppuccin_window_text " #W"
-set -g @catppuccin_window_current_text " #W"
+# A bell icon marks windows where a Claude Code agent is waiting on you: any
+# pane carrying @agent_waiting, set by ~/.claude/hooks/agent-attention.sh.
+set -g @catppuccin_window_text " #W#{?#{P:#{?@agent_waiting,1,}}, 󰂞,}"
+set -g @catppuccin_window_current_text " #W#{?#{P:#{?@agent_waiting,1,}}, 󰂞,}"
 
 # Load Catppuccin theme manually (recommended over TPM)
 run '~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux'
