@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.0 (2026-10-18)
+
+### Features
+
+- **catalog**: keep remote access opt-in and experimental (#12) ([abe371e](https://github.com/urmzd/dotfiles/commit/abe371ef645ce65088a48095876eee4e681ebfaf))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.20.0...v0.21.0)
+
+
 ## 0.20.0 (2026-10-18)
 
 ### Features
