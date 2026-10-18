@@ -29,3 +29,9 @@ requirements-pipx.txt
 {{- if ne .chezmoi.os "darwin" }}
 .gnupg/gpg-agent.conf
 {{- end }}
+
+# lidawake (keep awake with the lid closed) is part of the experimental remote
+# access setup: only deployed once the tailscale package is selected.
+{{- if not (has "tailscale" (.packages | default list)) }}
+.zsh/functions/lidawake.zsh
+{{- end }}
