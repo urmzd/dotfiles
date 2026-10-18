@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.20.0 (2026-10-18)
+
+### Features
+
+- **catalog**: add remote access bundle and lidawake (#11) ([0bdc49f](https://github.com/urmzd/dotfiles/commit/0bdc49fa116fcc5fbccb3fc6e0f9b02d40369dab))
+- **tmux**: flag windows where a Claude Code agent is waiting (#10) ([e9ea577](https://github.com/urmzd/dotfiles/commit/e9ea57783706b4d2f56cb03beb3f3a7bfac8c852))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.19.0...v0.20.0)
+
+
 ## 0.19.0 (2026-10-10)
 
 ### Features
