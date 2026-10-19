@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.22.0 (2026-10-19)
+
+### Features
+
+- **install**: fetch private packs on a fresh laptop (#13) ([4d32b84](https://github.com/urmzd/dotfiles/commit/4d32b84b6c6a016f978a8e1ed4744078d2b5fb05))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.21.0...v0.22.0)
+
+
 ## 0.21.0 (2026-10-18)
 
 ### Features
