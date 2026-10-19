@@ -13,17 +13,45 @@ set -u
 shown=0
 section() { [ "$shown" -eq 1 ] || ui_section "Packs"; shown=1; }
 
-# Never stop to ask for credentials: fail fast and warn instead.
+# Never stop to ask for credentials: fail fast and warn instead. A fresh
+# laptop has no known_hosts, and BatchMode refuses an unknown host key, so
+# a private pack failed even after `dotfiles identity`. GitHub's keys are
+# seeded from its API over HTTPS (seed_github_host); other hosts are
+# trusted on first use (accept-new still rejects a changed key).
 export GIT_TERMINAL_PROMPT=0
-export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=10"
+export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
+# HTTPS packs on github.com sign in with gh's token (what `gh auth setup-git`
+# does, without editing the managed ~/.gitconfig). Signed out, it fails fast.
+if command -v gh >/dev/null 2>&1; then
+    export GIT_CONFIG_COUNT=2
+    export GIT_CONFIG_KEY_0="credential.https://github.com.helper" GIT_CONFIG_VALUE_0=""
+    export GIT_CONFIG_KEY_1="credential.https://github.com.helper" GIT_CONFIG_VALUE_1="!gh auth git-credential"
+fi
 err="$(mktemp "${TMPDIR:-/tmp}/packs.XXXXXX")"
 trap 'rm -f "$err"' EXIT
 fetched=" "
+
+seeded=0
+seed_github_host() { # <url>
+    case "$1" in git@github.com:* | ssh://git@github.com/* | ssh://github.com/*) ;; *) return 0 ;; esac
+    [ "$seeded" -eq 0 ] || return 0
+    seeded=1
+    command -v ssh-keygen >/dev/null 2>&1 || return 0
+    ssh-keygen -F github.com >/dev/null 2>&1 && return 0
+    local keys
+    keys="$(curl -fsS --max-time 10 https://api.github.com/meta 2>/dev/null |
+        grep -oE '"(ssh-ed25519|ecdsa-sha2-nistp256|ssh-rsa) [A-Za-z0-9+/=]+"' | tr -d '"')" || true
+    [ -n "$keys" ] || return 0  # accept-new covers it
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+    printf '%s\n' "$keys" | sed 's/^/github.com /' >>"$HOME/.ssh/known_hosts"
+}
 
 fetch() { # <url> <repo dir>
     local url="$1" repo="$2"
     case "$fetched" in *" $repo "*) return 0 ;; esac
     fetched="$fetched$repo "
+    seed_github_host "$url"
     if [ -d "$repo/.git" ]; then
         # Fast-forward at most once a day; FETCH_HEAD records the last fetch.
         if [ -f "$repo/.git/FETCH_HEAD" ] && [ -z "$(find "$repo/.git/FETCH_HEAD" -mmin +1440 2>/dev/null)" ]; then
@@ -50,7 +78,8 @@ fetch() { # <url> <repo dir>
         else
             ui_warn "could not clone $url; the rest of the apply is unaffected"
             ui_hint "$(head -1 "$err")"
-            ui_hint "check access (dotfiles identity sets up this machine's SSH key), then rerun: chezmoi apply"
+            ui_hint "check access (dotfiles identity signs gh in and uploads this machine's SSH key), then rerun: chezmoi apply"
+            ui_hint "org with SAML SSO: authorize the key at https://github.com/settings/keys (Configure SSO)"
         fi
     fi
 }

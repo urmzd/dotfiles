@@ -37,6 +37,15 @@ One-liner (installs Homebrew + chezmoi, then runs `chezmoi init --apply`):
 curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/install.sh | bash
 ```
 
+With packs (company, team, or role overlays; `--pack` repeats), including private ones on a fresh laptop:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/dotfiles/main/install.sh | bash -s -- \
+    --pack git@github.com:acme/dev-setup.git//backend-engineer
+```
+
+The first apply installs git, gh, gpg, and the `dotfiles` CLI. If a pack cannot be fetched yet (a private repo before this machine has GitHub access), the installer runs `dotfiles identity` (browser sign-in to gh, an SSH key created and uploaded), loads the key into ssh-agent (on macOS, its passphrase is saved in Keychain), and applies twice more: once to clone the packs, once to install what they contain. SSH and HTTPS pack URLs both work: GitHub's host keys are added to `~/.ssh/known_hosts` from its API over HTTPS, and HTTPS clones of github.com use gh's token. Without a terminal it skips this and prints the commands to run.
+
 Or step by step:
 
 ```bash
@@ -179,7 +188,7 @@ Company, team, and personal setup lives in optional **packs**: folders of plain 
 | `https://github.com/acme/team.git` | the whole repo | cloned to `~/.config/packs/team` |
 | `~/my-overrides` or `/path` | that folder, in place | none |
 
-`<url>//<folder>` is Terraform's module syntax: one company repo can hold `base/`, `engineer/`, `backend-engineer/`, and so on, and each person stacks the folders for their role. Fetching ([`run_after_sync-packs.sh.tmpl`](run_after_sync-packs.sh.tmpl)) never fails the apply: an unreachable or private repo (common on a new laptop before `dotfiles identity` adds its SSH key), a missing folder, or a non-git folder in the way only prints a warning with the next step. Only the list is stored, in your local `chezmoi.toml`; nothing from a pack is tracked here. Configs from before the list keep their single `work_pack` as a one-pack list. To start one, copy [`pack-template/`](pack-template/); its README has the steps.
+`<url>//<folder>` is Terraform's module syntax: one company repo can hold `base/`, `engineer/`, `backend-engineer/`, and so on, and each person stacks the folders for their role. Fetching ([`run_after_sync-packs.sh.tmpl`](run_after_sync-packs.sh.tmpl)) never fails the apply: an unreachable or private repo (common on a new laptop before `dotfiles identity` adds its SSH key), a missing folder, or a non-git folder in the way only prints a warning with the next step. The bootstrap's `--pack` flag and its access setup cover a fresh laptop end to end (see [Quick Start](#quick-start)). Only the list is stored, in your local `chezmoi.toml`; nothing from a pack is tracked here. Configs from before the list keep their single `work_pack` as a one-pack list. To start one, copy [`pack-template/`](pack-template/); its README has the steps.
 
 Every file is optional, and each hook is a no-op when its file is missing:
 

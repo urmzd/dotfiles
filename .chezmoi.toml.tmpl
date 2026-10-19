@@ -63,6 +63,11 @@
 {{-   $packs = list $legacy_pack -}}
 {{- else if or (hasKey . "work_pack") (hasKey . "work_pack_repo") -}}
 {{-   if and $is_work (stat (joinPath .chezmoi.homeDir ".config/work")) }}{{ $packs = list "~/.config/work" }}{{ end -}}
+{{- else if env "DOTFILES_PACKS" -}}
+{{- /* install.sh --pack (any machine type): seeded unasked, on first init.  */ -}}
+{{-   range (env "DOTFILES_PACKS" | splitList ",") -}}
+{{-     if trim . }}{{ $packs = append $packs (trim .) }}{{ end -}}
+{{-   end -}}
 {{- else -}}
 {{-   $ask_packs = true -}}
 {{- end -}}
