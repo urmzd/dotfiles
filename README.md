@@ -288,7 +288,7 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 | `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
 | `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
 | `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
-| `skills-ecosystem` | write-code-portfolio, style-brand, sync-ecosystem, sync-ecosystem-to-chezmoi, setup-devenv-with-chezmoi |
+| `skills-ecosystem` | write-code-portfolio, style-brand, sync-ecosystem, sync-ecosystem-to-chezmoi, setup-devenv-with-chezmoi, align-readmes |
 | `skills-vercel` | [vercel-labs/skills](https://github.com/vercel-labs/skills), [vercel/ai-elements](https://github.com/vercel/ai-elements), [vercel/streamdown](https://github.com/vercel/streamdown), [vercel/ai](https://github.com/vercel/ai) (ai-sdk) |
 | `skills-gemini` | [google-gemini/gemini-skills](https://github.com/google-gemini/gemini-skills) |
 | `skills-fastapi` | [fastapi/fastapi](https://github.com/fastapi/fastapi) (fastapi) |
