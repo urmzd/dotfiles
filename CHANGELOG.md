@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.23.0 (2026-10-20)
+
+### Features
+
+- **skills**: add align-readmes fleet README audit (#14) ([f6dc06f](https://github.com/urmzd/dotfiles/commit/f6dc06f474a123c6436b10296a5874f7b60b23d4))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.22.0...v0.23.0)
+
+
 ## 0.22.0 (2026-10-19)
 
 ### Features
