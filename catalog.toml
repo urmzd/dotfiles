@@ -535,7 +535,7 @@ description = "urmzd/* conventions: brand and demos, ecosystem drift audits, por
 category = "skills"
 skills = [
     "write-code-portfolio", "style-brand", "sync-ecosystem",
-    "sync-ecosystem-to-chezmoi", "setup-devenv-with-chezmoi",
+    "sync-ecosystem-to-chezmoi", "setup-devenv-with-chezmoi", "align-readmes",
 ]
 
 [[package]]
