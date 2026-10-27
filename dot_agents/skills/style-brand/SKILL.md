@@ -1,10 +1,11 @@
 ---
 name: style-brand
 description: >
-  Frame and document a project's visual identity: terminal theme, font, demo
-  capture pipeline, asset conventions. Use when establishing or maintaining brand
-  consistency. Ships an example brand (Cyberdream + MonaspiceNe + teasr) as a
-  template, not a mandate.
+  Establish a project's visual identity and apply the shared website design
+  approach: readable typography, mobile navigation, clear visitor journeys,
+  accessible interactions and consistent content. Use when designing or refining
+  a website, interface, agent workspace or brand. Also covers terminal themes
+  and demo assets.
 allowed-tools: Read, Grep, Glob
 metadata:
   title: Visual Identity
@@ -14,8 +15,18 @@ metadata:
 
 # Visual Identity
 
-For interfaces where people direct and review agent work, read
+## Websites and interfaces
+
+Read [the shared web design standard](references/web-design.md) for website or
+interface work. Apply it within the user's brief and the project's existing
+architecture. Keep project-specific fonts, palette, content decisions and
+approved exceptions in that project's design notes. Standardize the method and
+quality bar, not the appearance of every brand.
+
+For interfaces where people direct and review agent work, also read
 [the AI workspace design reference](references/ai-workspace-design.md).
+
+The theme and terminal examples below are optional examples, not website defaults.
 
 ## Theme & Font
 
