@@ -115,7 +115,7 @@ Apply this rule to READMEs, AGENTS.md, CHANGELOG entries, and any markdown a sub
 
 ## Standard Section Order
 
-Header → Badges → Demo → (ToC if ≥300 lines) → Features → Installation (with Prerequisites subsection if applicable) → Quick Start → Examples → Usage / CLI Reference → Configuration → API → Architecture → Agent Skill → Related → License
+Header → Badges → Demo → (ToC if ≥300 lines) → Features → Installation (with Prerequisites subsection if applicable) → Quick Start → Examples → Usage / CLI Reference → Configuration → API → Development → Documentation → Agent Skill → License
 
 **Agent Skill is always the second-to-last section, directly before License.** Move it there even in existing READMEs where it appears elsewhere.
 
@@ -216,19 +216,16 @@ If the project has an `examples/` directory, add a section linking to it:
 See [`examples/`](examples/) for all runnable examples.
 ```
 
-### Architecture
+### No Architecture or Ecosystem Sections
 
-For complex projects, add a brief architecture summary and link to `docs/architecture.md`:
+Every README sells its own project as if it were the only one. A reader should be able to install, run and ship with it without knowing it belongs to a larger stack.
 
-```markdown
-## Architecture
-
-Brief overview of how the system is structured.
-
-See [docs/architecture.md](docs/architecture.md) for the full architecture guide.
-```
-
-Do NOT inline detailed architecture in the README; keep it in `docs/architecture.md`.
+- No `## Architecture`, `## Where this sits`, `## Composition` (as a stack map), `## Related` or `## Ecosystem` sections.
+- No layer diagrams or "X is layer N of M" framing. No tables of which sibling project owns which concern.
+- No internal package tours (`pkg/foo does...`). That belongs in AGENTS.md.
+- Mention a sibling project only where the reader must act on it: an install requirement, an import in Quick Start, or a dependency the user configures.
+- Link architecture, design and ecosystem docs from **Documentation** as one line each. Do not summarize them.
+- Content that tells the reader how to configure or extend the project stays, under **Configuration**, **Usage** or **API**, written as what the reader does, not how the system is layered.
 
 ### Agent Skill
 
