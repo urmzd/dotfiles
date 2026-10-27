@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.23.1 (2026-10-27)
+
+### Bug Fixes
+
+- **colima**: cap VM memory at 1/4 of RAM, max 8 GiB ([7940caa](https://github.com/urmzd/dotfiles/commit/7940caa463c4e7218c7498d8e03c87fc5f522620))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.23.0...v0.23.1)
+
+
 ## 0.23.0 (2026-10-20)
 
 ### Features
