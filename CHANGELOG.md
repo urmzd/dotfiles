@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.24.0 (2026-10-27)
+
+### Features
+
+- **style-brand**: add shared web design reference ([312f883](https://github.com/urmzd/dotfiles/commit/312f8833dfb3a4f3528e5f02976bff6606f74e7a))
+
+### Misc
+
+- **style-brand**: add AI workspace design reference ([5b7fac6](https://github.com/urmzd/dotfiles/commit/5b7fac6012541fe890b8d84a50c3bfab45deab8d))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.23.1...v0.24.0)
+
+
 ## 0.23.1 (2026-10-27)
 
 ### Bug Fixes
