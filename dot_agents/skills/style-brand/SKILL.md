@@ -14,6 +14,9 @@ metadata:
 
 # Visual Identity
 
+For interfaces where people direct and review agent work, read
+[the AI workspace design reference](references/ai-workspace-design.md).
+
 ## Theme & Font
 
 | Element | Choice |
