@@ -105,6 +105,7 @@ File-specific structural rules live in the owning skill. When a file looks stale
 | Artifact | Owning skill |
 |----------|--------------|
 | General documentation cleanup | `clean-docs` |
+| Where a doc lives, `docs/` layout, ADR/RFC templates | `scaffold-docs` |
 | `README.md` | `write-readme` |
 | `AGENTS.md` | `configure-ai` |
 | `llms.txt` | `create-llms-txt` |

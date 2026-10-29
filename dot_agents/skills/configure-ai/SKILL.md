@@ -21,10 +21,10 @@ metadata:
 ## Skills vs Docs
 
 - **Skills** (`skills/<name>/SKILL.md`) = executable agent instructions. *How to do things* (conventions, workflows, tool usage)
-- **Docs** (`docs/`) = project documentation. *What was decided and why* (rfcs/, guides/, plans/, runbooks/, architecture/)
+- **Docs** (`docs/`) = project documentation. *What was decided and why* (layout owned by `scaffold-docs`)
 - Both exist in every project; neither replaces the other
 - Every repo should also have: README.md (humans) + AGENTS.md (AI) + llms.txt (LLM discovery)
-- Root-level standard files (README, AGENTS.md, CONTRIBUTING, LICENSE, CODEOWNERS, llms.txt) stay at root; everything else goes in `docs/`
+- Root-level standard files stay at root; everything else goes in `docs/` (allowlist in `scaffold-docs`)
 
 ## AI Tools
 
