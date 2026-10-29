@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.27.0 (2026-10-29)
+
+### Features
+
+- **agy**: default to auto mode with terminal sandbox ([87faea9](https://github.com/urmzd/dotfiles/commit/87faea9dadfe5ee5e04707066f1f018c67f93746))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.26.0...v0.27.0)
+
+
 ## 0.26.0 (2026-10-29)
 
 ### Features
