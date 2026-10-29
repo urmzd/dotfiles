@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.26.0 (2026-10-29)
+
+### Features
+
+- **claude**: disable auto compact ([aa42c67](https://github.com/urmzd/dotfiles/commit/aa42c6775a6b56d18346c98fa72161aa7969b711))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.25.0...v0.26.0)
+
+
 ## 0.25.0 (2026-10-29)
 
 ### Features
