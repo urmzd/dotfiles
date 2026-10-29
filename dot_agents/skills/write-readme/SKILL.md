@@ -325,7 +325,6 @@ Every repo should have `llms.txt` at root per the [llms.txt specification](https
 
 - **README.md** human-facing documentation; stays at root
 - **[AGENTS.md](https://agents.md/)** AI-facing project context; stays at root
-- CONTRIBUTING.md, LICENSE, CODEOWNERS = standard root files
 - `skills/<name>/SKILL.md` = agent instructions
 - `llms.txt` = LLM discovery ([spec](https://llmstxt.org/))
-- **All other documents belong in `docs/`** organized into subdirectories: `guides/`, `rfcs/`, `plans/`, `runbooks/`, `architecture/`, etc.
+- **All other documents belong in `docs/`**. The root allowlist and the `docs/` layout are owned by `scaffold-docs`

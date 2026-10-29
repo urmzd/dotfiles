@@ -43,7 +43,7 @@ Every interface decision must answer both: *Can a human understand this? Can an 
 
 This is why:
 - **CLIs emit JSON** agents chain it, skills consume it, content persists
-- **`docs/`** organizes project documentation by purpose (guides/, rfcs/, plans/, runbooks/). Skills provide executable agent context alongside
+- **`docs/`** organizes project documentation by purpose (see `scaffold-docs`). Skills provide executable agent context alongside
 - **llms.txt exists** projects become AI-discoverable
 - **AGENTS.md mirrors README** agents get the same onboarding humans do
 - **Commit messages follow Angular** parseable by sr for automated releases
@@ -117,7 +117,7 @@ just run     # execute
 - **`AGENTS.md`** AI-facing: architecture, interfaces, commands
 - **`skills/<name>/SKILL.md`** agent instructions
 - **`CONTRIBUTING.md`** contributor onboarding
-- **`docs/`** all other documentation (guides/, rfcs/, plans/, runbooks/, architecture/): prerequisites, workflow
+- **`docs/`** all other documentation (see `scaffold-docs`): prerequisites, workflow
 
 No hidden setup. No tribal knowledge. No "ask Sarah, she knows how to configure this."
 
@@ -171,7 +171,7 @@ Every decision's "why" should be recoverable. If you can't explain why a choice 
 | No full-screen TUIs | Breaks piping, CI, screen readers, accessibility |
 | `thiserror` in libraries, `anyhow` in apps | Libraries expose typed errors for callers; apps need readable chains |
 | No coverage tools | State coverage philosophy. Percentage targets create false confidence |
-| `docs/` with organized subdirectories | Documentation is well-structured (guides/, rfcs/, plans/, runbooks/). Skills complement with executable agent context |
+| `docs/` with organized subdirectories | Documentation is well-structured (see `scaffold-docs`). Skills complement with executable agent context |
 | `sr` for releases, not semantic-release npm | Rust-native, faster, custom commit parsing, single binary |
 | Apache-2.0 license | Permissive, patent grant, corporate-friendly |
 | Homebrew/apt + per-language version managers over Docker for dev environments | Native performance, no container overhead, system tools age well |
@@ -188,7 +188,7 @@ When reviewing code, ask: "Why this approach?" If the answer is "it's how we've 
 | Undocumented architectural decisions | Commit body explains why; AGENTS.md captures architecture |
 | Coverage percentage targets | State coverage. Test meaningful paths and edge cases |
 | DI frameworks and service locators | Explicit wiring, visible dependency graphs |
-| Flat `docs/` with unorganized markdown | Structured `docs/` subdirectories: `guides/`, `rfcs/`, `plans/`, `runbooks/` |
+| Flat `docs/` with unorganized markdown | The `scaffold-docs` layout: `architecture/`, `adrs/`, `rfcs/`, `guides/`, `reference/`, `runbooks/`, `plans/` |
 | Abstract base classes and deep inheritance | Traits (Rust), interfaces (Go), protocols (Python) |
 | "Clever" code that saves lines | Boring code that a junior can read in 5 minutes |
 | Premature extraction into shared libraries | Copy small modules (< 100 LOC); extract when three+ projects diverge |

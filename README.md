@@ -293,7 +293,7 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 
 | Pack | Skills |
 | ---- | ------ |
-| (core, always) | ship, pr, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
+| (core, always) | ship, pr, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
 | `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
 | `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
 | `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
@@ -393,6 +393,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | run-eval-harness | Run a project's eval suite end to end: launch, monitor, parse the report, diff against the previous run (forks to a sonnet subagent) |
 | style-brand | Frame and document a project's visual identity. Ships Cyberdream + MonaspiceNe + teasr as a template, not a mandate |
 | sync-docs | Audit and synchronize project documentation (canonical doc-drift skill) |
+| scaffold-docs | Root-file allowlist, `docs/` layout (architecture, adrs, rfcs, guides, reference, runbooks, plans) and templates |
 | write-readme | README structure and section order |
 
 #### Subagents

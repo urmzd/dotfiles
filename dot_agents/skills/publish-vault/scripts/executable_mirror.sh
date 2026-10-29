@@ -26,7 +26,7 @@ placeholders=("$src"/.*."$ext".icloud)
 
 run() { if [ "$dry" -eq 1 ]; then echo "would: $*"; else "$@"; fi; }
 added=0 updated=0 removed=0
-for f in "${src_files[@]}"; do
+for f in ${src_files[@]+"${src_files[@]}"}; do
   name="$(basename "$f")" target="$dst/$name"
   if [ ! -e "$target" ]; then echo "add     $name"; run cp "$f" "$target"; added=$((added+1))
   elif ! cmp -s "$f" "$target"; then echo "update  $name"; run cp "$f" "$target"; updated=$((updated+1)); fi
