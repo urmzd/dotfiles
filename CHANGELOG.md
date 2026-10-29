@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.25.0 (2026-10-29)
+
+### Features
+
+- **scaffold-docs**: add skill owning the root allowlist and docs/ layout (#15) ([73191d5](https://github.com/urmzd/dotfiles/commit/73191d5c6b6c72dd1c94954bd7e5fe2db9b389f0))
+- **publish-vault**: add skill to mirror a vault folder into a repo ([da7f823](https://github.com/urmzd/dotfiles/commit/da7f8236c6d3e035af310e10406e7d369bb7e700))
+
+### Misc
+
+- **write-readme**: require standalone READMEs, drop architecture and ecosystem sections ([9b821b0](https://github.com/urmzd/dotfiles/commit/9b821b0bb8228c736d065a83b2f6119a65e98759))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.24.0...v0.25.0)
+
+
 ## 0.24.0 (2026-10-27)
 
 ### Features
