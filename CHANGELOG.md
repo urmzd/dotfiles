@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.28.1 (2026-10-30)
+
+### Bug Fixes
+
+- **editors**: disable extension auto-update in VS Code and Antigravity (#18) ([cec4797](https://github.com/urmzd/dotfiles/commit/cec47974dfd2f650a8cd5ea3b7f680d48ae2a4f4))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.28.0...v0.28.1)
+
+
 ## 0.28.0 (2026-10-30)
 
 ### Features
