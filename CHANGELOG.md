@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.28.0 (2026-10-30)
+
+### Features
+
+- **pnpm**: enforce pnpm 11 supply-chain policy in config and skills (#17) ([540b71f](https://github.com/urmzd/dotfiles/commit/540b71fcf9d2305bd74b63b1dca7a7b974ecc0cd))
+
+### Misc
+
+- **skills**: require What/Why/How, evidence and a demo in PR bodies (#16) ([1a05b5e](https://github.com/urmzd/dotfiles/commit/1a05b5e86c8598449986ab4fb18ad5d61403b2b4))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.27.0...v0.28.0)
+
+
 ## 0.27.0 (2026-10-29)
 
 ### Features
