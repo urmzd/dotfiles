@@ -40,6 +40,10 @@ files=$(cd "$src" && git ls-files |
     grep -vE '^(cli|\.github)/' |
     grep -E '(^|/)(run_|modify_)|\.sh(\.tmpl)?$|\.zsh(\.tmpl)?$|(^|/)dot_z(shrc|shenv|profile)')
 
+# Split file lists on newlines only: managed paths can contain spaces
+# (~/Library/Application Support).
+IFS=$'\n'
+
 count=0
 for f in $files; do
     out="$work/$(printf '%s' "$f" | tr '/' '_')"
