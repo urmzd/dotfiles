@@ -35,3 +35,8 @@ requirements-pipx.txt
 {{- if not (has "tailscale" (.packages | default list)) }}
 .zsh/functions/lidawake.zsh
 {{- end }}
+
+# macOS editor settings (VS Code, Antigravity) live under ~/Library.
+{{- if ne .chezmoi.os "darwin" }}
+Library/
+{{- end }}
