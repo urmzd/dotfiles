@@ -1,0 +1,6 @@
+# pnpm 11 global config. Repos repeat these in pnpm-workspace.yaml so CI and
+# other machines get the same policy.
+
+# Skip versions published in the last 24h; most malicious releases are pulled
+# within that window.
+minimumReleaseAge: 1440

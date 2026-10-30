@@ -53,7 +53,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Check formatting & lint
@@ -67,7 +67,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
@@ -80,7 +80,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
@@ -93,7 +93,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
@@ -186,6 +186,40 @@ packages:
     #   access: public      # needed for scoped @org/pkg on first publish
 ```
 
+### `pnpm-workspace.yaml`
+
+Every Node repo has one, even single-package repos. pnpm 11 reads its settings
+from here, not from `package.json` or `.npmrc`.
+
+```yaml
+# Skip versions published in the last 24h; most malicious releases are pulled
+# within that window.
+minimumReleaseAge: 1440
+
+# Deny by default. Allow a dependency's install script only when it needs one
+# and you have checked why; add a comment saying so.
+allowBuilds:
+  esbuild: true
+
+# Security pins live here, never in package.json ("pnpm.overrides" is ignored
+# by pnpm 11 and silently dropped from the lockfile).
+overrides: {}
+```
+
+Add `packages:` only for monorepos.
+
+### `package.json` pins
+
+```json
+{
+  "packageManager": "pnpm@11.6.0",
+  "engines": { "node": ">=24" }
+}
+```
+
+Never commit `package-lock.json`, `yarn.lock`, or `bun.lock`. Run `pnpm import`
+then delete the old lockfile when converting an npm project.
+
 ### `package.json` scripts
 
 ```json
@@ -269,9 +303,12 @@ For multi-package repos, add turbo for cached, parallel task execution:
 ## Gotchas
 
 - Use `pnpm install --frozen-lockfile` (not `pnpm install`) in CI for reproducible installs
+- `ERR_PNPM_IGNORED_BUILDS` means a dependency wants an install script. pnpm also writes `<pkg>: set this to true or false` into `pnpm-workspace.yaml`; replace that line with an explicit `true` or `false` in the existing `allowBuilds` map, or the file gets a duplicate key and every command fails
+- A lockfile entry younger than `minimumReleaseAge` fails `pnpm install` and `pnpm run`. If the bump was intended, wait out the 24h or regenerate locally with `--config.minimumReleaseAge=0`; never lower the setting in the repo
+- `astro check` needs `@astrojs/check` and `typescript` as devDependencies. Without them it logs an error and exits 0 in CI, so the check silently does nothing
 - `biome check` handles both formatting and linting in one pass
 - `biome check --write` to auto-fix (replaces `prettier --write` + `eslint --fix`)
-- Node 22 is the current LTS. Use `node-version: 22`
+- Node 24 is the current LTS. Use `node-version: 24`
 - `cache: pnpm` in setup-node handles caching automatically
 - `pnpm/action-setup@v4` must come before `actions/setup-node` in CI
 - For framework-specific type checks (e.g., `astro check`), add a separate `check` job
