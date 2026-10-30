@@ -66,6 +66,20 @@ Check workflow files for convention compliance. Report FAIL if violated:
 | release.yml bot skip | `github.actor != 'sr[bot]'` |
 | release.yml force dispatch | `workflow_dispatch` with `force` boolean input |
 
+## Node Supply-Chain Checks
+
+Run when `package.json` exists. Report FAIL if violated:
+
+| Check | Expected |
+|-------|----------|
+| Lockfile | `pnpm-lock.yaml` only; no `package-lock.json`, `yarn.lock`, `bun.lock` |
+| `packageManager` | `pnpm@11.x` pinned in `package.json` |
+| `pnpm-workspace.yaml` | Exists and sets `minimumReleaseAge: 1440` or higher |
+| `allowBuilds` | Every entry is `true` or `false`; no `set this to true or false` placeholder |
+| Overrides | In `pnpm-workspace.yaml`, not a `pnpm` field in `package.json` |
+| CI install | `pnpm install --frozen-lockfile`; no `npm ci`, `npm install`, `cache: npm` |
+| Framework checks | `astro check` scripts have `@astrojs/check` in devDependencies |
+
 ## Optional Directory Checks
 
 Report WARN (not FAIL) when conventions suggest a directory should exist:
