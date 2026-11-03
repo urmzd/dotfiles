@@ -99,6 +99,8 @@ bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'christoomey/vim-tmux-navigator'
+# Pass C-h/j/k/l through to agy too (it approves with C-k); default pattern plus agy
+set -g @vim_navigator_pattern '(\S+/)?g?\.?(view|l?n?vim?x?|fzf|agy)(diff)?(-wrapped)?'
 # Note: Using manual catppuccin installation (not TPM) to avoid conflicts
 
 # Session persistence
