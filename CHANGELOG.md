@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.28.2 (2026-11-03)
+
+### Bug Fixes
+
+- **tmux**: pass ctrl+h/j/k/l through to agy ([2e4d06d](https://github.com/urmzd/dotfiles/commit/2e4d06d497fe4a1691ed175f2517d06f7b177cad))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.28.1...v0.28.2)
+
+
 ## 0.28.1 (2026-10-30)
 
 ### Bug Fixes
