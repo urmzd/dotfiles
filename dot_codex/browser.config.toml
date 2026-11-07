@@ -1,0 +1,27 @@
+# Browser profile -- `codex --profile browser`
+# Terminal (tmux) sessions that need a browser: an isolated, headless Chrome
+# through the chrome-devtools MCP server.
+#
+# The bundled Browser and Chrome plugins only work in sessions the ChatGPT app
+# starts. The app passes BROWSER_USE_ACCESS_PIPE_PATH and its siblings to the
+# Codex processes it spawns; a terminal Codex never has them, so those plugins
+# fail with "The browser access host is unavailable". This profile turns them
+# off and uses chrome-devtools instead.
+
+# Pinned, a temporary profile deleted on close (no saved logins), no window.
+# required: wait for the server before the first turn, so a prompt passed on
+# the command line does not race its startup.
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@1.12.0", "--isolated", "--headless", "--viewport", "1280x800"]
+required = true
+startup_timeout_sec = 60
+
+[mcp_servers.node_repl]
+enabled = false
+
+[plugins."browser@openai-bundled"]
+enabled = false
+
+[plugins."chrome@openai-bundled"]
+enabled = false
