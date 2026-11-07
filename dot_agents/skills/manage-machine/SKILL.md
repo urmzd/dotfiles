@@ -75,8 +75,9 @@ command and say why:
   pack is a git repo, commit and push there so teammates get it.
 
 Entry fields: `brew`/`cask`/`tap` (macOS), `apt`/`dnf`/`pacman` (Linux),
-`npm`, `uv`, or `script` (installer URL) with `check` (shell test that passes
-once installed); `setup` for sign-in commands.
+`npm`, `uv`, or `script` (installer URL, with optional `script_args` and
+`script_env`) with `check` (shell test that passes once installed); `setup`
+for sign-in commands.
 
 ```toml
 [[package]]

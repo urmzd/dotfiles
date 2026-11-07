@@ -100,6 +100,9 @@ pub struct Package {
     pub script_shell: Option<String>,
     #[serde(default)]
     pub script_args: Vec<String>,
+    /// Environment for the installer, e.g. `{ CODEX_NON_INTERACTIVE = "1" }`.
+    #[serde(default)]
+    pub script_env: std::collections::BTreeMap<String, String>,
     /// Command run after a successful script install.
     #[serde(default)]
     pub post: Option<String>,
@@ -189,8 +192,13 @@ impl Package {
         let url = self.script.as_ref()?;
         let shell = self.script_shell.as_deref().unwrap_or("sh");
         let args: String = self.script_args.iter().map(|a| format!(" '{a}'")).collect();
+        let env: String = self
+            .script_env
+            .iter()
+            .map(|(k, v)| format!("{k}='{v}' "))
+            .collect();
         Some(format!(
-            "t=$(mktemp) && curl -fsSL --retry 2 '{url}' -o \"$t\" && [ -s \"$t\" ] && {shell} \"$t\"{args}; rc=$?; rm -f \"$t\"; exit $rc"
+            "t=$(mktemp) && curl -fsSL --retry 2 '{url}' -o \"$t\" && [ -s \"$t\" ] && {env}{shell} \"$t\"{args}; rc=$?; rm -f \"$t\"; exit $rc"
         ))
     }
 }
@@ -311,6 +319,22 @@ impl Catalog {
                 bail!("duplicate package or bundle id `{id}`");
             }
         }
+        // script_env keys become shell assignments, so they must be names.
+        for p in &catalog.packages {
+            for key in p.script_env.keys() {
+                let mut chars = key.chars();
+                let valid = chars
+                    .next()
+                    .is_some_and(|c| c == '_' || c.is_ascii_alphabetic())
+                    && chars.all(|c| c == '_' || c.is_ascii_alphanumeric());
+                if !valid {
+                    bail!(
+                        "package `{}`: script_env key `{key}` is not a variable name",
+                        p.id
+                    );
+                }
+            }
+        }
         Ok(catalog)
     }
 
@@ -399,6 +423,23 @@ adopt = true
         if !cfg!(target_os = "macos") {
             assert_eq!(p.installs(), vec!["helm", "kubectl"]);
         }
+    }
+
+    #[test]
+    fn installer_gets_script_env() {
+        let c = Catalog::parse(
+            "[[package]]\nid = \"cx\"\nname = \"C\"\ndescription = \"d\"\ncategory = \"c\"\nscript = \"https://x.test/install.sh\"\nscript_env = { B_FLAG = \"1\", A = \"x\" }\n",
+        )
+        .unwrap();
+        let cmd = c.get("cx").unwrap().installer_command().unwrap();
+        assert!(cmd.contains("&& A='x' B_FLAG='1' sh \"$t\";"), "{cmd}");
+        let bad = "[[package]]\nid = \"cx\"\nname = \"C\"\ndescription = \"d\"\ncategory = \"c\"\nscript_env = { \"A B\" = \"1\" }\n";
+        assert!(
+            Catalog::parse(bad)
+                .unwrap_err()
+                .to_string()
+                .contains("not a variable name")
+        );
     }
 
     #[test]

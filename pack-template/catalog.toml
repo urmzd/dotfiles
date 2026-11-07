@@ -4,7 +4,8 @@
 #
 # Fields: id, name, description, category (required strings); install with
 # tap/brew/cask (macOS), apt/dnf/pacman (Linux), npm, uv, or script (an
-# installer URL, run when `check` fails); setup lists sign-in commands for
+# installer URL, run when `check` fails; script_args and script_env pass it
+# arguments and env vars); setup lists sign-in commands for
 # `dotfiles package setup`; check is a shell test that passes once installed.
 #
 # GUI apps: give every cask an `apps` entry (cask -> app bundle in
