@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.29.0 (2026-11-07)
+
+### Features
+
+- **catalog**: install Codex with its self-updating installer (#20) ([6b84906](https://github.com/urmzd/dotfiles/commit/6b84906eedfeb630de900d5f70aeb1d0333b56b2))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.28.3...v0.29.0)
+
+
 ## 0.28.3 (2026-11-07)
 
 ### Bug Fixes
