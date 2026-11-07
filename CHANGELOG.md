@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.28.3 (2026-11-07)
+
+### Bug Fixes
+
+- **zsh**: put the Tailscale CLI on PATH on macOS (#19) ([0e70c29](https://github.com/urmzd/dotfiles/commit/0e70c29f8d0e0c76ed90a9ba715701070f99492a))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.28.2...v0.28.3)
+
+
 ## 0.28.2 (2026-11-03)
 
 ### Bug Fixes
