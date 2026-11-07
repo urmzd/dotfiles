@@ -36,11 +36,18 @@ fi
 
 {{- if .is_macos }}
 
-# Tailscale CLI: the tailscale-app cask (and App Store installs) ship the CLI
-# inside the app bundle as `Tailscale` with nothing linked onto PATH. macOS
-# volumes are case-insensitive, so `tailscale` resolves to it from here.
-if [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] && ! command -v tailscale >/dev/null 2>&1; then
-    export PATH="$PATH:/Applications/Tailscale.app/Contents/MacOS"
+# Tailscale CLI: however the app was installed (Homebrew cask, the
+# standalone download, or the App Store), the CLI lives inside the bundle as
+# `Tailscale` with nothing linked onto PATH. macOS volumes are
+# case-insensitive, so `tailscale` resolves to it from here.
+if ! command -v tailscale >/dev/null 2>&1; then
+    for _ts_dir in "/Applications/Tailscale.app/Contents/MacOS" "$HOME/Applications/Tailscale.app/Contents/MacOS"; do
+        if [ -x "$_ts_dir/Tailscale" ]; then
+            export PATH="$PATH:$_ts_dir"
+            break
+        fi
+    done
+    unset _ts_dir
 fi
 {{- end }}
 
