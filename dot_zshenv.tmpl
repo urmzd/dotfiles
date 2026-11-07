@@ -34,6 +34,16 @@ if [ -d "$HOME/.cargo/bin" ]; then
     export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
+{{- if .is_macos }}
+
+# Tailscale CLI: the tailscale-app cask (and App Store installs) ship the CLI
+# inside the app bundle as `Tailscale` with nothing linked onto PATH. macOS
+# volumes are case-insensitive, so `tailscale` resolves to it from here.
+if [ -x "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ] && ! command -v tailscale >/dev/null 2>&1; then
+    export PATH="$PATH:/Applications/Tailscale.app/Contents/MacOS"
+fi
+{{- end }}
+
 # Google Cloud CLI (installed by run_onchange_after_install-cloud-clis.sh)
 if [ -f "$HOME/.local/share/google-cloud-sdk/path.zsh.inc" ]; then
     . "$HOME/.local/share/google-cloud-sdk/path.zsh.inc"
