@@ -1,19 +1,35 @@
 #!/usr/bin/env bash
 {{ includeTemplate "bash-modern.sh" . }}
 # Install selected catalog packages that come from an installer script
-# (catalog field `script`, e.g. Claude Code, agy, OpenCode) rather than
+# (catalog field `script`, e.g. Claude Code, Codex, agy, OpenCode) rather than
 # Homebrew. Runs every apply and is silent when each package's `check` passes;
 # a missing one is installed through fetch_and_run (downloaded and checked
 # before it runs), and a failure only warns, so the next apply retries it.
 set -u
 {{ includeTemplate "ui.sh" . }}
 
+# run_with_env <K=V lines> <command...>: run a command (or function) with the
+# catalog's script_env exported, in a subshell so nothing leaks to the next one.
+run_with_env() {
+    local vars="$1"
+    shift
+    (
+        while IFS= read -r kv; do
+            [ -n "$kv" ] && export "$kv"
+        done <<EOF
+$vars
+EOF
+        "$@"
+    )
+}
+
 shown=0
-install_one() { # <name> <url> <shell> <check, base64> <post, base64> [installer args...]
-    local name="$1" url="$2" shell="$3" check post
+install_one() { # <name> <url> <shell> <check, base64> <post, base64> <env, base64> [installer args...]
+    local name="$1" url="$2" shell="$3" check post vars
     check="$(printf '%s' "$4" | base64 --decode)"
     post="$(printf '%s' "$5" | base64 --decode)"
-    shift 5
+    vars="$(printf '%s' "$6" | base64 --decode)"
+    shift 6
     if [ -n "$check" ] && sh -c "$check" >/dev/null 2>&1; then
         return 0
     fi
@@ -21,7 +37,7 @@ install_one() { # <name> <url> <shell> <check, base64> <post, base64> [installer
         ui_section "Installer-based packages"
         shown=1
     fi
-    if ui_run "installed $name" fetch_and_run "$url" "$shell" "$@"; then
+    if ui_run "installed $name" run_with_env "$vars" fetch_and_run "$url" "$shell" "$@"; then
         if [ -n "$post" ] && ! sh -c "$post" >/dev/null 2>&1; then
             ui_warn "$name: post-install cleanup failed"
         fi
@@ -33,7 +49,11 @@ install_one() { # <name> <url> <shell> <check, base64> <post, base64> [installer
 {{- $selected := get . "packages" | default list }}
 {{- range (includeTemplate "catalog" . | fromJson).package }}
 {{-   if and (or (has .id $selected) (get . "required")) (get . "script") }}
-install_one {{ .name | quote }} {{ .script | quote }} {{ get . "script_shell" | default "sh" | quote }} {{ get . "check" | default "" | b64enc | quote }} {{ get . "post" | default "" | b64enc | quote }}{{ range (get . "script_args" | default list) }} {{ . | quote }}{{ end }}
+{{-     $env := "" }}
+{{-     range $k, $v := (get . "script_env" | default dict) }}
+{{-       $env = printf "%s%s=%s\n" $env $k $v }}
+{{-     end }}
+install_one {{ .name | quote }} {{ .script | quote }} {{ get . "script_shell" | default "sh" | quote }} {{ get . "check" | default "" | b64enc | quote }} {{ get . "post" | default "" | b64enc | quote }} {{ $env | b64enc | quote }}{{ range (get . "script_args" | default list) }} {{ . | quote }}{{ end }}
 {{-   end }}
 {{- end }}
 exit 0

@@ -26,7 +26,8 @@ fi
 
 # One-time migration: npm globals used to target ~/.local/npm, which was never
 # on PATH. Move what is still wanted into fnm's default Node, then remove it.
-# Skipped: Codex and Copilot (Homebrew casks on macOS) and the legacy Gemini CLI.
+# Skipped: Codex (its standalone installer), Copilot (a Homebrew cask on
+# macOS), and the legacy Gemini CLI.
 legacy_npm="$HOME/.local/npm"
 if [ -d "$legacy_npm/lib/node_modules" ] && command -v npm >/dev/null 2>&1; then
     say
@@ -48,13 +49,38 @@ if [ -d "$legacy_npm/lib/node_modules" ] && command -v npm >/dev/null 2>&1; then
     fi
 fi
 
+# One-time migration: Codex now comes from its standalone installer
+# (~/.local/bin/codex, self-updating). The old Homebrew cask and npm copies
+# come first on PATH and shadow it, so remove them once it is present.
+if [ -x "$HOME/.local/bin/codex" ]; then
+{{- if .is_macos }}
+    if command -v brew >/dev/null 2>&1 && brew list --cask codex >/dev/null 2>&1; then
+        say
+        if brew uninstall --cask codex >/dev/null 2>&1; then
+            ui_ok "removed the codex cask (the standalone install in ~/.local/bin provides it)"
+        else
+            ui_warn "could not remove the codex cask; it shadows ~/.local/bin/codex"
+            ui_hint "remove it by hand: brew uninstall --cask codex"
+        fi
+    fi
+{{- end }}
+    for prefix in "$HOME/.local/npm" "${FNM_DIR:-$HOME/.local/share/fnm}"/node-versions/*/installation; do
+        if [ -d "$prefix/lib/node_modules/@openai/codex" ]; then
+            say
+            rm -rf "$prefix/lib/node_modules/@openai/codex"
+            rm -f "$prefix/bin/codex"
+            ui_ok "removed npm @openai/codex from ${prefix/#$HOME/~} (the standalone install provides it)"
+        fi
+    done
+fi
+
 {{- if .is_macos }}
 
-# One-time migration: Codex and Copilot moved from npm to Homebrew casks. npm
-# copies in fnm's per-Node globals come first on PATH and shadow the casks (and
-# vanish on a Node switch), so remove them once the cask is installed.
+# One-time migration: Copilot moved from npm to a Homebrew cask. npm copies in
+# fnm's per-Node globals come first on PATH and shadow the cask (and vanish on
+# a Node switch), so remove them once the cask is installed.
 if command -v brew >/dev/null 2>&1; then
-    for pair in "@openai/codex:codex:codex" "@github/copilot:copilot-cli:copilot"; do
+    for pair in "@github/copilot:copilot-cli:copilot"; do
         pkg="${pair%%:*}"
         rest="${pair#*:}"
         cask="${rest%%:*}"

@@ -24,8 +24,9 @@
 #   check             shell test that passes once setup is done; setup is
 #                     skipped while it passes
 #   script            installer URL run during apply (via fetch_and_run) when
-#                     `check` fails; script_shell (default sh) and script_args
-#                     control how; post runs after a successful install
+#                     `check` fails; script_shell (default sh), script_args,
+#                     and script_env (a table of env vars) control how; post
+#                     runs after a successful install
 #   linux_npm         npm packages for Linux only (macOS uses brew/cask)
 #   skills            agent skills it adds: a bare name is a skill in
 #                     dot_agents/skills (deployed only while selected), an
@@ -59,10 +60,18 @@ check = "command -v claude >/dev/null || [ -x \"$HOME/.local/bin/claude\" ]"
 [[package]]
 id = "codex"
 name = "Codex"
+# Standalone installer: ~/.local/bin/codex, updates itself in the background.
+# `check` looks only there, so a machine with the old Homebrew cask or npm copy
+# installs it too; run_after_setup-node then removes the old copy. On such a
+# machine the installer also writes a PATH block to a shell startup file
+# (already on PATH via ~/.zshenv); `post` removes it so chezmoi sees no change.
 description = "codex: OpenAI's coding agent CLI"
 category = "agents"
-cask = ["codex"]
-linux_npm = ["@openai/codex"]
+script = "https://chatgpt.com/codex/install.sh"
+script_shell = "sh"
+script_env = { CODEX_NON_INTERACTIVE = "1" }
+check = "[ -x \"$HOME/.local/bin/codex\" ]"
+post = "for f in \"$HOME/.zprofile\" \"$HOME/.zshrc\" \"$HOME/.bash_profile\" \"$HOME/.bashrc\" \"$HOME/.profile\"; do [ -f \"$f\" ] && perl -i -0pe 's/\\n*# >>> Codex installer >>>\\n.*?# <<< Codex installer <<<\\n?/\\n/gs' \"$f\"; done; true"
 
 [[package]]
 id = "copilot"
