@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.30.0 (2026-11-17)
+
+### Features
+
+- **agents**: require screenshots and visual verification in default instructions (#21) ([20cc773](https://github.com/urmzd/dotfiles/commit/20cc7732e3a1c47e1a62722c4847964db32d877d))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.29.0...v0.30.0)
+
+
 ## 0.29.0 (2026-11-07)
 
 ### Features
