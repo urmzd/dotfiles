@@ -1,5 +1,6 @@
 ---
 name: pr
+model: sonnet
 description: >
   Open a pull request via gh pr create with a reviewer-ready body: What, Why,
   How, Verification with real evidence, and a Demo (screenshot, GIF, terminal

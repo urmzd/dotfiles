@@ -2,7 +2,7 @@
 # Supervises tmux fleets. Read-only; delegates edits to writer; never edits files itself.
 # Used by the orchestrate-agents skill as the supervisor pane.
 
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 plan_mode_reasoning_effort = "xhigh"
 
