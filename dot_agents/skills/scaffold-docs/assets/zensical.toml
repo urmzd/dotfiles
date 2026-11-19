@@ -1,0 +1,30 @@
+# Copy to the repository root. Replace example-service with the repository slug.
+[project]
+site_name = "Example Service"
+site_url = "https://docs.urmzd.com/example-service/"
+repo_url = "https://github.com/urmzd/example-service"
+repo_name = "urmzd/example-service"
+docs_dir = "docs"
+site_dir = "site"
+exclude_docs = "/internal/**"
+nav = [
+  { "Start here" = "README.md" },
+  { "Run your first example" = "guides/first-run.md" },
+  { "Configuration" = "reference/configuration.md" },
+  { "All project guides" = "https://docs.urmzd.com/" },
+]
+
+[project.theme]
+features = ["content.code.copy", "navigation.footer"]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to light mode"

@@ -4,7 +4,8 @@ description: >
   Owns where documentation lives: the root-file allowlist (README, CONTRIBUTING,
   USAGE, CODEOWNERS and the other GitHub and tooling files) and the docs/ taxonomy
   (architecture, adrs, rfcs, guides, reference, runbooks, plans) with templates
-  for each kind. Scaffolds docs/ for a new repo, moves misplaced docs into it,
+  for each kind. Includes the Zensical publishing setup for core services.
+  Scaffolds docs/ for a new repo, moves misplaced docs into it,
   and retires stale ones (finished plans, superseded decisions, duplicated
   upgrade notes). Use when creating docs/, adding an ADR, RFC, guide or runbook,
   asked to "clean up stale docs", "organize docs", or when a doc sits at the repo
@@ -81,9 +82,10 @@ Create a folder only when there is a document for it. Never scaffold empty folde
 A `docs/design/` folder of proposals becomes `docs/rfcs/`. A design doc that
 describes what is built is architecture.
 
-`docs/README.md` is required whenever `docs/` exists: one table, one row per
-document, linking each with a one-line purpose. ADRs and RFCs are listed with
-their number and status.
+`docs/README.md` is the documentation home. Introduce the project and link to the first
+task. List each public document with a one-line purpose and include the number
+and status of each ADR and RFC. For a large collection, move the inventory to
+`docs/catalog.md` and link it from the home page.
 
 Numbering for ADRs and RFCs is four digits, starting at `0001`, never reused.
 
@@ -99,6 +101,54 @@ Copy from `assets/` in this skill. Fill every section or delete it; never leave 
 | Guide | [assets/guide.md](assets/guide.md) |
 | Runbook | [assets/runbook.md](assets/runbook.md) |
 | Plan | [assets/plan.md](assets/plan.md) |
+| Core service site | [assets/zensical.toml](assets/zensical.toml) |
+| Service-owned Pages workflow | [assets/docs-pages.yml](assets/docs-pages.yml) |
+
+## Core service documentation sites
+
+Each service keeps its source in `docs/` and its `zensical.toml` at the repository
+root. Copy the template, set the service name, repository URL and
+`https://docs.urmzd.com/<repo>/` with the trailing slash. Set the navigation
+paths to pages that exist. Start at `README.md`, then guide the reader through
+a runnable example with expected output, the concepts it uses and the reference
+for looking things up. Keep historical proposals in the inventory. Navigation
+controls what readers see in the menu. The generator also builds unlisted
+pages, so exclude private material from the published source and output.
+
+Use relative Markdown links inside `docs/` so the same page works on GitHub and
+under the service URL. For files outside `docs/`, link to their GitHub `blob`
+or `tree` URL with the correct ref, using a commit permalink for a
+version-specific example. A link such as `../../cmd/server/main.go` would
+escape the published service directory. Keep a screenshot in `docs/assets/`
+when it should appear inline. Ignore generated `/site/` and `/.cache/` in Git.
+
+From the service repository root, build with the version pinned in its Pages
+workflow. Start the local server to inspect the rendered pages.
+
+```sh
+uvx --from zensical==0.1.2 zensical build --strict
+uvx --from zensical==0.1.2 zensical serve
+```
+
+Open the URL printed by the server. Follow the first task, a reference link and
+a source-code link. Check the home page and a nested page at phone and desktop
+widths. To exercise the production path locally, copy `site/` into a temporary
+directory as `<repo>/`, serve its parent, and open `/<repo>/`. Follow a chapter
+link, use search and check that **All project guides** returns to the index.
+
+### Publish from the service repository
+
+Copy `assets/docs-pages.yml` to `.github/workflows/docs.yml`. Under **Settings →
+Pages**, select **GitHub Actions** as the build source. The account site
+`urmzd/urmzd.github.io` owns `docs.urmzd.com` and its index links to each
+service. Project sites inherit that domain at `/<repo>/`. Leave the service’s
+custom-domain setting empty and omit a `CNAME` file from its source and artifact.
+
+The workflow builds the service’s own checkout on pull requests to main.
+A push to main or a manual run on main builds and uploads `site/`, then
+deploys it through that repository’s `github-pages` environment. Each service
+can release its guide as part of its own merge. To add a guide, deploy it from
+the new service and add its URL to the account index. [How project sites inherit a custom domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages)
 
 ## Workflow
 

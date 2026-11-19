@@ -22,7 +22,7 @@ if [ -d docs ]; then
       case " $allowed_dirs " in *" $name "*) ;; *) report "docs: unknown folder docs/$name/" ;; esac
     else
       case "$name" in
-        README.md) ;;
+        README.md|catalog.md) ;;
         *.md) report "docs: loose file docs/$name, move it into a folder" ;;
         *) report "docs: non-prose file docs/$name, move it to docs/assets/ or next to the code that makes it" ;;
       esac
@@ -40,10 +40,15 @@ if [ -d docs ]; then
     done
   done
   if [ -f docs/README.md ]; then
+    inventory=docs/README.md
+    if [ -f docs/catalog.md ]; then
+      grep -qF '(catalog.md)' docs/README.md || report "docs: link catalog.md from docs/README.md"
+      inventory=docs/catalog.md
+    fi
     while IFS= read -r f; do
       rel=${f#docs/}
-      grep -qF "($rel" docs/README.md || report "docs: $f is not listed in docs/README.md"
-    done < <(find docs -name '*.md' ! -path docs/README.md ! -path 'docs/assets/*' | sort)
+      grep -qF "($rel" "$inventory" || report "docs: $f is not listed in $inventory"
+    done < <(find docs -name '*.md' ! -path docs/README.md ! -path docs/catalog.md ! -path 'docs/assets/*' ! -path 'docs/internal/*' | sort)
   fi
 fi
 
