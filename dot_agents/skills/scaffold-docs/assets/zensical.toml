@@ -11,6 +11,7 @@ nav = [
   { "Start here" = "README.md" },
   { "Run your first example" = "guides/first-run.md" },
   { "Configuration" = "reference/configuration.md" },
+  { "All project guides" = "https://docs.urmzd.com/" },
 ]
 
 [project.theme]
