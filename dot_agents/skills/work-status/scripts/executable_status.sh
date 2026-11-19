@@ -33,7 +33,7 @@ fi
 
 echo "## PRIMARY"
 printf 'repo\tbranch\tdefault\tdirty\tbehind\tflag\n'
-for root in "${repos[@]}"; do
+for root in ${repos[@]+"${repos[@]}"}; do
     name=$(basename "$root")
     branch=$(git -C "$root" branch --show-current 2>/dev/null)
     default=$(git -C "$root" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##')
@@ -50,7 +50,7 @@ done
 echo
 echo "## WORKTREES"
 printf 'repo\tworktree\tbranch\tdirty\tahead\tlast-commit\tpr\tflag\n'
-for root in "${repos[@]}"; do
+for root in ${repos[@]+"${repos[@]}"}; do
     name=$(basename "$root")
     default=$(git -C "$root" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)
     [ -n "$default" ] || default="HEAD"
@@ -90,7 +90,7 @@ echo
 echo "## OPEN PRS"
 if have gh; then
     printf 'repo\tpr\ttitle\tbranch\tdraft\tchecks\treview\tmerge-state\tflag\n'
-    for root in "${repos[@]}"; do
+    for root in ${repos[@]+"${repos[@]}"}; do
         name=$(basename "$root")
         (cd "$root" && gh pr list --state open --limit 100 \
             --json number,title,headRefName,isDraft,reviewDecision,mergeStateStatus,statusCheckRollup \
@@ -148,7 +148,7 @@ if have lsof; then
             port=${addr##*:}
             cwd=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | awk '/^n/{print substr($0,2)}')
             keep=""
-            for root in "${repos[@]}"; do
+            for root in ${repos[@]+"${repos[@]}"}; do
                 case "$cwd" in "$root"*) keep=1 ;; esac
             done
             [ -n "$keep" ] && printf '%s\t%s\t%s\t%s\n' "$port" "$pid" "$cmd" "${cwd/#$HOME/~}"
