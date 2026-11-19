@@ -74,8 +74,8 @@
 #   codex --strict-config exec --skip-git-repo-check "noop" </dev/null
 # ---------------------------------------------------------------------------
 
-model = "gpt-6-astra"
-model_reasoning_effort = "low"
+model = "gpt-6.2-astra"
+model_reasoning_effort = "high"
 model_reasoning_summary = "auto"
 
 # ---- Auto: sandboxed writes, escalations get approved ----------------------
@@ -175,7 +175,7 @@ writable_roots = []
 guardian_approval = true   # arms the approvals_reviewer / auto_review path
 multi_agent = true         # required for /agent and spawned subagent threads
 hooks = true               # SubagentStart / SubagentStop visibility
-memories = false           # opt-out; AGENTS.md is the source of truth
+memories = true            # opt-out; AGENTS.md is the source of truth
 js_repl = false            # node_repl MCP stays wired, but no in-session JS REPL
 
 # ---- Shell environment hygiene ---------------------------------------------
