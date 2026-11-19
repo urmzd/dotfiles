@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.31.0 (2026-11-19)
+
+### Features
+
+- **scaffold-docs**: publish guides from their service repositories (#24) ([738f4bb](https://github.com/urmzd/dotfiles/commit/738f4bb6a126d56419526006fb582261b13f5762))
+
+### Misc
+
+- **agents**: sync model defaults with the machine and move to the latest models (#22) ([2683838](https://github.com/urmzd/dotfiles/commit/2683838f9703c76fe7baed7beb60ea5fc4c014cd))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.30.0...v0.31.0)
+
+
 ## 0.30.0 (2026-11-17)
 
 ### Features
