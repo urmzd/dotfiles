@@ -102,6 +102,7 @@ Copy from `assets/` in this skill. Fill every section or delete it; never leave 
 | Runbook | [assets/runbook.md](assets/runbook.md) |
 | Plan | [assets/plan.md](assets/plan.md) |
 | Core service site | [assets/zensical.toml](assets/zensical.toml) |
+| Service-owned Pages workflow | [assets/docs-pages.yml](assets/docs-pages.yml) |
 
 ## Core service documentation sites
 
@@ -121,8 +122,8 @@ version-specific example. A link such as `../../cmd/server/main.go` would
 escape the published service directory. Keep a screenshot in `docs/assets/`
 when it should appear inline. Ignore generated `/site/` and `/.cache/` in Git.
 
-From the service repository root, build the same pinned version used by the
-hub. Start the local server to inspect the rendered pages.
+From the service repository root, build with the version pinned in its Pages
+workflow. Start the local server to inspect the rendered pages.
 
 ```sh
 uvx --from zensical==0.1.2 zensical build --strict
@@ -131,16 +132,23 @@ uvx --from zensical==0.1.2 zensical serve
 
 Open the URL printed by the server. Follow the first task, a reference link and
 a source-code link. Check the home page and a nested page at phone and desktop
-widths. To check the production subpath, serve the assembled hub locally and
-open `/<repo>/`. Confirm the stylesheet, images, search and navigation all
-resolve beneath that prefix.
+widths. To exercise the production path locally, copy `site/` into a temporary
+directory as `<repo>/`, serve its parent, and open `/<repo>/`. Follow a chapter
+link, use search and check that **All project guides** returns to the index.
 
-One dedicated GitHub Pages repository serves `docs.urmzd.com`. Its manifest
-selects a reviewed full commit SHA for each service. The hub checks out those
-commits, builds each site and assembles the generated directories at their
-repository slugs into one Pages artifact. A service update reaches the host
-through a reviewed pin change in the hub. Keep the domain and Pages deployment
-workflow in that repository.
+### Publish from the service repository
+
+Copy `assets/docs-pages.yml` to `.github/workflows/docs.yml`. Under **Settings →
+Pages**, select **GitHub Actions** as the build source. The account site
+`urmzd/urmzd.github.io` owns `docs.urmzd.com` and its index links to each
+service. Project sites inherit that domain at `/<repo>/`. Leave the service’s
+custom-domain setting empty and omit a `CNAME` file from its source and artifact.
+
+The workflow builds the service’s own checkout on pull requests to main.
+A push to main or a manual run on main builds and uploads `site/`, then
+deploys it through that repository’s `github-pages` environment. Each service
+can release its guide as part of its own merge. To add a guide, deploy it from
+the new service and add its URL to the account index. [How project sites inherit a custom domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages)
 
 ## Workflow
 
