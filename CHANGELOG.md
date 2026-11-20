@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.34.1 (2026-11-20)
+
+### Bug Fixes
+
+- **colima**: size the VM at 1/8 of RAM instead of 1/4 (#32) ([8b30e73](https://github.com/urmzd/dotfiles/commit/8b30e732f2d4b761c9025bc8241f5223e440c9f2))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.34.0...v0.34.1)
+
+
 ## 0.34.0 (2026-11-20)
 
 ### Features
