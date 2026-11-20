@@ -5,8 +5,8 @@
 # so a plain managed file would clobber those edits on every apply. Instead we
 # merge: the live file wins on conflicts, the managed baseline
 # (.chezmoitemplates/claude-settings.json) fills in missing keys, and the
-# permissions.allow / permissions.deny lists are unioned so new managed rules
-# still reach every machine.
+# permissions.allow / permissions.deny lists and each hook event's list are
+# unioned so new managed rules and hooks still reach every machine.
 set -euo pipefail
 
 current="$(cat)"
@@ -46,4 +46,6 @@ jq -n --argjson managed "$managed" --argjson current "$current" '
     | .permissions.allow = ((($managed.permissions.allow // []) + ($current.permissions.allow // [])) | unique)
     | (if (($managed.permissions.deny // []) + ($current.permissions.deny // [])) == []
        then . else .permissions.deny = ((($managed.permissions.deny // []) + ($current.permissions.deny // [])) | unique) end)
+    | .hooks = (reduce (($managed.hooks // {}) | keys[]) as $event (.hooks // {};
+        .[$event] = ((($managed.hooks[$event] // []) + ($current.hooks[$event] // [])) | unique)))
 '

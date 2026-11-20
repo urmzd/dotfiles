@@ -65,6 +65,15 @@
             "command": "~/.claude/hooks/agent-attention.sh set"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/work-at-risk.sh stop",
+            "timeout": 20
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -93,6 +102,17 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/agent-attention.sh clear"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/work-at-risk.sh start",
+            "timeout": 30
           }
         ]
       }
