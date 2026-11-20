@@ -1,4 +1,4 @@
-{{- /* VM memory: 1/4 of system RAM, clamped to 2..8 GiB (sysctl on macOS, /proc on Linux).
+{{- /* VM memory: 1/8 of system RAM, clamped to 2..8 GiB (sysctl on macOS, /proc on Linux).
      The vz VM never returns guest page cache to macOS, so it grows to this cap. */ -}}
 {{- $memBytes := 0 -}}
 {{- if eq .chezmoi.os "darwin" -}}
@@ -7,7 +7,7 @@
 {{-   $memBytes = output "awk" "/^MemTotal:/ { print $2 * 1024 }" "/proc/meminfo" | trim | int64 -}}
 {{- end -}}
 {{- $memGiB := div $memBytes 1073741824 -}}
-{{- $targetMem := max 2 (min 8 (div $memGiB 4)) -}}
+{{- $targetMem := max 2 (min 8 (div $memGiB 8)) -}}
 # Number of CPUs to be allocated to the virtual machine.
 cpu: 8
 
@@ -15,7 +15,7 @@ cpu: 8
 disk: 120
 
 # Size of the memory in GiB to be allocated to the virtual machine.
-# 1/4 of system memory, clamped to 2..8 GiB ({{ $memGiB }} GiB total = {{ $targetMem }} GiB)
+# 1/8 of system memory, clamped to 2..8 GiB ({{ $memGiB }} GiB total = {{ $targetMem }} GiB)
 memory: {{ $targetMem }}
 
 # Architecture of the virtual machine (aarch64, x86_64).
