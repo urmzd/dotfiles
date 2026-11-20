@@ -582,6 +582,13 @@ description = "Stacked pull requests with gh-stack"
 category = "skills"
 skills = ["github/gh-stack@skills/gh-stack"]
 
+[[package]]
+id = "skills-security-audit"
+name = "Security audit skill"
+description = "Cloudflare's multi-phase security audit with independently verified findings"
+category = "skills"
+skills = ["cloudflare/security-audit-skill@skills/security-audit"]
+
 # ---- Bundles ------------------------------------------------------------------
 # Fields: id, name, description, packages (ids above), presets. Ids share one
 # namespace with packages, so `dotfiles package add cloud` works.
