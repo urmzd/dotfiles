@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.33.0 (2026-11-20)
+
+### Features
+
+- **hooks**: flag work that exists only on one disk (#26) ([04450ca](https://github.com/urmzd/dotfiles/commit/04450cadf1f9f44b88fb196ce7450a225727b0fb))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.32.0...v0.33.0)
+
+
 ## 0.32.0 (2026-11-20)
 
 ### Features
