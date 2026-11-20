@@ -130,11 +130,28 @@ uvx --from zensical==0.1.2 zensical build --strict
 uvx --from zensical==0.1.2 zensical serve
 ```
 
-Open the URL printed by the server. Follow the first task, a reference link and
-a source-code link. Check the home page and a nested page at phone and desktop
-widths. To exercise the production path locally, copy `site/` into a temporary
-directory as `<repo>/`, serve its parent, and open `/<repo>/`. Follow a chapter
-link, use search and check that **All project guides** returns to the index.
+The account site supplies the shared portfolio typefaces, mark and palette at
+`/brand/`. Keep the root-relative URLs in the template so nested chapters
+also resolve them. The account site's `public/brand/zensical.css` styles all
+books, and `font = false` lets that stylesheet choose the typefaces. Edit
+shared presentation in the account repository.
+
+Use the development server above for live content edits. To see the complete
+theme and check the production subpath, stage the account assets beside the
+built book. From the service repository, with a sibling checkout of
+`urmzd.github.io`, run:
+
+```sh
+book=example-service # use the slug from site_url
+preview=$(mktemp -d)
+cp -R ../urmzd.github.io/public/brand "$preview/brand"
+cp -R site "$preview/$book"
+python3 -m http.server 8001 --bind 127.0.0.1 --directory "$preview"
+```
+
+Open `http://127.0.0.1:8001/<repo>/`. Check the home page and a nested chapter
+at phone and desktop widths in light and dark themes. Follow the first task,
+try search, open a source link and return to the index with **All project guides**.
 
 ### Publish from the service repository
 
