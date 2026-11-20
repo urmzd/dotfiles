@@ -420,6 +420,26 @@ uv = ["huggingface-hub"]
 setup = ["hf auth login"]
 check = "hf auth whoami"
 
+[[package]]
+id = "ant"
+name = "Claude Platform CLI"
+# Official CLI for the Claude API (anthropics/anthropic-cli), not the Claude
+# Code agent. Sign in with `ant auth login` or set ANTHROPIC_API_KEY.
+description = "ant: manage the Claude Platform (messages, agents, files, every API endpoint)"
+category = "ai"
+tap = ["anthropics/tap"]
+cask = ["anthropics/tap/ant"]
+
+[[package]]
+id = "openai-cli"
+name = "OpenAI CLI"
+# Official CLI for the OpenAI REST API (openai/openai-cli), not the Codex
+# agent. Reads OPENAI_API_KEY.
+description = "openai: manage the OpenAI platform (files, batches, images, every API endpoint)"
+category = "ai"
+tap = ["openai/tools"]
+cask = ["openai/tools/openai"]
+
 # ---- Remote access ------------------------------------------------------------
 # Reach this machine (and its tmux sessions) from a phone or another laptop.
 # Experimental: opt-in only, no preset selects these, until the approach is
