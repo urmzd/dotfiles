@@ -41,6 +41,11 @@ the primary checkout safe.
    `git checkout` a feature branch there, never commit on it directly; update
    it only with `git pull --ff-only`. All branch work happens inside
    worktrees.
+5. **Work never lives on one disk**: push a worktree's branch with its first
+   commit and open a draft pull request the same turn. Before a turn ends,
+   commit and push what the worktree holds; a work-in-progress commit is
+   fine. Never commit on a detached HEAD: create a branch first. When one
+   branch builds on another, base its pull request on that branch.
 
 ## Create a worktree
 
@@ -76,6 +81,11 @@ git worktree prune                                 # clear stale metadata
   `~/.claude/settings.json`) makes `claude --worktree` and subagent
   `isolation: worktree` create under `.worktrees/` automatically, and
   `~/.gitignore_global` ignores `.worktrees/` everywhere.
+- **Unsaved work is flagged**: `~/.claude/hooks/work-at-risk.sh` runs on
+  `Stop` and `SessionStart`. On stop it blocks once when the session's own
+  worktree has uncommitted or unpushed work. On start it lists every checkout
+  in the repo that does. Run `~/.claude/hooks/work-at-risk.sh scan <dir>` to
+  check a repo or a folder of repos by hand.
 - **EnterWorktree tool**: never use its name-based mode (it defaults to
   `.claude/worktrees/`). Create the worktree with git as above, then call
   `EnterWorktree` with `path: <repo-root>/.worktrees/<task>`.
