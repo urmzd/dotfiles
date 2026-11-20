@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.32.0 (2026-11-20)
+
+### Features
+
+- **scaffold-docs**: use the shared portfolio theme for service guides (#25) ([3ceac36](https://github.com/urmzd/dotfiles/commit/3ceac368d3f5af706ebed8100b91f6c1c3398f20))
+- **skills**: add land and work-status loop skills (#23) ([068a6e0](https://github.com/urmzd/dotfiles/commit/068a6e0a73e9f37cdeb4a76809135c3942018755))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.31.0...v0.32.0)
+
+
 ## 0.31.0 (2026-11-19)
 
 ### Features
