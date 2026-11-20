@@ -31,7 +31,27 @@ done
 # (executable_check-doc-hygiene.sh) into ~/.agents and chezmoi then flags the
 # real file as changed on every apply. chezmoi deploys ~/.agents before this
 # run_after script runs.
-ui_run "registered dotfiles skills and agents" agentspec manage add "$HOME/.agents" || true
+#
+# Register each dotfiles resource by name, never the whole ~/.agents tree:
+# that tree also holds anything a session or installer wrote there, and
+# registering the tree adopts those too and links them into every tool. A
+# project-specific skill dropped there by hand would become global.
+register_dotfiles_resources() {
+    local src="{{ .chezmoi.sourceDir }}/dot_agents" path name
+    for path in "$src"/skills/*/SKILL.md; do
+        [ -f "$path" ] || continue
+        name="${path%/SKILL.md}"; name="${name##*/}"
+        [ -d "$HOME/.agents/skills/$name" ] || continue
+        agentspec manage add "$HOME/.agents/skills/$name" >/dev/null 2>&1 || true
+    done
+    for path in "$src"/agents/*.md; do
+        [ -f "$path" ] || continue
+        name="${path##*/}"
+        [ -f "$HOME/.agents/agents/$name" ] || continue
+        agentspec manage add "$HOME/.agents/agents/$name" >/dev/null 2>&1 || true
+    done
+}
+ui_run "registered dotfiles skills and agents" register_dotfiles_resources || true
 
 if command -v jq >/dev/null 2>&1; then
     tmp_status="$(mktemp "${TMPDIR:-/tmp}/agentspec-status.XXXXXX")"
