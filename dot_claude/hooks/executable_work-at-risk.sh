@@ -83,7 +83,7 @@ case "$mode" in
             found="$(scan "$cwd")"
         else
             IFS=: read -r -a roots <<<"${WORK_AT_RISK_ROOTS:-$HOME/github}"
-            found="$(scan "${roots[@]}")"
+            found="$(scan ${roots[@]+"${roots[@]}"})"
         fi
         [ -n "$found" ] || exit 0
         total=$(printf '%s\n' "$found" | wc -l | tr -d ' ')
