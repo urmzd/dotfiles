@@ -6,6 +6,7 @@ repo_url = "https://github.com/urmzd/example-service"
 repo_name = "urmzd/example-service"
 docs_dir = "docs"
 site_dir = "site"
+extra_css = ["/brand/zensical.css"]
 exclude_docs = "/internal/**"
 nav = [
   { "Start here" = "README.md" },
@@ -15,6 +16,9 @@ nav = [
 ]
 
 [project.theme]
+font = false
+logo = "/brand/logo-mark.svg"
+favicon = "/brand/favicon.svg"
 features = ["content.code.copy", "navigation.footer"]
 
 [[project.theme.palette]]
