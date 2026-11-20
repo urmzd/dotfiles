@@ -1,7 +1,8 @@
 ---
 name: write-readme
 description: >
-  Structures and writes a project README: centered header, badges, demo image,
+  Structures and writes a project README: centered header, badges, the hero
+  demo (when a GIF beats a screenshot, how to record it, light and dark),
   section order, install.sh one-liner, Quick Start, fsrc code embeds, and the
   Agent Skill section. Use when creating or updating any project's README.md.
   Do NOT use for AGENTS.md or the skills-vs-docs taxonomy -> use configure-ai
@@ -66,17 +67,60 @@ Personal sites, curricula, and archives ship with CI + License only. Do not add 
 
 **Source:** `showcase/` directory, always. Never `assets/`, `doc/`, or a repo-root image. The `showcase/` name is pinned by `style-brand`.
 
-**Format:** `.gif` for terminal recordings (teasr), `.png` for static screenshots, `.svg` only for vector diagrams.
+**Format:** `.gif` for recordings (terminal or app), `.png` for static screenshots, `.svg` only for vector diagrams.
 
 **Width:** 80%.
 
 ```html
 <p align="center">
-  <img src="showcase/demo.gif" alt="Demo" width="80%">
+  <img src="showcase/demo.gif" alt="{What happens in it, in one sentence}" width="80%">
 </p>
+<p align="center"><em>{Where it was recorded, and what was edited}</em></p>
 ```
 
 Projects without a visual output (libraries with no CLI, curricula, archives) skip the demo. Do not synthesize a demo for a project that has nothing to show.
+
+### GIF or still
+
+Pick the medium by what sells the project:
+
+| The value is | Use |
+|---|---|
+| One screen that explains itself (a dashboard, a report, a rendered output) | `.png` |
+| A sequence: typing, streaming output, agents or jobs working, a before and after | `.gif` |
+
+When in doubt, describe the hero in one sentence. If the sentence has a verb that happens over time ("asks", "streams", "fixes"), record a GIF.
+
+### Recording a demo
+
+- **Record the real thing.** Drive the actual app with real inputs. Never show fixture or offline output a reader would mistake for the product, and never stage results. If a run goes wrong, record it again; do not edit it.
+- **Say what is real.** The caption names where it was recorded and what was edited, for example "Real models on a local preview. Idle pauses shortened."
+- **Keep it short.** 15 to 30 seconds, 1200 px wide, 12 fps, under 5 MB, looping. Open on a readable starting state and hold the result for about 4 seconds at the end.
+- **Shorten idle time only.** Cap gaps where nothing changes (about 1 second). Do not speed up the action itself.
+- **Script it in the repo.** The capture is a committed script behind a `make` target (or `teasr.toml` for terminal demos), so anyone can record it again. Re-record it in the same change as a redesign. A demo of an old UI misleads more than no demo.
+- **Alt text says what happens**, not "Demo".
+
+For web apps, teasr's web scenes emit a frame only at each `snapshot`, which turns streaming into a slideshow. Drive the browser with Playwright, record a CDP screencast (`Page.startScreencast`) with the frame timestamps, and encode with ffmpeg. Set `Emulation.setDeviceMetricsOverride` on the screencast's own CDP session: the screencast ignores Playwright's viewport and otherwise records the bare window at 1x. Then check the frame size.
+
+```sh
+# GIF from the recorded MP4: shared palette, small and sharp
+ffmpeg -i demo.mp4 -vf "fps=12,scale=1200:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle" showcase/demo.gif
+```
+
+### Light and dark
+
+When the UI has both themes, capture both and let GitHub pick: `showcase/demo-light.gif` and `showcase/demo-dark.gif`, and the same for gallery images.
+
+```html
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="showcase/demo-dark.gif">
+    <img src="showcase/demo-light.gif" alt="..." width="80%">
+  </picture>
+</p>
+```
+
+A project website plays the same recording as an MP4 (about a third the size of the GIF): `muted loop playsinline`, a poster set to the last frame, and under `prefers-reduced-motion` no autoplay, with controls shown.
 
 ## Table of Contents
 
@@ -95,7 +139,7 @@ Only list top-level `##` sections. Do not nest `###` headings in the ToC.
 
 ## Output Gallery
 
-For projects with multiple visual outputs (3-col, 30% width):
+For projects with multiple visual outputs (3-col, 30% width). Each image shows a different capability, not three views of the same page, and real data from the recorded session, not an empty state. Use `<picture>` per image when the hero has light and dark takes.
 
 ```html
 <p align="center">
