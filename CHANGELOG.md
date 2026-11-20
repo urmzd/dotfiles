@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.33.1 (2026-11-20)
+
+### Bug Fixes
+
+- **agents**: register only dotfiles skills and agents with agentspec (#31) ([1b86a1a](https://github.com/urmzd/dotfiles/commit/1b86a1af61c5989dc59c8f2e1908f6a431ab1e19))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.33.0...v0.33.1)
+
+
 ## 0.33.0 (2026-11-20)
 
 ### Features
