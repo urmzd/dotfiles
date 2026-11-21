@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.37.0 (2026-11-21)
+
+### Features
+
+- **zsh**: add awssso for IAM Identity Center login, like gcpsso (#35) ([5e46404](https://github.com/urmzd/dotfiles/commit/5e4640434fc5c4fc7312a04d66ba440919de7171))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.36.0...v0.37.0)
+
+
 ## 0.36.0 (2026-11-21)
 
 ### Features
