@@ -120,16 +120,9 @@ cannot.
 
 ## Who to study
 
-| Reference | Study for | Start here |
-|---|---|---|
-| Harvey II | Project workspace, reviewable agent output, evidence | https://www.harvey.ai/blog/introducing-harvey-ii, https://www.harvey.ai/blog/how-we-approach-design-at-harvey |
-| Codex app (Ed Bayes, Andrew Ambrosino) | Supervising parallel agents, approvals, review queue | https://openai.com/index/introducing-the-codex-app/, https://softwareengineeringdaily.com/wp-content/uploads/2026/01/SED1898-OpenAI.txt |
-| Linear (Karri Saarinen) | Work navigation, hierarchy, AI workbench model | https://linear.app/now/design-for-the-ai-age, https://karrisaarinen.com/posts/every-feature-should-earn-its-place/ |
-| Figma (Rasmus Andersson) | Role- and selection-sensitive UI, pattern reduction | https://rsms.me/work/figma/, https://www.figma.com/blog/ui-refresh/ |
-| Raycast | Fast, discoverable actions | https://www.raycast.com/blog/a-fresh-look-and-feel, https://www.raycast.com/why |
-| Dust (Édouard Wautier, Clément Aupiais) | Human/agent symmetry, prototype-first, trustworthy data display | https://dust.tt/blog/field-study-prototypes-over-mockups, https://medium.com/algolia-design/building-trust-with-data-visualisation-13321b44b819 |
-| Anthropic (Nate Parrott, Meaghan Choi, Jenny Wen, Joel Lewenstein) | Chat plus specialized UI, mental models, deciding what to build | https://www.aidesignfieldguide.com/articles/nate-parrott, https://designerfund.com/blog/ai-design-anthropic, https://www.linkedin.com/pulse/whats-worth-making-joel-lewenstein-xcgqc/ |
-| Geist (Anthropic, Harvey brand) | Values expressed through type, palette and components | https://geist.co/work/anthropic |
+The designers and products behind these principles, with links, are in
+[who to study](who-to-study.md). Open a source before you cite it, and follow
+the study steps there.
 
 ## Avoid
 
