@@ -127,7 +127,7 @@ dotfiles clean                   # Prune build artifacts and caches under ~/gith
 | editors | Cursor, Visual Studio Code |
 | chat | Slack, Slack CLI (`slack`), Discord, Zoom |
 | productivity | 1Password, Raycast, Linear, Figma |
-| ai | Claude, ChatGPT (desktop apps), Warp Agent CLI (`warp`, runs in Ghostty), Hugging Face CLI (`hf`) |
+| ai | Claude, ChatGPT (desktop apps), Warp Agent CLI (`warp`, runs in Ghostty), Hugging Face CLI (`hf`), Claude Platform CLI (`ant`), OpenAI CLI (`openai`) |
 | media | Spotify |
 | work | Atlassian CLI (`acli`), Teamwork Graph CLI (`twg`) |
 | stack | teasr (README screenshots and GIFs), oag (OpenAPI client codegen) |

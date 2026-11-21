@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.34.1 (2026-11-20)
+
+### Bug Fixes
+
+- **colima**: size the VM at 1/8 of RAM instead of 1/4 (#32) ([8b30e73](https://github.com/urmzd/dotfiles/commit/8b30e732f2d4b761c9025bc8241f5223e440c9f2))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.34.0...v0.34.1)
+
+
+## 0.34.0 (2026-11-20)
+
+### Features
+
+- **catalog**: add Claude Platform and OpenAI platform CLIs (#30) ([5d7cd81](https://github.com/urmzd/dotfiles/commit/5d7cd81eecd5dd903f6d2d61f74d1befbe78b5d7))
+
+### Bug Fixes
+
+- **security**: harden statusline caches and bind pack clones to their URL (#29) ([037bb6b](https://github.com/urmzd/dotfiles/commit/037bb6be9a15fa6ef02ab875ab71e3cabaeba70d))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.33.1...v0.34.0)
+
+
+## 0.33.1 (2026-11-20)
+
+### Bug Fixes
+
+- **agents**: register only dotfiles skills and agents with agentspec (#31) ([1b86a1a](https://github.com/urmzd/dotfiles/commit/1b86a1af61c5989dc59c8f2e1908f6a431ab1e19))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.33.0...v0.33.1)
+
+
+## 0.33.0 (2026-11-20)
+
+### Features
+
+- **hooks**: flag work that exists only on one disk (#26) ([04450ca](https://github.com/urmzd/dotfiles/commit/04450cadf1f9f44b88fb196ce7450a225727b0fb))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.32.0...v0.33.0)
+
+
 ## 0.32.0 (2026-11-20)
 
 ### Features

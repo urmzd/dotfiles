@@ -30,6 +30,7 @@ fi
 err="$(mktemp "${TMPDIR:-/tmp}/packs.XXXXXX")"
 trap 'rm -f "$err"' EXIT
 fetched=" "
+fetched_urls=" "
 
 seeded=0
 seed_github_host() { # <url>
@@ -49,9 +50,44 @@ seed_github_host() { # <url>
 
 fetch() { # <url> <repo dir>
     local url="$1" repo="$2"
-    case "$fetched" in *" $repo "*) return 0 ;; esac
+    case "$fetched" in
+        *" $repo "*)
+            # The clone directory is the repository name, so two pack URLs
+            # with the same name share it. The first listed one owns it.
+            case "$fetched_urls" in
+                *" $url "*) ;;
+                *)
+                    section
+                    ui_warn "$url shares $repo with an earlier pack; it is not cloned"
+                    ui_hint "packs are keyed by repository name: rename one of the two repositories"
+                    ;;
+            esac
+            return 0
+            ;;
+    esac
     fetched="$fetched$repo "
+    fetched_urls="$fetched_urls$url "
     seed_github_host "$url"
+    # A clone made from another URL (the pack moved, or an earlier pack had
+    # the same repository name) must not keep supplying this pack: nothing
+    # below would ever pull from the configured URL. Set it aside and clone
+    # fresh, so the directory only ever holds content from the listed URL.
+    if [ -d "$repo/.git" ]; then
+        local origin stale
+        origin="$(git -C "$repo" remote get-url origin 2>/dev/null || true)"
+        if [ "$origin" != "$url" ]; then
+            stale="$repo.replaced-$(date +%Y%m%d%H%M%S)"
+            section
+            if mv "$repo" "$stale" 2>"$err"; then
+                ui_warn "$repo was cloned from ${origin:-an unknown remote}, not $url; moved it to $stale"
+            else
+                ui_warn "$repo was cloned from ${origin:-an unknown remote}, not $url, and could not be moved aside"
+                ui_hint "$(head -1 "$err")"
+                ui_hint "move it aside by hand, then rerun: chezmoi apply"
+                return 0
+            fi
+        fi
+    fi
     if [ -d "$repo/.git" ]; then
         # Fast-forward at most once a day; FETCH_HEAD records the last fetch.
         if [ -f "$repo/.git/FETCH_HEAD" ] && [ -z "$(find "$repo/.git/FETCH_HEAD" -mmin +1440 2>/dev/null)" ]; then
