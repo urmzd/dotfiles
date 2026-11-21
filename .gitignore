@@ -247,3 +247,8 @@ node_modules
 # Rust build output for the dotfiles CLI (cli/)
 cli/target/
 .worktrees/
+
+# Managed scripts for ~/.local/bin (chezmoi dot_local/bin).
+!dot_local/
+!dot_local/bin/
+!dot_local/bin/executable_go
