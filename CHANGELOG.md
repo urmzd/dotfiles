@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.35.0 (2026-11-21)
+
+### Features
+
+- **agents**: add plain-language and structure rules to the response contract (#28) ([dbe7f41](https://github.com/urmzd/dotfiles/commit/dbe7f41a3916b55b703428a69c7794c1554e955d))
+- **skills**: add trending skill for a no-login digest of GitHub, Hacker News and Lobsters (#27) ([9c5f8a5](https://github.com/urmzd/dotfiles/commit/9c5f8a5e29c7fc8f04726b2ea3dc8081507782b1))
+
+### Misc
+
+- **write-readme**: decide GIF or still, and record demos from the real app (#33) ([f12c17a](https://github.com/urmzd/dotfiles/commit/f12c17afe35c1151e795edbf34d76643ff3b960f))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.34.1...v0.35.0)
+
+
 ## 0.34.1 (2026-11-20)
 
 ### Bug Fixes
