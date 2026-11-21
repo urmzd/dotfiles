@@ -1,0 +1,20 @@
+{
+  "skill": "trending",
+  "description": "Routing evals: does the query ask for a live picture of what is trending in software from public sources (GitHub trending and new repos, Hacker News, Lobsters)? Near-misses route to deep-research (one topic in depth), repo-status, get-work and work-status (the user's own repos and work), and github-insights (profile metrics).",
+  "queries": [
+    { "query": "what's trending on github today", "should_trigger": true, "note": "Default run." },
+    { "query": "give me the top 20 trending repos this week", "should_trigger": true, "note": "--since weekly." },
+    { "query": "any new rust repos blowing up this month", "should_trigger": true, "note": "--since monthly --lang rust." },
+    { "query": "what's on hacker news right now", "should_trigger": true, "note": "--sources hn." },
+    { "query": "catch me up on tech news without me opening twitter", "should_trigger": true, "note": "Full digest; state that X is not a source." },
+    { "query": "what are people in the agent tooling space shipping lately", "should_trigger": true, "note": "Digest, themes filtered to agents." },
+    { "query": "what's happening on twitter and github", "should_trigger": true, "note": "Digest; HN and Lobsters stand in for X." },
+    { "query": "research how vector databases compare for a 10M row workload", "should_trigger": false, "note": "One topic in depth: deep-research." },
+    { "query": "what's the status of my repos", "should_trigger": false, "note": "The user's own repos: repo-status." },
+    { "query": "what PRs do I have open", "should_trigger": false, "note": "In-flight work: work-status." },
+    { "query": "what should I work on next across my projects", "should_trigger": false, "note": "Portfolio choice: get-work." },
+    { "query": "generate the stars and languages card for my github profile", "should_trigger": false, "note": "Profile metrics: github-insights." },
+    { "query": "star that trending repo and clone it", "should_trigger": false, "note": "A write action; trending is read-only." },
+    { "query": "is the tokio crate still maintained", "should_trigger": false, "note": "A lookup about one project, not a trend digest." }
+  ]
+}

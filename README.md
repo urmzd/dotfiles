@@ -293,7 +293,7 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 
 | Pack | Skills |
 | ---- | ------ |
-| (core, always) | ship, pr, land, work-status, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
+| (core, always) | ship, pr, land, work-status, trending, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
 | `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
 | `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
 | `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
@@ -364,6 +364,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | land | Take finished work to the default branch in one pass: commit, PR, green CI, squash-merge, clean up |
 | work-status | Read-only snapshot of in-flight work: open PRs, worktrees, tmux panes, dev servers, with the next three actions |
+| trending | No-login digest of what is trending: GitHub trending and new repos, Hacker News, Lobsters, with the themes across them |
 | diagnose-ci | Find failing remote CI pipelines, pull logs, identify root cause (local sibling: diagnose-runtime) |
 | diagnose-runtime | Triage local runtime errors, hangs, slowness, and hardware/serial issues (the local counterpart to diagnose-ci) |
 | manage-theme | Switch, create, or debug the machine theme (Ghostty, Neovim, tmux, dotfiles output) via `dotfiles theme` and theme files |
