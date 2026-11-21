@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.36.0 (2026-11-21)
+
+### Features
+
+- **style-brand**: add who-to-study reference with joseph.cv and a mishap checklist (#34) ([5380919](https://github.com/urmzd/dotfiles/commit/53809196275e98cf00ea4b7051608e0400243676))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.35.0...v0.36.0)
+
+
 ## 0.35.0 (2026-11-21)
 
 ### Features
