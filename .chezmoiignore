@@ -40,3 +40,8 @@ requirements-pipx.txt
 {{- if ne .chezmoi.os "darwin" }}
 Library/
 {{- end }}
+
+# The go-test gate wraps `go test` with /usr/bin/lockf, which only macOS has.
+{{- if ne .chezmoi.os "darwin" }}
+.local/bin/go
+{{- end }}
