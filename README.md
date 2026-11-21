@@ -394,7 +394,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | extend-oss-skills-to-claude | Claude-specific skill deltas (invocation control, subagent execution, model overrides) |
 | audit-security | Security auditing and threat detection |
 | run-eval-harness | Run a project's eval suite end to end: launch, monitor, parse the report, diff against the previous run (forks to a sonnet subagent) |
-| style-brand | Frame and document a project's visual identity. Ships Cyberdream + MonaspiceNe + teasr as a template, not a mandate |
+| style-brand | Design, refine or critique websites, product UI and brand identity: shared design standard, mishaps to check for, and the designers we study. Also terminal theme and teasr demo templates |
 | sync-docs | Audit and synchronize project documentation (canonical doc-drift skill) |
 | scaffold-docs | Root-file allowlist, `docs/` layout (architecture, adrs, rfcs, guides, reference, runbooks, plans) and templates |
 | write-readme | README structure and section order |

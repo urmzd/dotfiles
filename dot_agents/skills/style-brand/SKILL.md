@@ -1,12 +1,13 @@
 ---
 name: style-brand
 description: >
-  Establish a project's visual identity and apply the shared website design
-  approach: readable typography, mobile navigation, clear visitor journeys,
-  accessible interactions and consistent content. Use when designing or refining
-  a website, interface, agent workspace or brand. Also covers terminal themes
-  and demo assets.
-allowed-tools: Read, Grep, Glob
+  Design, refine or critique anything a person looks at: websites, product UI,
+  agent workspaces, single screens and components, and brand identity. Holds
+  the shared design standard, the mishaps to check for, and the designers we
+  study. Use when building or changing a page or screen, reviewing a UI or a
+  screenshot, fixing alignment, spacing, clutter or inconsistent controls,
+  keeping several sites on one brand, or when the user shares a design or
+  portfolio link as a reference. Also covers terminal themes and demo assets.
 metadata:
   title: Visual Identity
   category: visual
@@ -15,18 +16,69 @@ metadata:
 
 # Visual Identity
 
-## Websites and interfaces
+## Which reference to read
 
-Read [the shared web design standard](references/web-design.md) for website or
-interface work. Apply it within the user's brief and the project's existing
-architecture. Keep project-specific fonts, palette, content decisions and
-approved exceptions in that project's design notes. Standardize the method and
-quality bar, not the appearance of every brand.
+| The work | Read |
+|---|---|
+| A website, landing page or docs site | [Shared web design standard](references/web-design.md) |
+| Product UI: an app screen, dashboard, panel or component | [Shared web design standard](references/web-design.md) |
+| An interface where people direct and review agent work | The standard, then [AI workspace design](references/ai-workspace-design.md) |
+| The user shared a link, or you need precedent | [Who to study](references/who-to-study.md) |
+| A terminal theme or a demo capture | The sections at the end of this file |
 
-For interfaces where people direct and review agent work, also read
-[the AI workspace design reference](references/ai-workspace-design.md).
+The web design standard applies to every screen, product UI included. Do not
+read only the AI workspace reference for product UI. It adds to the standard
+and does not replace it.
 
-The theme and terminal examples below are optional examples, not website defaults.
+## Order of work
+
+1. **Find the project's own design first.** Look for design notes, a brand
+   guide, a tokens file and the logo files. If the project belongs to a family
+   of sites or apps, open a sibling and match its palette, type, stroke weight,
+   logo and tone before you draw anything new. Reuse the logo file. Do not
+   redraw it.
+2. **Read the reference** from the table above.
+3. **Name the job of the screen** and the person's next action. List the text
+   and controls you plan to put on it, each with what the person does or
+   learns from it. Drop the ones with no answer.
+4. **Build within the brief** and the project's existing architecture.
+5. **Look at it.** Run the real thing and capture it at a phone width and a
+   desktop width, in light and dark when both exist. Check the screenshot
+   against the mishap list below.
+6. **Report with the screenshots.** Name any state you did not see.
+
+Keep project-specific fonts, palette, content decisions and approved
+exceptions in that project's design notes. Standardize the method and quality
+bar, not the appearance of every brand.
+
+## Mishaps to check for
+
+These are corrections people gave on real work, most frequent first. Check
+each one on the screenshot, not in the code.
+
+- **Unearned text and controls.** Extra labels, helper lines, tags, badges and
+  buttons that nobody asked for. Ask of every element: what does the person do
+  or learn with this? If there is no answer, remove it. Do not swap it for a
+  different element.
+- **Words where a familiar icon would do.** Use a well-known icon for a
+  well-known action, with an accessible name. Use one icon set at one size per
+  context. Never put two icons that mean the same thing side by side.
+- **Missing structure.** Comparable records belong in a table. One object with
+  its actions belongs in a card. Nothing should float without a container or
+  an alignment line it shares with its neighbors.
+- **Sibling sites that drift.** Different colors, logo, stroke weights or tone
+  across products of one brand. Match the existing tokens and assets.
+- **Animation ahead of clarity.** A clean, static page beats a moving one. Fix
+  blur and legibility before adding motion. Logos and icons are vector files.
+- **Fonts that silently fall back.** Check the computed font family in the
+  browser. A correct stylesheet does not prove the font loaded.
+- **Inconsistent controls.** Chevrons, icon sizes and button heights that
+  differ between similar controls, or content that overflows its button.
+- **Copying a reference.** A link the user shares is something to study. See
+  [who to study](references/who-to-study.md) for how.
+
+The theme and terminal examples below are optional examples, not website
+defaults.
 
 ## Theme & Font
 
