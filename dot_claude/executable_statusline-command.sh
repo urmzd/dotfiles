@@ -46,8 +46,24 @@ fmt_k() {
   fi
 }
 
+# --- Caches ---
+# Owner-only directory, never a fixed name in shared /tmp: another local
+# account could plant a cache file or a link there, and cached values end up
+# in awk and on the terminal.
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/claude-statusline"
+(umask 077 && mkdir -p "$CACHE_DIR") 2>/dev/null
+chmod 700 "$CACHE_DIR" 2>/dev/null
+
+# Cached and external values are numbers; anything else renders as 0.
+num_or_zero() {
+  case "$1" in
+    '' | *[!0-9.]* | *.*.*) printf '0' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 # --- Git caching ---
-GIT_CACHE="/tmp/claude-statusline-git.cache"
+GIT_CACHE="$CACHE_DIR/git.cache"
 GIT_TTL=5
 
 file_is_fresh() {
@@ -91,7 +107,7 @@ fi
 } < "$GIT_CACHE"
 
 # --- Usage limit caching ---
-USAGE_CACHE="/tmp/claude-statusline-usage.cache"
+USAGE_CACHE="$CACHE_DIR/usage.cache"
 USAGE_TTL=60
 
 refresh_usage_cache() {
@@ -113,9 +129,11 @@ if ! file_is_fresh "$USAGE_CACHE" "$USAGE_TTL"; then
 fi
 
 read -r usage_5h usage_7d < "$USAGE_CACHE" 2>/dev/null || { usage_5h=0; usage_7d=0; }
+usage_5h=$(num_or_zero "$usage_5h")
+usage_7d=$(num_or_zero "$usage_7d")
 
 # --- Plan detection caching ---
-PLAN_CACHE="/tmp/claude-statusline-plan.cache"
+PLAN_CACHE="$CACHE_DIR/plan.cache"
 PLAN_TTL=10
 
 refresh_plan_cache() {
@@ -198,7 +216,7 @@ fi
 # Usage limits (color-coded)
 color_for_pct() {
   local pct_int
-  pct_int=$(awk "BEGIN { printf \"%d\", int($1 + 0.5) }")
+  pct_int=$(awk -v v="$(num_or_zero "$1")" 'BEGIN { printf "%d", int(v + 0.5) }')
   if [ "$pct_int" -ge 90 ]; then
     printf '%s' "$RED"
   elif [ "$pct_int" -ge 70 ]; then
@@ -208,8 +226,8 @@ color_for_pct() {
   fi
 }
 
-five_hr_pct=$(awk "BEGIN { printf \"%d\", int(${usage_5h:-0} + 0.5) }")
-seven_day_pct=$(awk "BEGIN { printf \"%d\", int(${usage_7d:-0} + 0.5) }")
+five_hr_pct=$(awk -v v="$usage_5h" 'BEGIN { printf "%d", int(v + 0.5) }')
+seven_day_pct=$(awk -v v="$usage_7d" 'BEGIN { printf "%d", int(v + 0.5) }')
 
 if [ "$five_hr_pct" -gt 0 ] || [ "$seven_day_pct" -gt 0 ]; then
   c5=$(color_for_pct "${usage_5h:-0}")
@@ -218,7 +236,7 @@ if [ "$five_hr_pct" -gt 0 ] || [ "$seven_day_pct" -gt 0 ]; then
 fi
 
 # --- Line 2: Metrics ---
-used_pct=$(awk 'BEGIN { printf "%d", int('"$used_pct"') }')
+used_pct=$(awk -v v="$(num_or_zero "$used_pct")" 'BEGIN { printf "%d", int(v) }')
 used_tokens=$((used_pct * window_size / 100))
 
 # Color-coded progress bar (20 chars)
@@ -239,8 +257,9 @@ bar_empty=$(printf "%${empty}s" '' | sed 's/ /░/g')
 bar="${bar_color}${bar_filled}${DIM}${bar_empty}${RST}"
 
 # Cost (color-coded)
-cost_val=$(awk 'BEGIN { printf "%.2f", '"$cost"' }')
-cost_cmp=$(awk 'BEGIN { print ('"$cost"' > 5) ? "red" : ('"$cost"' >= 1) ? "yellow" : "green" }')
+cost=$(num_or_zero "$cost")
+cost_val=$(awk -v v="$cost" 'BEGIN { printf "%.2f", v }')
+cost_cmp=$(awk -v v="$cost" 'BEGIN { print (v > 5) ? "red" : (v >= 1) ? "yellow" : "green" }')
 case "$cost_cmp" in
   red)    cost_fmt="${RED}\$${cost_val}${RST}" ;;
   yellow) cost_fmt="${YELLOW}\$${cost_val}${RST}" ;;
