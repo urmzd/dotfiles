@@ -86,8 +86,13 @@ check opt init "$name init (needed when the tool reads a config file)" "$bin" in
 check opt completions "$name completions" "$bin" completions --help
 check opt doctor "$name doctor (needed when the tool depends on other programs)" "$bin" doctor --help
 
+# A synonym is a defect only when `--help` lists it. A hidden alias kept for
+# one release is allowed.
+listed=$("$bin" --help </dev/null 2>&1)
 for wrong in setup upgrade completion; do
-    if ok "$bin" "$wrong" --help; then record must "no-$wrong" fail "'$name $wrong' is a synonym of a standard verb"; fi
+    if printf '%s\n' "$listed" | grep -Eq "^[[:space:]]+$wrong([[:space:]]|$)"; then
+        record must "no-$wrong" fail "'$name $wrong' is a synonym of a standard verb"
+    fi
 done
 
 # --- repo ------------------------------------------------------------------
@@ -98,6 +103,13 @@ if [ -n "$repo" ]; then
     done
     if [ -f "$repo/skills/$name/SKILL.md" ]; then
         record must skill pass "skills/$name/SKILL.md"
+        if command -v agentspec >/dev/null 2>&1; then
+            if agentspec manage validate "$repo/skills/$name" 2>&1 | grep -q "is valid"; then
+                record must skill-valid pass "skills/$name/SKILL.md is a valid skill"
+            else
+                record must skill-valid fail "skills/$name/SKILL.md does not pass 'agentspec manage validate'"
+            fi
+        fi
     else
         others=$(find "$repo/skills" -maxdepth 2 -name SKILL.md 2>/dev/null | sed "s|$repo/||" | tr '\n' ' ')
         record must skill fail "skills/$name/SKILL.md is missing (found: ${others:-none})"

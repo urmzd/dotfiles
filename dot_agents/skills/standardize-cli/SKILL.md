@@ -66,7 +66,8 @@ Every verb that prints data accepts `--format json` and then prints one JSON doc
 - Write `<tool>.toml` or `<tool>.yaml` in the working directory and print its path.
 - Refuse to overwrite an existing file. `--force` overwrites.
 - The file it writes must pass the tool's own validation with no edit.
-- Offer named templates with a positional argument and `--list`, as `sr init` does.
+- Offer named templates with a positional argument and `--list`, as `sr init` and `teasr init` do. Test that the tool loads each template.
+- The default template must run on a fresh machine with nothing else installed.
 - Never ask a question when stdin is not a terminal.
 
 ### `update`
@@ -85,26 +86,34 @@ Every verb that prints data accepts `--format json` and then prints one JSON doc
 ### `doctor`
 
 - Check each thing the tool needs: a program on `PATH`, a browser, a font, a token.
-- Check the agent surface too: the installed skill matches this binary, and the MCP server is registered.
+- Check the agent surface too: the installed skill matches this binary, and the MCP server is registered. A failed check there is a warning, with `<tool> bootstrap` as the fix.
 - Print one line for each check, with the command that fixes a failed one.
 - Exit 1 when a required check fails. With `--format json`, print `{"checks": [{"id", "ok", "detail", "fix"}]}`.
 - Do not install anything. `doctor` reads; `bootstrap` and `init` write.
+- Reference: `teasr/crates/teasr-cli/src/doctor.rs`.
 
 ### `bootstrap`
 
 `bootstrap` makes a fresh install usable by agents with one command. The skill ships inside the binary, so the skill and the binary always have the same version.
 
-1. Embed `skills/<tool>/SKILL.md` in the binary at build time: `include_str!` in Rust, `embed` in Go.
-2. Write it to `~/.agents/skills/<tool>/SKILL.md`. Overwrite a copy that an earlier `bootstrap` wrote. Keep a same-named skill the user wrote, unless `--force` is set.
-3. Run `agentspec manage add ~/.agents/skills/<tool> --all-tools`.
-4. If the tool serves MCP, run `agentspec mcp add <tool> --command <tool> --args "mcp serve"`.
-5. If `agentspec` is not on `PATH`, print those commands and the JSON snippet, and exit 0.
+1. Embed the usage skill in the binary at build time: `include_str!` in Rust, `embed` in Go.
+2. Write it to a directory the tool owns: `~/.local/share/<tool>/skills/<tool>/SKILL.md` (`$XDG_DATA_HOME` first). Always overwrite it. It is the tool's own copy.
+3. Run `agentspec manage add <that directory> --all-tools`. The first run installs the skill in every AI tool. A later run skips it and exits 0.
+4. Run `agentspec manage update <tool>`. It refreshes a skill that came from that directory, for example after `<tool> update`.
+5. If the tool serves MCP, run `agentspec mcp add <tool> --command <tool> --args "mcp serve"`. It is safe to repeat.
+6. If `agentspec` is not on `PATH`, print the skill path and the MCP JSON snippet, and exit 0.
 
-`bootstrap` is idempotent and takes `--force` and `--dry-run`. Reference for steps 1 and 2: `agentspec/crates/agentspec/src/ops/bootstrap.rs`.
+- Never write into `~/.agents` or a tool's config directly. `agentspec manage add` skips a skill that is already in `~/.agents/skills`, so a file written there is never registered or linked.
+- A different skill with the same name is kept: agentspec's rule is that the first one installed wins. Report that it was kept. `--force` runs `agentspec manage remove <tool>` first.
+- `bootstrap` is idempotent and takes `--force` and `--dry-run`. With `--format json` it prints each command it ran and whether it passed.
+
+Reference: `teasr/crates/teasr-cli/src/bootstrap.rs`.
 
 ## The bundled skill
 
 - One skill is named after the binary: `skills/<tool>/SKILL.md`. It is the usage skill, and it is the one `bootstrap` installs.
+- The file must be where the build can embed it. A crate published to crates.io packages only its own directory, so keep the file at `crates/<cli>/skills/<tool>/SKILL.md` and make `skills/<tool>` at the repo root a relative link to it.
+- Run `agentspec manage validate skills/<tool>` in the same change. A frontmatter value that starts with `[` or contains `: ` must be quoted, or the file is not valid YAML and no tool loads it.
 - It tells an agent when to use the tool, the verbs, the `--format json` shapes, and the gotchas. It does not repeat `--help`.
 - A tool can ship more skills beside it, for example `skills/<tool>-dev/` for people who change the tool. `bootstrap` does not install those.
 - Change the skill in the same pull request as the behaviour it describes.
@@ -135,7 +144,7 @@ Read [references/mcp-server.md](references/mcp-server.md) before you add or revi
 ## Workflow
 
 - [ ] Run the audit and read every `FAIL`
-- [ ] Add or rename verbs. Keep an old name as a hidden alias for one release when people use it
+- [ ] Add or rename verbs. Keep an old name as a hidden alias for one release when people use it. The audit accepts a hidden alias
 - [ ] Make each verb honour `--format json`
 - [ ] Move the usage skill to `skills/<tool>/` and embed it
 - [ ] Add `bootstrap`, then `doctor` when the tool needs other programs
