@@ -4,10 +4,11 @@ description: >
   Design and audit CLI tools end-to-end: output modes, TTY detection, JSON piping,
   stderr/stdout separation, color/symbol semantics, the ui module pattern, signal
   handling, exit codes, and install.sh. Use when building, reviewing, or releasing any
-  CLI and you need general CLI design guidance. Do NOT use for the mandatory urmzd/*
-  portfolio CLI rules (argument-parser choice, self-update requirement, --format flag,
-  global flags, install.sh template): cli-standards owns those and overrides this skill
-  where they conflict.
+  CLI and you need general CLI design guidance, or how to implement the mandatory
+  portfolio CLI rules (argument-parser choice, self-update, --format flag, global
+  flags, install.sh template). Do NOT use to decide which verbs and surfaces a tool
+  must have (init, update, version, doctor, bootstrap, the bundled skill, the MCP
+  server): use standardize-cli, which loads on top of this skill.
 allowed-tools: Read, Grep, Glob
 metadata:
   title: CLI Patterns
@@ -480,6 +481,8 @@ Prefix naming: `SR_` → `TEASR_`, `AGENTSPEC_`, `OAG_`, `MNEMONIST_`, `LGP_`, `
 Platform targets (Rust musl): `x86_64-unknown-linux-musl`, `aarch64-unknown-linux-musl`, `x86_64-apple-darwin`, `aarch64-apple-darwin`.
 
 ## Subcommand Conventions
+
+`standardize-cli` owns which verbs a tool must have (`init`, `update`, `version`, `completions`, `doctor`, `bootstrap`, `mcp serve`) and what each must do. The rules below are how to build them.
 
 - Max 2 levels of nesting: `tool command subcommand`
 - Binary name matches the `[[bin]]` name in `Cargo.toml` or `"bin"` in `package.json`

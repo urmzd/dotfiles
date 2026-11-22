@@ -540,6 +540,7 @@ skills = [
     "scaffold-project", "scaffold-go", "scaffold-node", "scaffold-python",
     "scaffold-rust", "scaffold-terraform", "repo-init", "check-project",
     "community-health", "setup-ci", "setup-devenv", "choose-stack", "build-cli",
+    "standardize-cli",
     "write-readme", "create-llms-txt", "configure-ai", "update-repo-meta",
 ]
 
