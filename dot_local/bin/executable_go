@@ -19,7 +19,21 @@ REAL=
 for c in /opt/homebrew/bin/go /usr/local/bin/go /usr/local/go/bin/go; do
   [ -x "$c" ] && REAL=$c && break
 done
-[ -n "$REAL" ] || { echo "go-test gate: no go found in /opt/homebrew, /usr/local or /usr/local/go" >&2; exit 127; }
+# Any other install (Nix, mise, a GOROOT): the next go on PATH that is not
+# this file. Without this the wrapper would hide a go it cannot find.
+if [ -z "$REAL" ]; then
+  self=$(cd "$(dirname "$0")" 2>/dev/null && pwd -P)
+  oldifs=$IFS
+  IFS=:
+  for d in $PATH; do
+    [ -n "$d" ] && [ -x "$d/go" ] || continue
+    [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$self" ] && continue
+    REAL=$d/go
+    break
+  done
+  IFS=$oldifs
+fi
+[ -n "$REAL" ] || { echo "go-test gate: no go found in /opt/homebrew, /usr/local, /usr/local/go or on PATH" >&2; exit 127; }
 
 # Find the subcommand. Skip a leading `-C dir`.
 sub=$1
