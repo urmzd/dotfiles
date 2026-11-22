@@ -1,0 +1,89 @@
+#!/bin/sh
+# go-test gate. Installed 2026-11-21.
+#
+# Why: many agent sessions (Claude, Codex) start `go test -race` at the same
+# time. Each run holds 3 to 5 GB. Five at once pushed a 24 GB Mac into swap.
+#
+# What: every command except `go test` passes straight to the real go.
+# `go test` takes one of GO_TEST_SLOTS machine-wide slots (default 1) and
+# waits when all slots are busy. A slot is a flock(2) lock, so the kernel
+# frees it when the run ends or dies.
+#
+# Controls:
+#   GO_TEST_SLOTS=N      number of concurrent `go test` runs (default 1, lowered from 2 on 2026-11-21 for heat)
+#   GO_TEST_GATE=off     skip the gate for one command
+# Managed by chezmoi (dot_local/bin/executable_go, macOS only: it needs /usr/bin/lockf).
+# Remove: delete it from the dotfiles repo, then rm ~/.local/bin/go
+
+REAL=
+for c in /opt/homebrew/bin/go /usr/local/bin/go /usr/local/go/bin/go; do
+  [ -x "$c" ] && REAL=$c && break
+done
+# Any other install (Nix, mise, a GOROOT): the next go on PATH that is not
+# this file. Without this the wrapper would hide a go it cannot find.
+if [ -z "$REAL" ]; then
+  self=$(cd "$(dirname "$0")" 2>/dev/null && pwd -P)
+  oldifs=$IFS
+  IFS=:
+  for d in $PATH; do
+    [ -n "$d" ] && [ -x "$d/go" ] || continue
+    [ "$(cd "$d" 2>/dev/null && pwd -P)" = "$self" ] && continue
+    REAL=$d/go
+    break
+  done
+  IFS=$oldifs
+fi
+[ -n "$REAL" ] || { echo "go-test gate: no go found in /opt/homebrew, /usr/local, /usr/local/go or on PATH" >&2; exit 127; }
+
+# Find the subcommand. Skip a leading `-C dir`.
+sub=$1
+[ "$1" = "-C" ] && sub=$3
+
+if [ "$sub" != "test" ] || [ "$GO_TEST_GATE" = "off" ] || [ -n "$GO_TEST_GATE_HELD" ]; then
+  exec "$REAL" "$@"
+fi
+
+SLOTS=${GO_TEST_SLOTS:-1}
+MAX_WAIT=${GO_TEST_GATE_MAX_WAIT:-900}
+DIR=/tmp/go-test-gate-$(id -u)
+mkdir -p "$DIR" 2>/dev/null || exec "$REAL" "$@"
+
+# Cache trim. Go keeps build cache entries for 5 days and has no size limit.
+# `go test -race` across many worktrees wrote 63 GB in 5 hours. At most once
+# every 30 minutes, delete entries unused for GO_CACHE_MAX_AGE_MIN minutes
+# (default 120). Go marks an entry as used when a build reads it, so a
+# running build keeps its entries. GO_CACHE_TRIM=off turns this off.
+CACHE=${GOCACHE:-$HOME/Library/Caches/go-build}
+if [ "$GO_CACHE_TRIM" != "off" ] && [ -f "$CACHE/README" ] &&
+  [ -z "$(find "$DIR/trim.stamp" -mmin -30 2>/dev/null)" ]; then
+  touch "$DIR/trim.stamp"
+  (nice -n 15 /usr/bin/lockf -k -s -t 0 "$DIR/trim.lock" \
+    find "$CACHE"/[0-9a-f][0-9a-f] -type f -mmin +"${GO_CACHE_MAX_AGE_MIN:-120}" -delete \
+    </dev/null >/dev/null 2>&1 &)
+fi
+
+waited=0
+told=0
+while :; do
+  i=1
+  while [ "$i" -le "$SLOTS" ]; do
+    GO_TEST_GATE_HELD=$i /usr/bin/lockf -k -s -t 0 "$DIR/slot$i.lock" "$REAL" "$@"
+    rc=$?
+    case $rc in
+      75) ;;                          # slot busy: try the next one
+      64|69|71|73) exec "$REAL" "$@" ;; # gate broken: run without it
+      *) exit $rc ;;                  # the test run's own exit status
+    esac
+    i=$((i + 1))
+  done
+  if [ "$told" = 0 ]; then
+    echo "go-test gate: $SLOTS 'go test' runs are active on this machine. Waiting for a slot." >&2
+    told=1
+  fi
+  if [ "$waited" -ge "$MAX_WAIT" ]; then
+    echo "go-test gate: waited ${waited}s. Running without a slot." >&2
+    exec "$REAL" "$@"
+  fi
+  sleep 3
+  waited=$((waited + 3))
+done
