@@ -54,7 +54,7 @@ For each convention category, consult the owning skill rather than enumerating r
 | CI/release workflow | `setup-ci`, `sync-release` |
 | Language-specific scaffold | `scaffold-<lang>` |
 | CLI conventions | `build-cli` |
-| MCP server of a CLI | `build-mcp-server` |
+| Tool contract: verbs, bundled skill, MCP server | `standardize-cli` |
 | Doc-drift (fsrc, command renames, dead links) | `sync-docs` (delegate, do not re-implement) |
 
 ### 3. Check drift

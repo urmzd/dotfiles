@@ -294,7 +294,7 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 | Pack | Skills |
 | ---- | ------ |
 | (core, always) | ship, pr, land, work-status, trending, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
-| `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, build-mcp-server, write-readme, create-llms-txt, configure-ai, update-repo-meta |
+| `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, standardize-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
 | `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
 | `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
 | `skills-ecosystem` | write-code-portfolio, style-brand, sync-ecosystem, sync-ecosystem-to-chezmoi, setup-devenv-with-chezmoi, align-readmes |
@@ -332,9 +332,9 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 | write-code-portfolio | Personal portfolio specifics (Nix Flakes, chezmoi machine polymorphism, Powerlevel10k, Neovim) |
 | test-code | Testing philosophy and per-language conventions |
 | build-cli | Design and audit CLI tools end-to-end (output modes, TTY, JSON piping, install.sh, portfolio self-update / `--format` requirements) |
-| build-mcp-server | Add or audit a CLI's MCP server the standard way (`mcp serve`, `bootstrap`, schemas, annotations, limits, tests) |
 | check-project | Validate project structure against scaffold conventions |
 | choose-stack | Canonical tech stack reference by purpose |
+| standardize-cli | Make a CLI meet the tool contract: standard verbs, bundled skill, `bootstrap`, MCP server, with an audit script |
 
 #### Scaffolding & setup
 

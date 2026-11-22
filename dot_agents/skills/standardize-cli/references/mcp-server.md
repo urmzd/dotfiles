@@ -1,26 +1,6 @@
----
-name: build-mcp-server
-description: >
-  Add or audit the MCP (Model Context Protocol) server of a CLI tool so every tool
-  exposes it the same way: the `mcp serve` and `bootstrap` verbs, stdio transport,
-  tool naming, input schemas, result shape, tool annotations, startup limits, tests,
-  docs, and registration through agentspec. Use when a CLI gains an MCP server, when
-  an agent must call a tool as an MCP tool, when reviewing an existing server, or
-  when the user mentions "mcp serve", "MCP tool", "tool schema", "schema hash", or
-  "bootstrap". Loads on top of build-cli, which owns the CLI rules. Do NOT use for
-  calling or configuring someone else's MCP server (use agentspec-usage), or for
-  authoring a skill (use create-oss-skill).
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash(cargo *), Bash(go *), Bash(git *), Bash(agentspec *), Bash(jq *)
-user-invocable: true
-metadata:
-  title: Build MCP Server
-  category: development
-  order: 4
----
+# The MCP server
 
-# Build MCP Server
-
-One tool has four surfaces. The MCP server is the fourth, and it reuses the other three.
+The MCP server is one surface of the tool contract in [SKILL.md](../SKILL.md). It reuses the others: a tool call does what a CLI verb does.
 
 ```text
 binary (install.sh, update)
@@ -29,8 +9,6 @@ binary (install.sh, update)
   ├─ skills/<tool>/   agents: when and how to use the tool
   └─ mcp serve        agents: call the tool
 ```
-
-Read `build-cli` first. This skill adds only what the MCP surface needs.
 
 ## Rules
 
@@ -43,15 +21,13 @@ Read `build-cli` first. This skill adds only what the MCP surface needs.
 | 5 | A failure the caller caused is a tool result with `isError: true`. It is never a protocol error. |
 | 6 | stdout carries protocol messages only. Logs and progress go to stderr. |
 | 7 | Every tool has annotations and a schema with no `$ref`. |
-| 8 | `<tool> bootstrap` installs the bundled skill and registers the server. |
 
 ## Verbs
 
-| Verb | Required | Does |
-|------|----------|------|
-| `<tool> mcp serve` | yes | Serves the tools on stdio until stdin closes. |
-| `<tool> mcp tools` | yes | Prints what `tools/list` returns, as JSON on stdout. No client needed. |
-| `<tool> bootstrap` | yes | Installs the skill bundled in the binary and registers `mcp serve` with agentspec. |
+| Verb | Does |
+|------|------|
+| `<tool> mcp serve` | Serves the tools on stdio until stdin closes. |
+| `<tool> mcp tools` | Prints what `tools/list` returns, as JSON on stdout. No client needed. |
 
 `mcp` with no subcommand prints help. Do not make it start the server: a server that starts by accident blocks on stdin.
 
@@ -132,18 +108,6 @@ A caller is a model that may have read hostile text. Decide what it may do when 
 - Check the raw arguments against the limits before parsing the rest. A refused request must not be half read.
 - Say in the README what the limits do not stop. The limits are not a sandbox.
 
-## Bootstrap
-
-`bootstrap` makes a fresh install usable by agents with one command. The skill ships inside the binary, so the skill and the binary always have the same version.
-
-1. Embed `skills/<tool>/SKILL.md` in the binary at build time (`include_str!` in Rust, `embed` in Go).
-2. Write it to `~/.agents/skills/<tool>/SKILL.md`. Skip a same-named skill the user owns unless `--force` is set.
-3. Run `agentspec manage add ~/.agents/skills/<tool> --all-tools`.
-4. Run `agentspec mcp add <tool> --command <tool> --args "mcp serve"`.
-5. If `agentspec` is not on `PATH`, print the two commands and the JSON snippet, and exit 0.
-
-`bootstrap` is idempotent. Reference for steps 1 and 2: `agentspec/crates/agentspec/src/ops/bootstrap.rs`.
-
 ## Tests
 
 | Test | Proves |
@@ -163,21 +127,19 @@ Run the round trip against a real client once before release. Go: `mcp.NewInMemo
 { "mcpServers": { "<tool>": { "command": "<tool>", "args": ["mcp", "serve"] } } }
 ```
 
-- `skills/<tool>/SKILL.md`: an `MCP Server` section with the same snippet and the one-line `bootstrap` command.
+- `skills/<tool>/SKILL.md`: an `MCP Server` section with the same snippet.
 - AGENTS.md: where the server code is, and that stdout is the transport.
 
 ## Checklist
 
 - [ ] `<tool> mcp serve` runs on stdio; `<tool> mcp` alone prints help
 - [ ] `<tool> mcp tools` prints the tool list as JSON
-- [ ] `<tool> bootstrap` installs the skill and registers the server
 - [ ] Each tool returns the `--format json` document as text and as `structuredContent`
 - [ ] Each tool has the four annotations
 - [ ] The schema has no `$ref`, rejects unknown top-level fields, and is byte-stable
 - [ ] Unsafe kinds are off by default; `--root` follows symbolic links before it checks
 - [ ] No log line reaches stdout
 - [ ] Unit, golden schema, protocol and round-trip tests pass
-- [ ] README and SKILL.md have the section and the snippet
 
 ## Gotchas
 

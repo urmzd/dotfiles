@@ -39,7 +39,6 @@
 - [assess-quality](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/assess-quality/SKILL.md): Foundational quality framework (the "why" layer above review-design and write-code)
 - [audit-security](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/audit-security/SKILL.md): Security auditing and threat detection
 - [build-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-cli/SKILL.md): Design and audit CLI tools end-to-end (output modes, TTY, JSON, install.sh, portfolio self-update / `--format` requirements)
-- [build-mcp-server](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-mcp-server/SKILL.md): Add or audit a CLI's MCP server the standard way (`mcp serve`, `bootstrap`, schemas, annotations, limits, tests)
 - [check-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/check-project/SKILL.md): Validate project structure against scaffold conventions
 - [choose-stack](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/choose-stack/SKILL.md): Tech stack selection by purpose
 - [community-health](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/community-health/SKILL.md): Scaffold GitHub Community Standards files using `$COMMUNITY_HEALTH_CONTACT` or `git config user.email`
@@ -69,6 +68,7 @@
 - [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Per-language version manager + direnv pattern (portable)
 - [setup-devenv-with-chezmoi](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv-with-chezmoi/SKILL.md): Chezmoi helpers for pinned installers and tracked `.envrc` templates
 - [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Generate a conventional commit, then optionally push and watch CI until pass/fail
+- [standardize-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/standardize-cli/SKILL.md): Make a CLI meet the tool contract: standard verbs, bundled skill, `bootstrap`, MCP server, with an audit script
 - [style-brand](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/style-brand/SKILL.md): Design, refine or critique websites, product UI and brand identity: shared design standard, mishaps to check for, and the designers we study. Also terminal theme and teasr demo templates
 - [sync-docs](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-docs/SKILL.md): Audit and synchronize project documentation (canonical doc-drift skill)
 - [sync-ecosystem](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-ecosystem/SKILL.md): Audit one repository against ecosystem conventions and emit a drift report (portable)
