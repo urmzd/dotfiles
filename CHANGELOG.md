@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.38.0 (2026-11-22)
+
+### Features
+
+- **skills**: add standardize-cli, the tool contract for every CLI (#37) ([1a7b9f7](https://github.com/urmzd/dotfiles/commit/1a7b9f7d7763e3eec7bd867653eff1a4196d690c))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.37.0...v0.38.0)
+
+
 ## 0.37.0 (2026-11-21)
 
 ### Features
