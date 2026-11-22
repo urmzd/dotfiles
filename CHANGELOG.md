@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.0 (2026-11-22)
+
+### Features
+
+- **local-bin**: gate go test to one run at a time on macOS (#36) ([b35f072](https://github.com/urmzd/dotfiles/commit/b35f0726930b764ecfbdcb17e06a721b432f81e8))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.38.0...v0.39.0)
+
+
 ## 0.38.0 (2026-11-22)
 
 ### Features
