@@ -39,6 +39,7 @@
 - [assess-quality](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/assess-quality/SKILL.md): Foundational quality framework (the "why" layer above review-design and write-code)
 - [audit-security](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/audit-security/SKILL.md): Security auditing and threat detection
 - [build-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-cli/SKILL.md): Design and audit CLI tools end-to-end (output modes, TTY, JSON, install.sh, portfolio self-update / `--format` requirements)
+- [build-mcp-server](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-mcp-server/SKILL.md): Add or audit a CLI's MCP server the standard way (`mcp serve`, `bootstrap`, schemas, annotations, limits, tests)
 - [check-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/check-project/SKILL.md): Validate project structure against scaffold conventions
 - [choose-stack](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/choose-stack/SKILL.md): Tech stack selection by purpose
 - [community-health](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/community-health/SKILL.md): Scaffold GitHub Community Standards files using `$COMMUNITY_HEALTH_CONTACT` or `git config user.email`

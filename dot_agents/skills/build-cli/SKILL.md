@@ -4,10 +4,10 @@ description: >
   Design and audit CLI tools end-to-end: output modes, TTY detection, JSON piping,
   stderr/stdout separation, color/symbol semantics, the ui module pattern, signal
   handling, exit codes, and install.sh. Use when building, reviewing, or releasing any
-  CLI and you need general CLI design guidance. Do NOT use for the mandatory urmzd/*
-  portfolio CLI rules (argument-parser choice, self-update requirement, --format flag,
-  global flags, install.sh template): cli-standards owns those and overrides this skill
-  where they conflict.
+  CLI and you need general CLI design guidance, or the mandatory portfolio CLI rules
+  (argument-parser choice, standard verbs, self-update, --format flag, global flags,
+  install.sh template). Do NOT use for the MCP server of a CLI (`mcp serve`,
+  `bootstrap`, tool schemas): use build-mcp-server, which loads on top of this skill.
 allowed-tools: Read, Grep, Glob
 metadata:
   title: CLI Patterns
@@ -480,6 +480,17 @@ Prefix naming: `SR_` → `TEASR_`, `AGENTSPEC_`, `OAG_`, `MNEMONIST_`, `LGP_`, `
 Platform targets (Rust musl): `x86_64-unknown-linux-musl`, `aarch64-unknown-linux-musl`, `x86_64-apple-darwin`, `aarch64-apple-darwin`.
 
 ## Subcommand Conventions
+
+One name for one job, in every tool. Do not use a synonym.
+
+| Verb | Job | Not |
+|------|-----|-----|
+| `init` | Write the config file | `setup`, `new` |
+| the domain verb | The tool's main job: `run`, `generate`, `release` | |
+| `update` | Self-update | `upgrade` |
+| `version` | Print `<name> v<version>` | |
+| `completions` | Print shell completions | `completion` |
+| `mcp serve`, `mcp tools`, `bootstrap` | The agent surface. See `build-mcp-server` | a second binary |
 
 - Max 2 levels of nesting: `tool command subcommand`
 - Binary name matches the `[[bin]]` name in `Cargo.toml` or `"bin"` in `package.json`
