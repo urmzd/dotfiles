@@ -108,12 +108,14 @@ jobs:
   release:
     needs: ci
     runs-on: ubuntu-latest
+    # The sr-releaser key lives in this environment. Only main can use it.
+    environment: release
     steps:
       - name: Generate app token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SR_RELEASER_APP_ID }}
+          client-id: Iv23liUsXGDICnIdo3Ev
           private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
           repositories: ${{ github.event.repository.name }}
 
@@ -192,6 +194,8 @@ jobs:
           BIN_NAME="${{ github.event.repository.name }}"
           gh release upload "${{ needs.release.outputs.tag }}" "build/bin/${BIN_NAME}${{ matrix.artifact_suffix }}" --clobber
 ```
+
+The `release` environment and its `SR_RELEASER_PRIVATE_KEY` secret do not exist in a new repo. Register the repo in `urmzd/infra` first, or the job fails at "Generate app token". See `setup-ci`.
 
 ### `sr.yaml`
 
