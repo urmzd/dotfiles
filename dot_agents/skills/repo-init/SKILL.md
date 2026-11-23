@@ -47,12 +47,14 @@ Bootstrap a complete repository from zero to pushed.
 
 6. **Set metadata**: `gh repo edit --add-topic <topics> --description "<description>"` with relevant topics for the language/type.
 
-7. **Initial commit and push**:
+7. **Register for releases**: Add the repo to `managed_repos` in `urmzd/infra` `variables.tf`, and to `public_repos` when it is public. Merge that pull request before the first release, or the Release workflow fails at "Generate app token". See `setup-ci` for the steps and the check.
+
+8. **Initial commit and push**:
    - `git add -A` (safe here since it's a brand new repo)
    - `git commit -m "chore: initial project scaffold"`
    - `git push -u origin main`
 
-8. **Report**: Show the repo URL.
+9. **Report**: Show the repo URL.
 
 ## Rules
 

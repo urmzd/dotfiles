@@ -90,22 +90,39 @@ jobs:
 
 ## App Token Pattern
 
-Release workflows use a GitHub App for bot commits that can trigger further workflows:
+Release workflows use a GitHub App (sr-releaser) for bot commits that can trigger further workflows. The release job runs in the `release` environment, which holds the app's private key and only `main` can use:
 
 ```yaml
-- name: Generate app token
-  id: app-token
-  uses: actions/create-github-app-token@v1
-  with:
-    app-id: ${{ secrets.SR_RELEASER_APP_ID }}
-    private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
-    repositories: ${{ github.event.repository.name }}
+release:
+  needs: ci
+  runs-on: ubuntu-latest
+  environment: release
+  steps:
+    - name: Generate app token
+      id: app-token
+      uses: actions/create-github-app-token@v3
+      with:
+        client-id: Iv23liUsXGDICnIdo3Ev
+        private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
+        repositories: ${{ github.event.repository.name }}
 
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0
-    token: ${{ steps.app-token.outputs.token }}
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ steps.app-token.outputs.token }}
 ```
+
+Do not read `secrets.SR_RELEASER_APP_ID` or a repo-level `SR_RELEASER_PRIVATE_KEY`. Only `urmzd/infra` keeps those. In any other repo the job fails with `Input required and not supplied: app-id`.
+
+### Register a new repo for releases
+
+A new repo has no `release` environment and no key. Terraform in `urmzd/infra` creates both. Do this before the first release:
+
+1. In `urmzd/infra`, add the repo name to `managed_repos` in `variables.tf`. This creates the `release` environment, limits it to `main`, and stores `SR_RELEASER_PRIVATE_KEY` in it.
+2. If the repo is public, also add it to `public_repos`. This adds the `main-protection` ruleset: `main` then needs a pull request, and admins and sr-releaser bypass it.
+3. Open a pull request. Read the plan preview comment. It must show only resources for the new repo.
+4. Merge it. Terraform applies on `main`.
+5. Check the result: `gh api repos/urmzd/<repo>/environments/release/secrets --jq '.secrets[].name'` prints `SR_RELEASER_PRIVATE_KEY`.
 
 ## fsrc Step (Optional)
 
