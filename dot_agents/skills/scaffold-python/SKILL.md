@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v10.3.3
       - run: uv python install
       - run: uv sync --group dev
       - name: Check formatting
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v10.3.3
       - run: uv python install
       - run: uv sync --group dev
       - name: Run tests
@@ -266,6 +266,7 @@ uv.lock
 - `uv run` prefixes all commands to ensure they run in the project venv
 - `ruff` replaces black, isort, flake8, and pyflakes. One tool for format + lint
 - Python version comes from `pyproject.toml` `requires-python` field; `uv python install` resolves it
-- `astral-sh/setup-uv@v5` handles caching automatically
+- `astral-sh/setup-uv@v10.3.3` handles caching automatically
+- `astral-sh/setup-uv` has published no major or minor tags since v8, so `@v10` does not resolve. Pin an exact release such as `@v10.3.3`. Its releases are immutable
 - For PyPI publishing, `uv publish` uses trusted publishers (OIDC). Configure on pypi.org first
 - sr v9 rewrites the project's own entries in `uv.lock` (sources `editable`, `virtual`, `directory`) during the bump and stages it in the release commit. Do not list `uv.lock` in `stage_files` or add a post-release `uv lock` commit. Keep `uv.lock` beside `pyproject.toml` (or in a parent directory) so sr discovers it

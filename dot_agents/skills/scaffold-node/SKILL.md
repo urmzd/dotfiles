@@ -50,8 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -64,8 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -77,8 +77,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -90,8 +90,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -314,7 +314,7 @@ For multi-package repos, add turbo for cached, parallel task execution:
 - `biome check --write` to auto-fix (replaces `prettier --write` + `eslint --fix`)
 - Node 24 is the current LTS. Use `node-version: 24`
 - `cache: pnpm` in setup-node handles caching automatically
-- `pnpm/action-setup@v4` must come before `actions/setup-node` in CI
+- `pnpm/action-setup@v6` must come before `actions/setup-node` in CI
 - For framework-specific type checks (e.g., `astro check`), add a separate `check` job
 - `cancel-in-progress: false` on release workflow to prevent partial releases
 - For monorepos, use `turbo run <task>` instead of running tasks per-package manually
