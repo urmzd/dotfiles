@@ -139,7 +139,7 @@ Pin every third-party action to a full commit SHA, with the release in a trailin
 - **Resolve a SHA.** `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha` prints the commit for a tag. Do not copy a SHA from a web page or another repo.
 - **Before you bump a major.** Read the release notes of every major you skip, and check that the inputs you pass still exist in the action's `action.yml` at the new commit.
 
-Pins go stale. Add Dependabot so they do not. It updates the SHA and the comment together:
+Pins go stale. Add Dependabot so they do not. It updates the SHA and the comment together. Set the cooldown to match the 14-day rule: without it, Dependabot proposes a release after 3 days.
 
 ```yaml
 # .github/dependabot.yml
@@ -149,7 +149,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
 ```
+
+A cooldown does not delay security updates.
 
 ## fsrc Step (Optional)
 
