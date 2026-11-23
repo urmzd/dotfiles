@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.2 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: scaffold templates use actions/checkout@v7 (#39) ([bf64c13](https://github.com/urmzd/dotfiles/commit/bf64c13d2f35ea280dc66bcb60f00f2df0fcf015))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.1...v0.39.2)
+
+
 ## 0.39.1 (2026-11-23)
 
 ### Bug Fixes
