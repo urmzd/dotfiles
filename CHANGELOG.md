@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.5 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: Dependabot waits 14 days, to match the action pin rule (#42) ([d57c73e](https://github.com/urmzd/dotfiles/commit/d57c73ed0d472a4cf098a64ee6ed6b520f89d069))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.4...v0.39.5)
+
+
 ## 0.39.4 (2026-11-23)
 
 ### Bug Fixes
