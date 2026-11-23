@@ -106,7 +106,7 @@ release:
         private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
         repositories: ${{ github.event.repository.name }}
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
         token: ${{ steps.app-token.outputs.token }}
