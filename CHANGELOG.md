@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.3 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: scaffold templates use current, node24 action releases (#40) ([1e0b54e](https://github.com/urmzd/dotfiles/commit/1e0b54e6a8838594904c71c85f18db5535b84344))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.2...v0.39.3)
+
+
 ## 0.39.2 (2026-11-23)
 
 ### Bug Fixes
