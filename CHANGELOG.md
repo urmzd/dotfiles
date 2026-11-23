@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.1 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: release job uses the release environment and client id (#38) ([90616c1](https://github.com/urmzd/dotfiles/commit/90616c149e8723d9a07dc74afacc862ee6ecb507))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.0...v0.39.1)
+
+
 ## 0.39.0 (2026-11-22)
 
 ### Features
