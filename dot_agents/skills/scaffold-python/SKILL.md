@@ -50,8 +50,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv python install
       - run: uv sync --group dev
       - name: Check formatting
@@ -63,8 +63,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv python install
       - run: uv sync --group dev
       - name: Run tests
@@ -101,13 +101,13 @@ jobs:
     steps:
       - name: Generate app token
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: Iv23liUsXGDICnIdo3Ev
           private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
           repositories: ${{ github.event.repository.name }}
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
@@ -266,7 +266,7 @@ uv.lock
 - `uv run` prefixes all commands to ensure they run in the project venv
 - `ruff` replaces black, isort, flake8, and pyflakes. One tool for format + lint
 - Python version comes from `pyproject.toml` `requires-python` field; `uv python install` resolves it
-- `astral-sh/setup-uv@v10.3.3` handles caching automatically
-- `astral-sh/setup-uv` has published no major or minor tags since v8, so `@v10` does not resolve. Pin an exact release such as `@v10.3.3`. Its releases are immutable
+- `astral-sh/setup-uv` handles caching automatically
+- `astral-sh/setup-uv` has published no major or minor tags since v8, so `@v10` does not resolve. It is pinned to a commit like every other action. See `setup-ci`, "Pinned Actions"
 - For PyPI publishing, `uv publish` uses trusted publishers (OIDC). Configure on pypi.org first
 - sr v9 rewrites the project's own entries in `uv.lock` (sources `editable`, `virtual`, `directory`) during the bump and stages it in the release commit. Do not list `uv.lock` in `stage_files` or add a post-release `uv lock` commit. Keep `uv.lock` beside `pyproject.toml` (or in a parent directory) so sr discovers it

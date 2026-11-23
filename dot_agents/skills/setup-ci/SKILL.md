@@ -100,13 +100,13 @@ release:
   steps:
     - name: Generate app token
       id: app-token
-      uses: actions/create-github-app-token@v3
+      uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
       with:
         client-id: Iv23liUsXGDICnIdo3Ev
         private-key: ${{ secrets.SR_RELEASER_PRIVATE_KEY }}
         repositories: ${{ github.event.repository.name }}
 
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
         token: ${{ steps.app-token.outputs.token }}
@@ -123,6 +123,33 @@ A new repo has no `release` environment and no key. Terraform in `urmzd/infra` c
 3. Open a pull request. Read the plan preview comment. It must show only resources for the new repo.
 4. Merge it. Terraform applies on `main`.
 5. Check the result: `gh api repos/urmzd/<repo>/environments/release/secrets --jq '.secrets[].name'` prints `SR_RELEASER_PRIVATE_KEY`.
+
+## Pinned Actions
+
+Pin every third-party action to a full commit SHA, with the release in a trailing comment:
+
+```yaml
+- uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+```
+
+- **Why.** A tag such as `@v7` can be moved to new code. A commit SHA cannot. A moved tag is how the tj-actions compromise reached its users.
+- **What counts as third party.** Everything outside `urmzd/*`, including `actions/*`. Our own actions (`urmzd/sr@v9`, `urmzd/fsrc@v4`) stay on their major tag.
+- **Which release.** The newest release that is at least 14 days old. A release that is only days old has not been vetted by anyone.
+- **Branch-style refs.** `dtolnay/rust-toolchain@stable` is a branch. Pin the commit at the head of `stable` and keep `# stable` as the comment. That commit defaults to the stable toolchain.
+- **Resolve a SHA.** `gh api repos/<owner>/<repo>/commits/<tag> --jq .sha` prints the commit for a tag. Do not copy a SHA from a web page or another repo.
+- **Before you bump a major.** Read the release notes of every major you skip, and check that the inputs you pass still exist in the action's `action.yml` at the new commit.
+
+Pins go stale. Add Dependabot so they do not. It updates the SHA and the comment together:
+
+```yaml
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+```
 
 ## fsrc Step (Optional)
 
