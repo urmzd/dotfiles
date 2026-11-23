@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.4 (2026-11-23)
+
+### Bug Fixes
+
+- **skills**: pin third-party actions to commit SHAs (#41) ([412e55e](https://github.com/urmzd/dotfiles/commit/412e55ec0924dfb8b3c349a5d82b57e7ecc885c5))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.3...v0.39.4)
+
+
 ## 0.39.3 (2026-11-23)
 
 ### Bug Fixes
