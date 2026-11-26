@@ -6,7 +6,7 @@ description: >
   after a pipeline fails and the user says "fix it and retry", "fix the CI and
   push", or "make CI green". Do NOT use for a read-only investigation that stops
   at a recommendation (use diagnose-ci); do NOT use for a routine commit unrelated
-  to a CI failure (use ship).
+  to a CI failure (use commit).
 allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob, Edit
 user-invocable: true
 ---

@@ -7,7 +7,7 @@ description: >
   where to publish from and to, previews, then mirrors with a bundled script.
   Use when the user says "publish the blog", "sync the vault to the repo",
   "push my Obsidian posts", or "publish-vault". Do NOT commit or push (use
-  ship); do NOT edit note content.
+  commit); do NOT edit note content.
 allowed-tools: Bash, Read
 user-invocable: true
 arguments:
@@ -56,7 +56,7 @@ Mirror one vault folder into one target folder. The source wins every conflict; 
 
 7. **Mirror.** Rerun without `--dry-run`. If the dry run listed removals, get explicit approval first.
 
-8. **Report** the summary line and `git -C <dst> status --short .`. Offer `ship` to commit.
+8. **Report** the summary line and `git -C <dst> status --short .`. Offer `commit` to commit.
 
 ## Rules
 

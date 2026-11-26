@@ -1,6 +1,6 @@
 {
   "skill": "review-diff",
-  "description": "Routing evals: does the query trigger a working-tree diff review against the rubric? Near-misses route to assess-quality (set the quality bar), review-design (design tradeoffs), diagnose-ci (red pipeline), and ship/pr (commit + push).",
+  "description": "Routing evals: does the query trigger a working-tree diff review against the rubric? Near-misses route to assess-quality (set the quality bar), review-design (design tradeoffs), diagnose-ci (red pipeline), and commit/pr (commit + push).",
   "queries": [
     {
       "query": "review my changes before I commit",
@@ -70,7 +70,7 @@
     {
       "query": "commit these changes and push them",
       "should_trigger": false,
-      "note": "Commit + push is ship, not review."
+      "note": "Commit + push is commit, not review."
     },
     {
       "query": "open a pull request with a summary of my commits",

@@ -111,7 +111,7 @@ sr completions  Generate shell completions
 sr update       Update sr to the latest version
 ```
 
-AI-assisted commit, PR, and review authoring live in dedicated agent skills (`ship`, `pr`, `review`). The sr CLI is release-engineering only.
+AI-assisted commit, PR, and review authoring live in dedicated agent skills (`commit`, `pr`, `review`). The sr CLI is release-engineering only.
 
 ### Upgrading sr
 

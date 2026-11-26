@@ -293,7 +293,7 @@ Related standards: [AGENTS.md](https://agents.md/) and [llms.txt](https://llmstx
 
 | Pack | Skills |
 | ---- | ------ |
-| (core, always) | ship, pr, land, work-status, trending, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
+| (core, always) | commit, pr, land, work-status, trending, review-diff, merge-ready, diagnose-ci, diagnose-runtime, fix-and-retry, use-worktrees, write-code, test-code, clean-docs, sync-docs, scaffold-docs, audit-security, manage-secrets, sync-release, dotfiles, manage-machine, manage-theme, triage-dotfiles-env, orchestrate-agents |
 | `skills-scaffold` | scaffold-project, scaffold-go/node/python/rust/terraform, repo-init, check-project, community-health, setup-ci, setup-devenv, choose-stack, build-cli, standardize-cli, write-readme, create-llms-txt, configure-ai, update-repo-meta |
 | `skills-review` | assess-quality, review-design, release-audit, repo-status, asd-ste100 |
 | `skills-agent-dev` | agent-design-doctrine, create-oss-skill, extend-oss-skills-to-claude, run-eval-harness |
@@ -360,7 +360,7 @@ agentspec sync --fast                          # Discover, adopt, link, and veri
 
 | Skill | Purpose |
 | ----- | ------- |
-| ship | Generate a conventional commit, then optionally push and watch CI until pass/fail |
+| commit | Generate a conventional commit, then optionally push and watch CI until pass/fail |
 | pr | Create PRs with auto-generated summary from commits |
 | merge-ready | Drive an existing PR or MR to a mergeable state without merging it |
 | land | Take finished work to the default branch in one pass: commit, PR, green CI, squash-merge, clean up |

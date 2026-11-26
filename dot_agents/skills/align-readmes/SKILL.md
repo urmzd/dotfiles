@@ -86,7 +86,7 @@ Fix one repo per commit. Order:
 3. Directory trees, misplaced Agent Skill, section order
 4. Em dashes and prose (run `clean-docs`)
 
-For each repo, apply `write-readme`, then run `fsrc` if the README has markers. Commit with `ship` as `docs(readme): align with fleet standard`. Do not push unless asked.
+For each repo, apply `write-readme`, then run `fsrc` if the README has markers. Commit with `commit` as `docs(readme): align with fleet standard`. Do not push unless asked.
 
 ## 5. Report
 
