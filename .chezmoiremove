@@ -6,6 +6,6 @@
 # run_once_after_unload-docker-cleanup.
 Library/LaunchAgents/com.docker.cleanup.plist
 Library/Logs/docker-cleanup.log
-# ship skill: renamed to commit so it no longer shares a name with Claude
-# Code's built-in /ship (2026-11).
-.agents/skills/ship
+# Retired skills do not belong here: run_after_sync-agent-resources retires
+# them (its RETIRED list), because agentspec must unregister a skill before
+# its folder goes.
