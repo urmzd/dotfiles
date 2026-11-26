@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.7 (2026-11-26)
+
+### Bug Fixes
+
+- **agents**: retire renamed skills in the sync hook (#44) ([ac72956](https://github.com/urmzd/dotfiles/commit/ac72956d380a38919d443525e507a0618510d506))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.6...v0.39.7)
+
+
 ## 0.39.6 (2026-11-26)
 
 ### Bug Fixes
