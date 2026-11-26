@@ -4,8 +4,8 @@ description: >
   Generate a conventional commit message from staged or unstaged changes and
   create an atomic commit, then optionally push and watch CI until it passes or
   fails. Use when the user says "write a commit", "generate a commit message",
-  "commit this", "git add .", or "ship this". Push and CI-watch are optional and
-  skipped if the user only wants a commit. Do NOT open a pull request (use pr);
+  "commit this", or "git add .". Push and CI-watch are optional and skipped if
+  the user only wants a commit. Do NOT open a pull request (use pr);
   do NOT diagnose-then-fix a failing pipeline (use fix-and-retry); do NOT do a
   read-only CI investigation without committing (use diagnose-ci).
 allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob
