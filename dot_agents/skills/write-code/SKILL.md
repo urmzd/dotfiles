@@ -43,7 +43,7 @@ metadata:
 
 ## Commit Style
 
-Angular Conventional Commits (validated by CI lint; `ship` skill handles AI-assisted authoring):
+Angular Conventional Commits (validated by CI lint; `commit` skill handles AI-assisted authoring):
 
 ```text
 type(scope): lowercase imperative description (max 72 chars)

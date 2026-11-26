@@ -7,7 +7,7 @@ description: >
   again before merging. Use when the user says "commit and push and merge",
   "merge when green", "merge it when ready", "merge when CI is green", "get it
   merged", "land this", "merge them", "merge 142 and 133", or "wrap this up
-  and merge". Do NOT use for a commit or push with no merge (use ship), for
+  and merge". Do NOT use for a commit or push with no merge (use commit), for
   opening a PR only (use pr), for making a PR mergeable without merging it
   (use merge-ready), or for deploying (deploys always need their own ask).
 allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob, Edit
@@ -21,7 +21,7 @@ arguments:
 # Land
 
 One command for the whole path from "the work is done" to "it is on the
-default branch and the workspace is clean". It chains the `ship`, `pr` and
+default branch and the workspace is clean". It chains the `commit`, `pr` and
 `merge-ready` skills and adds the one step they refuse to do: the merge.
 
 ## Authority
@@ -42,7 +42,7 @@ tag.
    `use-worktrees` skill): the default branch never takes direct commits.
 
 2. **Commit and push** any uncommitted work on the branch, following the
-   `ship` skill (conventional message, specific files, no secrets).
+   `commit` skill (conventional message, specific files, no secrets).
 
 3. **Open or refresh the PR**, following the `pr` skill. A PR that changes
    anything a person looks at needs before and after screenshots in the body

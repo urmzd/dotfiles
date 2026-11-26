@@ -7,7 +7,7 @@ description: >
   never leaves the default branch. Use when creating a worktree, working on
   parallel branches, isolating an agent's edits, or when the user says
   "worktree", "work in parallel", or "branch without switching". Do NOT use
-  for commit/PR/merge flow (use ship, pr, merge-ready) or for plain single
+  for commit/PR/merge flow (use commit, pr, merge-ready) or for plain single
   branch work that needs no isolation.
 allowed-tools: Bash(git *), Read, Grep, Glob
 user-invocable: true

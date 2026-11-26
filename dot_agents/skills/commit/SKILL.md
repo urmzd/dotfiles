@@ -1,5 +1,5 @@
 ---
-name: ship
+name: commit
 description: >
   Generate a conventional commit message from staged or unstaged changes and
   create an atomic commit, then optionally push and watch CI until it passes or
@@ -16,7 +16,7 @@ arguments:
     required: false
 ---
 
-# Ship
+# Commit
 
 Commit, push, and watch the CI pipeline.
 

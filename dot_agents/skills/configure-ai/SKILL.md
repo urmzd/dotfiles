@@ -75,4 +75,4 @@ Every repo with a CLI or library should have `skills/<name>/SKILL.md`:
 
 ## Git Workflows
 
-AI-assisted commit, review, and PR authoring live in dedicated agent skills (`ship`, `pr`, `review`), not in the release tool. The release tool (`sr`) is release-engineering only as of v7: `release`, `status`, `config`, `init`, `migrate`, `completions`, `update`. See `sync-release` for release conventions and `sr migrate` for the upgrade guide from older versions.
+AI-assisted commit, review, and PR authoring live in dedicated agent skills (`commit`, `pr`, `review`), not in the release tool. The release tool (`sr`) is release-engineering only as of v7: `release`, `status`, `config`, `init`, `migrate`, `completions`, `update`. See `sync-release` for release conventions and `sr migrate` for the upgrade guide from older versions.

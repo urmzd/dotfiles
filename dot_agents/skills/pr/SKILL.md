@@ -9,7 +9,7 @@ description: >
   create", "raise a PR", or "make a PR for this branch", and whenever an agent
   opens a PR as part of a larger task. Also use to rewrite the body of a thin
   existing PR (gh pr edit). Assumes commits already exist and only opens the PR.
-  Do NOT commit changes or watch CI (use ship); do NOT diagnose or fix a
+  Do NOT commit changes or watch CI (use commit); do NOT diagnose or fix a
   failing pipeline (use fix-and-retry / diagnose-ci).
 allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob
 user-invocable: true

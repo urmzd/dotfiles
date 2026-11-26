@@ -41,6 +41,7 @@
 - [build-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/build-cli/SKILL.md): Design and audit CLI tools end-to-end (output modes, TTY, JSON, install.sh, portfolio self-update / `--format` requirements)
 - [check-project](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/check-project/SKILL.md): Validate project structure against scaffold conventions
 - [choose-stack](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/choose-stack/SKILL.md): Tech stack selection by purpose
+- [commit](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/commit/SKILL.md): Generate a conventional commit, then optionally push and watch CI until pass/fail
 - [community-health](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/community-health/SKILL.md): Scaffold GitHub Community Standards files using `$COMMUNITY_HEALTH_CONTACT` or `git config user.email`
 - [configure-ai](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/configure-ai/SKILL.md): AI tooling configuration, AGENTS.md, skills standard
 - [create-llms-txt](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/create-llms-txt/SKILL.md): Generate llms.txt files
@@ -67,7 +68,6 @@
 - [setup-ci](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-ci/SKILL.md): CI/CD pipeline setup and workflow conventions
 - [setup-devenv](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv/SKILL.md): Per-language version manager + direnv pattern (portable)
 - [setup-devenv-with-chezmoi](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/setup-devenv-with-chezmoi/SKILL.md): Chezmoi helpers for pinned installers and tracked `.envrc` templates
-- [ship](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/ship/SKILL.md): Generate a conventional commit, then optionally push and watch CI until pass/fail
 - [standardize-cli](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/standardize-cli/SKILL.md): Make a CLI meet the tool contract: standard verbs, bundled skill, `bootstrap`, MCP server, with an audit script
 - [style-brand](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/style-brand/SKILL.md): Design, refine or critique websites, product UI and brand identity: shared design standard, mishaps to check for, and the designers we study. Also terminal theme and teasr demo templates
 - [sync-docs](https://github.com/urmzd/dotfiles/blob/main/dot_agents/skills/sync-docs/SKILL.md): Audit and synchronize project documentation (canonical doc-drift skill)
