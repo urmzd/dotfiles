@@ -26,6 +26,27 @@ for name in ${HIDDEN[@]+"${HIDDEN[@]}"}; do
     ui_ok "removed $name (its skill pack is not selected)"
 done
 
+# Skills the dotfiles renamed or dropped. agentspec only removes a skill whose
+# folder exists, and removing it clears the registry entry, every tool link
+# and the folder. So this hook retires them. Never list them in
+# .chezmoiremove: chezmoi deletes the folder first, the removal then fails,
+# and the old skill stays registered and linked.
+RETIRED=(
+    "ship" # renamed to commit (2026-11)
+)
+retire_skill() {
+    local name="$1" dir="$HOME/.agents/skills/$1"
+    mkdir -p "$dir"
+    agentspec manage remove "$name" >/dev/null 2>&1 || true
+    rm -rf "$dir"
+    ui_ok "removed $name (retired from the dotfiles)"
+}
+for name in ${RETIRED[@]+"${RETIRED[@]}"}; do
+    [ -d "$HOME/.agents/skills/$name" ] || continue
+    [ -f "{{ .chezmoi.sourceDir }}/dot_agents/skills/$name/SKILL.md" ] && continue
+    retire_skill "$name"
+done
+
 # Register from the deployed tree, never the chezmoi source: agentspec copies
 # files verbatim, so a source path re-introduces chezmoi attribute names
 # (executable_check-doc-hygiene.sh) into ~/.agents and chezmoi then flags the
@@ -62,6 +83,14 @@ if command -v jq >/dev/null 2>&1; then
         ui_hint "inspect: agentspec status (the next chezmoi apply retries)"
         exit 0
     fi
+    # v0.39.6 retired ship through .chezmoiremove, so the folder can be gone
+    # while the skill is still registered. The registry is the only sign left.
+    for name in ${RETIRED[@]+"${RETIRED[@]}"}; do
+        [ -f "{{ .chezmoi.sourceDir }}/dot_agents/skills/$name/SKILL.md" ] && continue
+        jq -e --arg n "$name" 'any(.managed[]; .kind == "skill" and .name == $n)' "$tmp_status" >/dev/null 2>&1 || continue
+        retire_skill "$name"
+    done
+
     hidden_list="${HIDDEN[*]+${HIDDEN[*]}}"
     {
         find "{{ .chezmoi.sourceDir }}/dot_agents/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print 2>/dev/null |
