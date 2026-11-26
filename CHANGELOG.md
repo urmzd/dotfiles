@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.6 (2026-11-26)
+
+### Bug Fixes
+
+- **skills**: rename ship to commit (#43) ([72a0244](https://github.com/urmzd/dotfiles/commit/72a0244985ec5c10fbee8a15c3af6942a7ea994e))
+
+[Full Changelog](https://github.com/urmzd/dotfiles/compare/v0.39.5...v0.39.6)
+
+
 ## 0.39.5 (2026-11-23)
 
 ### Bug Fixes
